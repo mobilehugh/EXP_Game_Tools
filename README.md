@@ -1,5 +1,5 @@
 # EXP_Game_Tools
-Python tools to decrease the crunchiness and increase fun of the sciency fiction TTRPGT EXP.
+Python tools to decrease the crunchiness and increase fun of the sciency fiction TTRPG EXP.
 
 ## Requires
 python interpreter
