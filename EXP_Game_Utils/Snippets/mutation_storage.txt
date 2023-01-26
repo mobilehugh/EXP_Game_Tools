@@ -1,0 +1,6483 @@
+mental_mutation_random = {
+    range(1, 3): ("Absorption", absorption),
+    range(3, 4): ("Alternate Banishment", alternate_banishment),
+    range(4, 6): ("Alien Attachment", alien_attachment),
+    range(6, 8): ("Calculations", calculations),
+    range(8, 10): ("Communicate", communicate),
+    range(10, 11): ("Cryokinesis", cryokinesis),
+    range(11, 12): ("Death Field Generation", death_field_generation),
+    range(12, 13): ("Density Control Mental", density_control_mental),
+    range(13, 15): ("Detections", detections),
+    range(15, 17): ("Directional Sense", directional_sense),
+    range(17, 18): ("Empathy", empathy),
+    range(18, 20): ("Energy Attraction", energy_attraction),
+    range(20, 21): ("Seizure Projection", seizure_projection),
+    range(21, 22): ("Extra Sensory Projection", extra_sensory_projection),
+    range(22, 23): ("Force Field Generation", force_field_generation),
+    range(23, 24): ("Gyrokinesis", gyrokinesis),
+    range(24, 26): ("Heightened Brain Talent", heightened_brain_talent),
+    range(26, 28): ("Hostility Field", hostility_field),
+    range(28, 29): ("Illusion Generation", illusion_generation),
+    range(29, 31): ("Information Eradication", information_eradication),
+    range(31, 33): ("Intuition", intuition),
+    range(33, 35): ("Knowledge Transmission", knowledge_transmission),
+    range(35, 36): ("Levitation", levitation),
+    range(36, 37): ("Life Leech", life_leech),
+    range(37, 38): ("Light Wave Manipulation", light_wave_manipulation),
+    range(38, 40): ("Magnetic Control", magnetic_control),
+    range(40, 41): ("Mass Mind", mass_mind),
+    range(41, 43): ("Mechanical Sense", mechanical_sense),
+    range(43, 44): ("Mental Blast", mental_blast),
+    range(44, 45): ("Mental Control", mental_control),
+    range(45, 46): [
+        mental_control_over_physical_state,
+        "Mental Control Over Physical State",
+    ],
+    range(46, 48): ("Mental Defenselessness", mental_defenselessness),
+    range(48, 49): ("Molecular Disruption", molecular_disruption),
+    range(49, 51): ("Molecular Examination", molecular_examination),
+    range(51, 52): ("Molecular Phase Transformation", molecular_phase_transformation),
+    range(52, 53): ("Molecular Phase Transmutation", molecular_phase_transmutation),
+    range(53, 54): ("Muscle Manipulation", muscle_manipulation),
+    range(54, 55): ("Neuronegation", neuronegation),
+    range(55, 56): ("Phase", phase),
+    range(56, 58): ("Planal Hide Away", planal_hide_away),
+    range(58, 60): ("Planal Hold Away", planal_hold_away),
+    range(60, 62): ("Polar Disruption", polar_disruption),
+    range(62, 64): ("Power Drain", power_drain),
+    range(64, 66): ("Precognition", precognition),
+    range(66, 67): ("Projected Senes", projected_senes),
+    range(67, 68): ("Protection Shell", protection_shell),
+    range(68, 69): ("Psionic Defence", psionic_defence),
+    range(69, 70): ("Purify", purify),
+    range(70, 71): ("Pyrokinesis", pyrokinesis),
+    range(72, 74): ("Repulsion Field Generation", repulsion_field_generation),
+    range(74, 76): ("Restoration", restoration),
+    range(76, 78): ("Sensory Deprivation", sensory_deprivation),
+    range(78, 79): ("Sociability Field Generation", sociability_field_generation),
+    range(79, 81): ("Sonar", sonar),
+    range(81, 82): ("Sonic Attack", sonic_attack),
+    range(82, 84): ("Sonic Reproduction", sonic_reproduction),
+    range(84, 85): ("Suggestion", suggestion),
+    range(85, 86): ("Telekinesis", telekinesis),
+    range(86, 87): ("Telekinetic Arm", telekinetic_arm),
+    range(87, 88): ("Telekinetic Flight", telekinetic_flight),
+    range(88, 89): ("Telempathy", telempathy),
+    range(89, 90): ("Teleport", teleport),
+    range(90, 91): ("Thought Imitation", thought_imitation),
+    range(91, 92): ("Time Stop", time_stop),
+    range(92, 94): ("Time Tell", time_tell),
+    range(94, 95): ("Total Recuperation", total_recuperation),
+    range(95, 96): ("Ventriloquism", ventriloquism),
+    range(96, 98): ("Weapon Discharging", weapon_discharging),
+    range(98, 101): ("Weather Tell", weather_tell),
+    "name": "Mental Mutations",
+    "die_roll": "1d42",
+}
+
+
+def absorption(object):
+    mutation_data = {
+        "type": "Absorption",
+        "kind": "combat",
+        "CR": "+4",
+        "desc": "Absorb a specific energy type.",
+        "link": "#_absorption",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    lvl = object.Level
+    hpm = object.HPM
+
+    mutation_absorbs = {
+        range(1, 11): "Concussions",
+        range(11, 21): "Crushing, fast (B, C)",
+        range(21, 31): "Crushing, slow (A)",
+        range(31, 41): "Electricity",
+        range(41, 51): "Energy",
+        range(51, 61): "Fire",
+        range(61, 76): "Lazer",
+        range(76, 81): "Psionic",
+        range(81, 100): "Radiation",
+        range(100, 101): "Insults",
+        "name": "Absorption Type",
+        "die_roll": "1d100",
+    }
+
+    # calculate effects
+    energy_absorbed = please.get_table_result(mutation_absorbs)
+    absorb_amount = math.ceil(hpm / 3 + lvl * 3)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Absorb and protect from {energy_absorbed} attacks.")
+    mutation_details.append(f"Reduce {absorb_amount} HPS of damage to 1 HPS minimum.")
+
+    return mutation_details
+
+
+def alternate_banishment(object):
+    mutation_data = {
+        "type": "Alternate Banishment",
+        "kind": "combat",
+        "CR": "+10",
+        "desc": "Banish target to an alternate plane.",
+        "link": "#_alternate_banishment",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    lvl = object.Level
+    mstr = object.MSTR
+    wate = object.Wate
+
+    # calculate effects
+    kgs = wate + lvl * 5
+    freq = math.ceil((mstr + lvl) / 12)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f" Range {lvl} hexes. {freq} times a day.")
+    mutation_details.append(f"Banish up to {kgs} kgs.")
+
+    return mutation_details
+    mutation_details.append(f"Save vs MSTR if persona or 0-9 if object.")
+
+    return mutation_details
+
+
+def alien_attachment(object):
+    mutation_data = {
+        "type": "Alien Attachment",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Telepathically bond with an alien.",
+        "link": "#_alien_attachment",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    intel = object.INT
+    wate = object.Wate
+
+    # calculate effects
+    intel = math.ceil(intel / 3)
+    wate = math.ceil(wate / 2)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Alien max INT {intel}, and max Wate {wate} kgs.")
+    mutation_details.append(f"Alien becomes smarter than the persona.")
+
+    return mutation_details
+
+
+def calculations(object):
+    mutation_data = {
+        "type": "Calculations",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Calculating savant.",
+        "link": "#_calculations",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Calculate anything in one unit.")
+    mutation_details.append(f"Bonus of +15 on calculation rolls.")
+
+    return mutation_details
+
+
+def communicate(object):
+    mutation_data = {
+        "type": "Communicate",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Understand organic languages.",
+        "link": "#_communicate",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # collect variables
+    intel = object.INT
+    lvl = object.Level
+
+    # calculate effects
+    understand = (intel + lvl) * 3
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"{understand}% chance to understand. Max {intel} languages."
+    )
+    mutation_details.append(f"Bonus of +15 on language rolls.")
+
+    return mutation_details
+
+
+
+"""
+called at mental_mutation.selection(object,kind)
+this picks a single mental mutation that matches kind and returns the mutation_details list
+
+mutation_data = [] is a mixed list
+first element is the mutation_data 
+"type" is the name of the mutation
+"kind" combat, non-combat, defect
+"CR" combat ratio 0, +n or *n
+"desc" is a short description of the mutation
+"link" completion link for mutation
+
+remaining elements are the mutation details 
+to build the mutation kind, use mutation_details[0]["kind"] 
+to build the comment use "\n".join(mutation_details[1:]) skipping the first element
+
+###############################################################
+# using truncated table.mental_mutation_random 1d30           #
+###############################################################
+
+"""
+import please
+import table
+import math
+MENTAL_BASE_URL = "https://exp.sciencyfiction.com/v-wetware/CH58_Mental.html"
+
+def absorption(object):
+    mutation_data = {
+        "type": "Absorption",
+        "kind": "combat",
+        "CR": "+4",
+        "desc": "Absorb a specific energy type.",
+        "link": "#_absorption",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    lvl = object.Level
+    hpm = object.HPM
+
+    mutation_absorbs = {
+        range(1, 11): "Concussions",
+        range(11, 21): "Crushing, fast (B, C)",
+        range(21, 31): "Crushing, slow (A)",
+        range(31, 41): "Electricity",
+        range(41, 51): "Energy",
+        range(51, 61): "Fire",
+        range(61, 76): "Lazer",
+        range(76, 81): "Psionic",
+        range(81, 100): "Radiation",
+        range(100, 101): "Insults",
+        "name": "Absorption Type",
+        "die_roll": "1d100",
+    }
+
+    # calculate effects
+    energy_absorbed = please.get_table_result(mutation_absorbs)
+    absorb_amount = math.ceil(hpm / 3 + lvl * 3)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Absorb and protect from {energy_absorbed} attacks.")
+    mutation_details.append(f"Reduce {absorb_amount} HPS of damage to 1 HPS minimum.")
+
+    return mutation_details
+
+
+def alternate_banishment(object):
+    mutation_data = {
+        "type": "Alternate Banishment",
+        "kind": "combat",
+        "CR": "+10",
+        "desc": "Banish target to an alternate plane.",
+        "link": "#_alternate_banishment",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    lvl = object.Level
+    mstr = object.MSTR
+    wate = object.Wate
+
+    # calculate effects
+    kgs = wate + lvl * 5
+    freq = math.ceil((mstr + lvl) / 12)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f" Range {lvl} hexes. {freq} times a day.")
+    mutation_details.append(f"Banish up to {kgs} kgs.")
+
+    return mutation_details
+    mutation_details.append(f"Save vs MSTR if persona or 0-9 if object.")
+
+    return mutation_details
+
+
+def alien_attachment(object):
+    mutation_data = {
+        "type": "Alien Attachment",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Telepathically bond with an alien.",
+        "link": "#_alien_attachment",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    intel = object.INT
+    wate = object.Wate
+
+    # calculate effects
+    intel = math.ceil(intel / 3)
+    wate = math.ceil(wate / 2)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Alien max INT {intel}, and max Wate {wate} kgs.")
+    mutation_details.append(f"Alien becomes smarter than the persona.")
+
+    return mutation_details
+
+
+def calculations(object):
+    mutation_data = {
+        "type": "Calculations",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Calculating savant.",
+        "link": "#_calculations",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Calculate anything in one unit.")
+    mutation_details.append(f"Bonus of +15 on calculation rolls.")
+
+    return mutation_details
+
+
+def communicate(object):
+    mutation_data = {
+        "type": "Communicate",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Understand organic languages.",
+        "link": "#_communicate",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # collect variables
+    intel = object.INT
+    lvl = object.Level
+
+    # calculate effects
+    understand = (intel + lvl) * 3
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"{understand}% chance to understand. Max {intel} languages."
+    )
+    mutation_details.append(f"Bonus of +15 on language rolls.")
+
+    return mutation_details
+
+
+
+def cryokinesis(object):
+    mutation_data = {
+        "type": "Cryokinesis",
+        "kind": "combat",
+        "CR": "+3",
+        "desc": "Brain freeze targets.",
+        "link": "#_cryokinesis",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+
+    # calculate effects
+    duration = (mstr + lvl) * 5
+    frequency = math.ceil((mstr + lvl) / 5)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"{frequency} attacks per day. Range {mstr} hexes. Constant air con."
+    )
+    mutation_details.append(f"Cumulative 1d4 until target wins vs MSTR")
+
+    return mutation_details
+
+
+def death_field_generation(object):
+    mutation_data = {
+        "type": "Death Field Generation",
+        "kind": "combat",
+        "CR": "*3",
+        "desc": "Drain all nearby life force.",
+        "link": "#_death_field_generation",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    lvl = object.Level
+
+    # calculate effects
+    spare = math.floor(lvl / 3)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Drain all organics HPS in {lvl} hex radius. Spare {spare} targets"
+    )
+    mutation_details.append(
+        f"Save vs MSTR drops to 0 HPS. Unconscious 1 min per HPS drained."
+    )
+
+    return mutation_details
+
+
+def density_control_mental(object):
+
+    mutation_data = {
+        "type": "Density Control",
+        "kind": "non-combat",
+        "CR": "+3",
+        "desc": "Change a target's density.",
+        "link": "#_density_control",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mutation_details = []
+    lvl = object.Level
+    wate = object.Wate
+
+    # calculate effects
+    amount = wate * 2 + lvl * 10
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Change density of {amount} kgs target. Save vs MSTR.")
+    mutation_details.append(f"Increase increases AR and slows. Visa versa.")
+    mutation_details.append(f"Weapon penalty -175 on attack roll.")
+
+    return mutation_details
+
+
+def detections(object):
+    mutation_data = {
+        "type": "Detections",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Detect specific things.",
+        "link": "#_detections",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    awe = object.AWE
+    lvl = object.Level
+
+    detection_types = {
+        range(1, 9): "Chemical",
+        range(9, 17): "Pharma",
+        range(17, 21): "Energy source",
+        range(21, 29): "Candy",
+        range(29, 38): "Intelligence",
+        range(38, 41): "Invisible",
+        range(41, 46): "Lies",
+        range(46, 55): "Life",
+        range(55, 64): "Mechanicals",
+        range(64, 73): "Metals",
+        range(73, 82): "Poison",
+        range(82, 91): "Radiation",
+        range(91, 100): "Water",
+        range(100, 101): "Trouble",
+        "type": "Detection Type",
+        "number": "58.6",
+        "die_roll": "1d100",
+    }
+
+    detections_amount = math.ceil(awe / 4)
+    detections_list = []  # clear detection list
+
+    while len(detections_list) < detections_amount:
+        new_detection = please.get_table_result(detection_types)
+        if new_detection not in detections_list:
+            detections_list.append(new_detection)
+
+    detections_list.sort()
+    detectables = ", ".join(detections_list)
+
+    # calculate effects
+    distance = (awe + lvl) * 10
+    success = (awe + lvl) * 3
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"{success}% chance within {distance} hexes. +20 search rolls."
+    )
+    mutation_details.append(f"Dectables: {detectables}")
+
+    return mutation_details
+
+
+def directional_sense(object):
+    mutation_data = {
+        "type": "Directional Sense",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Can always find their way.",
+        "link": "#_directional_sense",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Can always find one's way. +20 on all wayfinding rolls.")
+    mutation_details.append(f"Does not work across hyperspace.")
+
+    return mutation_details
+
+
+def empathy(object):
+
+    mutation_data = {
+        "type": "Empathy",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Detect and feel other's emotions.",
+        "link": "#_empathy",
+    }
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+    distance = object.MSTR + object.Level
+    frequency = math.ceil(object.MSTR / 4)
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Feel organic emotions {distance} hexes {frequency} times per day."
+    )
+    mutation_details.append(f"Target may roll vs MSTR. +20 on all interpersonal rolls.")
+
+    return mutation_details
+
+
+def energy_attraction(object):
+
+    mutation_data = {
+        "type": "Energy Attraction",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Deadly energy redirects to mutant.",
+        "link": "#_energy_attraction",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+    mstr = object.MSTR
+    distance = object.MSTR * 10
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"{mstr}% to attract energy attacks within {distance} hexes."
+    )
+    mutation_details.append(f"-200 (no BP) on attack roll and 1/4 damage.")
+
+    return mutation_details
+
+
+def seizure_projection(object):
+
+    mutation_data = {
+        "type": "Seizure Projection",
+        "kind": "combat",
+        "CR": "+4",
+        "desc": "Project a seizure onto organics.",
+        "link": "#_seizure_projection",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+    distance = object.MSTR + object.Level
+    frequency = math.ceil(object.MSTR / 4)
+
+    mutation_details = []  # clear mutation_details for each mutation
+
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Induce seizures {distance} hexes away {frequency} times per day."
+    )
+    mutation_details.append(
+        f"Initially no save vs MSTR, move, attack, and task penalties"
+    )
+    mutation_details.append(f"Progresses to full unconsciousness if MSTR saves missed.")
+
+    return mutation_details
+
+
+def extra_sensory_projection(object):
+    mutation_data = {
+        "type": "Extra Sensory Perception",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Listen in on target's thoughts.",
+        "link": "#_extra_sensory_projection",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+
+    # calculate effects
+    distance = (mstr + lvl) * 2  # duration is same as distance
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Read organic minds {distance} hexes away for {distance} units."
+    )
+    mutation_details.append(f"Mutant can read the mind until save vs MSTR is made.")
+
+    return mutation_details
+
+
+def force_field_generation(object):
+
+    mutation_data = {
+        "type": "Force Field Generation",
+        "kind": "combat",
+        "CR": "*2",
+        "desc": "Surrounded by a force absorbing field.",
+        "link": "#_forc_field_generation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+
+    # calculate effects
+    strength = (mstr + lvl) * 10
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Absorb {strength} HPS of damage every full sleep.")
+    mutation_details.append(f"No effect on gases or radiation or mental attacks.")
+
+    return mutation_details
+
+
+def gyrokinesis(object):
+
+    mutation_data = {
+        "type": "Gyrokinesis",
+        "kind": "combat",
+        "CR": "+3",
+        "desc": "Spin targets involunarily.",
+        "link": "#_gyrokinesis",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+
+    # calculate effects
+    distance = (mstr + lvl) * 2  # duration is same as distance
+    frequency = math.ceil((mstr + lvl) / 6)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Spin for {distance} units up to {distance} hexes away.")
+    mutation_details.append(
+        f"Spin faster and faster until save vs MSTR (0-9 for inanimate objects)."
+    )
+
+    return mutation_details
+
+
+def heightened_brain_talent(object):
+
+    mutation_data = {
+        "type": "Heightened Brain Talent",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Hyper focused problem solving.",
+        "link": "#_heightened_brain_talent",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Get answers that challenge referee's plot (not destroy it)."
+    )
+    mutation_details.append(f"Incapacitated for 1d4 minutes while thinking.")
+
+    return mutation_details
+
+
+def hostility_field(object):
+
+    mutation_data = {
+        "type": "Hostility Field Generation",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Brings out the worst in other personas.",
+        "link": "#_hostility_field",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"1 hex radius of hate directed at mutant.")
+    mutation_details.append(f"-25 on negotiation rolls.")
+
+    return mutation_details
+
+
+def illusion_generation(object):
+
+    mutation_data = {
+        "type": "Illusion Generation",
+        "kind": "combat",
+        "CR": "+5",
+        "desc": "Put illusions into the target's mind.",
+        "link": "#_illusion_generation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+
+    # calculate effects
+    distance = (mstr + lvl) * 5
+    frequency = math.ceil((mstr + lvl) / 4)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Range is {distance} hexes, {frequency} times per day. Extend duration by {mstr + lvl}."
+    )
+    mutation_details.append(f"Save vs MSTR. More complicated illusions are shorter")
+
+    return mutation_details
+
+
+def information_eradication(object):
+
+    mutation_data = {
+        "type": "Information Eradication",
+        "kind": "combat",
+        "CR": "+6",
+        "desc": "Mutant is blessed with Information Eradication ",
+        "link": "#_information_eradication",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+
+    # calculate effects
+    frequency = math.ceil((mstr + lvl) / 5)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Range is {lvl} hexes, {frequency} times per day.")
+    mutation_details.append(
+        f"Save vs MSTR. More important memories are harder to erase."
+    )
+
+    return mutation_details
+
+
+def intuition(object):
+
+    mutation_data = {
+        "type": "Intuition",
+        "kind": "non-combat",
+        "CR": "+2",
+        "desc": "Get binary answers about threats.",
+        "link": "#_intuition",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+    frequency = math.ceil((mstr + lvl) / 3)
+
+    # calculate effects
+
+    # calculate effects
+    frequency = math.ceil((mstr + lvl) / 5)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Range is {lvl + mstr} hexes, {frequency} times per day.")
+    mutation_details.append(
+        f"Answers are for mutant's safety. Not plot destroying answers."
+    )
+    mutation_details.append(f"Bonus of +29 on intuition related rolls.")
+
+    return mutation_details
+
+
+def knowledge_transmission(object):
+
+    mutation_data = {
+        "type": "Knowledge Transmission",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Copy and transfer knowledge.",
+        "link": "#22_knowledge_transmission",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Mutant must touch the target to acquire and deliver info."
+    )
+    mutation_details.append(
+        f"A save vs MSTR (or INT) is made every time the knowledge moves."
+    )
+
+    return mutation_details
+
+
+def levitation(object):
+
+    mutation_data = {
+        "type": "Levitation",
+        "kind": "non-combat",
+        "CR": "*4",
+        "desc": "Hover upwards and downwards (not flight).",
+        "link": "#_levitation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+    frequency = math.ceil((mstr + lvl) / 2)
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Duration is {(lvl + mstr) * 30} units, {frequency} times per day."
+    )
+    mutation_details.append(
+        f"Psionic elevator can lift the mutant, help lift objects, and fight gravity."
+    )
+    mutation_details.append(f"Bonus of +29 on intuition related rolls.")
+
+    return mutation_details
+
+
+def life_leech(object):
+
+    mutation_data = {
+        "type": "Life Leech",
+        "kind": "combat",
+        "CR": "+10",
+        "desc": "Drain life force (HPS) from organics.",
+        "link": "#_life_leech",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    hpmax = object.HPM
+    lvl = object.Level
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Transfer {lvl + 5} HPS per unit from target to mutant.")
+    mutation_details.append(f"Temporarily absorb up to {2 * hpmax} HPS.")
+
+    return mutation_details
+
+
+def light_wave_manipulation(object):
+
+    mutation_data = {
+        "type": "Light Wave Manipulation",
+        "kind": "non-combat",
+        "CR": "*4",
+        "desc": "Alter light waves around the mutant.",
+        "link": "#_light_wave_manipulation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+    frequency = math.ceil((mstr + lvl) / 4)
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Duration is {(lvl + mstr) * 30} units, {frequency} times per day."
+    )
+    mutation_details.append(f"Bonus of +42 on sneak rolls and +25 on optics rolls.")
+
+    return mutation_details
+
+
+def magnetic_control(object):
+
+    mutation_data = {
+        "type": "Magnetic Control",
+        "kind": "combat",
+        "CR": "+2",
+        "desc": "Become a supermagnet.",
+        "link": "#_magnetic_control",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+    frequency = math.ceil((mstr + lvl) / 2)
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Magnetize for {lvl + mstr} units, {frequency} times per day."
+    )
+    mutation_details.append(
+        f"Attract magnetic materials up to {lvl + mstr} hexes away."
+    )
+
+    return mutation_details
+
+
+def mass_mind(object):
+
+    mutation_data = {
+        "type": "Mass Mind",
+        "kind": "combat",
+        "CR": "+4",
+        "desc": "Psionically redirect and amplify mental attacks.",
+        "link": "#_mass_mind",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+    frequency = math.ceil((mstr + lvl) / 4)
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Amplify mutations within {lvl + mstr} units, {frequency} times per day."
+    )
+    mutation_details.append(f"Bonus of +25 on any mental mutation rolls.")
+
+    return mutation_details
+
+
+def mechanical_sense(object):
+
+    mutation_data = {
+        "type": "Mechanical Sense",
+        "kind": "non-combat",
+        "CR": "*2",
+        "desc": "A way with machines.",
+        "link": "#_mechanical_sense",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    lvl = object.Level
+
+    # calculate effects
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    if please.do_1d100_check(15):
+        mutation_details.append(mutation_data)
+        mutation_details.append(f"{name}: {desc} (organic)")
+        mutation_details.append(
+            f"Able to understand ORGANIC machines {lvl + mstr}% to communicate."
+        )
+        mutation_details.append(
+            f"Function as 2nd level veterinarian. +42 or organic rolls."
+        )
+
+    else:
+        mutation_details.append(mutation_data)
+        mutation_details.append(f"{name}: {desc} (inorganic)")
+        mutation_details.append(
+            f"Able to understand machines {(lvl + mstr*3)}% to communicate."
+        )
+        mutation_details.append(
+            f"Function as 2nd level mechanic. +42 or organic rolls."
+        )
+
+    return mutation_details
+
+
+def mental_blast(object):
+
+    mutation_data = {
+        "type": "Mental Blast",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Mental Blast ",
+        "link": "#_mental_blast",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Mental Blast."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def mental_control(object):
+
+    mutation_data = {
+        "type": "Mental Control",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Mental Control ",
+        "link": "#30-mental-control",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Mental Control."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def mental_physiostasis(object):
+
+    mutation_data = {
+        "type": "Mental Control Over Physical State",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Mental Control Over Physical State ",
+        "link": "#31-mental-control-over-physical-state",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Mental Control Over Physical State."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def mental_defenselessness(object):
+
+    mutation_data = {
+        "type": "Mental Defencelessness",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Mutant is blessed with Mental Defencelessness ",
+        "link": "#32-mental-defencelessness",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Mental Defencelessness."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def molecular_disruption(object):
+
+    mutation_data = {
+        "type": "Molecular Disruption",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Molecular Disruption ",
+        "link": "#33-molecular-disruption",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Molecular Disruption."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def molecular_examination(object):
+
+    mutation_data = {
+        "type": "Molecular Examination",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Molecular Examination ",
+        "link": "#34-molecular-examination",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Molecular Examination."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def molecular_phase_transformation(object):
+
+    mutation_data = {
+        "type": "Molecular Phase Transformation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Molecular Phase Transformation ",
+        "link": "#35-molecular-phase-transformation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Molecular Phase Transformation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def molecular_phase_transmutation(object):
+
+    mutation_data = {
+        "type": "Molecular Phase Transmutation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Molecular Phase Transmutation ",
+        "link": "#36-molecular-phase-transmutation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Molecular Phase Transmutation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def muscle_manipulation(object):
+
+    mutation_data = {
+        "type": "Muscle Manipulation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Muscle Manipulation ",
+        "link": "#37-muscle-manipulation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Muscle Manipulation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def neuronegation(object):
+
+    mutation_data = {
+        "type": "Neuronegation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Neuronegation ",
+        "link": "#38-neuronegation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Neuronegation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def phase(object):
+
+    mutation_data = {
+        "type": "Phase",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Phase ",
+        "link": "#39-phase",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Phase."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def planal_hide_away(object):
+
+    mutation_data = {
+        "type": "Planal Hideaway",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Planal Hideaway ",
+        "link": "#40-planal-hideaway",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Planal Hideaway."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def planal_hold_away(object):
+
+    mutation_data = {
+        "type": "Planal Holdaway",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Planal Holdaway ",
+        "link": "#41-planal-holdaway",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Planal Holdaway."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def polar_disruption(object):
+
+    mutation_data = {
+        "number": "42",
+        "type": "Polar Disruption",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Mutant is blessed with Polar Disruption ",
+        "link": "#42-polar-disruption",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Polar Disruption."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def power_drain(object):
+
+    mutation_data = {
+        "number": "43",
+        "type": "Power Drain",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Power Drain ",
+        "link": "#43-power-drain",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Power Drain."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def precognition(object):
+
+    mutation_data = {
+        "type": "Precognition",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Precognition ",
+        "link": "#44-precognition",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Precognition."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def projected_sense(object):
+
+    mutation_data = {
+        "type": "Projected Sense",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Projected Sense ",
+        "link": "#45-projected-sense",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Projected Sense."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def protection_shell(object):
+
+    mutation_data = {
+        "type": "Protection Shell",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Protection Shell ",
+        "link": "#46-protection-shell",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Protection Shell."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def psionic_defence(object):
+
+    mutation_data = {
+        "type": "Psionic Defence",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Psionic Defence ",
+        "link": "#47-psionic-defence",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Psionic Defence."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def purify(object):
+
+    mutation_data = {
+        "type": "Purify",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Purify ",
+        "link": "#48-purify",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Purify."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def pyrokinesis(object):
+
+    mutation_data = {
+        "type": "Pyrokinesis",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Pyrokinesis ",
+        "link": "#49-pyrokinesis",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Pyrokinesis."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def repulsion_field_generation(object):
+
+    mutation_data = {
+        "type": "Repulsion Field Generation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Repulsion Field Generation ",
+        "link": "#50-repulsion-field-generation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Repulsion Field Generation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def restoration(object):
+
+    mutation_data = {
+        "type": "Restoration",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Restoration ",
+        "link": "#51-restoration",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Restoration."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def sensory_deprivation(object):
+
+    mutation_data = {
+        "type": "Sensory Deprivation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Sensory Deprivation ",
+        "link": "#52-sensory-deprivation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Sensory Deprivation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def sociability_field_generation(object):
+
+    mutation_data = {
+        "type": "Sociability Field Generation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Sociability Field Generation ",
+        "link": "#53-sociability-field-generation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Sociability Field Generation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def sonar(object):
+
+    mutation_data = {
+        "type": "Sonar",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Sonar ",
+        "link": "#54-sonar",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Sonar."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def sonic_attack(object):
+
+    mutation_data = {
+        "type": "Sonic Attack",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Sonic Attack ",
+        "link": "#55-sonic-attack",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Sonic Attack."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def sonic_reproduction(object):
+
+    mutation_data = {
+        "type": "Sonic Reproduction",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Sonic Reproduction ",
+        "link": "#56-sonic-reproduction",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Sonic Reproduction."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def suggestion(object):
+
+    mutation_data = {
+        "type": "Suggestion",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Suggestion ",
+        "link": "#57-suggestion",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Suggestion."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def telekinesis(object):
+
+    mutation_data = {
+        "type": "Telekinesis",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Telekinesis ",
+        "link": "#58-telekinesis",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Telekinesis."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def telekinetic_arm(object):
+
+    mutation_data = {
+        "type": "Telekinetic Arm",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Telekinetic Arm ",
+        "link": "#59-telekinetic-arm",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Telekinetic Arm."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def telekinetic_flight(object):
+
+    mutation_data = {
+        "type": "Telekinetic Flight",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Telekinetic Flight ",
+        "link": "#60-telekinetic-flight",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Telekinetic Flight."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def telempathy(object):
+
+    mutation_data = {
+        "type": "Telempathy",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Telempathy ",
+        "link": "#61-telempathy",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Telempathy."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def teleport(object):
+
+    mutation_data = {
+        "type": "Teleport",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Teleport ",
+        "link": "#62-teleport",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Teleport."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def thought_imitation(object):
+
+    mutation_data = {
+        "type": "Thought Imitation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Thought Imitation ",
+        "link": "#63-thought-imitation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Thought Imitation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def time_stop(object):
+
+    mutation_data = {
+        "type": "Time Stop",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Time Stop ",
+        "link": "#64-time-stop",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Time Stop."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def time_tell(object):
+
+    mutation_data = {
+        "type": "Time Tell",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Time Tell ",
+        "link": "#65-time-tell",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Time Tell."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def total_recuperation(object):
+
+    mutation_data = {
+        "type": "Total Recuperation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Total Recuperation ",
+        "link": "#66-total-recuperation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Total Recuperation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def ventriloquism(object):
+
+    mutation_data = {
+        "type": "Ventriloquism",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Ventriloquism ",
+        "link": "#67-ventriloquism",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Ventriloquism."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def weapon_discharging(object):
+
+    mutation_data = {
+        "type": "Weapons Discharging",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Mutant is blessed with Weapons Discharging ",
+        "link": "#68-weapons-discharging",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Weapons Discharging."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def weather_tell(object):
+
+    mutation_data = {
+        "type": "Weather Tell",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Mutant is blessed with Weather Tell ",
+        "link": "#69-weather-tell",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build description for comment
+    desc = desc + "\n    Say more about Weather Tell."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def select_mental(object, kind):
+    """
+    returns a single mental mutation of a given kind
+    checks to make sure the mutation is not already on the persona
+
+    # using shrunken mental_mutation_random
+    """
+
+    if hasattr(object, "Mental_Mutations"):
+        pass
+    else:
+        setattr(object, "Mental_Mutations", [])
+
+
+
+    # blocks repeats
+    mutation_repeat_blocker = please.get_table_result(table.mental_mutation_random)
+    if mutation_repeat_blocker[1] is object.Mental_Mutations:
+        print("Mental mutation repeat detected.")
+        select_mental(object, kind)
+    else:
+        mutation_details = mutation_repeat_blocker[0](object)
+
+    # checks for correct king of mutation
+    if kind == "Any":
+        return mutation_details
+
+    elif kind == "!defect" and mutation_kind == "defect":
+        return select_mental(object, kind)
+
+    elif (mutation_kind == kind) or (kind == "!defect" and mutation_kind != "defect"):
+        return mutation_details
+
+    elif mutation_kind != kind:
+        return select_mental(object, kind)
+
+    return mutation_details
+
+
+
+
+"""
+called at physical_mutation.selection(object,kind)
+this picks a single physical mutation that matches kind and returns the mutation_details list
+
+mutation_data = [] is a mixed list
+first element is the mutation_data 
+"type" is the name of the mutation
+"kind" combat, non-combat, defect
+"CR" combat ratio 0, +n or *n
+"desc" is a short description of the mutation
+"link" completion link for mutation
+
+remaining elements are the mutation details 
+to build the mutation kind, use mutation_details[0]["kind"] 
+to build the comment use "\n".join(mutation_details[1:]) skipping the first element
+
+###############################################################
+# using truncated table.physical_mutation_random 1d11           #
+###############################################################
+
+"""
+import please
+import table
+import math
+
+PHYSICAL_BASE_URL = "https://exp.sciencyfiction.com/v-wetware/CH59_Physical.html"
+
+
+def acidic_enzymes(object):
+    mutation_data = {
+        "type": "Acidic Enzymes",
+        "kind": "combat",
+        "CR": "+2",
+        "desc": "Spit acidic enzymes alternating unit.",
+        "link": "#_acidic_enzymes",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    pstr = object.PSTR
+    lvl = object.Level
+
+    # calculate elements of mutation
+    distance = str(object.PSTR + object.Level)
+    damage = "2d8+" + str(object.Level)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Range of {distance}. Damage {damage}.")
+    mutation_details.append(f"Organic targets only. No regeneration.")
+
+    return mutation_details
+
+
+def adaptation(object):
+    mutation_data = {
+        "type": "Adaptation",
+        "kind": "non-combat",
+        "CR": "*3",
+        "desc": "Adapt specific invulnerabilities.",
+        "link": "#_adaptation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    con = object.CON
+    intel = object.INT
+    lvl = object.Level
+
+    # calculate numbers
+    chance = con + intel + lvl
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"{chance}% chance immune to an attack until next sleep.")
+    mutation_details.append(f"{lvl}% chance permanent maximum of {lvl} immunities.")
+    mutation_details.append(f"Newest immunity replaces the oldest immunity.")
+
+    return mutation_details
+
+
+def attraction_odor(object):
+    mutation_data = {
+        "type": "Attraction Odor",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Long range attraction odor.",
+        "link": "#_attraction_odor",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    pstr = object.PSTR
+    cha = object.CHA
+
+    # calculate numbers
+    choices = ["Yes", "No"]
+    choice_comment = "Apply +2 charisma bonus from Attraction Odor?"
+    choice = please.choose_this(choices, choice_comment)
+
+    if choice == "Yes":
+        object.CHA = cha + 2
+        cha = object.CHA
+
+    # generate persona type attracted
+    attracted = please.get_table_result(table.list_of_life_forms)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"{attracted} come a calling.")
+    mutation_details.append(f"{pstr} km range. CON save vs {cha} intensity.")
+
+    return mutation_details
+
+
+def arms(object):
+    mutation_data = {
+        "type": "Arms",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Extra malfunctioning and malformed arms.",
+        "link": "#_arms",
+    }
+
+    # additional data
+    dex = object.DEX
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    family = object.FAMILY
+    dex = object.DEX
+
+    family_arm_location_pivot_table = {
+        "Anthro": table.anthro_snap_hit_location,
+        "Alien": table.alien_snap_hit_location,
+        "Robot": table.robot_snap_hit_location,
+    }
+
+    # calculate effects
+    extra_arms = please.roll_this("1d4")
+
+    choices = ["Yes", "No"]
+    choice_comment = f"Apply -{extra_arms} DEX penalty for {extra_arms} arm(s)?"
+    apply_penalty = please.choose_this(choices, choice_comment)
+
+    if apply_penalty == "Yes":
+        dex = dex - extra_arms
+        dex = 1 if dex < 1 else dex  # ternary to keep DEX > 0
+        object.DEX = dex
+
+    arm_locations = ""
+
+    for __ in range(extra_arms):
+        arm_locations += (
+            f"{please.get_table_result(family_arm_location_pivot_table[family])} "
+        )
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"{extra_arms} extra arm(s). Located: {arm_locations}")
+    mutation_details.append(f"Cannot be controlled and are irritating.")
+
+    return mutation_details
+
+
+def body_structure_change(object):
+    mutation_data = {
+        "type": "Body Structure Change",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Manipulate one's body like clay.",
+        "link": "#_body_structure_change",
+    }
+
+    # additional data
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    con = object.CON
+    lvl = object.Level
+
+    # calculations
+    frequency = math.ceil((con + lvl) / 6)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"Duration {con + lvl} hours. Frequency {frequency} times per day."
+    )
+    mutation_details.append(f"Takes 1-4 minutes. 1% chance per hour becomes permanent.")
+
+    return mutation_details
+
+
+def carapace(object):
+    mutation_data = {
+        "type": "Carapace",
+        "kind": "combat",
+        "CR": "+1",
+        "desc": "Thick protective hide.",
+        "link": "#_carapace",
+    }
+
+    # additional data
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    dex = object.DEX
+    cha = object.CHA
+    armour = object.AR
+
+    # determine carapace thickness
+    effects = please.get_table_result(table.carapace_thickness)
+
+    # assign carapace parameters
+    description = effects["covering"]
+    armour_bonus = effects["AR"]
+    damage_adjust = effects["DA"]
+    charisma_penalty = effects["cha_penalty"]
+    dexterity_penalty = effects["dex_penalty"]
+    mutation_data["CR"] = effects["new_CR"]  # update CR to new carapace thickness
+
+    # calculations
+    choices = ["Yes", "No"]
+    choice_comment = f"Apply {charisma_penalty} CHA penalty for {description} carapace?"
+    apply_penalty = please.choose_this(choices, choice_comment)
+
+    if apply_penalty == "Yes":
+        cha = cha + charisma_penalty  # remember charisma can be negative
+        object.CHA = cha
+
+    choices = ["Yes", "No"]
+    choice_comment = (
+        f"Apply {dexterity_penalty} DEX penalty for {description} carapace?"
+    )
+    apply_penalty = please.choose_this(choices, choice_comment)
+
+    if apply_penalty == "Yes":
+        dex = dex + dexterity_penalty
+        dex = 1 if dex < 1 else dex  # ternary to keep DEX > 0
+        object.DEX = dex
+
+    choices = ["Yes", "No"]
+    choice_comment = (
+        f"Apply armour rating bonus of {armour_bonus} for {description} carapace?"
+    )
+    apply_penalty = please.choose_this(choices, choice_comment)
+
+    if apply_penalty == "Yes":
+        object.AR = armour + armour_bonus
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(
+        f"{description} carapace. Multiply damage by {damage_adjust}."
+    )
+    mutation_details.append(f"Armour rating goes up, DEX and CHA go down.")
+
+    return mutation_details
+
+
+def chameleon(object):
+    mutation_data = {
+        "type": "Chameleon",
+        "kind": "non-combat",
+        "CR": "+5",
+        "desc": "Blend into the background when naked.",
+        "link": "#_chameleon-power",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # make calculations - none
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+    return mutation_details
+
+
+def decoy(object):
+    mutation_data = {
+        "type": "Decoy",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Drop a distracting tail thing.",
+        "link": "#_decoy",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    cha = object.CHA
+    con = object.CON
+    level = object.Level
+
+    # make calculations
+    kill_tox = round(con / 2)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+    return mutation_details
+
+
+def density_control(object):
+    mutation_data = {
+        "type": "Density Control",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Physically alter body's density.",
+        "link": "#_density-control",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    mstr = object.MSTR
+    con = object.CON
+
+    # calculate effects
+    frequency = round(con / 3)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+    return mutation_details
+
+
+def diminished_sense(object):
+    mutation_data = {
+        "type": "Diminished Sense",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Severe limitation of a sense.",
+        "link": "#_diminished_sense",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    awe = object.AWE
+    dex = object.DEX
+    mstr = object.MSTR
+    SOC = object.SOC
+
+    if 90 < please.roll_this("1d100"):
+        cannotcan = "Can"
+    else:
+        cannotcan = "Cannot"
+
+    DiminishedSense = {
+        range(1, 51): {
+            "sense": f"""\n    Diminished Sixth sense.\n    Impaired connection to psionic realm.\n    Loss of all mental mutations.\n    Defence against direct mind attacks.""",
+            "AWE": -1,
+            "DEX": 0,
+            "MSTR": -2,
+        },
+        range(51, 81): {
+            "sense": f"""\n    Diminished Smell sense. Impaired smell and taste.
+                \n    Defence against nauseaus or attraction odors.
+                \n    AWE halved to detect an ambush.""",
+            "AWE": -1,
+            "DEX": 0,
+            "MSTR": 0,
+        },
+        range(81, 90): {
+            "sense": f"""\n    Diminished Style sense.\n    Devastating lack of poise.\n    Penalties in all social areas.""",
+            "AWE": 0,
+            "DEX": 0,
+            "MSTR": 0,
+        },
+        range(90, 97): {
+            "sense": f"""\n    Diminished Hearing sense.
+                \n    Half damage from sonic attacks.
+                \n    {cannotcan} use and teach signing.
+                \n    AWE halved to detect an ambush.""",
+            "AWE": -2,
+            "DEX": 0,
+            "MSTR": 0,
+        },
+        range(97, 99): {
+            "sense": "\n    Diminished Touch sense.\n    Half damage \
+            from any painful attack.\n    Gait normal, but fumbly.",
+            "AWE": 0,
+            "DEX": -2,
+            "MSTR": 0,
+        },
+        range(99, 100): {
+            "sense": "\n    Diminished Sight sense.\n    Severe vision \
+            loss supplemented by sonar.\n    Bonuses using \
+            touch, hearing, taste.",
+            "AWE": -4,
+            "DEX": -2,
+            "MSTR": 0,
+        },
+        range(100, 101): "Ref's Own Table",
+        "type": "Diminished Sense",
+        "number": "59.8",
+        "die_roll": "1d100",
+        "backup": "1d99",
+    }
+
+    # calculate effects
+    sense_dict = please.get_table_result(DiminishedSense)
+
+    object.AWE = awe + sense_dict["AWE"]
+    object.DEX = dex + sense_dict["DEX"]
+    object.MSTR = mstr + sense_dict["MSTR"]
+    if sense_dict["sense"][16] == "Diminished Style":
+        object.SOC = round(SOC / 2)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+    return mutation_details
+
+
+def double_physical_pain(object):
+    mutation_data = {
+        "type": "Double Physical Pain",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Exquisitely sensitive pain sensors.",
+        "link": "#_double_physical_pain",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects - none
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+    return mutation_details
+
+
+def edible_tissue(object):
+    mutation_data = {
+        "type": "Edible Tissue",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Tear away collection of edible flesh.",
+        "link": "#_edible-tissue",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects - none
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def electric_shock(object):
+    mutation_data = {
+        "type": "Electric Shock",
+        "kind": "combat",
+        "CR": "+4",
+        "desc": "Electric shock generators.",
+        "link": "#_electric_shock",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    level = object.Level
+    pstr = object.PSTR
+
+    # calculate effects
+    C_range = level + round(pstr / 2)
+    C_damage = "3d4+" + str(level)
+    A_damage = "1d10+" + str(level + 6)
+
+    # build decription for comment
+    desc = desc + f"\n    Touch (type A),  {A_damage} HPS damage. "
+    desc = desc + f"\n    Bolt (type C) {C_range} hex, {C_damage} damage."
+    desc = desc + f"\n    One unit to recharge. +100 to hit conductives."
+    desc = desc + f"\n    1/3 damage from electrical attacks."
+    desc = desc + f"\n    +15 on any resuscitation performance rolls."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def enthalpy_attack(object):
+    mutation_data = {
+        "type": "Enthalpy Attack",
+        "kind": "combat",
+        "CR": "+3",
+        "desc": "Shoot freezing breath with icicles.",
+        "link": "#_enthalpy_attack",
+    }
+
+    # collect variables
+    number = mutation_data["number"]
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    level = object.Level
+    pstr = object.PSTR
+
+    # calculate effects
+    C_damage = "2d8+" + str(level)
+    C_range = level + pstr
+
+    # build decription for comment
+    desc = desc + f"\n    Breath {C_range} hex inflicting {C_damage} HPS."
+    desc = desc + f"\n    Area of effect attack. Needs 2 units to recool."
+    desc = desc + f"\n    2 hex air conditioning effect."
+    desc = desc + f"\n    Cold attacks do double damage."
+    desc = desc + f"\n    Heat attacks do half damage."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def fat_cell_accumulation(object):
+    mutation_data = {
+        "type": "Fat Cell Generation",
+        "kind": "defect",
+        "CR": "*.9",
+        "desc": "Large obvious lump(s) of adiposity.",
+        "link": "#_fat_cell_accumulation",
+    }
+
+    # collect variables
+    number = mutation_data["number"]
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    cha = object.CHA
+
+    FatLocation = {
+        range(1, 31): {
+            "front": "Foot",
+            "back": "Heel",
+            "subtable": ["Right ", "Left "],
+        },
+        range(31, 41): {
+            "front": "Ankle",
+            "back": "Ankle",
+            "subtable": ["Right ", "Left "],
+        },
+        range(41, 91): {
+            "front": "Shin",
+            "back": "Calf",
+            "subtable": ["Right ", "Left "],
+        },
+        range(91, 101): {
+            "front": "Knee Cap",
+            "back": "Knee Joint",
+            "subtable": ["Right ", "Left "],
+        },
+        range(101, 151): {
+            "front": "Thigh",
+            "back": "Hamstring",
+            "subtable": ["Right ", "Left "],
+        },
+        range(151, 201): {
+            "front": "Hip",
+            "back": "Buttock",
+            "subtable": ["Right ", "Left "],
+        },
+        range(201, 251): {
+            "front": "Groin",
+            "back": "Buttock",
+            "subtable": ["Right ", "Middle of ", "Left "],
+        },
+        range(251, 451): {
+            "front": "Abdomen",
+            "back": "Lower Back",
+            "subtable": ["Right ", "Middle of ", "Left "],
+        },
+        range(451, 651): {
+            "front": "Pectorals",
+            "back": "Upper Back",
+            "subtable": ["Right ", "Middle of ", "Left "],
+        },
+        range(651, 726): {
+            "front": "Hand",
+            "back": "Hand",
+            "subtable": ["Right ", "Left "],
+        },
+        range(726, 801): {
+            "front": "Forearm",
+            "back": "Forearm",
+            "subtable": ["Right ", "Left "],
+        },
+        range(801, 876): {
+            "front": "Bicep",
+            "back": "Tricep",
+            "subtable": ["Right ", "Left "],
+        },
+        range(876, 951): {
+            "front": "Shoulder",
+            "back": "Shoulder",
+            "subtable": ["Right ", "Left "],
+        },
+        range(951, 966): {
+            "front": "Throat",
+            "back": "Back of Neck",
+            "subtable": ["Middle of "],
+        },
+        range(966, 980): {
+            "front": "Mouth",
+            "back": "Back of Neck",
+            "subtable": ["Middle of "],
+        },
+        range(980, 989): {
+            "front": "Eyes",
+            "back": "Back of Head",
+            "subtable": ["Right ", "Middle of ", "Left "],
+        },
+        range(989, 1001): {
+            "front": "Forehead",
+            "back": "Top of Head",
+            "subtable": ["Middle of "],
+        },
+        "type": "Fat Location",
+        "number": "59.9",
+        "die_roll": "1d1000",
+    }
+
+    # calculate effects
+    lumpies = random.randint(1, 3)
+    object.CHA = cha - lumpies
+    locations = ""
+    for x in range(1, (lumpies + 1)):
+        # grab the dictionary for front back table
+        locator = please.get_table_result(FatLocation)
+        upper = len(locator["subtable"])
+        upper = upper - 1
+        director = random.randint(0, upper)
+        locations = locations + f"\n    {x}. Located on "
+        locations = locations + locator["subtable"][director]
+        if please.roll_this("1d1000") > 500:
+            locations = locations + locator["front"] + "."
+        else:
+            locations = locations + locator["back"] + "."
+
+    # build decription for comment
+    desc = desc + locations
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def gas_generation(object):
+    mutation_data = {
+        "type": "Gas Generation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Spray toxic gas from an orifice.",
+        "link": "#_gas_generation",
+    }
+
+    # collect variables
+    number = mutation_data["number"]
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    con = object.CON
+    level = object.Level
+    line = ""
+    attack = round(con / 2) + level
+    freq = round(con / 5) + level
+
+    # calculate effects
+    PoisonGas = {
+        range(1, 3): "Death",
+        range(3, 43): "Nausea",
+        range(43, 59): "Paralysis",
+        range(59, 61): "Pharmaceutical Effect",
+        range(61, 100): "Unconsciousness",
+        range(100, 101): "Ref's Own Table",
+        "type": "Poison Gas",
+        "number": "59.10",
+        "die_roll": "1d100",
+    }
+
+    PharmaceuticalType = {
+        range(1, 11): "Cure",
+        range(11, 21): "DNA",
+        range(21, 41): "Narcotic",
+        range(41, 51): "Heal",
+        range(51, 61): "Inoculation",
+        range(61, 66): "Mutation",
+        range(66, 76): "Mutation Effect",
+        range(76, 86): "Periodic Intumescent",
+        range(86, 96): "Permanent Intumescent",
+        range(96, 100): "Poison",
+        range(100, 101): "Ref's Own Table",
+        "type": "Pharmaceutical Type",
+        "number": "50.5",
+        "die_roll": "1d100",
+    }
+
+    gas_effect = please.get_table_result(PoisonGas)
+
+    # build description for comment
+
+    if gas_effect == "Death":
+        line = line + f"\n    5h toxic cloud of death. {attack} intensity."
+        line = line + f"\n    inflicts {attack}d4 damage. Lasts 1d4-1 units."
+
+    elif gas_effect == "Nausea":
+        line = line + f"\n    3h toxic cloud of puke. {attack} intensity."
+        line = line + f"\n    Incapacitated for 1d8 minutes. Cloud lasts 2d4 units."
+
+    elif gas_effect == "Paralysis":
+        line = line + f"\n    3h toxic cloud of weakness. {attack} intensity."
+        line = line + f"\n    Paralyzed for 3d10 units. Dissipates after 1d8 units."
+
+    elif gas_effect == "Unconsciousness":
+        line = line + f"\n    3h toxic cloud of sleepy. {attack} intensity."
+        line = line + f"\n    Unconscious for 1d4 days. Dissipates after 1d2 units."
+
+    elif gas_effect == "Pharmaceutical Effect":
+        drug = please.get_table_result(PharmaceuticalType)
+        line = line + f"\n    1h burp of {drug}. Must save vs {attack} intensity."
+        line = line + f"\n    You need to go read about the pharmaceutical effect."
+
+    line = line + f"\n    May use this {freq} times per day."
+    desc = desc + line
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def haste(object):
+    mutation_data = {
+        "type": "Haste",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Haste.",
+        "link": "#_haste",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    con = object.CON
+    lvl = object.Level
+
+    # calculate effects
+    duration = con + lvl
+    freq = math.ceil((con + lvl) / 4)
+
+    # build decription for comment
+    desc = desc + f"\n    Do everything at double speed."
+    desc = desc + f"\n    Run, attack, think at double. Then rest an hour."
+    desc = desc + f"\n    For full {duration} units. {freq} times per day."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def heat_generation(object):
+    mutation_data = {
+        "type": "Heat Generation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Heat Generation.",
+        "link": "#_heat_generation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Heat Generation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def heightened_attribute(object):
+    mutation_data = {
+        "type": "Heightened Attribute",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Heightened Attribute.",
+        "link": "#_heightened_attribute",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Heightened Attribute."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def heightened_vision(object):
+    mutation_data = {
+        "type": "Heightened Vision",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Heightened Vision.",
+        "link": "#_heightened_vision",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Heightened Vision."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def increased_metabolism(object):
+    mutation_data = {
+        "type": "Increased Metabolism",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Increased Metabolism.",
+        "link": "#_increased_metabolism",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Increased Metabolism."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def launchable_quills(object):
+    mutation_data = {
+        "type": "Launchable Quills",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Launchable Quills.",
+        "link": "#_launchable_quills",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Launchable Quills."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def light_generation(object):
+    mutation_data = {
+        "type": "Light Generation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Light Generation.",
+        "link": "#_light_generation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Light Generation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def mechanical_insertion(object):
+    mutation_data = {
+        "type": "Mechanical Insertion",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Mechanical Insertion.",
+        "link": "#_mechanical_insertion",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Mechanical Insertion."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def mechanical_prosthesis(object):
+    mutation_data = {
+        "type": "Mechanical Prosthesis",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Rocking it with Mechanical Prosthesis.",
+        "link": "#_mechanical_prosthesis",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Mechanical Prosthesis."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def mitosis(object):
+    mutation_data = {
+        "type": "Mitosis",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Mitosis.",
+        "link": "#_mitosis",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Mitosis."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def multiple_body_parts(object):
+    mutation_data = {
+        "type": "Multiple Body Parts",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Multiple Body Parts.",
+        "link": "#_multiple_body_parts",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Multiple Body Parts."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def new_organ(object):
+    mutation_data = {
+        "type": "New Organ",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with New Organs.",
+        "link": "#_new_organ",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about New Organs."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def non_breathing(object):
+    mutation_data = {
+        "type": "Non Breathing",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Non Breathing.",
+        "link": "#_non_breathing",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Non Breathing."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def no_resistance_to_disease(object):
+    mutation_data = {
+        "type": "No Resistance to Disease",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Rocking it with No Resistance to Disease.",
+        "link": "#_no_resistance_to_disease",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about No Resistance to Disease."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def no_resistance_to_poison(object):
+    mutation_data = {
+        "type": "No Resistance to Poison",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Rocking it with No Resistance to Poison.",
+        "link": "#_no_resistance_to_poison",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about No Resistance to Poison."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def oversized_body_part(object):
+
+    mutation_data = {
+        "type": "Oversized Body Part",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Oversized Body Parts.",
+        "link": "#_oversized_body_part",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Oversized Body Parts."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def photosynthetic_skin(object):
+    mutation_data = {
+        "type": "Photosynthetic Skin",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Photosynthetic Skin.",
+        "link": "#_photosynthetic_skin",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Photosynthetic Skin."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def phosphorescent_skin(object):
+    mutation_data = {
+        "type": "Phosphorescent Skin",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Rocking it with Phosphorescent Skin.",
+        "link": "#_phosphorescent_skin",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Phosphorescent Skin."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def pockets(object):
+    mutation_data = {
+        "type": "Pockets",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Pockets.",
+        "link": "#_pockets",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Pockets."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def pressurized_body(object):
+    mutation_data = {
+        "type": "Pressurized Body",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Pressurized Body.",
+        "link": "#_pressurized_body",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Pressurized Body."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def radiating_eyes(object):
+    mutation_data = {
+        "type": "Radiating Eyes",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Radiating Eyes.",
+        "link": "#_radiating_eyes",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Radiating Eyes."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def regeneration(object):
+    mutation_data = {
+        "type": "Regeneration",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Regeneration.",
+        "link": "#_regeneration",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Regeneration."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def rubbery_skin(object):
+    mutation_data = {
+        "type": "Rubbery Skin",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Rubbery Skin.",
+        "link": "#_rubbery_skin",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Rubbery Skin."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def rust(object):
+    mutation_data = {
+        "type": "Rust",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Rust.",
+        "link": "#_rust",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Rust."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def self_destruction(object):
+    mutation_data = {
+        "type": "Self Destruction",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Rocking it with Self Destruction.",
+        "link": "#_self_destruction",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Self Destruction."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def shape_change(object):
+    mutation_data = {
+        "type": "Shape Change",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Shape Change.",
+        "link": "#_shape_change",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Shape Change."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def size_manipulation(object):
+    mutation_data = {
+        "type": "Size Manipulation",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Size Manipulation.",
+        "link": "#_size_manipulation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Size Manipulation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def skin_structure_change(object):
+    mutation_data = {
+        "type": "Skin Structure Change",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Skin Structure Change.",
+        "link": "#_skin_structure_change",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Skin Structure Change."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def smoke_screen(object):
+    mutation_data = {
+        "type": "Smoke Screen",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Smoke Screen.",
+        "link": "#_smoke_screen",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Smoke Screen."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def sonar_attack(object):
+    mutation_data = {
+        "type": "Sonic Attack",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Sonic Attack.",
+        "link": "#_sonic_attack",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Sonic Attack."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def spit_poison(object):
+    mutation_data = {
+        "type": "Spit Poison",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Spit Poison.",
+        "link": "#_spit_poison",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Spit Poison."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def static_quills(object):
+    mutation_data = {
+        "type": "Static Quills",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Static Quills.",
+        "link": "#_static_quills",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Static Quills."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def strange_new_body_part(object):
+    mutation_data = {
+        "type": "Strange New Body Part",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Strange New Body Part.",
+        "link": "#_strange_new_body_part",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Strange New Body Part."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def symbiotic_attachment(object):
+    mutation_data = {
+        "type": "Symbiotic Attachment",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Symbiotic Attachment.",
+        "link": "#_symbiotic_attachment",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Symbiotic Attachment."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def tear_away_body_part(object):
+    mutation_data = {
+        "type": "Tear Away Body Parts",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Tear Away Body Parts.",
+        "link": "#_tear_away_body_part",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Tear Away Body Parts."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def undersized_body_part(object):
+    mutation_data = {
+        "type": "Undersized Body Parts",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Rocking it with Undersized Body Parts.",
+        "link": "#_undersized_body_part",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Undersized Body Parts."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def vibrations(object):
+    mutation_data = {
+        "type": "Vibrations",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Vibrations.",
+        "link": "#_vibrations",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Vibrations."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def wate_manipulation(object):
+    mutation_data = {
+        "type": "Wate Manipulation",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Rocking it with Wate Manipulation.",
+        "link": "#_wate_manipulation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Wate Manipulation."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def wings(object):
+    mutation_data = {
+        "type": "Wings",
+        "kind": "combat",
+        "CR": "0",
+        "desc": "Rocking it with Wings.",
+        "link": "#_wings",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+
+    # calculate effects
+
+    # build decription for comment
+    desc = desc + "\n    Say more about Wings."
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"more data needed about.")
+    mutation_details.append(f"even more data needed.")
+
+
+def select_physical(object, kind):
+    """
+    returns a single physical mutation of a given kind
+    checks to make sure the mutation is not already on the persona
+
+    # using shrunken physical_mutation_random
+    """
+
+    if hasattr(object, "Physical_Mutations"):
+        pass
+    else:
+        setattr(object, "Physical_Mutations", [])
+
+    # blocks repeats
+    mutation_repeat_blocker = please.get_table_result(table.physical_mutation_random)
+    if mutation_repeat_blocker[1] is object.Physical_Mutations:
+        print("Physical mutation repeat detected.")
+        select_physical(object, kind)
+    else:
+        mutation_details = mutation_repeat_blocker[0](object)
+
+    # checks for correct king of mutation
+    mutation_kind = mutation_details[0]["kind"]
+    if kind == "Any":
+        return mutation_details
+
+    elif kind == "!defect" and mutation_kind == "defect":
+        return select_physical(object, kind)
+
+    elif (mutation_kind == kind) or (kind == "!defect" and mutation_kind != "defect"):
+        return mutation_details
+
+    elif mutation_kind != kind:
+        return select_physical(object, kind)
+
+    else:
+        print("*** error")
+        print(mutation_details)
+
+    return mutation_details
+
+
+
+
+import please
+import random
+import math
+
+
+def physical(object, number, kind=""):
+
+    # url = "https://expgame.com/vi-mutations/chapter-59-physical-mutations/"
+
+    def AcidicEnzymes():
+
+        AcidicEnzymes = {
+            "number": "01",
+            "name": "Acidic Enzymes",
+            "type": "combat",
+            "CR": "+2",
+            "desc": "Spit acidic enzymes every other unit",
+            "link": "#1-acidic-enzymes",
+        }
+
+        # collect variables
+        number = AcidicEnzymes["number"]
+        name = AcidicEnzymes["name"]
+        desc = AcidicEnzymes["desc"]
+
+        # calculate elements of mutation
+        range_mute = str(object.PSTR + object.Level)
+        damage = "2d8+" + str(object.Level)
+
+        # build description to complete comment
+        desc = desc + "\n    Only affects organic targets."
+        desc = desc + f"\n    Range {range_mute} hexes. Damage {damage} HPS."
+
+        return f"{number}. {name}: " + desc
+
+    def Adaptation():
+
+        Adaptation = {
+            "number": "02",
+            "name": "Adaptation",
+            "type": "non-combat",
+            "CR": "*2.5",
+            "desc": "Can instantly adapt and repel attacks",
+            "link": "#2-adaptation",
+        }
+
+        # collect variables
+        number = Adaptation["number"]
+        name = Adaptation["name"]
+        desc = Adaptation["desc"]
+
+        # calculate numbers
+        sleep = str((object.INT + object.Level) * 2)
+        perm = str(object.Level)
+        max_perm = str(round(object.INT / 6))
+
+        # build decription for comment
+        desc = desc + f"\n    Adapts to both good and bad. Not volitional."
+        desc = desc + f"\n    Lasts all day {sleep}% Permanent {perm}%"
+        desc = desc + f"\n    Max permanent adapations is {max_perm}."
+
+        return f"{number}. {name}: " + desc
+
+    def AttractionOdor():
+
+        DataSet = {
+            "number": "03",
+            "name": "Attraction Odor",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Long range attraction odor.",
+            "link": "#3-attraction-odor",
+        }
+
+        AttractionTable = {
+            range(1, 7): "Ambushers",
+            range(7, 13): "Carnivores",
+            range(13, 19): "Chasers",
+            range(19, 25): "Chemosynthetics",
+            range(25, 31): "Detritovores",
+            range(31, 37): "Herbivores",
+            range(37, 43): "Hunters",
+            range(43, 49): "Mitotic Reproducers",
+            range(49, 55): "Omnivores",
+            range(55, 61): "Oviparous Reproducers",
+            range(61, 67): "Photosynthetics",
+            range(67, 73): "Spore Reproducers",
+            range(73, 75): "Parasitic Reproducers",
+            range(75, 79): "Trappers",
+            range(79, 91): "Vivaporous Reproducers",
+            range(91, 93): "Robots",
+            range(93, 100): "Anthro Types",
+            range(100, 101): "Ref's Own Table",
+            "name": "Attracted Personas",
+            "number": "45.7",
+            "die_roll": "1d100",
+            "backup": "1d99",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        cha = object.CHA
+        pstr = object.PSTR
+
+        # calculate numbers
+        object.CHA = cha + 1
+        attack = object.CHA
+
+        # generate persona type attracted
+        attracted = please.get_table_result(AttractionTable)
+
+        # build decription for comment
+        desc = desc + f"\n    Attracts {attracted} within {pstr} kms."
+        desc = desc + f"\n    Attracted save vs {attack} level poison."
+        desc = desc + f"\n    +15 on all negotiations and a CHA bonus."
+        return f"{number}. {name}: " + desc
+
+    def Arms():
+        DataSet = {
+            "number": "04",
+            "name": "Arms",
+            "type": "defect",
+            "CR": "0",
+            "desc": "Unecessary malfunctioning and malformed arms.",
+            "link": "#4-arms",
+        }
+
+        # additional data
+        dex = object.DEX
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        ExtraArm = {
+            range(1, 2): "Left Leg",
+            range(2, 3): "Right Leg",
+            range(3, 4): "Groin",
+            range(4, 5): "Butt",
+            range(5, 6): "Stomach",
+            range(6, 7): "Left Arm",
+            range(7, 8): "Right Arm",
+            range(8, 9): "Chest/Back",
+            range(9, 10): "Face",
+            range(10, 11): "Head",
+            range(11, 13): "Chest",
+            "name": "Extra Arm",
+            "number": "59.6",
+            "die_roll": "1d12",
+            "backup": "1d9",
+        }
+
+        # calculate effects
+        extra_arms = please.roll_this("1d4")
+        dex = dex - extra_arms
+        if dex < 1:
+            dex = 1
+        object.DEX = dex
+        arm_locations = ""
+
+        for __ in range(extra_arms):
+            arm_locations = arm_locations + " " + please.get_table_result(ExtraArm)
+
+        # build decription for comment
+        desc = desc + f"\n    {extra_arms} extra arms. DEX penalty."
+        desc = desc + f"\n    Ambidextrous with normal arms."
+        desc = desc + f"\n    Located on {arm_locations}"
+
+        return f"{number}. {name}: " + desc
+
+    def BodyStructureChange():
+
+        DataSet = {
+            "number": "05",
+            "name": "Body Structure Change",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Body shape can be manipulated like molding clay.",
+            "link": "#5-body-structure-change",
+        }
+
+        # additional data
+        mstr = object.MSTR
+        level = object.Level
+        con = object.CON
+
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculations
+        duration = mstr + level
+        frequency = round(con / 6) + level
+
+        # build decription for comment
+        desc = desc + f"\n    {frequency} times per day."
+        desc = desc + f"\n    Lasting {duration} hours."
+        desc = desc + f"\n    +100 on Disguise rolls."
+        desc = desc + f"\n    1% chance per hour of permanence."
+
+        return f"{number}. {name}: " + desc
+
+    def Carapace():
+
+        DataSet = {
+            "number": "06",
+            "name": "Carapace",
+            "type": "combat",
+            "CR": "+1",
+            "desc": "Thickened protective skin.",
+            "link": "#6-carapace",
+        }
+
+        # additional data
+
+        CarapaceCovering = {
+            range(1, 21): {
+                "cover": "Slight",
+                "AR": 49,
+                "DA": "No",
+                "appearance": -1,
+                "movement": 0,
+            },
+            range(21, 61): {
+                "cover": "Partial",
+                "AR": 99,
+                "DA": ".75",
+                "appearance": -2,
+                "movement": 0,
+            },
+            range(61, 91): {
+                "cover": "Total",
+                "AR": 199,
+                "DA": ".50",
+                "appearance": -3,
+                "movement": -1,
+            },
+            range(91, 101): {
+                "cover": "Mondo",
+                "AR": 249,
+                "DA": ".25",
+                "appearance": -4,
+                "movement": -2,
+            },
+            "name": "Carapace Covering",
+            "number": "59.7",
+            "die_roll": "1d100",
+            "backup": "1d99",
+        }
+
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        effects = please.get_table_result(CarapaceCovering)
+
+        covering = effects["cover"]
+        AR_Bonus = effects["AR"]
+        Damage_Adjust = effects["DA"]
+        appearance = effects["appearance"]
+        movement = effects["movement"]
+
+        dex = object.DEX
+        cha = object.CHA
+        AR = object.AR
+
+        # calculations
+        object.DEX = dex + movement
+        if object.DEX < 1:
+            object.DEX = 1
+        object.CHA = cha + appearance
+        object.AR = AR + AR_Bonus
+
+        # build decription for comment
+        desc = desc + f"\n    {covering} AR Bonus of (+{AR_Bonus})."
+        desc = desc + f"\n    Blunt damage reduced by {Damage_Adjust}."
+        desc = desc + f"\n    Can harm charisma and dexterity."
+
+        return f"{number}. {name}: " + desc
+
+    def ChameleonPower():
+
+        DataSet = {
+            "number": "07",
+            "name": "Chameleon Power",
+            "type": "non-combat",
+            "CR": "+5",
+            "desc": "Blend into the background when naked.",
+            "link": "#7-chameleon-power",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # make calculations - none
+
+        # build decription for comment
+        desc = desc + f"\n    +25 on sneaking performance rolls."
+        desc = desc + f"\n    Detection requires Difficult AWE roll."
+        desc = desc + f"\n    Not invisibility."
+
+        return f"{number}. {name}: " + desc
+
+    def Decoy():
+
+        DataSet = {
+            "number": "08",
+            "name": "Decoy",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Drop a distracting tail thing.",
+            "link": "#8-decoy",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        cha = object.CHA
+        con = object.CON
+        level = object.Level
+
+        # make calculations
+        kill_tox = round(con / 2)
+
+        # build decription for comment
+        desc = desc + f"\n    Super pheromone {level} hex range."
+        desc = desc + f"\n    INT < 7 80% attracted. Rest save vs {cha} level."
+        desc = desc + f"\n    When eaten save vs {kill_tox} level poison."
+        desc = desc + f"\n    Grows back after one full sleep."
+
+        return f"{number}. {name}: " + desc
+
+    def DensityControl():
+
+        DataSet = {
+            "number": "09",
+            "name": "Density Control",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Physically alter body's density.",
+            "link": "#9-density-control",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        mstr = object.MSTR
+        con = object.CON
+
+        # calculate effects
+        frequency = round(con / 3)
+
+        # build decription for comment
+        desc = desc + f"\n    {frequency} times per day for {mstr} minutes."
+        desc = desc + "\n    Denser decrease damage by .75."
+        desc = desc + f"\n    Less dense decrease damage by 10-60%, flying 1d6 h."
+        desc = desc + "\n    +15 on wate related performance rolls."
+
+        return f"{number}. {name}: " + desc
+
+    def DiminishedSense():
+
+        DataSet = {
+            "number": "10",
+            "name": "Diminished Sense",
+            "type": "defect",
+            "CR": "0",
+            "desc": "Severe limitation of a sense.",
+            "link": "#10-diminished-sense",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        awe = object.AWE
+        dex = object.DEX
+        mstr = object.MSTR
+        SOC = object.SOC
+
+        if 90 < please.roll_this("1d100"):
+            cannotcan = "Can"
+        else:
+            cannotcan = "Cannot"
+
+        DiminishedSense = {
+            range(1, 51): {
+                "sense": f"""\n    Diminished Sixth sense.\n    Impaired connection to psionic realm.\n    Loss of all mental mutations.\n    Defence against direct mind attacks.""",
+                "AWE": -1,
+                "DEX": 0,
+                "MSTR": -2,
+            },
+            range(51, 81): {
+                "sense": f"""\n    Diminished Smell sense. Impaired smell and taste.
+                    \n    Defence against nauseaus or attraction odors.
+                    \n    AWE halved to detect an ambush.""",
+                "AWE": -1,
+                "DEX": 0,
+                "MSTR": 0,
+            },
+            range(81, 90): {
+                "sense": f"""\n    Diminished Style sense.\n    Devastating lack of poise.\n    Penalties in all social areas.""",
+                "AWE": 0,
+                "DEX": 0,
+                "MSTR": 0,
+            },
+            range(90, 97): {
+                "sense": f"""\n    Diminished Hearing sense.
+                    \n    Half damage from sonic attacks.
+                    \n    {cannotcan} use and teach signing.
+                    \n    AWE halved to detect an ambush.""",
+                "AWE": -2,
+                "DEX": 0,
+                "MSTR": 0,
+            },
+            range(97, 99): {
+                "sense": "\n    Diminished Touch sense.\n    Half damage \
+                from any painful attack.\n    Gait normal, but fumbly.",
+                "AWE": 0,
+                "DEX": -2,
+                "MSTR": 0,
+            },
+            range(99, 100): {
+                "sense": "\n    Diminished Sight sense.\n    Severe vision \
+                loss supplemented by sonar.\n    Bonuses using \
+                touch, hearing, taste.",
+                "AWE": -4,
+                "DEX": -2,
+                "MSTR": 0,
+            },
+            range(100, 101): "Ref's Own Table",
+            "name": "Diminished Sense",
+            "number": "59.8",
+            "die_roll": "1d100",
+            "backup": "1d99",
+        }
+
+        # calculate effects
+        sense_dict = please.get_table_result(DiminishedSense)
+
+        object.AWE = awe + sense_dict["AWE"]
+        object.DEX = dex + sense_dict["DEX"]
+        object.MSTR = mstr + sense_dict["MSTR"]
+        if sense_dict["sense"][16] == "Diminished Style":
+            object.SOC = round(SOC / 2)
+
+        # build decription for comment
+        desc = desc + sense_dict["sense"]
+
+        return f"{number}. {name}: " + desc
+
+    def DoublePhysicalPain():
+
+        DataSet = {
+            "number": "11",
+            "name": "Double Physical Pain",
+            "type": "defect",
+            "CR": "0",
+            "desc": "Exquisitely sensitive pain sensors.",
+            "link": "#11-double-physical-pain",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects - none
+
+        # build decription for comment
+        desc = desc + "\n    Heals twice as fast. Analgesia is ineffective."
+        desc = desc + "\n    Takes extra 2d8 HPS damage if painful"
+
+        return f"{number}. {name}: " + desc
+
+    def EdibleTissue():
+
+        DataSet = {
+            "number": "12",
+            "name": "Edible Tissue",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Tear away collection of edible flesh.",
+            "link": "#12-edible-tissue",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects - none
+
+        # build decription for comment
+        desc = desc + "\n    Supplies the mutant's daily food allowance."
+        desc = desc + "\n    Inedible by others. Still needs water."
+
+        return f"{number}. {name}: " + desc
+
+    def ElectricShock():
+
+        DataSet = {
+            "number": "13",
+            "name": "Electric Shock",
+            "type": "combat",
+            "CR": "+4",
+            "desc": "Electric shock generators.",
+            "link": "#13-electric-shock",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        level = object.Level
+        pstr = object.PSTR
+
+        # calculate effects
+        C_range = level + round(pstr / 2)
+        C_damage = "3d4+" + str(level)
+        A_damage = "1d10+" + str(level + 6)
+
+        # build decription for comment
+        desc = desc + f"\n    Touch (type A),  {A_damage} HPS damage. "
+        desc = desc + f"\n    Bolt (type C) {C_range} hex, {C_damage} damage."
+        desc = desc + f"\n    One unit to recharge. +100 to hit conductives."
+        desc = desc + f"\n    1/3 damage from electrical attacks."
+        desc = desc + f"\n    +15 on any resuscitation performance rolls."
+
+        return f"{number}. {name}: " + desc
+
+    def EnthalpyAttack():
+
+        DataSet = {
+            "number": "14",
+            "name": "Enthalpy Attack",
+            "type": "combat",
+            "CR": "+3",
+            "desc": "Shoot freezing breath with icicles.",
+            "link": "#14-enthalpy-attack",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        level = object.Level
+        pstr = object.PSTR
+
+        # calculate effects
+        C_damage = "2d8+" + str(level)
+        C_range = level + pstr
+
+        # build decription for comment
+        desc = desc + f"\n    Breath {C_range} hex inflicting {C_damage} HPS."
+        desc = desc + f"\n    Area of effect attack. Needs 2 units to recool."
+        desc = desc + f"\n    2 hex air conditioning effect."
+        desc = desc + f"\n    Cold attacks do double damage."
+        desc = desc + f"\n    Heat attacks do half damage."
+
+        return f"{number}. {name}: " + desc
+
+    def FatCellGeneration():
+
+        DataSet = {
+            "number": "15",
+            "name": "Fat Cell Generation",
+            "type": "defect",
+            "CR": "*.9",
+            "desc": "Large obvious lump(s) of adiposity.",
+            "link": "#15-fat-cell-accumulation",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        cha = object.CHA
+
+        FatLocation = {
+            range(1, 31): {
+                "front": "Foot",
+                "back": "Heel",
+                "subtable": ["Right ", "Left "],
+            },
+            range(31, 41): {
+                "front": "Ankle",
+                "back": "Ankle",
+                "subtable": ["Right ", "Left "],
+            },
+            range(41, 91): {
+                "front": "Shin",
+                "back": "Calf",
+                "subtable": ["Right ", "Left "],
+            },
+            range(91, 101): {
+                "front": "Knee Cap",
+                "back": "Knee Joint",
+                "subtable": ["Right ", "Left "],
+            },
+            range(101, 151): {
+                "front": "Thigh",
+                "back": "Hamstring",
+                "subtable": ["Right ", "Left "],
+            },
+            range(151, 201): {
+                "front": "Hip",
+                "back": "Buttock",
+                "subtable": ["Right ", "Left "],
+            },
+            range(201, 251): {
+                "front": "Groin",
+                "back": "Buttock",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(251, 451): {
+                "front": "Abdomen",
+                "back": "Lower Back",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(451, 651): {
+                "front": "Pectorals",
+                "back": "Upper Back",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(651, 726): {
+                "front": "Hand",
+                "back": "Hand",
+                "subtable": ["Right ", "Left "],
+            },
+            range(726, 801): {
+                "front": "Forearm",
+                "back": "Forearm",
+                "subtable": ["Right ", "Left "],
+            },
+            range(801, 876): {
+                "front": "Bicep",
+                "back": "Tricep",
+                "subtable": ["Right ", "Left "],
+            },
+            range(876, 951): {
+                "front": "Shoulder",
+                "back": "Shoulder",
+                "subtable": ["Right ", "Left "],
+            },
+            range(951, 966): {
+                "front": "Throat",
+                "back": "Back of Neck",
+                "subtable": ["Middle of "],
+            },
+            range(966, 980): {
+                "front": "Mouth",
+                "back": "Back of Neck",
+                "subtable": ["Middle of "],
+            },
+            range(980, 989): {
+                "front": "Eyes",
+                "back": "Back of Head",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(989, 1001): {
+                "front": "Forehead",
+                "back": "Top of Head",
+                "subtable": ["Middle of "],
+            },
+            "name": "Fat Location",
+            "number": "59.9",
+            "die_roll": "1d1000",
+        }
+
+        # calculate effects
+        lumpies = random.randint(1, 3)
+        object.CHA = cha - lumpies
+        locations = ""
+        for x in range(1, (lumpies + 1)):
+            # grab the dictionary for front back table
+            locator = please.get_table_result(FatLocation)
+            upper = len(locator["subtable"])
+            upper = upper - 1
+            director = random.randint(0, upper)
+            locations = locations + f"\n    {x}. Located on "
+            locations = locations + locator["subtable"][director]
+            if please.roll_this("1d1000") > 500:
+                locations = locations + locator["front"] + "."
+            else:
+                locations = locations + locator["back"] + "."
+
+        # build decription for comment
+        desc = desc + locations
+
+        return f"{number}. {name}: " + desc
+
+    def GasGeneration():
+
+        DataSet = {
+            "number": "16",
+            "name": "Gas Generation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Spray toxic gas from an orifice.",
+            "link": "#16-gas-generation",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        con = object.CON
+        level = object.Level
+        line = ""
+        attack = round(con / 2) + level
+        freq = round(con / 5) + level
+
+        # calculate effects
+        PoisonGas = {
+            range(1, 3): "Death",
+            range(3, 43): "Nausea",
+            range(43, 59): "Paralysis",
+            range(59, 61): "Pharmaceutical Effect",
+            range(61, 100): "Unconsciousness",
+            range(100, 101): "Ref's Own Table",
+            "name": "Poison Gas",
+            "number": "59.10",
+            "die_roll": "1d100",
+        }
+
+        PharmaceuticalType = {
+            range(1, 11): "Cure",
+            range(11, 21): "DNA",
+            range(21, 41): "Narcotic",
+            range(41, 51): "Heal",
+            range(51, 61): "Inoculation",
+            range(61, 66): "Mutation",
+            range(66, 76): "Mutation Effect",
+            range(76, 86): "Periodic Intumescent",
+            range(86, 96): "Permanent Intumescent",
+            range(96, 100): "Poison",
+            range(100, 101): "Ref's Own Table",
+            "name": "Pharmaceutical Type",
+            "number": "50.5",
+            "die_roll": "1d100",
+        }
+
+        gas_effect = please.get_table_result(PoisonGas)
+
+        # build description for comment
+
+        if gas_effect == "Death":
+            line = line + f"\n    5h toxic cloud of death. {attack} intensity."
+            line = line + f"\n    inflicts {attack}d4 damage. Lasts 1d4-1 units."
+
+        elif gas_effect == "Nausea":
+            line = line + f"\n    3h toxic cloud of puke. {attack} intensity."
+            line = line + f"\n    Incapacitated for 1d8 minutes. Cloud lasts 2d4 units."
+
+        elif gas_effect == "Paralysis":
+            line = line + f"\n    3h toxic cloud of weakness. {attack} intensity."
+            line = line + f"\n    Paralyzed for 3d10 units. Dissipates after 1d8 units."
+
+        elif gas_effect == "Unconsciousness":
+            line = line + f"\n    3h toxic cloud of sleepy. {attack} intensity."
+            line = line + f"\n    Unconscious for 1d4 days. Dissipates after 1d2 units."
+
+        elif gas_effect == "Pharmaceutical Effect":
+            drug = please.get_table_result(PharmaceuticalType)
+            line = line + f"\n    1h burp of {drug}. Must save vs {attack} intensity."
+            line = line + f"\n    You need to go read about the pharmaceutical effect."
+
+        line = line + f"\n    May use this {freq} times per day."
+        desc = desc + line
+
+        return f"{number}. {name}: " + desc
+
+    def Haste():
+
+        DataSet = {
+            "number": "17",
+            "name": "Haste",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Haste.",
+            "link": "#17-haste",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        con = object.CON
+        lvl = object.Level
+
+        # calculate effects
+        duration = con + lvl
+        freq = math.ceil((con + lvl) / 4)
+
+        # build decription for comment
+        desc = desc + f"\n    Do everything at double speed."
+        desc = desc + f"\n    Run, attack, think at double. Then rest an hour."
+        desc = desc + f"\n    For full {duration} units. {freq} times per day."
+
+        return f"{number}. {name}: " + desc
+
+    def HeatGeneration():
+
+        DataSet = {
+            "number": "18",
+            "name": "Heat Generation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Heat Generation.",
+            "link": "#18-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Heat Generation."
+
+        return f"{number}. {name}: " + desc
+
+    def HeightenedAttribute():
+
+        DataSet = {
+            "number": "19",
+            "name": "Heightened Attribute",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Heightened Attribute.",
+            "link": "#19-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Heightened Attribute."
+
+        return f"{number}. {name}: " + desc
+
+    def HeightenedVision():
+
+        DataSet = {
+            "number": "20",
+            "name": "Heightened Vision",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Heightened Vision.",
+            "link": "#20-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Heightened Vision."
+
+        return f"{number}. {name}: " + desc
+
+    def IncreasedMetabolism():
+
+        DataSet = {
+            "number": "21",
+            "name": "Increased Metabolism",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Increased Metabolism.",
+            "link": "#21-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Increased Metabolism."
+
+        return f"{number}. {name}: " + desc
+
+    def LaunchableQuills():
+
+        DataSet = {
+            "number": "22",
+            "name": "Launchable Quills",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Launchable Quills.",
+            "link": "#22-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Launchable Quills."
+
+        return f"{number}. {name}: " + desc
+
+    def LightGeneration():
+
+        DataSet = {
+            "number": "23",
+            "name": "Light Generation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Light Generation.",
+            "link": "#23-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Light Generation."
+
+        return f"{number}. {name}: " + desc
+
+    def MechanicalInsertion():
+
+        DataSet = {
+            "number": "24",
+            "name": "Mechanical Insertion",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Mechanical Insertion.",
+            "link": "#24-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Mechanical Insertion."
+
+        return f"{number}. {name}: " + desc
+
+    def MechanicalProsthesis():
+
+        DataSet = {
+            "number": "25",
+            "name": "Mechanical Prosthesis",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Mechanical Prosthesis.",
+            "link": "#25-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Mechanical Prosthesis."
+
+        return f"{number}. {name}: " + desc
+
+    def Mitosis():
+
+        DataSet = {
+            "number": "26",
+            "name": "Mitosis",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Mitosis.",
+            "link": "#26-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Mitosis."
+
+        return f"{number}. {name}: " + desc
+
+    def MultipleBodyParts():
+
+        DataSet = {
+            "number": "27",
+            "name": "Multiple Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Multiple Body Parts.",
+            "link": "#27-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Multiple Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def NewOrgans():
+
+        DataSet = {
+            "number": "28",
+            "name": "New Organs",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with New Organs.",
+            "link": "#28-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about New Organs."
+
+        return f"{number}. {name}: " + desc
+
+    def NonBreathing():
+
+        DataSet = {
+            "number": "29",
+            "name": "Non Breathing",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Non Breathing.",
+            "link": "#29-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Non Breathing."
+
+        return f"{number}. {name}: " + desc
+
+    def NoResistancetoDisease():
+
+        DataSet = {
+            "number": "30",
+            "name": "No Resistance to Disease",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with No Resistance to Disease.",
+            "link": "#30-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about No Resistance to Disease."
+
+        return f"{number}. {name}: " + desc
+
+    def NoResistancetoPoison():
+
+        DataSet = {
+            "number": "31",
+            "name": "No Resistance to Poison",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with No Resistance to Poison.",
+            "link": "#31-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about No Resistance to Poison."
+
+        return f"{number}. {name}: " + desc
+
+    def OversizedBodyParts():
+
+        DataSet = {
+            "number": "32",
+            "name": "Oversized Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Oversized Body Parts.",
+            "link": "#32-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Oversized Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def PhotosyntheticSkin():
+
+        DataSet = {
+            "number": "33",
+            "name": "Photosynthetic Skin",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Photosynthetic Skin.",
+            "link": "#33-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Photosynthetic Skin."
+
+        return f"{number}. {name}: " + desc
+
+    def PhosphorescentSkin():
+
+        DataSet = {
+            "number": "34",
+            "name": "Phosphorescent Skin",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Phosphorescent Skin.",
+            "link": "#34-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Phosphorescent Skin."
+
+        return f"{number}. {name}: " + desc
+
+    def PoorRespiratorySystem():
+
+        DataSet = {
+            "number": "35",
+            "name": "Poor Respiratory System",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Poor Respiratory System.",
+            "link": "#35-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Poor Respiratory System."
+
+        return f"{number}. {name}: " + desc
+
+    def Pockets():
+
+        DataSet = {
+            "number": "36",
+            "name": "Pockets",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Pockets.",
+            "link": "#36-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Pockets."
+
+        return f"{number}. {name}: " + desc
+
+    def PressurizedBody():
+
+        DataSet = {
+            "number": "37",
+            "name": "Pressurized Body",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Pressurized Body.",
+            "link": "#37-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Pressurized Body."
+
+        return f"{number}. {name}: " + desc
+
+    def RadiatingEyes():
+
+        DataSet = {
+            "number": "38",
+            "name": "Radiating Eyes",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Radiating Eyes.",
+            "link": "#38-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Radiating Eyes."
+
+        return f"{number}. {name}: " + desc
+
+    def Regeneration():
+
+        DataSet = {
+            "number": "39",
+            "name": "Regeneration",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Regeneration.",
+            "link": "#39-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Regeneration."
+
+        return f"{number}. {name}: " + desc
+
+    def RubberySkin():
+
+        DataSet = {
+            "number": "40",
+            "name": "Rubbery Skin",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Rubbery Skin.",
+            "link": "#40-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Rubbery Skin."
+
+        return f"{number}. {name}: " + desc
+
+    def Rust():
+
+        DataSet = {
+            "number": "41",
+            "name": "Rust",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Rust.",
+            "link": "#41-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Rust."
+
+        return f"{number}. {name}: " + desc
+
+    def SelfDestruction():
+
+        DataSet = {
+            "number": "42",
+            "name": "Self Destruction",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Self Destruction.",
+            "link": "#42-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Self Destruction."
+
+        return f"{number}. {name}: " + desc
+
+    def ShapeChange():
+
+        DataSet = {
+            "number": "43",
+            "name": "Shape Change",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Shape Change.",
+            "link": "#43-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Shape Change."
+
+        return f"{number}. {name}: " + desc
+
+    def SizeManipulation():
+
+        DataSet = {
+            "number": "44",
+            "name": "Size Manipulation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Size Manipulation.",
+            "link": "#44-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Size Manipulation."
+
+        return f"{number}. {name}: " + desc
+
+    def SkinStructureChange():
+
+        DataSet = {
+            "number": "45",
+            "name": "Skin Structure Change",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Skin Structure Change.",
+            "link": "#45-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Skin Structure Change."
+
+        return f"{number}. {name}: " + desc
+
+    def SmokeScreen():
+
+        DataSet = {
+            "number": "46",
+            "name": "Smoke Screen",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Smoke Screen.",
+            "link": "#46-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Smoke Screen."
+
+        return f"{number}. {name}: " + desc
+
+    def SonicAttack():
+
+        DataSet = {
+            "number": "47",
+            "name": "Sonic Attack",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Sonic Attack.",
+            "link": "#47-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Sonic Attack."
+
+        return f"{number}. {name}: " + desc
+
+    def SpitPoison():
+
+        DataSet = {
+            "number": "48",
+            "name": "Spit Poison",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Spit Poison.",
+            "link": "#48-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Spit Poison."
+
+        return f"{number}. {name}: " + desc
+
+    def StaticQuills():
+
+        DataSet = {
+            "number": "49",
+            "name": "Static Quills",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Static Quills.",
+            "link": "#49-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Static Quills."
+
+        return f"{number}. {name}: " + desc
+
+    def StrangeNewBodyPart():
+
+        DataSet = {
+            "number": "50",
+            "name": "Strange New Body Part",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Strange New Body Part.",
+            "link": "#50-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Strange New Body Part."
+
+        return f"{number}. {name}: " + desc
+
+    def SymbioticAttachment():
+
+        DataSet = {
+            "number": "51",
+            "name": "Symbiotic Attachment",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Symbiotic Attachment.",
+            "link": "#51-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Symbiotic Attachment."
+
+        return f"{number}. {name}: " + desc
+
+    def TearAwayBodyParts():
+
+        DataSet = {
+            "number": "52",
+            "name": "Tear Away Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Tear Away Body Parts.",
+            "link": "#52-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Tear Away Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def UndersizedBodyParts():
+
+        DataSet = {
+            "number": "53",
+            "name": "Undersized Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Undersized Body Parts.",
+            "link": "#53-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Undersized Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def Vibrations():
+
+        DataSet = {
+            "number": "54",
+            "name": "Vibrations",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Vibrations.",
+            "link": "#54-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Vibrations."
+
+        return f"{number}. {name}: " + desc
+
+    def VisionDefect():
+
+        DataSet = {
+            "number": "55",
+            "name": "Vision Defect",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Vision Defect.",
+            "link": "#55-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Vision Defect."
+
+        return f"{number}. {name}: " + desc
+
+    def WateManipulation():
+
+        DataSet = {
+            "number": "56",
+            "name": "Wate Manipulation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Wate Manipulation.",
+            "link": "#56-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Wate Manipulation."
+
+        return f"{number}. {name}: " + desc
+
+    def Wings():
+
+        DataSet = {
+            "number": "57",
+            "name": "Wings",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Wings.",
+            "link": "#57-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Wings."
+
+        return f"{number}. {name}: " + desc
+
+    def ROT_creator():
+
+        # collect variables
+        print("\nYou have chosen to create a NEW physical mutation.")
+        print("Please proceed with caution and diligence.")
+        number = 42
+        while number < 61:
+            number = int(
+                input("Please assign this physical mutation a number (> 60)? ")
+            )
+        number = str(number)
+        name = input("Please assign this physical mutation a BRIEF title (1-2 words)? ")
+        desc = input(
+            "Please assign this physical mutation a one sentence description. "
+        )
+
+        # build decription for comment
+        desc = desc + "\n    This is a Ref's Own Table mutation."
+
+        return f"{number}. {name}: " + desc
+
+    physical_table = {
+        range(1, 3): {
+            "name": "Acidic Enzymes",
+            "kind": "combat",
+            "function": AcidicEnzymes,
+        },
+        range(3, 4): {
+            "name": "Adaptation",
+            "kind": "non-combat",
+            "function": Adaptation,
+        },
+        range(4, 7): {
+            "name": "Attraction Odor",
+            "kind": "defect",
+            "function": AttractionOdor,
+        },
+        range(7, 9): {"name": "Arms", "kind": "defect", "function": Arms},
+        range(9, 10): {
+            "name": "Body Structure Change",
+            "kind": "non-combat",
+            "function": BodyStructureChange,
+        },
+        range(10, 12): {"name": "Carapace", "kind": "combat", "function": Carapace},
+        range(12, 14): {
+            "name": "Chameleon Power",
+            "kind": "non-combat",
+            "function": ChameleonPower,
+        },
+        range(14, 16): {"name": "Decoy", "kind": "non-combat", "function": Decoy},
+        range(16, 18): {
+            "name": "Density Control",
+            "kind": "combat",
+            "function": DensityControl,
+        },
+        range(18, 20): {
+            "name": "Diminished Sense",
+            "kind": "defect",
+            "function": DiminishedSense,
+        },
+        range(20, 22): {
+            "name": "Double Physical Pain",
+            "kind": "defect",
+            "function": DoublePhysicalPain,
+        },
+        range(22, 24): {
+            "name": "Edible Tissue",
+            "kind": "combat",
+            "function": EdibleTissue,
+        },
+        range(24, 25): {
+            "name": "Electric Shock",
+            "kind": "combat",
+            "function": ElectricShock,
+        },
+        range(25, 26): {
+            "name": "Enthalpy Attack",
+            "kind": "combat",
+            "function": EnthalpyAttack,
+        },
+        range(26, 28): {
+            "name": "Fat Cell Generation",
+            "kind": "defect",
+            "function": FatCellGeneration,
+        },
+        range(28, 29): {
+            "name": "Gas Generation",
+            "kind": "combat",
+            "function": GasGeneration,
+        },
+        range(29, 30): {"name": "Haste", "kind": "combat", "function": Haste},
+        range(30, 32): {
+            "name": "Heat Generation",
+            "kind": "combat",
+            "function": HeatGeneration,
+        },
+        range(32, 36): {
+            "name": "Heightened Attribute",
+            "kind": "combat",
+            "function": HeightenedAttribute,
+        },
+        range(36, 38): {
+            "name": "Heightened Vision",
+            "kind": "combat",
+            "function": HeightenedVision,
+        },
+        range(38, 40): {
+            "name": "Increased Metabolism",
+            "kind": "defect",
+            "function": IncreasedMetabolism,
+        },
+        range(40, 42): {
+            "name": "Launchable Quills",
+            "kind": "combat",
+            "function": LaunchableQuills,
+        },
+        range(42, 44): {
+            "name": "Light Generation",
+            "kind": "combat",
+            "function": LightGeneration,
+        },
+        range(44, 45): {
+            "name": "Mechanical Insertion",
+            "kind": "non-combat",
+            "function": MechanicalInsertion,
+        },
+        range(45, 47): {
+            "name": "Mechanical Prosthesis",
+            "kind": "defect",
+            "function": MechanicalProsthesis,
+        },
+        range(47, 48): {"name": "Mitosis", "kind": "combat", "function": Mitosis},
+        range(48, 50): {
+            "name": "Multiple Body Parts",
+            "kind": "defect",
+            "function": MultipleBodyParts,
+        },
+        range(50, 51): {"name": "New Organs", "kind": "combat", "function": NewOrgans},
+        range(51, 52): {
+            "name": "Non Breathing",
+            "kind": "combat",
+            "function": NonBreathing,
+        },
+        range(52, 54): {
+            "name": "No Resistance to Disease",
+            "kind": "defect",
+            "function": NoResistancetoDisease,
+        },
+        range(54, 56): {
+            "name": "No Resistance to Poison",
+            "kind": "defect",
+            "function": NoResistancetoPoison,
+        },
+        range(56, 57): {
+            "name": "Oversized Body Parts",
+            "kind": "combat",
+            "function": OversizedBodyParts,
+        },
+        range(57, 58): {
+            "name": "Photosynthetic Skin",
+            "kind": "combat",
+            "function": PhotosyntheticSkin,
+        },
+        range(58, 60): {
+            "name": "Phosphorescent Skin",
+            "kind": "defect",
+            "function": PhosphorescentSkin,
+        },
+        range(60, 62): {
+            "name": "Poor Respiratory System",
+            "kind": "defect",
+            "function": PoorRespiratorySystem,
+        },
+        range(62, 64): {"name": "Pockets", "kind": "non-combat", "function": Pockets},
+        range(64, 66): {
+            "name": "Pressurized Body",
+            "kind": "combat",
+            "function": PressurizedBody,
+        },
+        range(66, 68): {
+            "name": "Radiating Eyes",
+            "kind": "combat",
+            "function": RadiatingEyes,
+        },
+        range(68, 70): {
+            "name": "Regeneration",
+            "kind": "non-combat",
+            "function": Regeneration,
+        },
+        range(70, 72): {
+            "name": "Rubbery Skin",
+            "kind": "non-combat",
+            "function": RubberySkin,
+        },
+        range(72, 74): {"name": "Rust", "kind": "defect", "function": Rust},
+        range(74, 75): {
+            "name": "Self Destruction",
+            "kind": "defect",
+            "function": SelfDestruction,
+        },
+        range(75, 76): {
+            "name": "Shape Change",
+            "kind": "non-combat",
+            "function": ShapeChange,
+        },
+        range(76, 77): {
+            "name": "Size Manipulation",
+            "kind": "non-combat",
+            "function": SizeManipulation,
+        },
+        range(77, 78): {
+            "name": "Skin Structure Change",
+            "kind": "combat",
+            "function": SkinStructureChange,
+        },
+        range(78, 79): {
+            "name": "Smoke Screen",
+            "kind": "non-combat",
+            "function": SmokeScreen,
+        },
+        range(79, 80): {
+            "name": "Sonic Attack",
+            "kind": "combat",
+            "function": SonicAttack,
+        },
+        range(80, 81): {
+            "name": "Spit Poison",
+            "kind": "combat",
+            "function": SpitPoison,
+        },
+        range(81, 83): {
+            "name": "Static Quills",
+            "kind": "non-combat",
+            "function": StaticQuills,
+        },
+        range(83, 85): {
+            "name": "Strange New Body Part",
+            "kind": "non-combat",
+            "function": StrangeNewBodyPart,
+        },
+        range(85, 86): {
+            "name": "Symbiotic Attachment",
+            "kind": "non-combat",
+            "function": SymbioticAttachment,
+        },
+        range(86, 87): {
+            "name": "Tear Away Body Parts",
+            "kind": "non-combat",
+            "function": TearAwayBodyParts,
+        },
+        range(87, 89): {
+            "name": "Undersized Body Parts",
+            "kind": "defect",
+            "function": UndersizedBodyParts,
+        },
+        range(89, 91): {"name": "Vibrations", "kind": "combat", "function": Vibrations},
+        range(91, 94): {
+            "name": "Vision Defect",
+            "kind": "defect",
+            "function": VisionDefect,
+        },
+        range(94, 97): {
+            "name": "Wate Manipulation",
+            "kind": "non-combat",
+            "function": WateManipulation,
+        },
+        range(97, 99): {"name": "Wings", "kind": "non-combat", "function": Wings},
+        range(99, 101): {
+            "name": "Ref's Own Table",
+            "kind": "combat",
+            "function": ROT_creator,
+        },
+        "name": "Physical Mutations",
+        "number": "59.1",
+        "die_roll": "1d100",
+        "backup": "1d99",
+    }
+
+    physical_list = []
+    comment = []
+
+    print("*** START physical mutation while loop ", kind)
+    # checker for a bunch of mutations
+    while number > 0:
+        phys_dict = please.get_table_result(physical_table)
+        name = phys_dict["name"]
+        kind_mute = phys_dict["kind"]
+        print("*** at top ", number, name, kind_mute)
+
+        if name not in physical_list and name != "Ref's Own Table":
+            print("*** fresh mutation")
+
+            if not kind:
+                print("*** anything is allowed")
+                comment.append(phys_dict["function"]())
+                physical_list.append(name)
+                number -= 1
+
+            elif kind == kind_mute:
+                print("*** direct hit on kind")
+                comment.append(phys_dict["function"]())
+                physical_list.append(name)
+                number -= 1
+
+            elif kind == "!defect" and (
+                kind_mute == "combat" or kind_mute == "non-combat"
+            ):
+                print("*** no defect allowed")
+                comment.append(phys_dict["function"]())
+                physical_list.append(name)
+                number -= 1
+
+            elif kind == "non-combat":
+                print("*** non-combat  only")
+
+            elif kind == "defect":
+                print("*** defect only")
+
+        if name == "Ref's Own Table":
+            comm_choice = "Do you have a new physical mutation prepared? "
+            choice = please.choose_this(["Yes", "No"], comm_choice)
+            if choice == "Yes":
+                comment.append(ROT_creator())
+                number -= 1
+
+    return comment
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+physical_mutation_random = {
+    range(1, 3): ("Acidic Enzymes", acidic_enzymes),
+    range(3, 4): ("Adaptation", adaptation),
+    range(4, 7): ("Attraction Odor", attraction_odor),
+    range(7, 9): ("Arms", arms),
+    range(9, 10): ("Body Structure Change", body_structure_change),
+    range(10, 12): ("Carapace", carapace),
+    range(12, 14): ("Chameleon", chameleon),
+    range(14, 16): ("Decoy", decoy),
+    range(16, 18): ("Density Control", density_control),
+    range(18, 20): ("Diminished Sense", diminished_sense),
+    range(20, 22): ("Double Physical Pain", double_physical_pain),
+    range(22, 24): ("Edible Tissue", edible_tissue),
+    range(24, 25): ("Electric Shock", electric_shock),
+    range(25, 26): ("Enthalpy Attack", enthalpy_attack),
+    range(26, 28): ("Fat Cell Accumulation", fat_cell_accumulation),
+    range(28, 29): ("Haste", haste),
+    range(29, 30): ("Gas Generation", gas_generation),
+    range(30, 32): ("Heat Generation", heat_generation),
+    range(32, 36): ("Heightened Attribute", heightened_attribute),
+    range(36, 38): ("Heightened Vision", heightened_vision),
+    range(38, 40): ("Increased Metabolism", increased_metabolism),
+    range(40, 42): ("Launchable Quills", launchable_quills),
+    range(42, 44): ("Light Generation", light_generation),
+    range(44, 45): ("Mechanical Insertion", mechanical_insertion),
+    range(45, 47): ("Mechanical Prosthesis", mechanical_prosthesis),
+    range(47, 48): ("Mitosis", mitosis),
+    range(48, 50): ("Multiple Body Parts", multiple_body_parts),
+    range(50, 51): ("New Organ", new_organ),
+    range(51, 52): ("Non-breathing", non_breathing),
+    range(52, 54): ("No Resistance to Disease", no_resistance_to_disease),
+    range(54, 56): ("No Resistance to Poison", no_resistance_to_poison),
+    range(56, 57): ("Oversized Body Part", oversized_body_part),
+    range(57, 58): ("Photosynthetic Skin", photosynthetic_skin),
+    range(58, 61): ("Phosphorescent Skin", phosphorescent_skin),
+    range(61, 64): ("Pockets", pockets),
+    range(64, 66): ("Pressurized Body", pressurized_body),
+    range(66, 68): ("Radiating Eyes", radiating_eyes),
+    range(68, 70): ("Regeneration", regeneration),
+    range(70, 72): ("Rubbery Skin", rubbery_skin),
+    range(72, 74): ("Rust", rust),
+    range(74, 75): ("Self-Destruction", self_destruction),
+    range(75, 76): ("Shape Change", shape_change),
+    range(76, 77): ("Size Manipulation", size_manipulation),
+    range(77, 78): ("Skin Structure Change", skin_structure_change),
+    range(78, 79): ("Smoke Screen", smoke_screen),
+    range(79, 80): ("Sonic Attack", sonic_attack),
+    range(80, 81): ("Spit Poison", spit_poison),
+    range(81, 83): ("Static Quills", static_quills),
+    range(83, 85): ("Strange New Body Part", strange_new_body_part),
+    range(85, 86): ("Symbiotic Attachment", symbiotic_attachment),
+    range(86, 87): ("Tear Away Body Part", tear_away_body_part),
+    range(87, 90): ("Undersized Body Part", undersized_body_part),
+    range(90, 93): ("Vibrations", vibrations),
+    range(94, 96): ("Water Manipulation", wate_manipulation),
+    range(96, 101): ("Wings", wings),
+    "name": "Physical Mutations",
+    "die_roll": "1d11",
+}
+
+def acidic_enzymes(object):
+    mutation_data = {
+        "type": "Acidic Enzymes",
+        "kind": "combat",
+        "CR": "+2",
+        "desc": "Spit acidic enzymes alternating unit.",
+        "link": "#_acidic_enzymes",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    pstr = object.PSTR
+    lvl = object.Level
+
+    # calculate elements of mutation
+    distance = str(object.PSTR + object.Level)
+    damage = "2d8+" + str(object.Level)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"Range of {distance}. Damage {damage}.")
+    mutation_details.append(f"Organic targets only. No regeneration.")
+
+    return mutation_details
+
+
+def adaptation(object):
+    mutation_data = {
+        "type": "Adaptation",
+        "kind": "non-combat",
+        "CR": "*3",
+        "desc": "Adapt specific invulnerabilities.",
+        "link": "#_adaptation",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    con = object.CON
+    intel = object.INT
+    lvl = object.Level
+
+    # calculate numbers
+    chance = con + intel + lvl
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"{chance}% chance immune to an attack until next sleep.")
+    mutation_details.append(f"{lvl}% chance permanent maximum of {lvl} immunities.")
+    mutation_details.append(f"Newest immunity replaces the oldest immunity.")
+
+    return mutation_details
+
+
+def attraction_odor(object):
+    mutation_data = {
+        "type": "Attraction Odor",
+        "kind": "non-combat",
+        "CR": "0",
+        "desc": "Long range attraction odor.",
+        "link": "#_attraction_odor",
+    }
+
+    # collect variables
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    pstr = object.PSTR
+    cha = object.CHA
+
+    # calculate numbers
+    choices = ["Yes", "No"]
+    choice_comment = "Apply +2 charisma bonus from Attraction Odor?"
+    choice = please.choose_this(choices, choice_comment)
+
+    if choice == "Yes":
+        object.CHA = cha + 2
+        cha = object.CHA
+
+    # generate persona type attracted
+    attracted = please.get_table_result(table.list_of_life_forms)
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"{attracted} come a calling.")
+    mutation_details.append(f"{pstr} km range. CON save vs {cha} intensity.")
+
+    return mutation_details
+
+
+def arms(object):
+    mutation_data = {
+        "type": "Arms",
+        "kind": "defect",
+        "CR": "0",
+        "desc": "Extra malfunctioning and malformed arms.",
+        "link": "#_arms",
+    }
+
+    # additional data
+    dex = object.DEX
+    name = mutation_data["type"]
+    desc = mutation_data["desc"]
+    family = object.FAMILY
+    dex = object.DEX
+
+    family_arm_location_pivot_table = {
+        "Anthro": table.anthro_snap_hit_location,
+        "Alien": table.alien_snap_hit_location,
+        "Robot": table.robot_snap_hit_location,
+    }
+
+    # calculate effects
+    extra_arms = please.roll_this("1d4")
+
+    choices = ["Yes", "No"]
+    choice_comment = f"Apply -{extra_arms} DEX penalty for {extra_arms} arm(s)?"
+    apply_penalty = please.choose_this(choices, choice_comment)
+
+    if apply_penalty == "Yes":
+        dex = dex - extra_arms
+        dex = 1 if dex < 1 else dex  # ternary to keep DEX > 0
+        object.DEX = dex
+
+    arm_locations = ""
+
+    for __ in range(extra_arms):
+        arm_locations += (
+            f"{please.get_table_result(family_arm_location_pivot_table[family])} "
+        )
+
+    mutation_details = []  # clear mutation_details for each mutation
+    # build description for comment
+    mutation_details.append(mutation_data)
+    mutation_details.append(f"{name}: {desc}")
+    mutation_details.append(f"{extra_arms} extra arm(s). Located: {arm_locations}")
+    mutation_details.append(f"Cannot be controlled and are irritating.")
+
+    return mutation_details
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

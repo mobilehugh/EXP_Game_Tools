@@ -1,0 +1,2525 @@
+def AnaNg(word):
+    """
+    method to synch A or An with next word
+    returns modified string
+    """
+
+    vowels = "AEIOU"
+    first_letter = word[0]
+
+    if first_letter in vowels:
+        vowel = True
+    else:
+        vowel = False
+
+    # add An or add A depending on vowelation
+    if vowel:
+        word = "An " + word
+    else:
+        word = "A " + word
+
+    # remove the capitals after first letter
+    word = word.lower()
+    word = word[0].upper() + word[1:] + "."
+
+    return word
+
+
+def gate_keeper(table, result, result_list=[""]):
+    """
+    differentiates choose, extra roll and ROT
+    needs table, result and result list if no repeats
+
+    """
+    # check for non-strings and just return them
+    # print("***Gate Keeper result", result)
+    # print("***Gate Keeper result_list")
+    # print(result_list)
+
+    if type(result) != type("str"):
+        return result
+    elif result == "Choose":
+        result = choose_check(table, result, result_list)
+    elif result == "Ref's Own Table":
+        result = ref_table_check(table, result, result_list)
+    elif result == "Extra Roll":
+        result, result_list = extra_roll_check(table, result, result_list)
+
+    # norepeat check against result_list
+    result_length = len(result)
+    for x in range(len(result_list)):
+        if result == result_list[x][:result_length]:
+            # print(f"*** Gate No repeats found {result} at {result_list[x]}")
+            result = norepeats(table, result, result_list)
+            break
+
+    # print("*** Exiting gate keeper with "  + result)
+    return result
+
+
+def choose_check(table, result, result_list):
+    # print("\n*** CHOOSE Detected with result " + result)
+
+    # build choices list from table
+    choices = []
+    table_name = table["name"]
+    table_number = table["number"]
+    for key in table:
+        if table[key] == "Choose":
+            break
+        else:
+            choices.append(table[key])
+    comment = (
+        f"\nTable {table_number} {table_name} is offering you a CHOICE.\n"
+        "Please make a CHOICE from above? "
+    )
+
+    choice = choose_this(choices, comment)
+
+    # print("Exiting Choose with " + choice)
+    return choice
+
+
+def ref_table_check(table, result, result_list):
+    # print("\n***REF'S OWN TABLE DETECTED with " + result)
+
+    # ROT Warning and chjoice
+    table_name = table["name"]
+    table_number = table["number"]
+    comment = (
+        f"\nTable {table_number} {table_name} is allowing you to MODIFY it.\n"
+        f"Does the referee have a detailed entry for {table_name}?"
+    )
+    choice = choose_this(["Yes", "No"], comment)
+
+    if choice == "Yes":
+        print(f"\nYou are about to modify Table {table_number} {table_name}.")
+        print("Doing this incorrectly can break the machine. ")
+        rot = input(f"Carefully INPUT NEW ITEM for Table {table_number} {table_name}. ")
+        result = rot
+    else:
+        result = get_table_result(table)
+        print("internal roll = " + result)
+        result = gate_keeper(table, result, result_list)
+        # result += "--notrot"
+    # print("Exiting Ref's Own Table  with " + result)
+    return result
+
+
+def extra_roll_check(table, result, result_list):
+    result = get_table_result(table)
+    result = gate_keeper(table, result, result_list)
+    result_list.append(result)
+
+    result = get_table_result(table)
+    result = gate_keeper(table, result, result_list)
+    print("\n*** EXTRA ROLL SCORED bonus " + result)
+
+    return (result, result_list)
+
+
+def norepeats(table, result, result_list):
+    # print(f"\n***REPEAT DETECTED: {result} on below \n{result_list}")
+    table_name = table["name"]
+    table_number = table["number"]
+
+    comment = (
+        f"\nTable {table_number} {table_name} has a REPEAT.\n"
+        f"YOU  HAVE {stringalizer(result_list)}\n"
+        f"KEEP THE REPEAT {result}? "
+    )
+
+    choice = choose_this(["Yes", "No"], comment)
+
+    if choice == "No":
+        result = get_table_result(table)
+        # print(f"*** NO REPEAT new result is {result}")
+        result = gate_keeper(table, result, result_list)
+
+    return result
+
+
+def stringalizer(result_list):
+    stringalized = ", ".join(result_list)
+    # print(f"*** we joined {result_list} to create {stringalized}")
+    return stringalized
+
+
+def PerformanceTablizer(object):
+
+    # table of performance table tabling tabled here
+
+    Level = object.Level
+
+    if Level > 30:
+        Level = 30
+
+    object.Perf_Table = PerformanceTable[Level]
+    DD_List = object.Perf_Table
+    print(
+        f"\n{object.Vocation} PERFORMANCE TABLE Level {object.Level} EXPS {object.EXPS}"
+    )
+
+    print("      Degree of Difficulty (DD)")
+    print("Skill ", end="")
+    for x in range(0, len(DD_List)):
+        dd = x + 1
+        print(f"{dd:>4} ", end="")
+
+    for skill in range(Level, Level + 5):
+
+        print(f"\n{skill:^6}", end="")
+        for x in range(0, len(DD_List)):
+            DD = PerformanceTable[skill][x]
+            print(f"{DD:>4} ", end="")
+
+    print("")
+    return
+
+
+def existing_anthro_persona_maintenance(object):
+
+    please.find_existing_anthro_record(object)
+    print(f"\nWorking on record {object.ID}")
+    maintenance_choice = "I like turtles"
+
+    while maintenance_choice != "Exit":
+        item_list = [
+            "EXPS Update",
+            "Level Update",
+            "Name Change",
+            "Review On Screen",
+            "PDF Update",
+            "New Persona Record",
+            "Exit",
+        ]
+        item_comment = f"What are you doing to {object.Persona_Name}?"
+        maintenance_choice = please.choose_this(item_list, item_comment)
+
+        if maintenance_choice == "EXPS Update":
+            exps_levels.update_persona_exps(object)
+
+            # function call to update EXPS in record
+            please.store_locally(object)
+            please.anthro_pdf_creator(object)
+
+        elif maintenance_choice == "Level Update":
+            object.Level = int(input("\nPlease input your new Level value: "))
+            # function call to update Level in record
+            please.store_locally(object)
+            please.anthro_pdf_creator(object)
+
+        elif maintenance_choice == "Name Change":
+            new_name = input("\nPlease input your new PERSONA Name: ")
+
+            print(f"The new name for {object.Persona_Name} is {new_name}")
+            print(f"File name {object.File_Name} does NOT change")
+            setattr(object, "Persona_Name", new_name)
+            please.store_locally(object)
+            please.anthro_pdf_creator(object)
+
+        elif maintenance_choice == "Review On Screen":
+            please.anthro_review(object)
+
+        elif maintenance_choice == "PDF Update":
+            please.anthro_pdf_creator(object)
+
+        elif maintenance_choice == "New Persona Record":
+            existing_anthro_persona_maintenance(object)
+
+    return
+
+
+def anthro_maintenance(object):
+
+    type_options = ["Existing Persona", "Brand New Persona"]
+    comment = "What are you working on?"
+    type_choice = please.choose_this(type_options, comment)
+
+    if type_choice == "Existing Persona":
+        existing_anthro_persona_maintenance(object)
+
+    elif type_choice == "Brand New Persona":
+        anthro_manual_input(object)
+
+    return
+
+
+#####################################
+# manually input anthro object attributes
+#####################################
+
+
+def anthro_manual_input(manually):
+
+    print("\nYou are manually inputting a record for a brand new persona.")
+
+    manually.Player_Name = input("Please input your mundane terran name: ")
+    manually.FAMILY = "Anthro"
+
+    if please.say_yes_to("Is this a referee persona?"):
+        manually.RP = True
+    else:
+        manually.RP = False
+
+    manually.Player_Name = input("Please input your MUNDANE TERRAN name: ")
+
+    manually.Persona_Name = input("Please input your ANTHRO PERSONA name: ")
+
+    bespoke_anthro_attribute_ranges(manually)
+
+    # input anthro type
+    all_anthro_types = [key for key in table.anthro_sub_types.keys()]
+    type_options = all_anthro_types
+    comment = "Please input the ANTHRO TYPE"
+    type_choice = please.choose_this(type_options, comment)
+    manually.Anthro_Type = type_choice
+
+    # input anthro sub type
+    anthro_sub_type_selection(manually)
+
+    # input anthro size
+    anthro_size_random(manually)
+
+    # input vocation type
+    all_vocation_types = [key for key in table.attributes_improve_by_vocation.keys()]
+    type_options = all_vocation_types
+    comment = "Please input the VOCATION TYPE"
+    type_choice = please.choose_this(type_options, comment)
+    manually.Vocation = type_choice
+
+    # EXPS Level neeeded for mutations
+    exps_levels.exps_level_bespoke(manually)
+
+    manually.Hite = int(input("Please input your HITE in cms: "))
+    manually.Wate = int(input("Please input your WATE in kgs: "))
+    manually.Age = int(input("Please input your AGE in years: "))
+
+    manually.Move = int(input("Please input your MOVE in h/u: "))
+    manually.WA = int(input("Please input your WA in kg: "))
+    manually.AR = int(input("Please input your AR: "))
+
+    # mutation input check
+    if please.say_yes_to("Are there mutations to input?"):
+        mutations.pick_bespoke_mutation(manually)
+
+    # assign gifts
+    manually.Gifts = vocation.update_gifts(manually)
+
+    # assign interests
+    additional_interests = vocation.update_interests(manually)
+    manually.Interests.extend(additional_interests)
+
+    # assign skills
+    additional_skills = vocation.update_skills(manually)
+    manually.Skills.extend(additional_skills)
+
+    return
+
+
+
+def find_existing_anthro_record(object):
+    # finder for long list of hard to type file names
+
+    list_of_files = os.listdir("./Records/Personas/")
+    list_comment = "Identify the desired persona record."
+    persona_record = choose_this(list_of_files, list_comment)
+
+    # get latest record on persona (AKA last line of file)
+    with open("./Records/Personas/" + persona_record, "r") as f:
+        file_data = f.readlines()[-1]
+
+    dict_data = json.loads(file_data)
+
+    for key, value in dict_data.items():
+        setattr(object, key, value)
+
+    return
+
+
+
+"""
+level selection and level adjustments are done here. quite complicated
+
+"""
+
+import please
+import table
+import vocation
+
+
+
+
+
+def get_exps_from_level(object):
+    """
+    returns an integer value of the EXPS amount based on Level
+    does not alter the object.
+    """
+
+    vocation = object.Vocation
+    level = object.Level
+    top_level = table.vocation_exps_levels[vocation]["top_level"]
+
+    if level > top_level:
+        exps_bottom = table.vocation_exps_levels[vocation]["top_amount"]
+        full_levels = level - (table.vocation_exps_levels[vocation]["top_level"] + 1)
+        exps_amount = int(
+            exps_bottom
+            + (full_levels * table.vocation_exps_levels[vocation]["rate"])
+            + table.vocation_exps_levels[vocation]["rate"] / 2
+        )
+
+    else:
+
+        for exps_range, level_number in table.vocation_exps_levels[vocation].items():
+            if level == level_number:
+                exps_amount = int(
+                    (exps_range.stop - exps_range.start) / 2 + exps_range.start
+                )
+                break
+
+    return exps_amount
+
+
+def get_level_from_exps(object):
+    
+    exps_table = table.vocation_exps_levels[object.Vocation]
+    exps_amount = object.EXPS
+
+    # print("\n\nyou get past assignment in levelizer")
+
+    top = exps_table["top_amount"]
+    top_level = exps_table["top_level"]
+    rate = exps_table["rate"]
+    if exps_amount > top:
+        new_level = top_level + round((exps_amount - top) / rate)
+    else:
+        for key in exps_table:
+            if exps_amount in key:
+                new_level = exps_table[key]
+                break
+
+    return new_level
+
+def update_persona_exps(object):
+    """
+    adds new EXPS to total and checks for level increase
+    """
+    present_exps = object.EXPS
+    present_level = object.Level
+    
+    if please.say_yes_to("Are inputting a new TOTAL EXPS amount?"):
+        new_exps = int(input("What is the new TOTAL EXPS amount? "))
+    else:
+        session_exps = int(input("\nPlease input your new EXPS session amount: "))
+        new_exps = present_exps + session_exps
+    object.EXPS = new_exps
+    
+    new_level = get_level_from_exps(object)
+    
+    # if no level increase then return
+    if new_level == present_level:
+        print(f"Level {object.Level} {object.Vocation} with {object.EXPS} EXPS.")
+        return
+
+    level_increase  = new_level - present_level
+    object.Level = new_level
+    print(f"Level {object.Level} {object.Vocation} with {object.EXPS} EXPS.")
+    print(f"You gained {level_increase} level(s), you ean one interest and one skill per new level.")
+
+    # update gifts
+    object.Gifts = vocation.update_gifts(object)
+
+    # update interests and skills
+
+    additional_interests = vocation.update_interests(object, level_increase)
+    object.Interests.extend(additional_interests)
+    
+    additional_skills = vocation.update_skills(object, level_increase)
+    object.Skills.extend(additional_skills)              
+            
+    return
+
+
+
+import please
+import random
+import math
+
+
+def physical(object, number, kind=""):
+
+    # url = "https://expgame.com/vi-mutations/chapter-59-physical-mutations/"
+
+    def AcidicEnzymes():
+
+        AcidicEnzymes = {
+            "number": "01",
+            "name": "Acidic Enzymes",
+            "type": "combat",
+            "CR": "+2",
+            "desc": "Spit acidic enzymes every other unit",
+            "link": "#1-acidic-enzymes",
+        }
+
+        # collect variables
+        number = AcidicEnzymes["number"]
+        name = AcidicEnzymes["name"]
+        desc = AcidicEnzymes["desc"]
+
+        # calculate elements of mutation
+        range_mute = str(object.PSTR + object.Level)
+        damage = "2d8+" + str(object.Level)
+
+        # build description to complete comment
+        desc = desc + "\n    Only affects organic targets."
+        desc = desc + f"\n    Range {range_mute} hexes. Damage {damage} HPS."
+
+        return f"{number}. {name}: " + desc
+
+    def Adaptation():
+
+        Adaptation = {
+            "number": "02",
+            "name": "Adaptation",
+            "type": "non-combat",
+            "CR": "*2.5",
+            "desc": "Can instantly adapt and repel attacks",
+            "link": "#2-adaptation",
+        }
+
+        # collect variables
+        number = Adaptation["number"]
+        name = Adaptation["name"]
+        desc = Adaptation["desc"]
+
+        # calculate numbers
+        sleep = str((object.INT + object.Level) * 2)
+        perm = str(object.Level)
+        max_perm = str(round(object.INT / 6))
+
+        # build decription for comment
+        desc = desc + f"\n    Adapts to both good and bad. Not volitional."
+        desc = desc + f"\n    Lasts all day {sleep}% Permanent {perm}%"
+        desc = desc + f"\n    Max permanent adapations is {max_perm}."
+
+        return f"{number}. {name}: " + desc
+
+    def AttractionOdor():
+
+        DataSet = {
+            "number": "03",
+            "name": "Attraction Odor",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Long range attraction odor.",
+            "link": "#3-attraction-odor",
+        }
+
+        AttractionTable = {
+            range(1, 7): "Ambushers",
+            range(7, 13): "Carnivores",
+            range(13, 19): "Chasers",
+            range(19, 25): "Chemosynthetics",
+            range(25, 31): "Detritovores",
+            range(31, 37): "Herbivores",
+            range(37, 43): "Hunters",
+            range(43, 49): "Mitotic Reproducers",
+            range(49, 55): "Omnivores",
+            range(55, 61): "Oviparous Reproducers",
+            range(61, 67): "Photosynthetics",
+            range(67, 73): "Spore Reproducers",
+            range(73, 75): "Parasitic Reproducers",
+            range(75, 79): "Trappers",
+            range(79, 91): "Vivaporous Reproducers",
+            range(91, 93): "Robots",
+            range(93, 100): "Anthro Types",
+            range(100, 101): "Ref's Own Table",
+            "name": "Attracted Personas",
+            "number": "45.7",
+            "die_roll": "1d100",
+            "backup": "1d99",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        cha = object.CHA
+        pstr = object.PSTR
+
+        # calculate numbers
+        object.CHA = cha + 1
+        attack = object.CHA
+
+        # generate persona type attracted
+        attracted = please.get_table_result(AttractionTable)
+
+        # build decription for comment
+        desc = desc + f"\n    Attracts {attracted} within {pstr} kms."
+        desc = desc + f"\n    Attracted save vs {attack} level poison."
+        desc = desc + f"\n    +15 on all negotiations and a CHA bonus."
+        return f"{number}. {name}: " + desc
+
+    def Arms():
+        DataSet = {
+            "number": "04",
+            "name": "Arms",
+            "type": "defect",
+            "CR": "0",
+            "desc": "Unecessary malfunctioning and malformed arms.",
+            "link": "#4-arms",
+        }
+
+        # additional data
+        dex = object.DEX
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        ExtraArm = {
+            range(1, 2): "Left Leg",
+            range(2, 3): "Right Leg",
+            range(3, 4): "Groin",
+            range(4, 5): "Butt",
+            range(5, 6): "Stomach",
+            range(6, 7): "Left Arm",
+            range(7, 8): "Right Arm",
+            range(8, 9): "Chest/Back",
+            range(9, 10): "Face",
+            range(10, 11): "Head",
+            range(11, 13): "Chest",
+            "name": "Extra Arm",
+            "number": "59.6",
+            "die_roll": "1d12",
+            "backup": "1d9",
+        }
+
+        # calculate effects
+        extra_arms = please.roll_this("1d4")
+        dex = dex - extra_arms
+        if dex < 1:
+            dex = 1
+        object.DEX = dex
+        arm_locations = ""
+
+        for __ in range(extra_arms):
+            arm_locations = arm_locations + " " + please.get_table_result(ExtraArm)
+
+        # build decription for comment
+        desc = desc + f"\n    {extra_arms} extra arms. DEX penalty."
+        desc = desc + f"\n    Ambidextrous with normal arms."
+        desc = desc + f"\n    Located on {arm_locations}"
+
+        return f"{number}. {name}: " + desc
+
+    def BodyStructureChange():
+
+        DataSet = {
+            "number": "05",
+            "name": "Body Structure Change",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Body shape can be manipulated like molding clay.",
+            "link": "#5-body-structure-change",
+        }
+
+        # additional data
+        mstr = object.MSTR
+        level = object.Level
+        con = object.CON
+
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculations
+        duration = mstr + level
+        frequency = round(con / 6) + level
+
+        # build decription for comment
+        desc = desc + f"\n    {frequency} times per day."
+        desc = desc + f"\n    Lasting {duration} hours."
+        desc = desc + f"\n    +100 on Disguise rolls."
+        desc = desc + f"\n    1% chance per hour of permanence."
+
+        return f"{number}. {name}: " + desc
+
+    def Carapace():
+
+        DataSet = {
+            "number": "06",
+            "name": "Carapace",
+            "type": "combat",
+            "CR": "+1",
+            "desc": "Thickened protective skin.",
+            "link": "#6-carapace",
+        }
+
+        # additional data
+
+        CarapaceCovering = {
+            range(1, 21): {
+                "cover": "Slight",
+                "AR": 49,
+                "DA": "No",
+                "appearance": -1,
+                "movement": 0,
+            },
+            range(21, 61): {
+                "cover": "Partial",
+                "AR": 99,
+                "DA": ".75",
+                "appearance": -2,
+                "movement": 0,
+            },
+            range(61, 91): {
+                "cover": "Total",
+                "AR": 199,
+                "DA": ".50",
+                "appearance": -3,
+                "movement": -1,
+            },
+            range(91, 101): {
+                "cover": "Mondo",
+                "AR": 249,
+                "DA": ".25",
+                "appearance": -4,
+                "movement": -2,
+            },
+            "name": "Carapace Covering",
+            "number": "59.7",
+            "die_roll": "1d100",
+            "backup": "1d99",
+        }
+
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        effects = please.get_table_result(CarapaceCovering)
+
+        covering = effects["cover"]
+        AR_Bonus = effects["AR"]
+        Damage_Adjust = effects["DA"]
+        appearance = effects["appearance"]
+        movement = effects["movement"]
+
+        dex = object.DEX
+        cha = object.CHA
+        AR = object.AR
+
+        # calculations
+        object.DEX = dex + movement
+        if object.DEX < 1:
+            object.DEX = 1
+        object.CHA = cha + appearance
+        object.AR = AR + AR_Bonus
+
+        # build decription for comment
+        desc = desc + f"\n    {covering} AR Bonus of (+{AR_Bonus})."
+        desc = desc + f"\n    Blunt damage reduced by {Damage_Adjust}."
+        desc = desc + f"\n    Can harm charisma and dexterity."
+
+        return f"{number}. {name}: " + desc
+
+    def ChameleonPower():
+
+        DataSet = {
+            "number": "07",
+            "name": "Chameleon Power",
+            "type": "non-combat",
+            "CR": "+5",
+            "desc": "Blend into the background when naked.",
+            "link": "#7-chameleon-power",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # make calculations - none
+
+        # build decription for comment
+        desc = desc + f"\n    +25 on sneaking performance rolls."
+        desc = desc + f"\n    Detection requires Difficult AWE roll."
+        desc = desc + f"\n    Not invisibility."
+
+        return f"{number}. {name}: " + desc
+
+    def Decoy():
+
+        DataSet = {
+            "number": "08",
+            "name": "Decoy",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Drop a distracting tail thing.",
+            "link": "#8-decoy",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        cha = object.CHA
+        con = object.CON
+        level = object.Level
+
+        # make calculations
+        kill_tox = round(con / 2)
+
+        # build decription for comment
+        desc = desc + f"\n    Super pheromone {level} hex range."
+        desc = desc + f"\n    INT < 7 80% attracted. Rest save vs {cha} level."
+        desc = desc + f"\n    When eaten save vs {kill_tox} level poison."
+        desc = desc + f"\n    Grows back after one full sleep."
+
+        return f"{number}. {name}: " + desc
+
+    def DensityControl():
+
+        DataSet = {
+            "number": "09",
+            "name": "Density Control",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Physically alter body's density.",
+            "link": "#9-density-control",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        mstr = object.MSTR
+        con = object.CON
+
+        # calculate effects
+        frequency = round(con / 3)
+
+        # build decription for comment
+        desc = desc + f"\n    {frequency} times per day for {mstr} minutes."
+        desc = desc + "\n    Denser decrease damage by .75."
+        desc = desc + f"\n    Less dense decrease damage by 10-60%, flying 1d6 h."
+        desc = desc + "\n    +15 on wate related performance rolls."
+
+        return f"{number}. {name}: " + desc
+
+    def DiminishedSense():
+
+        DataSet = {
+            "number": "10",
+            "name": "Diminished Sense",
+            "type": "defect",
+            "CR": "0",
+            "desc": "Severe limitation of a sense.",
+            "link": "#10-diminished-sense",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        awe = object.AWE
+        dex = object.DEX
+        mstr = object.MSTR
+        SOC = object.SOC
+
+        if 90 < please.roll_this("1d100"):
+            cannotcan = "Can"
+        else:
+            cannotcan = "Cannot"
+
+        DiminishedSense = {
+            range(1, 51): {
+                "sense": f"""\n    Diminished Sixth sense.\n    Impaired connection to psionic realm.\n    Loss of all mental mutations.\n    Defence against direct mind attacks.""",
+                "AWE": -1,
+                "DEX": 0,
+                "MSTR": -2,
+            },
+            range(51, 81): {
+                "sense": f"""\n    Diminished Smell sense. Impaired smell and taste.
+                    \n    Defence against nauseaus or attraction odors.
+                    \n    AWE halved to detect an ambush.""",
+                "AWE": -1,
+                "DEX": 0,
+                "MSTR": 0,
+            },
+            range(81, 90): {
+                "sense": f"""\n    Diminished Style sense.\n    Devastating lack of poise.\n    Penalties in all social areas.""",
+                "AWE": 0,
+                "DEX": 0,
+                "MSTR": 0,
+            },
+            range(90, 97): {
+                "sense": f"""\n    Diminished Hearing sense.
+                    \n    Half damage from sonic attacks.
+                    \n    {cannotcan} use and teach signing.
+                    \n    AWE halved to detect an ambush.""",
+                "AWE": -2,
+                "DEX": 0,
+                "MSTR": 0,
+            },
+            range(97, 99): {
+                "sense": "\n    Diminished Touch sense.\n    Half damage \
+                from any painful attack.\n    Gait normal, but fumbly.",
+                "AWE": 0,
+                "DEX": -2,
+                "MSTR": 0,
+            },
+            range(99, 100): {
+                "sense": "\n    Diminished Sight sense.\n    Severe vision \
+                loss supplemented by sonar.\n    Bonuses using \
+                touch, hearing, taste.",
+                "AWE": -4,
+                "DEX": -2,
+                "MSTR": 0,
+            },
+            range(100, 101): "Ref's Own Table",
+            "name": "Diminished Sense",
+            "number": "59.8",
+            "die_roll": "1d100",
+            "backup": "1d99",
+        }
+
+        # calculate effects
+        sense_dict = please.get_table_result(DiminishedSense)
+
+        object.AWE = awe + sense_dict["AWE"]
+        object.DEX = dex + sense_dict["DEX"]
+        object.MSTR = mstr + sense_dict["MSTR"]
+        if sense_dict["sense"][16] == "Diminished Style":
+            object.SOC = round(SOC / 2)
+
+        # build decription for comment
+        desc = desc + sense_dict["sense"]
+
+        return f"{number}. {name}: " + desc
+
+    def DoublePhysicalPain():
+
+        DataSet = {
+            "number": "11",
+            "name": "Double Physical Pain",
+            "type": "defect",
+            "CR": "0",
+            "desc": "Exquisitely sensitive pain sensors.",
+            "link": "#11-double-physical-pain",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects - none
+
+        # build decription for comment
+        desc = desc + "\n    Heals twice as fast. Analgesia is ineffective."
+        desc = desc + "\n    Takes extra 2d8 HPS damage if painful"
+
+        return f"{number}. {name}: " + desc
+
+    def EdibleTissue():
+
+        DataSet = {
+            "number": "12",
+            "name": "Edible Tissue",
+            "type": "non-combat",
+            "CR": "0",
+            "desc": "Tear away collection of edible flesh.",
+            "link": "#12-edible-tissue",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects - none
+
+        # build decription for comment
+        desc = desc + "\n    Supplies the mutant's daily food allowance."
+        desc = desc + "\n    Inedible by others. Still needs water."
+
+        return f"{number}. {name}: " + desc
+
+    def ElectricShock():
+
+        DataSet = {
+            "number": "13",
+            "name": "Electric Shock",
+            "type": "combat",
+            "CR": "+4",
+            "desc": "Electric shock generators.",
+            "link": "#13-electric-shock",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        level = object.Level
+        pstr = object.PSTR
+
+        # calculate effects
+        C_range = level + round(pstr / 2)
+        C_damage = "3d4+" + str(level)
+        A_damage = "1d10+" + str(level + 6)
+
+        # build decription for comment
+        desc = desc + f"\n    Touch (type A),  {A_damage} HPS damage. "
+        desc = desc + f"\n    Bolt (type C) {C_range} hex, {C_damage} damage."
+        desc = desc + f"\n    One unit to recharge. +100 to hit conductives."
+        desc = desc + f"\n    1/3 damage from electrical attacks."
+        desc = desc + f"\n    +15 on any resuscitation performance rolls."
+
+        return f"{number}. {name}: " + desc
+
+    def EnthalpyAttack():
+
+        DataSet = {
+            "number": "14",
+            "name": "Enthalpy Attack",
+            "type": "combat",
+            "CR": "+3",
+            "desc": "Shoot freezing breath with icicles.",
+            "link": "#14-enthalpy-attack",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        level = object.Level
+        pstr = object.PSTR
+
+        # calculate effects
+        C_damage = "2d8+" + str(level)
+        C_range = level + pstr
+
+        # build decription for comment
+        desc = desc + f"\n    Breath {C_range} hex inflicting {C_damage} HPS."
+        desc = desc + f"\n    Area of effect attack. Needs 2 units to recool."
+        desc = desc + f"\n    2 hex air conditioning effect."
+        desc = desc + f"\n    Cold attacks do double damage."
+        desc = desc + f"\n    Heat attacks do half damage."
+
+        return f"{number}. {name}: " + desc
+
+    def FatCellGeneration():
+
+        DataSet = {
+            "number": "15",
+            "name": "Fat Cell Generation",
+            "type": "defect",
+            "CR": "*.9",
+            "desc": "Large obvious lump(s) of adiposity.",
+            "link": "#15-fat-cell-accumulation",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        cha = object.CHA
+
+        FatLocation = {
+            range(1, 31): {
+                "front": "Foot",
+                "back": "Heel",
+                "subtable": ["Right ", "Left "],
+            },
+            range(31, 41): {
+                "front": "Ankle",
+                "back": "Ankle",
+                "subtable": ["Right ", "Left "],
+            },
+            range(41, 91): {
+                "front": "Shin",
+                "back": "Calf",
+                "subtable": ["Right ", "Left "],
+            },
+            range(91, 101): {
+                "front": "Knee Cap",
+                "back": "Knee Joint",
+                "subtable": ["Right ", "Left "],
+            },
+            range(101, 151): {
+                "front": "Thigh",
+                "back": "Hamstring",
+                "subtable": ["Right ", "Left "],
+            },
+            range(151, 201): {
+                "front": "Hip",
+                "back": "Buttock",
+                "subtable": ["Right ", "Left "],
+            },
+            range(201, 251): {
+                "front": "Groin",
+                "back": "Buttock",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(251, 451): {
+                "front": "Abdomen",
+                "back": "Lower Back",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(451, 651): {
+                "front": "Pectorals",
+                "back": "Upper Back",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(651, 726): {
+                "front": "Hand",
+                "back": "Hand",
+                "subtable": ["Right ", "Left "],
+            },
+            range(726, 801): {
+                "front": "Forearm",
+                "back": "Forearm",
+                "subtable": ["Right ", "Left "],
+            },
+            range(801, 876): {
+                "front": "Bicep",
+                "back": "Tricep",
+                "subtable": ["Right ", "Left "],
+            },
+            range(876, 951): {
+                "front": "Shoulder",
+                "back": "Shoulder",
+                "subtable": ["Right ", "Left "],
+            },
+            range(951, 966): {
+                "front": "Throat",
+                "back": "Back of Neck",
+                "subtable": ["Middle of "],
+            },
+            range(966, 980): {
+                "front": "Mouth",
+                "back": "Back of Neck",
+                "subtable": ["Middle of "],
+            },
+            range(980, 989): {
+                "front": "Eyes",
+                "back": "Back of Head",
+                "subtable": ["Right ", "Middle of ", "Left "],
+            },
+            range(989, 1001): {
+                "front": "Forehead",
+                "back": "Top of Head",
+                "subtable": ["Middle of "],
+            },
+            "name": "Fat Location",
+            "number": "59.9",
+            "die_roll": "1d1000",
+        }
+
+        # calculate effects
+        lumpies = random.randint(1, 3)
+        object.CHA = cha - lumpies
+        locations = ""
+        for x in range(1, (lumpies + 1)):
+            # grab the dictionary for front back table
+            locator = please.get_table_result(FatLocation)
+            upper = len(locator["subtable"])
+            upper = upper - 1
+            director = random.randint(0, upper)
+            locations = locations + f"\n    {x}. Located on "
+            locations = locations + locator["subtable"][director]
+            if please.roll_this("1d1000") > 500:
+                locations = locations + locator["front"] + "."
+            else:
+                locations = locations + locator["back"] + "."
+
+        # build decription for comment
+        desc = desc + locations
+
+        return f"{number}. {name}: " + desc
+
+    def GasGeneration():
+
+        DataSet = {
+            "number": "16",
+            "name": "Gas Generation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Spray toxic gas from an orifice.",
+            "link": "#16-gas-generation",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        con = object.CON
+        level = object.Level
+        line = ""
+        attack = round(con / 2) + level
+        freq = round(con / 5) + level
+
+        # calculate effects
+        PoisonGas = {
+            range(1, 3): "Death",
+            range(3, 43): "Nausea",
+            range(43, 59): "Paralysis",
+            range(59, 61): "Pharmaceutical Effect",
+            range(61, 100): "Unconsciousness",
+            range(100, 101): "Ref's Own Table",
+            "name": "Poison Gas",
+            "number": "59.10",
+            "die_roll": "1d100",
+        }
+
+        PharmaceuticalType = {
+            range(1, 11): "Cure",
+            range(11, 21): "DNA",
+            range(21, 41): "Narcotic",
+            range(41, 51): "Heal",
+            range(51, 61): "Inoculation",
+            range(61, 66): "Mutation",
+            range(66, 76): "Mutation Effect",
+            range(76, 86): "Periodic Intumescent",
+            range(86, 96): "Permanent Intumescent",
+            range(96, 100): "Poison",
+            range(100, 101): "Ref's Own Table",
+            "name": "Pharmaceutical Type",
+            "number": "50.5",
+            "die_roll": "1d100",
+        }
+
+        gas_effect = please.get_table_result(PoisonGas)
+
+        # build description for comment
+
+        if gas_effect == "Death":
+            line = line + f"\n    5h toxic cloud of death. {attack} intensity."
+            line = line + f"\n    inflicts {attack}d4 damage. Lasts 1d4-1 units."
+
+        elif gas_effect == "Nausea":
+            line = line + f"\n    3h toxic cloud of puke. {attack} intensity."
+            line = line + f"\n    Incapacitated for 1d8 minutes. Cloud lasts 2d4 units."
+
+        elif gas_effect == "Paralysis":
+            line = line + f"\n    3h toxic cloud of weakness. {attack} intensity."
+            line = line + f"\n    Paralyzed for 3d10 units. Dissipates after 1d8 units."
+
+        elif gas_effect == "Unconsciousness":
+            line = line + f"\n    3h toxic cloud of sleepy. {attack} intensity."
+            line = line + f"\n    Unconscious for 1d4 days. Dissipates after 1d2 units."
+
+        elif gas_effect == "Pharmaceutical Effect":
+            drug = please.get_table_result(PharmaceuticalType)
+            line = line + f"\n    1h burp of {drug}. Must save vs {attack} intensity."
+            line = line + f"\n    You need to go read about the pharmaceutical effect."
+
+        line = line + f"\n    May use this {freq} times per day."
+        desc = desc + line
+
+        return f"{number}. {name}: " + desc
+
+    def Haste():
+
+        DataSet = {
+            "number": "17",
+            "name": "Haste",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Haste.",
+            "link": "#17-haste",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+        con = object.CON
+        lvl = object.Level
+
+        # calculate effects
+        duration = con + lvl
+        freq = math.ceil((con + lvl) / 4)
+
+        # build decription for comment
+        desc = desc + f"\n    Do everything at double speed."
+        desc = desc + f"\n    Run, attack, think at double. Then rest an hour."
+        desc = desc + f"\n    For full {duration} units. {freq} times per day."
+
+        return f"{number}. {name}: " + desc
+
+    def HeatGeneration():
+
+        DataSet = {
+            "number": "18",
+            "name": "Heat Generation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Heat Generation.",
+            "link": "#18-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Heat Generation."
+
+        return f"{number}. {name}: " + desc
+
+    def HeightenedAttribute():
+
+        DataSet = {
+            "number": "19",
+            "name": "Heightened Attribute",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Heightened Attribute.",
+            "link": "#19-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Heightened Attribute."
+
+        return f"{number}. {name}: " + desc
+
+    def HeightenedVision():
+
+        DataSet = {
+            "number": "20",
+            "name": "Heightened Vision",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Heightened Vision.",
+            "link": "#20-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Heightened Vision."
+
+        return f"{number}. {name}: " + desc
+
+    def IncreasedMetabolism():
+
+        DataSet = {
+            "number": "21",
+            "name": "Increased Metabolism",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Increased Metabolism.",
+            "link": "#21-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Increased Metabolism."
+
+        return f"{number}. {name}: " + desc
+
+    def LaunchableQuills():
+
+        DataSet = {
+            "number": "22",
+            "name": "Launchable Quills",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Launchable Quills.",
+            "link": "#22-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Launchable Quills."
+
+        return f"{number}. {name}: " + desc
+
+    def LightGeneration():
+
+        DataSet = {
+            "number": "23",
+            "name": "Light Generation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Light Generation.",
+            "link": "#23-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Light Generation."
+
+        return f"{number}. {name}: " + desc
+
+    def MechanicalInsertion():
+
+        DataSet = {
+            "number": "24",
+            "name": "Mechanical Insertion",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Mechanical Insertion.",
+            "link": "#24-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Mechanical Insertion."
+
+        return f"{number}. {name}: " + desc
+
+    def MechanicalProsthesis():
+
+        DataSet = {
+            "number": "25",
+            "name": "Mechanical Prosthesis",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Mechanical Prosthesis.",
+            "link": "#25-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Mechanical Prosthesis."
+
+        return f"{number}. {name}: " + desc
+
+    def Mitosis():
+
+        DataSet = {
+            "number": "26",
+            "name": "Mitosis",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Mitosis.",
+            "link": "#26-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Mitosis."
+
+        return f"{number}. {name}: " + desc
+
+    def MultipleBodyParts():
+
+        DataSet = {
+            "number": "27",
+            "name": "Multiple Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Multiple Body Parts.",
+            "link": "#27-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Multiple Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def NewOrgans():
+
+        DataSet = {
+            "number": "28",
+            "name": "New Organs",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with New Organs.",
+            "link": "#28-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about New Organs."
+
+        return f"{number}. {name}: " + desc
+
+    def NonBreathing():
+
+        DataSet = {
+            "number": "29",
+            "name": "Non Breathing",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Non Breathing.",
+            "link": "#29-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Non Breathing."
+
+        return f"{number}. {name}: " + desc
+
+    def NoResistancetoDisease():
+
+        DataSet = {
+            "number": "30",
+            "name": "No Resistance to Disease",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with No Resistance to Disease.",
+            "link": "#30-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about No Resistance to Disease."
+
+        return f"{number}. {name}: " + desc
+
+    def NoResistancetoPoison():
+
+        DataSet = {
+            "number": "31",
+            "name": "No Resistance to Poison",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with No Resistance to Poison.",
+            "link": "#31-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about No Resistance to Poison."
+
+        return f"{number}. {name}: " + desc
+
+    def OversizedBodyParts():
+
+        DataSet = {
+            "number": "32",
+            "name": "Oversized Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Oversized Body Parts.",
+            "link": "#32-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Oversized Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def PhotosyntheticSkin():
+
+        DataSet = {
+            "number": "33",
+            "name": "Photosynthetic Skin",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Photosynthetic Skin.",
+            "link": "#33-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Photosynthetic Skin."
+
+        return f"{number}. {name}: " + desc
+
+    def PhosphorescentSkin():
+
+        DataSet = {
+            "number": "34",
+            "name": "Phosphorescent Skin",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Phosphorescent Skin.",
+            "link": "#34-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Phosphorescent Skin."
+
+        return f"{number}. {name}: " + desc
+
+    def PoorRespiratorySystem():
+
+        DataSet = {
+            "number": "35",
+            "name": "Poor Respiratory System",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Poor Respiratory System.",
+            "link": "#35-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Poor Respiratory System."
+
+        return f"{number}. {name}: " + desc
+
+    def Pockets():
+
+        DataSet = {
+            "number": "36",
+            "name": "Pockets",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Pockets.",
+            "link": "#36-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Pockets."
+
+        return f"{number}. {name}: " + desc
+
+    def PressurizedBody():
+
+        DataSet = {
+            "number": "37",
+            "name": "Pressurized Body",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Pressurized Body.",
+            "link": "#37-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Pressurized Body."
+
+        return f"{number}. {name}: " + desc
+
+    def RadiatingEyes():
+
+        DataSet = {
+            "number": "38",
+            "name": "Radiating Eyes",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Radiating Eyes.",
+            "link": "#38-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Radiating Eyes."
+
+        return f"{number}. {name}: " + desc
+
+    def Regeneration():
+
+        DataSet = {
+            "number": "39",
+            "name": "Regeneration",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Regeneration.",
+            "link": "#39-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Regeneration."
+
+        return f"{number}. {name}: " + desc
+
+    def RubberySkin():
+
+        DataSet = {
+            "number": "40",
+            "name": "Rubbery Skin",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Rubbery Skin.",
+            "link": "#40-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Rubbery Skin."
+
+        return f"{number}. {name}: " + desc
+
+    def Rust():
+
+        DataSet = {
+            "number": "41",
+            "name": "Rust",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Rust.",
+            "link": "#41-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Rust."
+
+        return f"{number}. {name}: " + desc
+
+    def SelfDestruction():
+
+        DataSet = {
+            "number": "42",
+            "name": "Self Destruction",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Self Destruction.",
+            "link": "#42-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Self Destruction."
+
+        return f"{number}. {name}: " + desc
+
+    def ShapeChange():
+
+        DataSet = {
+            "number": "43",
+            "name": "Shape Change",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Shape Change.",
+            "link": "#43-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Shape Change."
+
+        return f"{number}. {name}: " + desc
+
+    def SizeManipulation():
+
+        DataSet = {
+            "number": "44",
+            "name": "Size Manipulation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Size Manipulation.",
+            "link": "#44-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Size Manipulation."
+
+        return f"{number}. {name}: " + desc
+
+    def SkinStructureChange():
+
+        DataSet = {
+            "number": "45",
+            "name": "Skin Structure Change",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Skin Structure Change.",
+            "link": "#45-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Skin Structure Change."
+
+        return f"{number}. {name}: " + desc
+
+    def SmokeScreen():
+
+        DataSet = {
+            "number": "46",
+            "name": "Smoke Screen",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Smoke Screen.",
+            "link": "#46-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Smoke Screen."
+
+        return f"{number}. {name}: " + desc
+
+    def SonicAttack():
+
+        DataSet = {
+            "number": "47",
+            "name": "Sonic Attack",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Sonic Attack.",
+            "link": "#47-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Sonic Attack."
+
+        return f"{number}. {name}: " + desc
+
+    def SpitPoison():
+
+        DataSet = {
+            "number": "48",
+            "name": "Spit Poison",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Spit Poison.",
+            "link": "#48-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Spit Poison."
+
+        return f"{number}. {name}: " + desc
+
+    def StaticQuills():
+
+        DataSet = {
+            "number": "49",
+            "name": "Static Quills",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Static Quills.",
+            "link": "#49-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Static Quills."
+
+        return f"{number}. {name}: " + desc
+
+    def StrangeNewBodyPart():
+
+        DataSet = {
+            "number": "50",
+            "name": "Strange New Body Part",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Strange New Body Part.",
+            "link": "#50-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Strange New Body Part."
+
+        return f"{number}. {name}: " + desc
+
+    def SymbioticAttachment():
+
+        DataSet = {
+            "number": "51",
+            "name": "Symbiotic Attachment",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Symbiotic Attachment.",
+            "link": "#51-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Symbiotic Attachment."
+
+        return f"{number}. {name}: " + desc
+
+    def TearAwayBodyParts():
+
+        DataSet = {
+            "number": "52",
+            "name": "Tear Away Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Tear Away Body Parts.",
+            "link": "#52-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Tear Away Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def UndersizedBodyParts():
+
+        DataSet = {
+            "number": "53",
+            "name": "Undersized Body Parts",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Undersized Body Parts.",
+            "link": "#53-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Undersized Body Parts."
+
+        return f"{number}. {name}: " + desc
+
+    def Vibrations():
+
+        DataSet = {
+            "number": "54",
+            "name": "Vibrations",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Vibrations.",
+            "link": "#54-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Vibrations."
+
+        return f"{number}. {name}: " + desc
+
+    def VisionDefect():
+
+        DataSet = {
+            "number": "55",
+            "name": "Vision Defect",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Vision Defect.",
+            "link": "#55-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Vision Defect."
+
+        return f"{number}. {name}: " + desc
+
+    def WateManipulation():
+
+        DataSet = {
+            "number": "56",
+            "name": "Wate Manipulation",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Wate Manipulation.",
+            "link": "#56-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Wate Manipulation."
+
+        return f"{number}. {name}: " + desc
+
+    def Wings():
+
+        DataSet = {
+            "number": "57",
+            "name": "Wings",
+            "type": "combat",
+            "CR": "0",
+            "desc": "Rocking it with Wings.",
+            "link": "#57-something",
+        }
+
+        # collect variables
+        number = DataSet["number"]
+        name = DataSet["name"]
+        desc = DataSet["desc"]
+
+        # calculate effects
+
+        # build decription for comment
+        desc = desc + "\n    Say more about Wings."
+
+        return f"{number}. {name}: " + desc
+
+    def ROT_creator():
+
+        # collect variables
+        print("\nYou have chosen to create a NEW physical mutation.")
+        print("Please proceed with caution and diligence.")
+        number = 42
+        while number < 61:
+            number = int(
+                input("Please assign this physical mutation a number (> 60)? ")
+            )
+        number = str(number)
+        name = input("Please assign this physical mutation a BRIEF title (1-2 words)? ")
+        desc = input(
+            "Please assign this physical mutation a one sentence description. "
+        )
+
+        # build decription for comment
+        desc = desc + "\n    This is a Ref's Own Table mutation."
+
+        return f"{number}. {name}: " + desc
+
+    physical_table = {
+        range(1, 3): {
+            "name": "Acidic Enzymes",
+            "kind": "combat",
+            "function": AcidicEnzymes,
+        },
+        range(3, 4): {
+            "name": "Adaptation",
+            "kind": "non-combat",
+            "function": Adaptation,
+        },
+        range(4, 7): {
+            "name": "Attraction Odor",
+            "kind": "defect",
+            "function": AttractionOdor,
+        },
+        range(7, 9): {"name": "Arms", "kind": "defect", "function": Arms},
+        range(9, 10): {
+            "name": "Body Structure Change",
+            "kind": "non-combat",
+            "function": BodyStructureChange,
+        },
+        range(10, 12): {"name": "Carapace", "kind": "combat", "function": Carapace},
+        range(12, 14): {
+            "name": "Chameleon Power",
+            "kind": "non-combat",
+            "function": ChameleonPower,
+        },
+        range(14, 16): {"name": "Decoy", "kind": "non-combat", "function": Decoy},
+        range(16, 18): {
+            "name": "Density Control",
+            "kind": "combat",
+            "function": DensityControl,
+        },
+        range(18, 20): {
+            "name": "Diminished Sense",
+            "kind": "defect",
+            "function": DiminishedSense,
+        },
+        range(20, 22): {
+            "name": "Double Physical Pain",
+            "kind": "defect",
+            "function": DoublePhysicalPain,
+        },
+        range(22, 24): {
+            "name": "Edible Tissue",
+            "kind": "combat",
+            "function": EdibleTissue,
+        },
+        range(24, 25): {
+            "name": "Electric Shock",
+            "kind": "combat",
+            "function": ElectricShock,
+        },
+        range(25, 26): {
+            "name": "Enthalpy Attack",
+            "kind": "combat",
+            "function": EnthalpyAttack,
+        },
+        range(26, 28): {
+            "name": "Fat Cell Generation",
+            "kind": "defect",
+            "function": FatCellGeneration,
+        },
+        range(28, 29): {
+            "name": "Gas Generation",
+            "kind": "combat",
+            "function": GasGeneration,
+        },
+        range(29, 30): {"name": "Haste", "kind": "combat", "function": Haste},
+        range(30, 32): {
+            "name": "Heat Generation",
+            "kind": "combat",
+            "function": HeatGeneration,
+        },
+        range(32, 36): {
+            "name": "Heightened Attribute",
+            "kind": "combat",
+            "function": HeightenedAttribute,
+        },
+        range(36, 38): {
+            "name": "Heightened Vision",
+            "kind": "combat",
+            "function": HeightenedVision,
+        },
+        range(38, 40): {
+            "name": "Increased Metabolism",
+            "kind": "defect",
+            "function": IncreasedMetabolism,
+        },
+        range(40, 42): {
+            "name": "Launchable Quills",
+            "kind": "combat",
+            "function": LaunchableQuills,
+        },
+        range(42, 44): {
+            "name": "Light Generation",
+            "kind": "combat",
+            "function": LightGeneration,
+        },
+        range(44, 45): {
+            "name": "Mechanical Insertion",
+            "kind": "non-combat",
+            "function": MechanicalInsertion,
+        },
+        range(45, 47): {
+            "name": "Mechanical Prosthesis",
+            "kind": "defect",
+            "function": MechanicalProsthesis,
+        },
+        range(47, 48): {"name": "Mitosis", "kind": "combat", "function": Mitosis},
+        range(48, 50): {
+            "name": "Multiple Body Parts",
+            "kind": "defect",
+            "function": MultipleBodyParts,
+        },
+        range(50, 51): {"name": "New Organs", "kind": "combat", "function": NewOrgans},
+        range(51, 52): {
+            "name": "Non Breathing",
+            "kind": "combat",
+            "function": NonBreathing,
+        },
+        range(52, 54): {
+            "name": "No Resistance to Disease",
+            "kind": "defect",
+            "function": NoResistancetoDisease,
+        },
+        range(54, 56): {
+            "name": "No Resistance to Poison",
+            "kind": "defect",
+            "function": NoResistancetoPoison,
+        },
+        range(56, 57): {
+            "name": "Oversized Body Parts",
+            "kind": "combat",
+            "function": OversizedBodyParts,
+        },
+        range(57, 58): {
+            "name": "Photosynthetic Skin",
+            "kind": "combat",
+            "function": PhotosyntheticSkin,
+        },
+        range(58, 60): {
+            "name": "Phosphorescent Skin",
+            "kind": "defect",
+            "function": PhosphorescentSkin,
+        },
+        range(60, 62): {
+            "name": "Poor Respiratory System",
+            "kind": "defect",
+            "function": PoorRespiratorySystem,
+        },
+        range(62, 64): {"name": "Pockets", "kind": "non-combat", "function": Pockets},
+        range(64, 66): {
+            "name": "Pressurized Body",
+            "kind": "combat",
+            "function": PressurizedBody,
+        },
+        range(66, 68): {
+            "name": "Radiating Eyes",
+            "kind": "combat",
+            "function": RadiatingEyes,
+        },
+        range(68, 70): {
+            "name": "Regeneration",
+            "kind": "non-combat",
+            "function": Regeneration,
+        },
+        range(70, 72): {
+            "name": "Rubbery Skin",
+            "kind": "non-combat",
+            "function": RubberySkin,
+        },
+        range(72, 74): {"name": "Rust", "kind": "defect", "function": Rust},
+        range(74, 75): {
+            "name": "Self Destruction",
+            "kind": "defect",
+            "function": SelfDestruction,
+        },
+        range(75, 76): {
+            "name": "Shape Change",
+            "kind": "non-combat",
+            "function": ShapeChange,
+        },
+        range(76, 77): {
+            "name": "Size Manipulation",
+            "kind": "non-combat",
+            "function": SizeManipulation,
+        },
+        range(77, 78): {
+            "name": "Skin Structure Change",
+            "kind": "combat",
+            "function": SkinStructureChange,
+        },
+        range(78, 79): {
+            "name": "Smoke Screen",
+            "kind": "non-combat",
+            "function": SmokeScreen,
+        },
+        range(79, 80): {
+            "name": "Sonic Attack",
+            "kind": "combat",
+            "function": SonicAttack,
+        },
+        range(80, 81): {
+            "name": "Spit Poison",
+            "kind": "combat",
+            "function": SpitPoison,
+        },
+        range(81, 83): {
+            "name": "Static Quills",
+            "kind": "non-combat",
+            "function": StaticQuills,
+        },
+        range(83, 85): {
+            "name": "Strange New Body Part",
+            "kind": "non-combat",
+            "function": StrangeNewBodyPart,
+        },
+        range(85, 86): {
+            "name": "Symbiotic Attachment",
+            "kind": "non-combat",
+            "function": SymbioticAttachment,
+        },
+        range(86, 87): {
+            "name": "Tear Away Body Parts",
+            "kind": "non-combat",
+            "function": TearAwayBodyParts,
+        },
+        range(87, 89): {
+            "name": "Undersized Body Parts",
+            "kind": "defect",
+            "function": UndersizedBodyParts,
+        },
+        range(89, 91): {"name": "Vibrations", "kind": "combat", "function": Vibrations},
+        range(91, 94): {
+            "name": "Vision Defect",
+            "kind": "defect",
+            "function": VisionDefect,
+        },
+        range(94, 97): {
+            "name": "Wate Manipulation",
+            "kind": "non-combat",
+            "function": WateManipulation,
+        },
+        range(97, 99): {"name": "Wings", "kind": "non-combat", "function": Wings},
+        range(99, 120): {
+            "name": "Ref's Own Table",
+            "kind": "combat",
+            "function": ROT_creator,
+        },
+        "name": "Physical Mutations",
+        "number": "59.1",
+        "die_roll": "1d120",
+        "backup": "1d99",
+    }
+
+    physical_list = []
+    comment = []
+
+    print("*** START physical mutation while loop ", kind)
+    # checker for a bunch of mutations
+    while number > 0:
+        phys_dict = please.get_table_result(physical_table)
+        name = phys_dict["name"]
+        kind_mute = phys_dict["kind"]
+        print("*** at top ", number, name, kind_mute)
+
+        if name not in physical_list and name != "Ref's Own Table":
+            print("*** fresh mutation")
+
+            if not kind:
+                print("*** anything is allowed")
+                comment.append(phys_dict["function"]())
+                physical_list.append(name)
+                number -= 1
+
+            elif kind == kind_mute:
+                print("*** direct hit on kind")
+                comment.append(phys_dict["function"]())
+                physical_list.append(name)
+                number -= 1
+
+            elif kind == "!defect" and (
+                kind_mute == "combat" or kind_mute == "non-combat"
+            ):
+                print("*** no defect allowed")
+                comment.append(phys_dict["function"]())
+                physical_list.append(name)
+                number -= 1
+
+            elif kind == "non-combat":
+                print("*** non-combat  only")
+
+            elif kind == "defect":
+                print("*** defect only")
+
+        if name == "Ref's Own Table":
+            comm_choice = "Do you have a new physical mutation prepared? "
+            choice = please.choose_this(["Yes", "No"], comm_choice)
+            if choice == "Yes":
+                comment.append(ROT_creator())
+                number -= 1
+
+    return comment
+
+
+"""          
+
+                        
+                # checks to see if mutation is a repeat or not of typs
+                if (mutation not in physical_list) and (mutation_kind in kind):
+                    if mutation == "Ref's Own Table":
+                        option_list = ["Yes", "No"]
+                        list_comment = "Is there a Ref's Own Table? "
+                        choice = please.choose_this(option_list, list_comment)
+                        if choice == "No":
+                            phys_roll = please.roll_this("1d99")
+                            for lock in physical_table:
+                                if phys_roll in lock:
+                                    mutation = physical_table[lock]["name"]
+                                    mutation_kind = physical_table[lock]["kind"]
+                                    print(mutation, mutation_kind, lock)
+                                    key = lock
+                                    break
+
+                    physical_list.append(mutation)
+                    comment.append(physical_table[key]["function"]())
+                    if (mutation_kind) != "defect":
+                        number -= 1
+                break
+        """
