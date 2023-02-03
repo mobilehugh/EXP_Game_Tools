@@ -1172,9 +1172,9 @@ undersized_body_part = {
 # BIOLOGIST Gifts, Interests and Skills
 
 biologist_gifts = {
-    range(1, 4): "Describing",
-    range(4, 7): "Noticing",
-    range(7, 99): "Understanding",
+    range(1, 4): "Danger Look",
+    range(4, 7): "Disenvenomation",
+    range(7, 99): "Symbolic Comms",
 }
 
 
@@ -1332,9 +1332,9 @@ knite_interest_skills_pivot = {
 # MECHANIC Gifts, Interests and Skills
 
 mechanic_gifts = {
-    range(1, 4): "Repetition",
+    range(1, 4): "Interim Fix",
     range(4, 7): "Memorization",
-    range(7, 99): "Tooling",
+    range(7, 99): "Replacement",
 }
 
 
@@ -1466,9 +1466,9 @@ merc_interest_skills_pivot = {
 # NOMAD Gifts, Interests and Skills
 
 nomad_gifts = {
-    range(1, 4): "Survival",
-    range(4, 7): "Tracking",
-    range(7, 99): "Safe Passage",
+    range(1, 4): "Sustenance",
+    range(4, 7): "Passage",
+    range(7, 99): "Tracking",
 }
 
 
@@ -1632,8 +1632,8 @@ nothing_interest_skills_pivot = {
 # SPIE Gifts, Interests, and Skills
 
 spie_gifts = {
-    range(1, 4): "Escape",
-    range(4, 7): "Deceive",
+    range(1, 4): "Deceive",
+    range(4, 7): "Escape",
     range(7, 99): "Assassinate",
 }
 
@@ -1698,7 +1698,7 @@ spie_interest_skill_pivot = {
 veterinarian_gifts = {
     range(1, 4): "Quick Fix",
     range(4, 7): "Resuscitation",
-    range(7, 99): "Suggesion",
+    range(7, 99): "Suggestion",
 }
 
 
