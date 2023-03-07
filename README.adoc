@@ -8,6 +8,13 @@ pip install fpdf2 (for viewing printable and browser readable persona record)
 
 create a folder Records and three subfolders Bin, Players, and Referee
 
+.*in same folder as a_persona_record.py*
+* /Records
+** /Bin
+** /Players
+** /Referee
+
+
 authorize your local python to create txt and pdf files in the above folders. 
 
 best of luck.
