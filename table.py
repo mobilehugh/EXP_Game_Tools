@@ -1172,18 +1172,18 @@ undersized_body_part = {
 # BIOLOGIST Gifts, Interests and Skills
 
 biologist_gifts = {
-    range(1, 4): "Danger Look",
-    range(4, 7): "Disenvenomation",
-    range(7, 99): "Symbolic Comms",
+    range(1, 4): "Danger",
+    range(4, 7): "Disvenomation",
+    range(7, 99): "Symbolism",
 }
 
 
 biologist_interests = {
-    range(1, 41): "Taxonomy",
-    range(41, 61): "Research",
-    range(61, 95): "Culture",
-    range(95, 99): "Choose",
-    range(99, 101): "Extra Roll",
+    range(1, 20): "Culture",
+    range(21, 55): "Research",
+    range(56, 89): "Taxonomy",
+    range(90, 95): "Choose",
+    range(96, 101): "Extra Roll",
     "name": "Biologist Interests",
     "die_roll": "1d100",
 }
@@ -1290,7 +1290,7 @@ knite_gifts = {
 knite_interests = {
     range(1, 41): "Physical Space",
     range(41, 61): "Think Space",
-    range(61, 95): "Research",
+    range(61, 95): "Culture Space",
     range(95, 99): "Choose",
     range(99, 101): "Extra Roll",
     "name": "Knite Interests",
@@ -1326,7 +1326,7 @@ knite_physical_skills = {
 knite_interest_skills_pivot = {
     "Physical Space": knite_physical_skills,
     "Think Space": knite_kirlian_skills,
-    "Research": culture_skills,
+    "Culture Space": culture_skills,
 }
 
 # MECHANIC Gifts, Interests and Skills
@@ -1339,10 +1339,10 @@ mechanic_gifts = {
 
 
 mechanic_interests = {
-    range(1, 41): "Enhance",
-    range(41, 61): "Repair",
-    range(61, 95): "Research",
-    range(95, 99): "Choose",
+    range(1, 41): "Repair",
+    range(41, 80): "Enhance",
+    range(81, 95): "Research",
+    range(96, 99): "Choose",
     range(99, 101): "Extra Roll",
     "name": "Mechanic Interests",
     "die_roll": "1d100",
@@ -1525,9 +1525,9 @@ nomad_interest_skills_pivot = {
 # NOTHING Gifts, Interests, and Skills
 
 nothing_gifts = {
-    range(1, 4): "Pull Dress Code",
-    range(4, 7): "Pull Attention",
-    range(7, 99): "Pull Privilege",
+    range(1, 4): "Dress",
+    range(4, 7): "Attention",
+    range(7, 99): "Privilege",
 }
 
 
@@ -1634,7 +1634,7 @@ nothing_interest_skills_pivot = {
 spie_gifts = {
     range(1, 4): "Deceive",
     range(4, 7): "Escape",
-    range(7, 99): "Assassinate",
+    range(7, 99): "Stun",
 }
 
 
