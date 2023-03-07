@@ -1332,7 +1332,7 @@ knite_interest_skills_pivot = {
 # MECHANIC Gifts, Interests and Skills
 
 mechanic_gifts = {
-    range(1, 4): "Interim Fix",
+    range(1, 4): "Quick Repair",
     range(4, 7): "Memorization",
     range(7, 99): "Replacement",
 }
