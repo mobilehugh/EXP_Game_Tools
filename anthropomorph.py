@@ -17,7 +17,7 @@ def anthro_generator_selector():
     player persona vs referee persona vs updating existing persona
     """
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
 
     choices = [
         "Fresh Anthro (new player)",

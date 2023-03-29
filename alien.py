@@ -16,7 +16,7 @@ def alien_generator_selector() -> None:
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
 
     option_list = ["Fresh Alien (New Player)", "Bespoke Alien", "Random Alien", "Maintenance", "Back"]
     list_comment = "Please Choose:"

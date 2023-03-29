@@ -611,8 +611,14 @@ def do_toy_maintenance(toy: dict) -> None:
     return
 
 
+def clear_console():
+    """
+    Clears the console on different OSs
+    """
+    os.system("cls" if os.name == "nt" else "clear")
+
 def say_goodnight_marsha():
-    os.system("cls")
+    clear_console()
     print("".center(31, "*"))
     print("* Thank you for your service. *")
     print("".center(31, "*"))

@@ -303,7 +303,7 @@ anthro_sub_types = {
         "Lion",
         "Manx",
         "Sabre tooth tiger",
-        "Sphynx",
+        "Sphinx",
         "Tiger",
     ],
     "Florian": [
@@ -1081,14 +1081,14 @@ multiple_body_parts = {
     range(45, 59): "Fingers",
     range(59, 74): "Head",
     range(74, 83): "Legs",
-    range(83, 95): "Mouthes",
+    range(83, 95): "Mouths",
     range(95, 101): "Noses",
     "die_roll": "1d100",
 }
 
 new_organ_type = {
     range(1, 11): "Air Producing Gland: Personal air supply.",
-    range(11, 14): "Blood Draining Probiscus:",
+    range(11, 14): "Blood Draining Proboscis:",
     range(11, 24): "Blood Producing Organ: Cannot bleed out. +15 to be resuscitated.",
     range(24, 36): "Electricity Storing Organ:",
     range(
@@ -1132,7 +1132,7 @@ skin_structure_change = {
 
 strange_new_body_part = {
     range(1, 8): "Antennae replace ears. Listen around corners.",
-    range(8, 17): "Ears fold up and down accordian like.",
+    range(8, 17): "Ears fold up and down accordion like.",
     range(17, 26): "Eyes are concave reflectors.",
     range(26, 35): "Eye Stalks (30cms) replace eye sockets. Look around corners.",
     range(35, 46): "Fins attached to arms, and legs.",
@@ -1177,7 +1177,6 @@ biologist_gifts = {
     range(7, 99): "Symbolism",
 }
 
-
 biologist_interests = {
     range(1, 20): "Culture",
     range(21, 55): "Research",
@@ -1205,7 +1204,7 @@ taxonomy_skills = {
     range(38, 41): "Large",
     range(41, 43): "Long Lived",
     range(43, 47): "Microbiologic",
-    range(47, 52): "Mitotics",
+    range(47, 52): "Mitotic",
     range(52, 54): "Move in Air",
     range(54, 56): "Move in Water",
     range(56, 58): "Move on Land",
@@ -1218,13 +1217,13 @@ taxonomy_skills = {
     range(80, 86): "Photosynthetic",
     range(86, 89): "Poisonous",
     range(89, 90): "Powered Attacks ",
-    range(90, 91): "Psionic",
+    range(90, 91): "Psionics",
     range(91, 92): "Ranged Attacks ",
     range(92, 93): "Robotic",
     range(93, 94): "Short Lived",
     range(94, 95): "Spores",
     range(95, 96): "Trappers",
-    range(96, 98): "Vivaporous",
+    range(96, 98): "Viviparous",
     range(98, 99): "Web Makers",
     range(99, 100): "Choose",
     range(100, 101): "Extra Roll",
@@ -1256,7 +1255,7 @@ research_skills = {
 culture_skills = {
     range(1, 9): "Communities",
     range(9, 17): "Economics",
-    range(17, 25): "Familys",
+    range(17, 25): "Families",
     range(25, 33): "Languages",
     range(33, 41): "Languages",
     range(41, 49): "Mass Media",
@@ -1372,7 +1371,7 @@ mechanic_skills = {
     range(41, 43): "Gravetics",
     range(43, 45): "Grenades",
     range(45, 47): "Industry",
-    range(47, 49): "Jewellry",
+    range(47, 49): "Jewelry",
     range(49, 51): "Leather",
     range(51, 53): "Leverage",
     range(52, 55): "Magnetics",
@@ -1506,7 +1505,7 @@ biome_sub_list = {
     range(11, 21): "Toxic",
     range(21, 31): "High Gravity",
     range(31, 41): "Low Gravity",
-    range(41, 51): "Thin Atmoshphere",
+    range(41, 51): "Thin Atmosphere",
     range(51, 61): "Dense Atmosphere",
     range(61, 71): "Underground",
     range(71, 81): "Aboveground",
