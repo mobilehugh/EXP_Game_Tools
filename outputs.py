@@ -1465,7 +1465,7 @@ def output_combat_tabler(object, combat_table):
 
 
 def anthro_review(object):
-    os.system("cls")
+    please.clear_console()
     print(
         f"\n\nANTHRO PERSONA RECORD\n"
         f"Persona: {object.Persona_Name} \t\t\tPlayer: {object.Player_Name} \tCreated: {object.Date_Created}\n"
@@ -1582,7 +1582,7 @@ def alien_review(alien):
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
     print(
         f"ALIEN PERSONA RECORD\n"
         f"Persona: {alien.Persona_Name} \t\tPlayer Name: {alien.Player_Name} \tCreated: {alien.Date_Created}\n"
@@ -1733,7 +1733,7 @@ def robot_review(robot: dict) -> None:
     """
 
     # clearance for Clarence
-    ## os.system("cls")
+    ## please.clear_console()
 
     print("\n\n\nROBOT PERSONA RECORD")
     print(

@@ -1,4 +1,11 @@
-import os
+"""
+This is the main for a collection of python programs that create personas for EXP
+EXP The game of technological chaos is a table top role playing game.
+This package creates persona records for players and referees. 
+The persona records are stored as <mangled> JSON, can be updated and printed out as PDFs
+Yet to come: full robots, TOYs and isolated mutations. 
+exp.sciencyfiction.com
+"""
 
 import alien
 import anthropomorph
@@ -6,10 +13,6 @@ import mutations
 import please
 import robot
 import toy
-
-"""
-Main function for the persona record maker for EXP
-"""
 
 def record_chooser():
     """
@@ -23,20 +26,7 @@ def record_chooser():
         # clearance for Clarence
         please.clear_console()
 
-        choices = [
-            "Anthro",
-            "Alien",
-            "Robot",
-            "Toy",
-            "Mutation",
-            "Maintenance",
-            "Quit",
-        ]
-
-        choices_comment = "What do you want to do? "
-        record_type_desired = please.choose_this(choices, choices_comment)
-
-        record_type_function_map = {
+        choices_function_map = {
             "Anthro": anthropomorph.anthro_generator_selector,
             "Alien": alien.alien_generator_selector,
             "Robot": robot.robot_generator_selector,
@@ -46,8 +36,12 @@ def record_chooser():
             "Quit": please.say_goodnight_marsha,
         }
 
-        if record_type_desired in record_type_function_map:
-            record_type_function_map[record_type_desired]()
+        choices_comment = "What do you want to do? "
+        choices = list(choices_function_map.keys())
+        record_type_desired = please.choose_this(choices, choices_comment)
+
+        if record_type_desired in choices_function_map:
+            choices_function_map[record_type_desired]()
 
 
 def main():
@@ -64,7 +58,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-        
-
-
-

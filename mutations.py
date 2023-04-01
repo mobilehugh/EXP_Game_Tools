@@ -3245,7 +3245,7 @@ def mutation_generation_selector():
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
 
     option_list = ["Fresh Mutation", "Bespoke Mutation", "Maintenance", "Back"]
     list_comment = "Please Choose:"

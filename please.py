@@ -350,7 +350,7 @@ def record_storage(object: dict) -> None:
         return
 
     elif storage_chosen == "Nuke This Thing":
-        os.system("cls")
+        please.clear_console()
         return
 
 

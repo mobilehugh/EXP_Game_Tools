@@ -1149,7 +1149,7 @@ def fresh_alien():
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
     print("\nYou are generating a FRESH ALIEN Persona")
 
     fresh = table.PersonaRecord()
@@ -1203,7 +1203,7 @@ def bespoke_alien():
     """
     
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
     print("\nYou are generating a BESPOKE ALIEN Persona")
 
 

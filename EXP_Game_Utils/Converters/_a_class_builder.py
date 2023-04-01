@@ -8,7 +8,7 @@ import os, re, sys
 sys.path.insert(0, "C:\\Users\mobil\OneDrive\Documents\Persona Record\EXP_Game_Tools")
 import please
 
-os.system("cls")
+please.clear_console()
 
 source_function = """
 def illusion_generation(object):

@@ -17,7 +17,7 @@ def robot_generator_selector():
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
 
     option_list = [
         "Fresh Robot (New Player)",
@@ -1558,7 +1558,7 @@ def fresh_robot():
     """
     
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
     print("\nYou are generating a fresh ROBOT PERSONA")
 
     fresh = table.PersonaRecord()

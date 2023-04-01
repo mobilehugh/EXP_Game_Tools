@@ -12,7 +12,7 @@ def toy_generator_selector() -> None:
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
 
     option_list = ["Fresh Toy", "Bespoke Toy", "Maintenance", "Back"]
     list_comment = "Please Choose:"

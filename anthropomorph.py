@@ -892,7 +892,7 @@ def fresh_anthro():
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
     print("\nYou are generating a fresh ANTHRO PERSONA")
 
     ### set up the object for Anthro persona
@@ -934,7 +934,7 @@ def bespoke_anthro():
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
     print("\nYou are generating a bespoke ANTHRO PERSONA.")
 
     ### set up the object for Anthro persona
@@ -1027,7 +1027,7 @@ def random_anthro():
     """
 
     # clearance for Clarence
-    os.system("cls")
+    please.clear_console()
     print("\nYou are generating a RANDOM ANTHRO PERSONA.")
 
     ### set up the object for Anthro persona
