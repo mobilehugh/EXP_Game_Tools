@@ -2,18 +2,18 @@
 Python tools to decrease the crunchiness and increase fun of the sciency fiction TTRPG EXP.
 
 ## Requires
-install python interpreter
+install python interpreter (3.8 and up)
 
 pip install fpdf2 (for viewing printable and browser readable persona record)
 
-create a folder Records and three subfolders Bin, Players, and Referee
+create a folder Records and four subfolders Bin, Players, Referee and Toys
 
 .*in same folder as a_persona_record.py*
 * /Records
 ** /Bin
 ** /Players
 ** /Referee
-
+** /Toys
 
 authorize your local python to create txt and pdf files in the above folders. 
 

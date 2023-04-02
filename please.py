@@ -350,7 +350,7 @@ def record_storage(object: dict) -> None:
         return
 
     elif storage_chosen == "Nuke This Thing":
-        please.clear_console()
+        clear_console()
         return
 
 
@@ -425,7 +425,7 @@ def collect_required_records(record_type: str) -> dict:
     generates a list of required records, user selects one
     """
     object = table.PersonaRecord()
-    print(f"line 443 {type(object) = }")
+    print(f"please -- line 428 {type(object) = }")
 
     # finder for long list of hard to type file names
     if record_type == "Toy":
@@ -473,7 +473,7 @@ def do_referee_maintenance():
     things that referee's need to access and do
     """
 
-    if not say_yes_to("\nAre you a referee?"):  # referee check eventually a password
+    if not say_yes_to("\nAre you a referee?"):  # referee check for fun 
         a_persona_record.record_chooser()
 
     record_type = choose_this(
@@ -542,73 +542,7 @@ def do_referee_maintenance():
     return
 
 
-def do_persona_maintenance(object: dict) -> None:
-    """
-    list of actions a player has access to
-    """
 
-    if object.FAMILY == "Toy":  # this escape may not be necessary
-        print("what are TOYS doing in PERSONAS?")
-        toy.toy_maintenance(object)
-
-    # pivoteer = object.FAMILY
-    maintenance_choice = "I like turtles"
-    while maintenance_choice != "Exit":
-        pivoteer = object.FAMILY
-
-        item_list = [
-            "Name Change",
-            "Review On Screen",
-            "PDF Update",
-            "PDF On Screen",
-            "Change Working Record",
-            "Exit",
-        ]
-        item_comment = f"What are you doing to {object.Persona_Name}?"
-        maintenance_choice = choose_this(item_list, item_comment)
-
-        if maintenance_choice == "EXPS Update":
-            vocation.update_persona_exps(object)
-            store_locally(object)
-            table.output_pivot_table[pivoteer][0](object)
-
-        elif maintenance_choice == "Level Update":
-            object.Level = int(input("\nPlease input your new Level value: "))
-            # function call to update Level in record
-            store_locally(object)
-            table.output_pivot_table[pivoteer][0](object)
-
-        elif maintenance_choice == "Name Change":
-            new_name = input("\nPlease input your new PERSONA Name: ")
-
-            print(f"The new name for {object.Persona_Name} is {new_name}")
-            print(f"File name {object.File_Name} does NOT change")
-            setattr(object, "Persona_Name", new_name)
-            store_locally(object)
-            table.output_pivot_table[pivoteer][0](object)
-
-        elif maintenance_choice == "Review On Screen":
-            table.output_pivot_table[pivoteer][1](object)
-
-        elif maintenance_choice == "PDF Update":
-            table.output_pivot_table[pivoteer][0](object)
-
-        elif maintenance_choice == "PDF On Screen":
-            table.output_pivot_table[pivoteer][2](object)
-
-        elif maintenance_choice == "Change Working Record":
-            record_type = choose_this(
-                ["Players", "Alien", "Anthro", "Robot", "Toy", "All"],
-                "What record type?",
-            )
-            object = collect_required_records(record_type)
-
-    return
-
-
-def do_toy_maintenance(toy: dict) -> None:
-    print(toy)
-    return
 
 
 def clear_console():

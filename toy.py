@@ -1,6 +1,3 @@
-import math
-import os
-
 import a_persona_record
 import please
 import table
@@ -14,28 +11,22 @@ def toy_generator_selector() -> None:
     # clearance for Clarence
     please.clear_console()
 
-    option_list = ["Fresh Toy", "Bespoke Toy", "Maintenance", "Back"]
-    list_comment = "Please Choose:"
+    toy_workflow_map = {
+        "Fresh Toy":fresh_toy, 
+        "Bespoke Toy":bespoke_toy,
+        "Maintenance":please.do_referee_maintenance, 
+        "Back":a_persona_record.record_chooser
+        }
+
+    list_comment = "Choose a TOY workflow:"
+    option_list = list(toy_workflow_map.keys())
     plan_desired = please.choose_this(option_list, list_comment)
 
-    if plan_desired == "Fresh Toy":
-        fresh_toy()
-    elif plan_desired == "Bespoke Toy":
-        bespoke_toy()
-    elif plan_desired == "Maintenance":
-        object = please.collect_required_records("Toys")
-        please.do_toy_maintenance(object)
-    elif plan_desired == "Back":
-        a_persona_record.record_chooser()
-    else:
-        # BuildSupport(object)
-        print("Bad toy methods were chosen some how")
-    return
-
+    if plan_desired in toy_workflow_map:
+        toy_workflow_map[plan_desired]()
 
 def toy_category():
     return please.get_table_result(table.toy_categories)
-
 
 def fresh_toy():
     toy_cat = toy_category()

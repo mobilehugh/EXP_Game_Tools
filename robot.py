@@ -1,14 +1,12 @@
 import math
 import secrets
-import os
 
 import a_persona_record
-import please
-import vocation
 import anthropomorph
-import mutations
-import table
 import outputs
+import please
+import table
+import vocation
 
 
 def robot_generator_selector():
@@ -19,31 +17,20 @@ def robot_generator_selector():
     # clearance for Clarence
     please.clear_console()
 
-    option_list = [
-        "Fresh Robot (New Player)",
-        "Bespoke Robot",
-        "Random Robot",
-        "Maintenance",
-        "Back",
-    ]
-    list_comment = "Please Choose:"
-    plan_desired = please.choose_this(option_list, list_comment)
+    workflow_function_map = {
+        "Fresh Robot (New Player)":fresh_robot,
+        "Bespoke Robot":bespoke_robot,
+        "Random Robot":rando_robot,
+        "Maintenance":please.do_referee_maintenance,
+        "Back":a_persona_record.record_chooser,
+    }
 
-    if plan_desired == "Fresh Robot (New Player)":
-        fresh_robot()
-    elif plan_desired == "Bespoke Robot":
-        bespoke_robot()
-    elif plan_desired == "Random Robot":
-        rando_robot()
-    elif plan_desired == "Maintenance":
-        object = please.collect_required_records("Players")
-        please.do_persona_maintenance(object)
-    elif plan_desired == "Back":
-        a_persona_record.record_chooser()
-    else:
-        # BuildSupport(object)
-        print("Bad robot methods were chosen some how")
-    return
+    list_comment = "Choose a robot workflow:"
+    option_list = list(workflow_function_map.keys())
+    workflow_desired = please.choose_this(option_list, list_comment)
+
+    if workflow_desired in workflow_function_map:
+        workflow_function_map[workflow_desired]()
 
 
 def fresh_robot_attributes(object: dict) -> None:

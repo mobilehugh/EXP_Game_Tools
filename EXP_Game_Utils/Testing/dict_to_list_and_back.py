@@ -13,7 +13,7 @@ import toy
 
 record_type_function_map = {
     "Anthro": anthropomorph.anthro_generator_selector,
-    "Alien": alien.alien_generator_selector,
+    "Alien": alien.alien_workflow,
     "Robot": robot.robot_generator_selector,
     "Toy": toy.toy_generator_selector,
     "Mutation": mutations.mutation_generation_selector,

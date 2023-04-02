@@ -1,6 +1,5 @@
 import math
 import secrets
-import os
 
 import please
 import table
@@ -19,36 +18,24 @@ def anthro_generator_selector():
     # clearance for Clarence
     please.clear_console()
 
-    choices = [
-        "Fresh Anthro (new player)",
-        "Bespoke Anthro",
-        "Random Anthro",
-        "Maintenance",
-        "Back",
-    ]
-    choice_comment = "What do you want to do? "
+    workflow_function_map = {
+        "Fresh Anthro (new player)":fresh_anthro,
+        "Bespoke Anthro":bespoke_anthro,
+        "Random Anthro":random_anthro,
+        "Maintenance":please.do_referee_maintenance,
+        "Back":a_persona_record.record_chooser,
+    }
+    choice_comment = "Choose anthro workflow? "
+    choices= list(workflow_function_map.keys())
     anthro_record_type = please.choose_this(choices, choice_comment)
 
-    if anthro_record_type == "Fresh Anthro (new player)":
-        fresh_anthro()
-    elif anthro_record_type == "Bespoke Anthro":
-        bespoke_anthro()
-    elif anthro_record_type == "Random Anthro":
-        random_anthro()
-    elif anthro_record_type == "Maintenance":
-        object = please.collect_required_records("Players")
-        please.do_persona_maintenance(object)
-    elif anthro_record_type == "Back":
-        a_persona_record.record_chooser()
-    else:
-        print("Error in anthro_generator_selector")
-    return
+    if anthro_record_type in workflow_function_map:
+        workflow_function_map[anthro_record_type]()
 
 
 ####################################
 # FRESH ANTHRO FUNCTIONS
 ####################################
-
 
 def anthro_attributes_fresh(object):
     """

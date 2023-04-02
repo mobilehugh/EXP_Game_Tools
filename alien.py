@@ -10,33 +10,27 @@ import mutations
 import outputs
 
 
-def alien_generator_selector() -> None:
+def alien_workflow() -> None:
     """
     player alien versus referee person vs persona maintenance
     """
-
     # clearance for Clarence
     please.clear_console()
 
-    option_list = ["Fresh Alien (New Player)", "Bespoke Alien", "Random Alien", "Maintenance", "Back"]
-    list_comment = "Please Choose:"
+    option_function_map = {
+        "Fresh Alien (New Player)":fresh_alien, 
+        "Bespoke Alien":bespoke_alien, 
+        "Random Alien":rando_alien, 
+        "Maintenance":please.do_referee_maintenance, 
+        "Back":a_persona_record.record_chooser
+    }
+
+    option_list = list(option_function_map.keys())
+    list_comment = "Choose an alien workflow:"
     plan_desired = please.choose_this(option_list, list_comment)
 
-    if plan_desired == "Fresh Alien (New Player)":
-        fresh_alien()
-    elif plan_desired == "Bespoke Alien":
-        bespoke_alien()
-    elif plan_desired == "Random Alien":
-        rando_alien()
-    elif plan_desired == "Maintenance":
-        object = please.collect_required_records("Players")
-        please.do_persona_maintenance(object)
-    elif plan_desired == "Back":
-        a_persona_record.record_chooser()
-    else:
-        # BuildSupport(object)
-        print("Bad alien methods were chosen some how")
-    return
+    if plan_desired in option_function_map:
+        option_function_map[plan_desired]()
 
 
 ####################################
@@ -228,7 +222,7 @@ def alien_adornments_fresh(object):
             if adornment == "Arms Adornment":
                 adornment = please.get_table_result(table.alien_arm_adornments)
 
-            # if adornmentment is a head adornment then replace with head adornment
+            # if adornment is a head adornment then replace with head adornment
             if adornment == "Head Adornment":
                 adornment = please.get_table_result(table.alien_head_adornments)
 
@@ -395,7 +389,7 @@ def alien_life_span_fresh(object):
     multi = span_data["multiplier"]
     years = "years"
 
-    ### caluclate total life span
+    ### calculate total life span
     life_span = base + please.roll_this(die_roll) * multi
     setattr(object, "Life_Span", [0, life_span])
 
@@ -426,7 +420,7 @@ def alien_life_span_fresh(object):
 
     object.Life_Cycle = life_cycle
 
-    ### data for future calc of alien age if neededd
+    ### data for future calc of alien age if needed
     object.Age_Adolescent = child + adol
     object.Alien_Age_Suffix = years
 
@@ -675,7 +669,7 @@ def alien_nomenclature(object):
 
 def alien_size_bespoke(object: dict) -> None:
     """
-    generate alien size including minute and humungous
+    generate alien size including minute and humongous
     """
 
     methods = ["Random", "Bespoke"]
@@ -816,7 +810,7 @@ def alien_life_span_bespoke(object: dict) -> None:
         multi = span_data["multiplier"]
         years = "years"
 
-        ### caluclate total life span
+        ### calculate total life span
         life_span = base + please.roll_this(die_roll) * multi
         setattr(object, "Life_Span", [0, life_span])
 
@@ -851,7 +845,7 @@ def alien_life_span_bespoke(object: dict) -> None:
 
         object.Life_Cycle = life_cycle
 
-        ### data for future calc of alien age if neededd
+        ### data for future calc of alien age if needed
         object.Age_Adolescent = child + adol
         object.Alien_Age_Suffix = years
 
@@ -893,7 +887,7 @@ def alien_biology_bespoke(object: dict) -> None:
         source = please.bespokify_this_table(table.alien_biology_energy_source)
 
     if not please.say_yes_to(
-        f"Do you want the existing energy PROCURMENT type: {procure}"
+        f"Do you want the existing energy PROCUREMENT type: {procure}"
     ):
         procure = please.bespokify_this_table(table.alien_biology_energy_procurement)
 
