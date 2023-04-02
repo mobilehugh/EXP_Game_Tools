@@ -9,7 +9,7 @@ import table
 import vocation
 
 
-def robot_generator_selector():
+def robot_workflow():
     """
     player robot versus referee person vs persona maintenance
     """

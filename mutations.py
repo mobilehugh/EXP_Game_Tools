@@ -1,6 +1,5 @@
-import secrets
 import math
-import os
+import secrets
 
 import a_persona_record
 import please
@@ -3239,7 +3238,7 @@ class Wings(Mutation):
         return f"Big beautiful wings for flying at {some_thing} h/u."
 
 
-def mutation_generation_selector():
+def mutation_workflow():
     """
     Mutate now avoid the post bomb rush
     """
@@ -3247,7 +3246,7 @@ def mutation_generation_selector():
     # clearance for Clarence
     please.clear_console()
 
-    option_list = ["Fresh Mutation", "Bespoke Mutation", "Maintenance", "Back"]
+    option_list = ["Fresh Mutation", "Bespoke Mutation", "Back"]
     list_comment = "Please Choose:"
     plan_desired = please.choose_this(option_list, list_comment)
 

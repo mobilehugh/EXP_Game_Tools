@@ -11,7 +11,7 @@ import mutations
 from mutations import *
 
 
-def anthro_generator_selector():
+def anthro_workflow():
     """
     player persona vs referee persona vs updating existing persona
     """

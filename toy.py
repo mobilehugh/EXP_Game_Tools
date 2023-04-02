@@ -3,7 +3,7 @@ import please
 import table
 
 
-def toy_generator_selector() -> None:
+def toy_workflow() -> None:
     """
     Got toys?
     """
@@ -13,8 +13,8 @@ def toy_generator_selector() -> None:
 
     toy_workflow_map = {
         "Fresh Toy":fresh_toy, 
-        "Bespoke Toy":bespoke_toy,
-        "Maintenance":please.do_referee_maintenance, 
+        "Bespoke Toy":fresh_toy,
+        "Maintenance":fresh_toy, 
         "Back":a_persona_record.record_chooser
         }
 
@@ -37,4 +37,5 @@ def fresh_toy():
 
 
 def bespoke_toy():
+    fresh_toy()
     return

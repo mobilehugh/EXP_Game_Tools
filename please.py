@@ -449,8 +449,11 @@ def collect_required_records(record_type: str) -> dict:
         list_of_files = [x for x in list_of_files if f"_{record_type.lower()}_" in x]
 
     if len(list_of_files) == 0:
-        print("\n*** ERROR: no files found")
-        quit()
+        print(f"\n*** ERROR: no files found in {directory_to_use}")
+        if say_yes_to("Would you like to continue?"):
+            a_persona_record.record_chooser()
+        else:
+            say_goodnight_marsha()
 
     list_comment = "Choose the desired record."
     persona_record = choose_this(list_of_files, list_comment)

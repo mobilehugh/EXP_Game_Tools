@@ -27,11 +27,11 @@ def record_chooser():
         please.clear_console()
 
         choices_function_map = {
-            "Anthro": anthropomorph.anthro_generator_selector,
+            "Anthro": anthropomorph.anthro_workflow,
             "Alien": alien.alien_workflow,
-            "Robot": robot.robot_generator_selector,
-            "Toy": toy.toy_generator_selector,
-            "Mutation": mutations.mutation_generation_selector,
+            "Robot": robot.robot_workflow,
+            "Toy": toy.toy_workflow,
+            "Mutation": mutations.mutation_workflow,
             "Maintenance": please.do_referee_maintenance,
             "Quit": please.say_goodnight_marsha,
         }
