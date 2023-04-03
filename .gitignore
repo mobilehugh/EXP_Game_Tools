@@ -1,15 +1,4 @@
-<<<<<<< HEAD
-Records/*
-<<<<<<< Updated upstream
-
-__pycache__/table.cpython-311.pyc
 __pycache__/*
 EXP_Game_Utils/*
 .vscode/*
-=======
 /Records/*
-__pycache__/*
-.vscode/*
-/EXP_Game_Utils/*
->>>>>>> 7e4673be8e26403db258d9028ae43e0a357607ad
->>>>>>> Stashed changes
