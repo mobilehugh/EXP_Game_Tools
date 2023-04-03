@@ -1,26 +1,21 @@
 # EXP_Game_Tools
-Python tools to decrease the crunchiness and increase fun of the sciency fiction TTRPG EXP.
+Python tools to decrease the crunchiness and increases the fun of the sciency fiction TTRPG EXP.
 
-## Requires
-install python interpreter (3.8 and up)
-
-pip install fpdf2 (for viewing printable and browser readable persona record)
-
-create a folder Records and four subfolders Bin, Players, Referee and Toys
-
-.*in same folder as a_persona_record.py*
-* /Records
-** /Bin
-** /Players
-** /Referee
-** /Toys
-
-authorize your local python to create txt and pdf files in the above folders. 
-
-best of luck.
-
-## How To
-py a_persona_record.py 
-
-## What the heck
 Check out the rule set at http://exp.sciencyfiction.com
+
+## How To 
+. install python interpreter (3.8 and up)
+. pip install fpdf2 (for viewing printable and browser readable persona record)
+. clone this repo
+. in the repo folder add the folder Records, and in Records add the folders Bin, Players, Referee and Toys
+. py a_persona_record.py 
+
+.*Folders should look like*
+* /Repo Folder  
+** /Records
+*** /Bin
+*** /Players
+*** /Referee
+*** /Toys
+
+best of luck and have fun
