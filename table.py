@@ -48,16 +48,28 @@ class PersonaRecord:
     PSTR: int = 0
     SOC: int = 42
     HPM: int = 0
+    Anthro_Type: str = "None"
+    Age_Cat: str = "None"
+    Age: int = 0
+    Anthro_Size: str = "Medium"
+    Hite: int = 0
+    Wate: int = 0
     Mutations: dict = field(default_factory=dict)
+    Vocation: str = "None"
     Level: int = 1
     EXPS: int = 42
-    Vocation: str = "None"
     Interests: list[str] = field(default_factory=list) 
-    Skills: list[str] = field(default_factory=list) 
+    Skills: list[str] = field(default_factory=list)
+    AR: int = 500
+    MOVE: int = 0
     Date_Created: str = "Soon"
     Date_Updated: str = "Soon"
     ID: str = "None"
     File_Name: str = "None"
+
+""" MISSING
+Proficiencies, WA, equipment
+"""
 
 
 example_persona_dict = {
@@ -914,7 +926,6 @@ protection_shell_options = {
     "die_roll": "1d100",
 }
 
-
 poison_gas_type = {
     range(1, 3): "Death Gas: Drop to -1 HPS",
     range(3, 25): "Killing Gas: Inflict 1d4 HPS damage per intensity.",
@@ -1040,7 +1051,6 @@ heightened_attribute = {
     range(81, 101): "HPM: Heal twice as fast.",
     "die_roll": "1d100",
 }
-
 
 heightened_vision = {
     range(1, 21): "Infravision: Thermal based see in the dark.",
@@ -1335,7 +1345,6 @@ mechanic_gifts = {
     range(4, 7): "Memorization",
     range(7, 99): "Replacement",
 }
-
 
 mechanic_interests = {
     range(1, 41): "Repair",

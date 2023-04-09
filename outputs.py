@@ -272,7 +272,7 @@ class PDF(FPDF):
             align="L",
             h=line_height,
             markdown=True,
-            txt=f"**BP:** Bonus Proficient  **BNP:** Bonus Non Proficient **MR:** Maximum Roll **DB:** Damage Bonus\n**Type A:** Self-powered striking (fist, sword)  **Type B:** Self-powered projectile (bow, spit) **Type C:** Powered projectile (gun, lazer)",
+            txt=f"**Raw:** Add to Unskilled Attack Rolls  **Skilled:** Add to Skilled Attack Rolls **Max:**  Maximum Attack Roll **Force:** Add to damage roll\n**Strike:** fist, sword, club  **Fling:** bow, spear, spit **Shoot:** gun, lazer, fission **Sotto/Flotto:** = Shoot **Grenade:** = Fling, no Force",
         )
 
         return
@@ -331,11 +331,11 @@ class PDF(FPDF):
 
         data = [
             [
-                "Attack:LB",
-                "BP:CB",
-                "BNP:CB",
-                "MR:CB",
-                "DB:CB",
+                "Type:LB",
+                "Raw:CB",
+                "Skilled:CB",
+                "Max:CB",
+                "Force:CB",
             ]
         ]
 
@@ -343,9 +343,9 @@ class PDF(FPDF):
         if ABP > 0:
             data.append(
                 [
-                    "Type A:LB",
-                    f"{ABP}:CI",
+                    "Strike:LB",
                     f"{ABNP}:CI",
+                    f"{ABP}:CI",
                     f"{AMR}:CI",
                     f"{ADB}:CI",
                 ]
@@ -354,9 +354,9 @@ class PDF(FPDF):
         if BBP > 0:
             data.append(
                 [
-                    "Type B:LB",
-                    f"{BBP}:CI",
+                    "Fling:LB",
                     f"{BBNP}:CI",
+                    f"{BBP}:CI",
                     f"{BMR}:CI",
                     f"{BDB}:CI",
                 ]
@@ -365,9 +365,9 @@ class PDF(FPDF):
         if CBP > 0:
             data.append(
                 [
-                    "Type C:LB",
-                    f"{CBP}:CI",
+                    "Shoot:LB",
                     f"{CBNP}:CI",
+                    f"{CBP}:CI",
                     f"{CMR}:CI",
                     f"{CDB}:CI",
                 ]
@@ -390,7 +390,7 @@ class PDF(FPDF):
             prof_slot = "___________ " if CPROF not in [4, 5] else "______ "
             CPROF = f"{CPROF} {prof_slot*CPROF}"
 
-        data = [["Proficiencies:LB"]]
+        data = [["Skilled Weapons:LB"]]
 
         if ABP > 0:
             data.append([f"{APROF}:LI"])

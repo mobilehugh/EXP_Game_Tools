@@ -11,7 +11,8 @@ Check out the rule set at http://exp.sciencyfiction.com
 . py a_persona_record.py 
 
 .*Folders should look like*
-* /Repo Folder  
+* /Repo Folder 
+** a_persona_record.py etc
 ** /Records
 *** /Bin
 *** /Players
