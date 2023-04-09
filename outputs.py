@@ -1532,6 +1532,37 @@ def anthro_review(object):
 
     return
 
+#####################################
+# Bespoke Backpager PDF
+#####################################
+
+def backpager_creator(object):
+    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
+    pdf.set_margin(0)  # set margins to 0
+
+    pdf.add_page()
+    pdf.perimiter_box()
+    pdf.title_line(object)
+    pdf.note_lines()
+
+    pdf.add_page()
+    pdf.title_line(object)
+    pdf.perimiter_box()
+    pdf.note_lines()
+
+    sub_directory = "Referee" if object.RP else "Players"
+    pdf_name = f"./Records/{sub_directory}/{object.File_Name}.BACKPAGER.pdf"
+    pdf.output(
+        name=pdf_name,
+        dest="F",
+    )
+    print(f"\n***PDF stored at ./Records/{sub_directory}/{object.File_Name}.pdf")
+    return
+
+
+
+
+
 
 #####################################
 # ANTHRO output to PDF

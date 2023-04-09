@@ -1,14 +1,16 @@
-import re
-import secrets
-import os
 import json
 import math
+import os
+import re
+import secrets
 import time
 
-import toy
-import vocation
 import a_persona_record
 import table
+import toy
+import vocation
+
+from outputs import backpager_creator
 
 """ 
 Please contains several functions that respond to please.<whatever>
@@ -495,6 +497,7 @@ def do_referee_maintenance():
             "Review On Screen",
             "PDF Update",
             "PDF On Screen",
+            "PDF Backgrounder",
             "Attribute Manipulation",
             "Change Working Record",
             "Exit",
@@ -527,6 +530,10 @@ def do_referee_maintenance():
 
         elif maintenance_choice == "PDF Update":
             table.output_pivot_table[pivoteer][0](object)
+
+        elif maintenance_choice == "PDF Backgrounder":
+            outputs.backpager_creator(object)
+
 
         elif maintenance_choice == "PDF On Screen":
             table.output_pivot_table[pivoteer][0](object)  # update the PDF
