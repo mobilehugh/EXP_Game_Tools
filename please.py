@@ -10,7 +10,6 @@ import table
 import toy
 import vocation
 
-from outputs import backpager_creator
 
 """ 
 Please contains several functions that respond to please.<whatever>
@@ -497,7 +496,7 @@ def do_referee_maintenance():
             "Review On Screen",
             "PDF Update",
             "PDF On Screen",
-            "PDF Backgrounder",
+            "PDF Backpage",
             "Attribute Manipulation",
             "Change Working Record",
             "Exit",
@@ -531,8 +530,8 @@ def do_referee_maintenance():
         elif maintenance_choice == "PDF Update":
             table.output_pivot_table[pivoteer][0](object)
 
-        elif maintenance_choice == "PDF Backgrounder":
-            outputs.backpager_creator(object)
+        elif maintenance_choice == "PDF Backpage":
+           table.output_pivot_table[pivoteer][3](object)
 
 
         elif maintenance_choice == "PDF On Screen":

@@ -1536,7 +1536,9 @@ def anthro_review(object):
 # Bespoke Backpager PDF
 #####################################
 
-def backpager_creator(object):
+def backpage_creator(object):
+    print ("at backpage_creator")
+    please.show_me_your_dict(object)
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
     pdf.set_margin(0)  # set margins to 0
 
@@ -1558,9 +1560,6 @@ def backpager_creator(object):
     )
     print(f"\n***PDF stored at ./Records/{sub_directory}/{object.File_Name}.pdf")
     return
-
-
-
 
 
 

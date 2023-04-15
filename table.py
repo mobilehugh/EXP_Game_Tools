@@ -117,9 +117,9 @@ nil = {
 }
 
 output_pivot_table = {
-    "Alien": [outputs.alien_pdf_creator, outputs.alien_review, outputs.pdf_opener],
-    "Anthro": [outputs.anthro_pdf_creator, outputs.anthro_review, outputs.pdf_opener],
-    "Robot": [outputs.robot_pdf_creator, outputs.robot_review, outputs.pdf_opener],
+    "Alien": [outputs.alien_pdf_creator, outputs.alien_review, outputs.pdf_opener, outputs.backpage_creator],
+    "Anthro": [outputs.anthro_pdf_creator, outputs.anthro_review, outputs.pdf_opener, outputs.backpage_creator],
+    "Robot": [outputs.robot_pdf_creator, outputs.robot_review, outputs.pdf_opener, outputs.backpage_creator],
 }
 
 
