@@ -11,7 +11,7 @@ import mutations
 from mutations import *
 
 
-def anthro_workflow():
+def anthro_workflow() -> None: 
     """
     player persona vs referee persona vs updating existing persona
     """
@@ -37,7 +37,7 @@ def anthro_workflow():
 # FRESH ANTHRO FUNCTIONS
 ####################################
 
-def anthro_attributes_fresh(object):
+def anthro_attributes_fresh(persona_record:dict):
     """
     hit points max (HPM) depends on CON and is generated separately
     """
@@ -50,7 +50,7 @@ def anthro_attributes_fresh(object):
 
     for attribute in fresh_dict:
         die_roll = please.roll_this(fresh_dict[attribute])
-        setattr(object, attribute, die_roll)
+        setattr(persona_record, attribute, die_roll)
 
     return
 
@@ -92,7 +92,7 @@ def list_eligible_anthro_types(object):
     anthro_type_choices = []
 
     for anthro_type in table.anthro_type_attribute_requirements:
-        this_type = True
+        anthro_type_flag = True
 
         for attribute_name in table.anthro_type_attribute_requirements[anthro_type]:
             persona_attribute_value = getattr(object, attribute_name)
@@ -100,8 +100,8 @@ def list_eligible_anthro_types(object):
                 anthro_type
             ][attribute_name]
             if persona_attribute_value < required_attribute_value:
-                this_type = False
-        if this_type:
+                anthro_type_flag = False
+        if anthro_type_flag:
             anthro_type_choices.append(anthro_type)
 
     return anthro_type_choices

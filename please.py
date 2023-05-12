@@ -554,13 +554,13 @@ def do_referee_maintenance():
 
 
 
-def clear_console():
+def clear_console() -> None:
     """
     Clears the console on different OSs
     """
     os.system("cls" if os.name == "nt" else "clear")
 
-def say_goodnight_marsha():
+def say_goodnight_marsha() -> None:
     clear_console()
     print("".center(31, "*"))
     print("* Thank you for your service. *")
