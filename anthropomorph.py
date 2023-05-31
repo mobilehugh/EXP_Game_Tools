@@ -19,11 +19,10 @@ def anthro_workflow() -> None:
     please.clear_console()
 
     workflow_function_map = {
-        "Fresh Anthro (new player)":fresh_anthro,
+        "AAA#Fresh Anthro (new player)":fresh_anthro,
         "Bespoke Anthro":bespoke_anthro,
         "Random Anthro":random_anthro,
-        "Maintenance":please.do_referee_maintenance,
-        "Back":a_persona_record.record_chooser,
+        "Maintenance":please.do_referee_maintenance
     }
     choice_comment = "Choose anthro workflow? "
     choices= list(workflow_function_map.keys())

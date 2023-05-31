@@ -21,8 +21,7 @@ def alien_workflow() -> None:
         "Fresh Alien (New Player)":fresh_alien, 
         "Bespoke Alien":bespoke_alien, 
         "Random Alien":rando_alien, 
-        "Maintenance":please.do_referee_maintenance, 
-        "Back":a_persona_record.record_chooser
+        "Maintenance":please.do_referee_maintenance
     }
 
     option_list = list(option_function_map.keys())

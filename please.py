@@ -4,6 +4,7 @@ import os
 import re
 import secrets
 import time
+from typing import Union
 
 import a_persona_record
 import table
@@ -26,84 +27,69 @@ These are helper functions that are used by all record types
 def roll_this(die_roll_string: str) -> int:
     """
     die roll must be in the format of "xdy+z", returns integer result
+    if die roll request does not compute a str is returned
     """
+    # in a type violation returns a string instead of an integer when there  is a dice error
+    dice_error = f"Oops! {die_roll_string} Does not compute. Examples: 2d6+2, 1d1000, 4d6D1 (drop lowest)"
 
-    dice_error = f"\nDICE ERROR: {die_roll_string} \nPlease check your die roll.\nExamples: 2d6+2, 1d1000, 4d6D1 (drop lowest)\n"
 
     # pulling die parts 1 d 6 + 1 ect from the die_roll_string string
     die_parts = re.compile(r"(\d{1,4})d(\d{1,5})(\+|\-|D)*(\d{1,5})*").search(
         die_roll_string
     )
 
-    if die_parts:
+    # if string not a die roll bail
+    if not die_parts:
+        return dice_error
 
-        die_amount, die_type, die_mod, mod_amount = die_parts.group(1, 2, 3, 4)
 
-        # cleaning up the die data Nones and missing parts
-        if not die_mod or not mod_amount:
-            mod_amount = 0
-        die_amount, die_type, mod_amount = (
-            int(die_amount),
-            int(die_type),
-            int(mod_amount),
-        )
+    # assign values to the die roll parts 
+    die_amount, die_type, die_mod, mod_amount = die_parts.group(1, 2, 3, 4)
 
-        # die_amount error checking and int conversion
-        if die_amount < 1 or die_amount > 99:
-            print(dice_error)
-            return False
+    if not die_mod or not mod_amount:
+        mod_amount = 0
+    die_amount, die_type, mod_amount = (
+        int(die_amount),
+        int(die_type),
+        int(mod_amount),
+    )
 
-        # die_type error checking and int conversion
-        if die_type < 1 or die_type > 1000 or mod_amount > 9999:
-            print(dice_error)
-            return False
+    # die_amount error checking and int conversion
+    if die_amount < 1 or die_amount > 99:
+        return dice_error
 
-        # create a list of the die rolls
-        all_dice = []
-        for __ in range(die_amount):
-            new_roll = secrets.randbelow(die_type) + 1
-            all_dice.append(new_roll)
-            all_dice = sorted(all_dice, reverse=True)
+    # die_type error checking and int conversion
+    if die_type < 1 or die_type > 1000 or mod_amount > 9999:
+        return dice_error
 
-        # die_mod processing and error check
-        if die_mod == "D":
-            if mod_amount >= len(all_dice):
-                # print(dice_error)
-                return False
+    # create a list of the die rolls
+    all_dice = sorted([secrets.randbelow(die_type) + 1 for _ in range(die_amount)], reverse=True)
 
-            for __ in range(mod_amount):
-                all_dice.pop()
-            result = sum(all_dice)
+    # die_mod processing and error checks
+    if die_mod == "D":
+        if mod_amount >= len(all_dice):
+            return dice_error
+        result = sum(all_dice[:-mod_amount])
 
-        elif die_mod is None:
-            result = sum(all_dice)
+    elif die_mod is None:
+        result = sum(all_dice)
 
-        elif die_mod == "+":
-            result = sum(all_dice) + mod_amount
+    elif die_mod == "+":
+        result = sum(all_dice) + mod_amount
 
-        elif die_mod == "-":
-            result = sum(all_dice) - mod_amount
-        else:
-            print("this error should never happen")
-            print(dice_error)
-            return False
-
+    elif die_mod == "-":
+        result = sum(all_dice) - mod_amount
     else:
-        result = False
-        print(dice_error)
+        print("this error should never happen")
+        return dice_error
 
     return result
-
 
 def do_1d100_check(number: int) -> bool:
     """
     Checks to see if 1d100 is less than or equal to the argument
     """
-    if roll_this("1d100") <= number:
-        return True
-    else:
-        return False
-
+    return roll_this("1d100") <= number
 
 ###########################################
 #
@@ -111,101 +97,102 @@ def do_1d100_check(number: int) -> bool:
 #
 ###########################################
 
-
 def choose_this(choices: list, message: str) -> str:
     """
     Choose from a list of choices and return the chosen item
+    list can force default choice with AAA# prefix to element
     quit or restart or chastise the user
     """
-    if len(choices) < 2:
-        return choices[0]
 
-    print(f"\n{message}")
-    for x, option in enumerate(choices):
-        print(f"{x + 1}) {option}")
+    restart_commands = ["back", "reset", "restart", "RESET"]
+    quit_commands = ["quit", "q", "exit", "QUIT"]
 
-    choice = input("Please choose from above (ret -> 1): ")
+    # sets up choices identifying default AAA# element, alpha order and adding BACK QUIT
+    choices.sort()
+    if "AAA#" in choices[0]:
+        choices[0] = choices[0].split('#')[1]
+    choices.extend(["RESET","QUIT"])
 
-    if choice == "":
-        choice = "1"
+    while True:
 
-    if choice.isdigit():
-        choice = int(choice)
-        if choice > 0 and choice <= len(choices):
-            return choices[choice - 1]
-        else:
-            print("Please choose valid option.")
-            return choose_this(choices, message)
+        # if only one choice on list return that choice automatically
+        # the option to reset or quit is no given 
+        if len(choices) < 4:
+            choice = choices[0]
+            break
 
-    ### restart detection ###
-    if choice in ["back", "Back", "reset", "Reset", "restart", "Restart"]:
-        a_persona_record.record_chooser()
+        # present the message and options
+        print(f"\n{message}")
+        for idx, option in enumerate(choices, start=1):
+            print(f"{idx}) {option}")
 
-    ### quit detection ###
-    if choice in ["quit", "Quit", "q", "Q", "exit", "Exit"]:
-        say_goodnight_marsha()
+        choice = input(f"Please choose from above [{choices[0]}]: ")
 
-    #### error detection ####
-    if choice not in choices:
-        print("Your choice is out of range. ")
-        return choose_this(choices, message)
-    print("")
+        if not choice:
+            choice = "1"
+
+        if choice.isdigit():
+            choice = int(choice)
+            if 0 < choice <= len(choices):
+                choice = choices[choice - 1] 
+            else:
+                print("\nPlease select a valid number.", end="")
+                continue
+
+        if choice in quit_commands:
+            say_goodnight_marsha()
+            break
+
+        if choice in restart_commands:
+            a_persona_record.record_chooser()
+            break
+
+        if choice in choices:
+            break
+
+        if choice not in choices:
+            print("\nPlease select a valid choice.", end="")
+            continue
 
     return choice
 
 
 def say_yes_to(question: str) -> bool:
     """
-    Returns True for Yes and False for No
+    question string with boolean return
     """
-    choice = choose_this(["Yes", "No"], question)
-    if choice in ["Yes", "yes", "Y", "y", ""]:
-        return True
-    elif choice in ["No", "no", "N", "n"]:
-        return False
+    choice = choose_this(["AAA#Yes", "No"], question)
+    return True if choice == "Yes" else False
 
 
-def bespokify_this_table(table_chosen: dict) -> str:
+
+def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
     """
     return a string either chosen, randomized or created
     """
-
     # create the list to work from (can be dict or list)
     table_choices_list = list_table_choices(table_chosen)
 
-    # does the table have a name?
-    if type(table_chosen) == dict:
-        has_name = True if "name" in table_chosen.keys() else False
-        if has_name:
-            table_name = f'the {table_chosen["name"]} Table'
-        else:
-            table_name = "this list"
-
-    elif type(table_chosen) == list:
+    # get table name from dict or  call it this list
+    if isinstance(table_chosen, dict):
+        table_name = 'the ' + table_chosen.get('name', 'this list') + ' Table'
+    elif isinstance(table_chosen, list):
         table_name = "this list"
 
-    else:
-        print("ERROR: table_chosen is not a dict or list")
-
-    option_list = ["Random", "Bespoke", "Create New"]
+    option_list = ["AAA#Random", "Bespoke", "Create New"]
     choice = choose_this(option_list, f"What do you want to do with {table_name}?")
-    print(f"{choice = }")
     table_choice = "something malfed up here"
 
     if choice == "Random":
         table_choice = secrets.choice(table_choices_list)
-
     elif choice == "Bespoke":
         table_choice = choose_this(table_choices_list, "Choose from the table below:")
-
     elif choice == "Create New":
-        print(f"Please carefully input a new element for the {table_name} Table.")
+        print(f"Please carefully input a new element for {table_name}.")
         table_choice = input("New Element: ")
 
-    else:
-        print("bespokify_this_table malfed up")
-
     return table_choice
+
 
 
 ###########################################
@@ -252,24 +239,28 @@ def get_table_result(table: dict) -> str:
     return result
 
 
-def list_table_choices(table_chosen: dict) -> list:
+def list_table_choices(table_chosen:dict) -> list:
     """
-    uses list comprehension to return a list of the table values
-    excluding table dict control and data info.
+    returns a list of elements stripped from a table dict or list
+    Uses list comprehension and removes table labels from list
     """
+    EXCLUDED_DICT_VALUES = ["Choose", "Extra Roll", "Secondary"]
+    EXCLUDED_DICT_KEYS = ["name", "die_roll", "title"]
 
-    if type(table_chosen) == dict:
+    if isinstance(table_chosen, dict):
+        # If input is a dictionary, filter keys and values
         choices = [
             value
             for key, value in table_chosen.items()
-            if value not in ["Choose", "Extra Roll", "Secondary"]
-            and key not in ["name", "die_roll", "title"]
+            if value not in EXCLUDED_DICT_VALUES
+            and key not in EXCLUDED_DICT_KEYS
         ]
-    elif type(table_chosen) == list:
+    elif isinstance(table_chosen, list):
+        # If input is a list, do nothing
         choices = table_chosen
-
     else:
-        print("bad table type in list table choices")
+        # If input is neither list nor dict, raise TypeError
+        raise TypeError("Input to list_table_choices must be a list or a dictionary.")
 
     return choices
 

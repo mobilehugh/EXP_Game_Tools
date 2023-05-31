@@ -27,18 +27,22 @@ def record_chooser():
         please.clear_console()
 
         choices_function_map = {
-            "Anthro": anthropomorph.anthro_workflow,
+            "AAA#Anthro": anthropomorph.anthro_workflow,
             "Alien": alien.alien_workflow,
             "Robot": robot.robot_workflow,
             "Toy": toy.toy_workflow,
             "Mutation": mutations.mutation_workflow,
             "Maintenance": please.do_referee_maintenance,
-            "Quit": please.say_goodnight_marsha,
         }
 
         choices_comment = "What do you want to do? "
         choices = list(choices_function_map.keys())
         record_type_desired = please.choose_this(choices, choices_comment)
+          
+
+        # restore default key to work in choices_function_map
+        if ("AAA#" + record_type_desired) in choices_function_map.keys():
+            record_type_desired = "AAA#" + record_type_desired
 
         if record_type_desired in choices_function_map:
             choices_function_map[record_type_desired]()
