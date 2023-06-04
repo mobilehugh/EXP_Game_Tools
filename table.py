@@ -3723,9 +3723,9 @@ attack_type_B = {
 
 robot_ram_dam = {
     range(1, 46): "Blunt Flat (1d4)",
-    range(46, 76): "Blunt Protruberance (1d6)",
+    range(46, 76): "Blunt Protuberance (1d6)",
     range(76, 91): "Edge (1d8)",
-    range(91, 101): "Sharp Protruberance (1d10)",
+    range(91, 101): "Sharp Protuberance (1d10)",
     "name": "Robotic Ramming Damage",
     "die_roll": "1d100",
 }

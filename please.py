@@ -13,6 +13,7 @@ from collections import Counter
 
 import a_persona_record
 import table
+from table import PersonaRecord
 import toy
 import vocation
 
@@ -392,32 +393,43 @@ def attribute_manipulation(object: dict) -> None:
     return
 
 
-def assign_id_and_file_name(object: dict) -> None:
+def assign_id_and_file_name(persona_record: PersonaRecord) -> None:
     """
-    Assigns a file name to the object for the very first time. like a version...
+    Assigns an ID and  File_name to persona_record for the very first time. like a version...
     """
-    linux_time = str(math.ceil(time.time()))  # unique time stamp
+    try:
+        if persona_record.FAMILY == "Toy":
+            id_name = (
+                f'{(persona_record.Persona_Name.replace(" ", "_").lower() + "_") if persona_record.Persona_Name != "Nobody" else ""}'
+                f'{persona_record.FAMILY_TYPE.upper()}_{persona_record.FAMILY_SUB.replace(" ","_").upper()}_'
+                f'{str(math.ceil(time.time()))}' # unique time stamp and file type
+            )
+        elif persona_record.RP and persona_record.FAMILY != "Toy":
+            id_name = (
+                f'{persona_record.Persona_Name.replace(" ", "_").upper()}_'
+                f'{persona_record.FAMILY.lower()}_{persona_record.FAMILY_TYPE.lower()}_'
+                f'{(persona_record.FAMILY_SUB.lower() + "_") if persona_record.FAMILY_SUB else ""}'
+                f'{persona_record.Vocation.lower()}_'
+                f'{str(math.ceil(time.time()))}' # unique time stamp and file type
+            )
+        else:
+            id_name = (
+                f'{persona_record.Player_Name.replace(" ", "_").upper()}_'
+                f'{(persona_record.Persona_Name.replace(" ", "_").lower() + "_") if persona_record.Persona_Name != "Nobody" else ""}'
+                f'{persona_record.FAMILY.lower()}_{persona_record.FAMILY_TYPE.lower()}_'
+                f'{(persona_record.FAMILY_SUB.lower() + "_") if persona_record.FAMILY_SUB else ""}'
+                f'{persona_record.Vocation.lower()}_'
+                f'{str(math.ceil(time.time()))}' # unique time stamp and file type
+            )
+        persona_record.ID = id_name
+        persona_record.File_Name = id_name + ".jsonl"
 
-    if object.FAMILY == "Toy":
-        print("\n*** There is no toy yet, so we'll make one for you.")
-        file_name = "premature toy. please delete this file"
-        return
+        if not persona_record.Date_Created or persona_record.Date_Created == "Soon":
+            persona_record.Date_Created = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
 
-    if (
-        object.RP
-    ):  # referee personas uppercase the persona_name have a simple unique_ident
-        unique_ident = f"{linux_time}RP{object.FAMILY[:3]}"
-        file_name = f'referee_{object.FAMILY.lower()}_{object.Player_Name.replace(" ", "_").lower()}_{object.Persona_Name.replace(" ", "_").upper()}_{object.Vocation.lower()}_{unique_ident}.txt'
-
-    elif not object.RP:
-        unique_ident = f"{linux_time}{object.Player_Name[:2].upper()}{object.FAMILY[:2].upper()}{object.Vocation[:2].upper()}"
-        file_name = f'player_{object.FAMILY.lower()}_{object.Player_Name.replace(" ", "_").upper()}_{object.Persona_Name.replace(" ", "_").lower()}_{object.Vocation.lower()}_{unique_ident}.txt'
-
-    setattr(object, "File_Name", file_name)
-    setattr(object, "Date_Created", time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime()))
-    setattr(object, "Date_Updated", time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime()))
-
-    return
+        persona_record.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
+    except AttributeError as error:
+        print(f"PersonaRecord doesn't have the necessary attributes. {error}")
 
 
 def collect_required_records(record_type: str) -> dict:
