@@ -2697,7 +2697,7 @@ class PhotosyntheticSkin(Mutation):
         self.table_name = None
         self.link = "#_photosynthetic_skin"
 
-        if self.object.FAMILY == "Anthro" and self.object.Anthro_Type == "Florian":
+        if self.object.FAMILY == "Anthro" and self.object.FAMILY_TYPE== "Florian":
             self.perm = "Double healing rate for florian with photosynthetic skin"
         else:
             self.perm = "Respiration via photosynthesis. Hold breath indefinitely."
@@ -3079,7 +3079,7 @@ class StrangeNewBodyPart(Mutation):
         if (
             stranger_things
             in ["Fins attached to arms, and legs.", "Gills for breathing underwater."]
-            and self.object.Anthro_Type == "Aquarian"
+            and self.object.FAMILY_TYPE== "Aquarian"
         ):
             if please.say_yes_to("Do you an aquarian to have fishy things REALLY? "):
                 pass

@@ -613,7 +613,10 @@ def android(object: dict) -> None:
     object.Peripherals = []
 
     ### hite and wate EXCEPTION for android
-    object.Anthro_Type = object.Base_Family
+    #ob__ject.Anthro_Type = object.Base_Family
+    # this is wrong Anthro_Type is now FAMILY_TYPE == Android
+    # must now get wate with Base_Family
+    # points out error of using objects and side effects 
     anthropomorph.anthro_size_fresh(object)
     object.Wate = round(object.Wate * 1.3)
 
@@ -1350,7 +1353,9 @@ def social(object):
     object.Value = 100000
     object.HPM = please.roll_this("1d3+1") * con
     # social wate and hite
-    object.Anthro_Type = basefamily
+    # ob__ject.Anthro_Type = basefamily
+    # this is no longer correct FAMILY_TYPE == social now
+
     anthropomorph.AnthroHiteWate(object)
     object.Wate = round(object.Wate * 1.5)
     # RobotAttacks chance

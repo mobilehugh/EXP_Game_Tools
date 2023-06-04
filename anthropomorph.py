@@ -113,7 +113,7 @@ def anthro_type_fresh(object):
     choices = list_eligible_anthro_types(object)
     choice_comment = "Which anthro type do you want?"
     type_choice = please.choose_this(choices, choice_comment)
-    object.Anthro_Type = type_choice
+    object.FAMILY_TYPE= type_choice
 
     return
 
@@ -344,12 +344,12 @@ def anthro_mutations_fresh(object):
             print(working_mutation)
             fresh_amount += 1
 
-            if working_mutation.kind == "defect" and object.Anthro_Type == "Purestrain":
+            if working_mutation.kind == "defect" and object.FAMILY_TYPE== "Purestrain":
                 print("\nYou are a purestrain, you cannot have a defect mutation.")
                 fresh_amount -= 2
                 object.Mutations.pop(working_mutation.name)
 
-            if working_mutation.kind == "defect" and object.Anthro_Type != "Purestrain":
+            if working_mutation.kind == "defect" and object.FAMILY_TYPE!= "Purestrain":
                 if please.say_yes_to("A Defect DOES NOT count as a mutation? "):
                     fresh_amount -= 1
 
@@ -372,12 +372,12 @@ def anthro_mutations_fresh(object):
             print(working_mutation)
             fresh_amount += 1
 
-            if working_mutation.kind == "defect" and object.Anthro_Type == "Purestrain":
+            if working_mutation.kind == "defect" and object.FAMILY_TYPE== "Purestrain":
                 print("\nYou are a purestrain, you cannot have a defect mutation.")
                 fresh_amount -= 2
                 object.Mutations.pop(working_mutation.name)
 
-            if working_mutation.kind == "defect" and object.Anthro_Type != "Purestrain":
+            if working_mutation.kind == "defect" and object.FAMILY_TYPE!= "Purestrain":
                 if please.say_yes_to("A Defect DOES NOT count as a mutation? "):
                     fresh_amount -= 2
 
@@ -671,19 +671,19 @@ def anthro_type_bespoke(object):
         type_options = list_eligible_anthro_types(object)
         comment = "Which ANTHRO TYPE do you want?"
         type_choice = please.choose_this(type_options, comment)
-        object.Anthro_Type = type_choice
+        object.FAMILY_TYPE= type_choice
 
     elif method_type_selection == "Bespoke":
         type_options = all_anthro_types
         comment = "Which anthro type do you want?"
         type_choice = please.choose_this(type_options, comment)
-        object.Anthro_Type = type_choice
+        object.FAMILY_TYPE= type_choice
 
     elif method_type_selection == "Random":
         type_choice = all_anthro_types[
             (please.roll_this("1d" + str(len(all_anthro_types))) - 1)
         ]  ### -1 to avoid indexing error
-        object.Anthro_Type = type_choice
+        object.FAMILY_TYPE= type_choice
 
     else:
         print("\nYou have not selected a valid anthro type selection method")

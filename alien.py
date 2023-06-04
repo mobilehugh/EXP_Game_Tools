@@ -372,7 +372,7 @@ def alien_natural_powers_fresh(object):
         print(working_mutation)
         fresh_amount += 1
 
-        if working_mutation.kind == "defect" and object.Anthro_Type != "Purestrain":
+        if working_mutation.kind == "defect" and object.FAMILY_TYPE!= "Purestrain":
             if please.say_yes_to("Does a DEFECT get an extra roll? "):
                 fresh_amount -= 1
 

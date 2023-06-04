@@ -36,6 +36,10 @@ class PersonaRecord:
     Player_Name: str = "Player_One"
     Persona_Name: str = "Nobody"
     FAMILY: str = "Anthro"
+    FAMILY_TYPE: str = "Humanoid"
+    FAMILY_SUB: str = ""
+    Anthro_Type: str = "None" # to be deprecated
+    sub_type: str = "None" # to be deprecated
     RP: bool = False
     Otto: bool = False
     Show: bool = False
@@ -48,64 +52,26 @@ class PersonaRecord:
     PSTR: int = 0
     SOC: int = 42
     HPM: int = 0
-    Anthro_Type: str = "None"
-    Age_Cat: str = "None"
-    Age: int = 0
-    Anthro_Size: str = "Medium"
-    Hite: int = 0
-    Wate: int = 0
-    Mutations: dict = field(default_factory=dict)
-    Vocation: str = "None"
-    Level: int = 1
-    EXPS: int = 42
-    Interests: list[str] = field(default_factory=list) 
-    Skills: list[str] = field(default_factory=list)
     AR: int = 500
     MOVE: int = 0
+    Age_Cat: str = "None"
+    Age: int = 0
+    Size_Cat: str = "Medium"
+    Anthro_Size: str = "Medium" # to be deprecated
+    Hite: int = 0
+    Wate: int = 0
+    Vocation: str = "Nothing"
+    Level: int = 1
+    EXPS: int = 42
+    Mutations: dict = field(default_factory=dict)
+    Interests: list[str] = field(default_factory=list) 
+    Skills: list[str] = field(default_factory=list)
+    Proficiencies: list[str] = field(default_factory=list)
+    Equipment: list[str] = field(default_factory=list)
     Date_Created: str = "Soon"
     Date_Updated: str = "Soon"
     ID: str = "None"
-    File_Name: str = "None"
-
-""" MISSING
-Proficiencies, WA, equipment
-"""
-
-
-example_persona_dict = {
-    "Player_Name": "Stephen Smith",
-    "FAMILY": "Anthro",
-    "RP": False,
-    "AWE": 11,
-    "CHA": 11,
-    "CON": 9,
-    "DEX": 13,
-    "INT": 12,
-    "MSTR": 9,
-    "PSTR": 15,
-    "SOC": 963,
-    "HPM": 31,
-    "Anthro_Type": "Ursidae",
-    "Anthro_Sub_Type": "Grizzly bear",
-    "Move": 5,
-    "AR": 578,
-    "WA": 20,
-    "Anthro_Size": "Medium",
-    "Hite": 173,
-    "Wate": 77,
-    "Age_Cat": "Young",
-    "Age": 11,
-    "Level": 1,
-    "EXPS": 42,
-    "Mutations": {},
-    "Vocation": "Nomad",
-    "Interests": ["Domestication", "Domestication", "Survival"],
-    "Skills": ["Herbivores", "Mitotic Reproducers", "Normal"],
-    "Persona_Name": "Piglet",
-    "ID": "1645740810STURNOM",
-    "Date_Create": "Thu-24-Feb-2022(22:13)",
-    "File_Name": "Stephen_Smith_Piglet_Nomad_1645740810STURNOM.txt",
-}
+    File_Name: str = "None" # ID + ".jsonl"
 
 nil = {
     range(1, 5): "Nil Oops",

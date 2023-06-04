@@ -1,10 +1,15 @@
 import json
 import math
 import os
+import sys
 import re
+import subprocess
 import secrets
 import time
 from typing import Union
+from itertools import islice
+from collections import Counter
+
 
 import a_persona_record
 import table
@@ -202,25 +207,31 @@ def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
 ###########################################
 
 
-def show_me_your_dict(dinkie: dict) -> None:
+def show_me_your_dict(dinkie: object) -> None:
     """
-    print out the dict that you want to see
+    Prints out the dict or object's attribute dictionary.
     """
 
-    if type(dinkie) == dict:
-        print(f"\n{dinkie}")
-        return
+    if isinstance(dinkie, dict):
+        items = iter(dinkie.items())
+    elif hasattr(dinkie, '__dict__'):
+        items = iter(dinkie.__dict__.items())
+    else:
+        raise AttributeError("'dinkie' should be a dict or an object with a '__dict__'.")
+    
+    if "name" in dinkie:
+        print(dinkie["name"].upper())
+    else:
+        print("this list".upper())
 
-    new_liner = 0
-    for key, value in dinkie.__dict__.items():
-        this_pair = f"{key}: {value}   "
-        new_liner += len(this_pair)
-        print(f"{this_pair}", end="")
-        if new_liner > 60:
-            new_liner = 0
-            print("")
-
-    return
+    while True:
+        # Extracting 2 items at a time using islice
+        batch = list(islice(items, 2))
+        if not batch:
+            break
+        for key, value in batch:
+            print(f"{key}: {value}", end='   ')
+        print()  # Print newline after each batch
 
 
 def colour_my_whirled(*args):
@@ -229,6 +240,7 @@ def colour_my_whirled(*args):
 
 def get_table_result(table: dict) -> str:
     """
+    THIS WILL BE DEPRECATED ONCE DERANGED Tables are ACTIVATED
     return a single result from a random table
     """
     random = roll_this(table["die_roll"])
@@ -268,17 +280,13 @@ def list_table_choices(table_chosen:dict) -> list:
 def collate_this(skill_list: list) -> list:
     """
     Collates a list by enumerating by total elements
+    for example, mechanics-2 instead of ["mechanics", "mechanics"]
     """
-    collated_list = []
+    counter = Counter(skill_list)
+    collated_list = [f"{item}-{count}" for item, count in counter.items()]
+    collated_list.sort()
 
-    for item in skill_list:
-        score = skill_list.count(item)
-        collated_list.append(f"{item}-{str(score)}")
-
-    send_list = list(set(collated_list))
-    send_list.sort()
-
-    return send_list
+    return collated_list
 
 
 ##############################################
@@ -549,12 +557,22 @@ def clear_console() -> None:
     """
     Clears the console on different OSs
     """
-    os.system("cls" if os.name == "nt" else "clear")
+    cmd = "cls" if os.name == "nt" else "clear"
+
+    try:
+        subprocess.check_call(cmd, shell=True)
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Failed to clear the console: {e}")
+
 
 def say_goodnight_marsha() -> None:
+    """
+    Clears the console, prints a farewell message, and exits the program.
+    """
     clear_console()
+
     print("".center(31, "*"))
     print("* Thank you for your service. *")
-    print("".center(31, "*"))
-    print()
-    quit()
+    print("".center(31, "*"), "\n") # "\n" added here to create a new line
+
+    sys.exit()
