@@ -27,7 +27,7 @@ def record_chooser():
         please.clear_console()
 
         choices_function_map = {
-            "AAA#Anthro": anthropomorph.anthro_workflow,
+            "Anthro": anthropomorph.anthro_workflow,
             "Alien": alien.alien_workflow,
             "Robot": robot.robot_workflow,
             "Toy": toy.toy_workflow,
@@ -41,8 +41,6 @@ def record_chooser():
           
 
         # restore default key to work in choices_function_map
-        if ("AAA#" + record_type_desired) in choices_function_map.keys():
-            record_type_desired = "AAA#" + record_type_desired
 
         if record_type_desired in choices_function_map:
             choices_function_map[record_type_desired]()

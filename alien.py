@@ -649,7 +649,7 @@ def alien_nomenclature(object):
         if please.say_yes_to("Do you want to QUIT the program"):
             print("\n*** program terminated")
             exit()
-    object.Alien_Type = alien_species
+    object.FAMILY_TYPE = alien_species
 
     persona_name = input("\nPlease input the name of your personal ALIEN PERSONA? ")
     if persona_name == "quit" or persona_name == "Quit":
@@ -1148,7 +1148,7 @@ def fresh_alien():
     fresh = table.PersonaRecord()
     fresh.FAMILY = "Alien"
     fresh.Vocation = "Alien"
-    fresh.Alien_Type = "Undiscovered"
+    fresh.FAMILY_TYPE = "Undiscovered"
     fresh.Persona_Name = "Nebulous"
     fresh.Date_Created = "Still Evolving"
     fresh.RP = False
@@ -1202,7 +1202,7 @@ def bespoke_alien():
 
     bespoke = table.PersonaRecord()
     bespoke.FAMILY = "Alien"
-    bespoke.Alien_Type = "Undiscovered"
+    bespoke.FAMILY_TYPE = "Undiscovered"
     bespoke.Persona_Name = "Nebulous"
     bespoke.Date_Created = "Still Evolving"
     bespoke.RP = True if please.say_yes_to("Is this a REFEREE persona? ") else False

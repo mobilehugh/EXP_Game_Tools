@@ -19,7 +19,7 @@ def anthro_workflow() -> None:
     please.clear_console()
 
     workflow_function_map = {
-        "AAA#Fresh Anthro (new player)":fresh_anthro,
+        "Fresh Anthro (new player)":fresh_anthro,
         "Bespoke Anthro":bespoke_anthro,
         "Random Anthro":random_anthro,
         "Maintenance":please.do_referee_maintenance
@@ -128,23 +128,23 @@ def anthro_sub_type_selection(object):
     method_of_selection = please.choose_this(choices, choice_comment)
 
     if method_of_selection == "Choose":
-        choices = table.anthro_sub_types[object.Anthro_Type]
+        choices = table.anthro_sub_types[object.FAMILY_TYPE]
         list_comment = "Choose your anthro subtype: "
         sub_type = please.choose_this(choices, list_comment)
 
     elif method_of_selection == "Bespoke":
-        sub_type = input(f"Carefully input subtype for the {object.Anthro_Type}: ")
+        sub_type = input(f"Carefully input subtype for the {object.FAMILY_TYPE}: ")
 
     elif method_of_selection == "Random":
-        die_type = len(table.anthro_sub_types[object.Anthro_Type])
+        die_type = len(table.anthro_sub_types[object.FAMILY_TYPE])
         rando = secrets.randbelow(die_type)
-        sub_type = table.anthro_sub_types[object.Anthro_Type][rando]
+        sub_type = table.anthro_sub_types[object.FAMILY_TYPE][rando]
 
     elif method_of_selection == "Generalis (none)":
         sub_type = "Generalis"
 
-    object.Anthro_Sub_Type = sub_type
-    # print(f"Persona is a {object.Anthro_Type} {object.Anthro_Sub_Type}")
+    object.FAMILY_SUB = sub_type
+    # print(f"Persona is a {object.FAMILY_TYPE} {object.FAMILY_SUB}")
     return
 
 
@@ -153,7 +153,7 @@ def adjust_attributes_by_anthro_type(object):
     each anthro type has a set of attributes that are adjusted by the anthro type
     """
 
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
     MSTR_printed = False
     # print(f"\nAdjusting attributes for {anthro_type}")
 
@@ -214,7 +214,7 @@ def adjust_attributes_by_anthro_type(object):
 
 def anthro_size_fresh(object):
 
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
 
     # choose anthro size
     choices = ["Smaller", "Larger"]
@@ -239,7 +239,7 @@ def anthro_size_fresh(object):
 
 def anthro_size_rando(object):
 
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
 
     # choose anthro size
     anthro_size_choice = secrets.choice(["Smaller", "Larger"])
@@ -298,7 +298,7 @@ def anthro_age_fresh(object):
     """
     generates the persona age at level one start
     """
-    AnthroType = object.Anthro_Type
+    AnthroType = object.FAMILY_TYPE
     object.Age_Cat = "Young"
     object.Age = please.roll_this(table.anthro_starting_ages[AnthroType])
 
@@ -311,7 +311,7 @@ def anthro_mutations_fresh(object):
     """
 
     # determine the chance of mutations based on anthro type
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
     mentchance = table.anthro_type_mutation_chance[anthro_type]["mentchance"]
     physchance = table.anthro_type_mutation_chance[anthro_type]["physchance"]
 
@@ -391,7 +391,7 @@ def anthro_mutations_rando(object):
     """
 
     # determine the chance of mutations based on anthro type
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
     mentchance = table.anthro_type_mutation_chance[anthro_type]["mentchance"] * 2
     physchance = table.anthro_type_mutation_chance[anthro_type]["physchance"] * 2
 
@@ -644,7 +644,7 @@ def improve_attributes_by_anthro_type(object):
     """
     bestow improved attributes based on anthro type
     """
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
     if anthro_type not in table.attribute_improve_by_anthro_type:
         print(f"No bespoke attributes for {anthro_type}")
         return
@@ -756,7 +756,7 @@ def choose_anthro_age_category(object):
     list_comment = "Choose a bespoke age range."
     Bespoke_Age_Range = please.choose_this(option_list, list_comment)
 
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
     numerical_age_range = option_list.index(Bespoke_Age_Range)
 
     die_roll = table.anthro_ages_by_category_and_type[anthro_type][numerical_age_range]
@@ -777,7 +777,7 @@ def random_anthro_age_category(object):
     option_list = ["Child", "Adolescent", "Adult", "Elder", "Aged"]
     random_age_range = please.get_table_result(table.anthro_random_age_category)
 
-    anthro_type = object.Anthro_Type
+    anthro_type = object.FAMILY_TYPE
     numerical_age_range = option_list.index(random_age_range)
 
     die_roll = table.anthro_ages_by_category_and_type[anthro_type][numerical_age_range]

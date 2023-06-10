@@ -10,6 +10,30 @@ import mutations
 import vocation
 import table
 
+def outputs_workflow(record, out_type: str) -> None:
+    '''
+    simplify output calls  by directing TYPE and needs
+    '''
+    family_type = record.FAMILY
+
+    if family_type == "Anthro" and out_type == "screen":
+        anthro_review(record)
+    elif family_type == "Anthro" and out_type == "pdf":
+        anthro_pdf_creator(record)
+    elif family_type == "Alien" and out_type == "screen":
+        alien_review(record)
+    elif family_type == "Alien" and out_type == "pdf":
+        alien_pdf_creator(record)
+    elif family_type == "Robot" and out_type == "screen":
+        robot_review(record)
+    elif family_type == "Robot" and out_type == "pdf":
+        robot_pdf_creator(record)
+    elif family_type == "Toy" and out_type == "screen":
+        print("this doesn't exist yet")
+    elif family_type == "Toy" and out_type == "pdf":
+        print("this doesn't exist yet")
+    return
+
 
 ################################################
 #
@@ -53,7 +77,7 @@ class PDF(FPDF):
 
     def locutus(self):
         """
-        makes aarrow at x and y
+        makes an arrow at x and y
         """
         x = self.get_x()
         y = self.get_y()
@@ -164,7 +188,7 @@ class PDF(FPDF):
         ]
         data[1] = [f"{str(x)}:CI" for x in working_data]
 
-        ## attribute value line ouptut
+        ## attribute value line output
         self.set_font("Helvetica", size=13)
         self.table_vomit(data, x_left, x_right, 17, 1.1, 0)
 
@@ -209,7 +233,7 @@ class PDF(FPDF):
         line_height = self.font_size * 2
 
         if self.object.FAMILY == "Anthro":
-            blob = f"**DESCRIPTION:** {self.object.Age} year-old {self.object.Anthro_Sub_Type.lower()} {self.object.Vocation.lower()}."
+            blob = f"**DESCRIPTION:** {self.object.Age} year-old {self.object.FAMILY_SUB.lower()} {self.object.Vocation.lower()}."
 
         elif self.object.FAMILY == "Alien":
             blob = f"**DESCRIPTION:** {self.object.Quick_Description}"
@@ -237,7 +261,7 @@ class PDF(FPDF):
             blob = f"**COMBAT INFO** for {self.object.Vocation} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
 
         elif self.table_title == "Alien":
-            blob = f"**COMBAT INFO** for {self.object.Alien_Type} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
+            blob = f"**COMBAT INFO** for {self.object.FAMILY_TYPE} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
 
         elif self.table_title == "Robot":
             blob = f"**COMBAT INFO** for {self.object.Robot_Type} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
@@ -591,7 +615,7 @@ class PDF(FPDF):
         line_height = self.font_size * 1.6
         # self.set_xy(8, self.get_y() + 2)
         self.set_x(8)
-        blob = f"**BIOLOGIC INFO** for {self.object.FAMILY} {self.object.Anthro_Type}  {self.object.Anthro_Sub_Type}"
+        blob = f'**BIOLOGIC INFO** for {self.object.FAMILY} {self.object.FAMILY_TYPE}  {self.object.FAMILY_SUB if self.object.FAMILY_SUB else " "}'
         line_width = self.get_string_width(blob)
         self.cell(
             w=line_width,
@@ -605,7 +629,7 @@ class PDF(FPDF):
 
         self.set_font("Helvetica", size=10)
         self.set_xy(8, self.get_y() + 1)
-        blob = f"**Family** {self.object.FAMILY} **Type:** {self.object.Anthro_Type} **Sub Type:** {self.object.Anthro_Sub_Type} **Age:** {self.object.Age} years **Hite:** {self.object.Hite} cms **Wate:** {self.object.Wate} kgs"
+        blob = f"**Family** {self.object.FAMILY} **Type:** {self.object.FAMILY_TYPE} **Sub Type:** {self.object.FAMILY_SUB} **Age:** {self.object.Age} years **Hite:** {self.object.Hite} cms **Wate:** {self.object.Wate} kgs"
         self.cell(w=0, markdown=True, txt=blob, ln=True, fill=False)
 
         # print out Mutations
@@ -709,7 +733,7 @@ class PDF(FPDF):
         self.set_draw_color(150)
         line_height = self.font_size * 1.6
         self.set_xy(8, self.get_y() + 2)
-        blob = f"**XENOLOGIC INFO** for {self.object.FAMILY} **SPECIES:** {self.object.Alien_Type}"
+        blob = f"**XENOLOGIC INFO** for {self.object.FAMILY} **SPECIES:** {self.object.FAMILY_TYPE}"
         line_width = self.get_string_width(blob)
         self.cell(
             w=line_width,
@@ -842,7 +866,7 @@ class PDF(FPDF):
         self.set_xy(left_life_society_x, top_of_xeno)
         self.set_font("Helvetica", size=10)
         line_height = self.font_size * 1.3
-        blob = f"**Society** of {self.object.Alien_Type}"
+        blob = f"**Society** of {self.object.FAMILY_TYPE}"
         line_width = 0  # full width
         self.cell(
             w=line_width,
@@ -1050,7 +1074,7 @@ class PDF(FPDF):
 
         # anthro, vocation = vocation and tasks
         # alien, vocation = vocation and tasks, and alien
-        # robot, vocaiton = vocation and tasks, and robot
+        # robot, vocation = vocation and tasks, and robot
         # alien, alien = alien
         # robot, robot = robot
 
@@ -1102,25 +1126,22 @@ class PDF(FPDF):
 #
 ##############################################
 
-
-def pdf_opener(object: dict) -> None:
+def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str = "C:/") -> None:
     """
-    opens PDF of choice in the browser of choice
+    finds the specified file on computer
+    then shows it in the default browser
     """
-    target_pdf = f"{object.File_Name}.pdf"
-    if object.FAMILY == "Toy":
-        directory_to_use = "file:///C:/Users/mobil/OneDrive/Documents/Persona%20Record/EXP_Game_Tools/Records/Toys/"
-
-    else:
-        directory_to_use = (
-            "file:///C:/Users/mobil/OneDrive/Documents/Persona%20Record/EXP_Game_Tools/Records/Referee/"
-            if object.RP
-            else "file:///C:/Users/mobil/OneDrive/Documents/Persona%20Record/EXP_Game_Tools/Records/Players/"
-        )
-
-    webbrowser.get().open_new(f"{directory_to_use}{target_pdf}")
-
-    return
+    try:
+        for root, dirs, files in os.walk(search_path):
+            if file_name in files:
+                found_file = os.path.join(root, file_name)
+                browser_file = "file:///" + found_file.replace('\\','/')
+                webbrowser.get().open_new(browser_file)
+                break
+    except PermissionError:
+        print(f"Permission denied for directory {root}. Continuing search...")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def vocation_combat_tabler(calc, *args):
@@ -1268,7 +1289,7 @@ def alien_combat_tabler(calc, *args):
             "CDB": 0,
             "PROF": f"Natural - {attacks} {attack_desc} for {damage} HPS.",
         },
-        "TITLE": f"{calc.Alien_Type} LVL {level}",
+        "TITLE": f"{calc.FAMILY_TYPE} LVL {level}",
         "ARMOVE": f"Armour Rating (AR): {calc.AR}     Move: See below",
     }
 
@@ -1463,7 +1484,6 @@ def output_combat_tabler(object, combat_table):
 # ANTHRO output to screen
 #####################################
 
-
 def anthro_review(object):
     please.clear_console()
     print(
@@ -1471,7 +1491,7 @@ def anthro_review(object):
         f"Persona: {object.Persona_Name} \t\t\tPlayer: {object.Player_Name} \tCreated: {object.Date_Created}\n"
         f"AWE: {object.AWE} CHA: {object.CHA} CON: {object.CON} DEX: {object.DEX} "
         f"INT: {object.INT} MSTR: {object.MSTR} PSTR: {object.PSTR} HPS: {object.HPM} SOC: {object.SOC} WA: {object.WA}\n"
-        f"Family: {object.FAMILY} Type: {object.Anthro_Type} SubType: {object.Anthro_Sub_Type}\n"
+        f"Family: {object.FAMILY} Type: {object.FAMILY_TYPE} SubType: {object.FAMILY_SUB}\n"
         f"Age: {object.Age} years Hite: {object.Hite} cms Wate: {object.Wate} kgs\n"
         f"Vocation: {object.Vocation} Level: {object.Level} EXPS: {object.EXPS}"
     )
@@ -1532,41 +1552,12 @@ def anthro_review(object):
 
     return
 
-#####################################
-# Bespoke Back pager PDF
-#####################################
-
-def backpage_creator(object):
-    print ("at backpage_creator")
-    please.show_me_your_dict(object)
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    pdf.set_margin(0)  # set margins to 0
-
-    pdf.add_page()
-    pdf.perimiter_box()
-    pdf.title_line(object)
-    pdf.note_lines()
-
-    pdf.add_page()
-    pdf.title_line(object)
-    pdf.perimiter_box()
-    pdf.note_lines()
-
-    sub_directory = "Referee" if object.RP else "Players"
-    pdf_name = f"./Records/{sub_directory}/{object.File_Name}.BACKPAGER.pdf"
-    pdf.output(
-        name=pdf_name,
-        dest="F",
-    )
-    print(f"\n***PDF stored at ./Records/{sub_directory}/{object.File_Name}.pdf")
-    return
 
 
 
 #####################################
 # ANTHRO output to PDF
 #####################################
-
 
 def anthro_pdf_creator(object):
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
@@ -1591,6 +1582,7 @@ def anthro_pdf_creator(object):
     pdf.note_lines()
     pdf.id_data(object)
 
+    ''' 
     sub_directory = "Referee" if object.RP else "Players"
     pdf_name = f"./Records/{sub_directory}/{object.File_Name}.pdf"
     pdf.output(
@@ -1598,6 +1590,23 @@ def anthro_pdf_creator(object):
         dest="F",
     )
     print(f"\n***PDF stored at ./Records/{sub_directory}/{object.File_Name}.pdf")
+    '''
+
+    pdf.output(
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+        dest="F",
+    )
+    show_pdf()
+
+    '''program_folder = os.path.dirname(sys.executable)
+    print(program_folder)
+    print()
+    print("file:///C:/Users/mobil/Documents/EXP_Game_Tools/Records/Bin/")
+
+    input("did you catch that program folder?")
+
+    webbrowser.get().open_new(f"file:///C:/Users/mobil/Documents/EXP_Game_Tools/Records/Bin/last_output.pdf")
+    '''
     return
 
 
@@ -1618,7 +1627,7 @@ def alien_review(alien):
         f"Persona: {alien.Persona_Name} \t\tPlayer Name: {alien.Player_Name} \tCreated: {alien.Date_Created}\n"
         f"AWE: {alien.AWE} CHA: {alien.CHA} CON: {alien.CON} DEX: {alien.DEX} "
         f"INT: {alien.INT} MSTR: {alien.MSTR} PSTR: {alien.PSTR} HPS: {alien.HPM} SOC: {alien.SOC} WA: {alien.WA}\n"
-        f"Family: {alien.FAMILY} Species: {alien.Alien_Type}\n"
+        f"Family: {alien.FAMILY} Species: {alien.FAMILY_TYPE}\n"
         f"Age: {alien.Age} {alien.Alien_Age_Suffix} Size: {alien.Size} Wate: {alien.Wate} {alien.Wate_Suffix}"
     )
 
@@ -1673,7 +1682,7 @@ def alien_review(alien):
             print(f"{x + 1}) {skill}")
 
     # print out the Alien powers aka mutations
-    print(f"\nNATURAL POWERS of {alien.Alien_Type}")
+    print(f"\nNATURAL POWERS of {alien.FAMILY_TYPE}")
 
     if len(alien.Mutations) == 0:
         print("None")
@@ -1685,14 +1694,14 @@ def alien_review(alien):
             working_mutation = all_mutations[name](alien)
             working_mutation.post_details(working_mutation.__class__)
 
-    print(f"\nBIOLOGY of {alien.Alien_Type}")
+    print(f"\nBIOLOGY of {alien.FAMILY_TYPE}")
     for bio_line in alien.Biology:
         print(f"{bio_line}")
     print("")
     for bio_line in alien.Life_Cycle:
         print(f"{bio_line}")
 
-    print(f"\nSOCIETY of {alien.Alien_Type}")
+    print(f"\nSOCIETY of {alien.FAMILY_TYPE}")
     for soc_line in alien.Society:
         print(f"{soc_line}")
 
@@ -1704,7 +1713,12 @@ def alien_review(alien):
 #####################################
 
 
-def alien_pdf_creator(alien):
+def alien_pdf_creator(alien) -> None:
+    '''
+    creates an alien pdf and then shows it on the browser
+    pdfs are no longer stored
+    '''
+
     ### create the pdf
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
     pdf.set_margin(0)  # set margins to 0
@@ -1741,23 +1755,18 @@ def alien_pdf_creator(alien):
     pdf.note_lines()
     pdf.id_data(alien)
 
-    sub_directory = "Referee" if alien.RP else "Players"
-    pdf_name = f"./Records/{sub_directory}/{alien.File_Name}.pdf"
-
     pdf.output(
-        name=pdf_name,
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
         dest="F",
     )
-    print(f"\n***PDF stored at /Records/{sub_directory}/{alien.File_Name}.pdf")
-    return
+    show_pdf()
 
 
 #####################################
 # ROBOT output to screen
 #####################################
 
-
-def robot_review(robot: dict) -> None:
+def robot_review(robot) -> None:
     """
     print the robot to screen
     """
@@ -1829,6 +1838,7 @@ def robot_review(robot: dict) -> None:
             print(f"{x + 1}) {gift}")
 
         # robot vocation  Interest list
+
         print(f"\n{robot.Vocation} INTERESTS: ")
         collated_interests = please.collate_this(robot.Interests)
 
@@ -1850,6 +1860,10 @@ def robot_review(robot: dict) -> None:
 
 
 def robot_pdf_creator(robot):
+    '''
+    creates a pdf for a robot 
+    shows it in the browser PDFs are no longer stored
+    '''
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
     pdf.set_margin(0)  # set margins to 0
 
@@ -1873,12 +1887,40 @@ def robot_pdf_creator(robot):
     pdf.note_lines()
     pdf.id_data(robot)
 
-    sub_directory = "Referee" if robot.RP else "Players"
-    pdf_name = f"./Records/{sub_directory}/{robot.File_Name}.pdf"
+    pdf.output(
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+        dest="F",
+    )
+    show_pdf()
 
+
+#####################################
+# Bespoke Back pager PDF
+#####################################
+
+def backpage_creator(object):
+    print ("at backpage_creator")
+    please.show_me_your_dict(object)
+    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
+    pdf.set_margin(0)  # set margins to 0
+
+    pdf.add_page()
+    pdf.perimiter_box()
+    pdf.title_line(object)
+    pdf.note_lines()
+
+    pdf.add_page()
+    pdf.title_line(object)
+    pdf.perimiter_box()
+    pdf.note_lines()
+
+    sub_directory = "Referee" if object.RP else "Players"
+    pdf_name = f"./Records/{sub_directory}/{object.File_Name}.BACKPAGER.pdf"
     pdf.output(
         name=pdf_name,
         dest="F",
     )
-    print(f"\n***PDF stored at ./Records/{sub_directory}/{robot.File_Name}.pdf")
+    print(f"\n***PDF stored at ./Records/{sub_directory}/{object.File_Name}.pdf")
     return
+
+

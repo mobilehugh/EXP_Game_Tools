@@ -10,12 +10,12 @@ from typing import Union
 from itertools import islice
 from collections import Counter
 
-
 import a_persona_record
 import table
 from table import PersonaRecord
 import toy
 import vocation
+import outputs
 
 
 """ 
@@ -106,21 +106,20 @@ def do_1d100_check(number: int) -> bool:
 def choose_this(choices: list, message: str) -> str:
     """
     Choose from a list of choices and return the chosen item
-    list can force default choice with AAA# prefix to element
+    [default] element for list choices[0]
     quit or restart or chastise the user
     """
 
     restart_commands = ["back", "reset", "restart", "RESET"]
     quit_commands = ["quit", "q", "exit", "QUIT"]
 
-    # sets up choices identifying default AAA# element, alpha order and adding BACK QUIT
+    # [0] is default, sort, reinsert default and add directions
+    default = choices.pop(0)
     choices.sort()
-    if "AAA#" in choices[0]:
-        choices[0] = choices[0].split('#')[1]
+    choices.insert(0,default)
     choices.extend(["RESET","QUIT"])
 
     while True:
-
         # if only one choice on list return that choice automatically
         # the option to reset or quit is no given 
         if len(choices) < 4:
@@ -167,7 +166,7 @@ def say_yes_to(question: str) -> bool:
     """
     question string with boolean return
     """
-    choice = choose_this(["AAA#Yes", "No"], question)
+    choice = choose_this(["Yes", "No"], question)
     return True if choice == "Yes" else False
 
 
@@ -185,7 +184,7 @@ def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
     elif isinstance(table_chosen, list):
         table_name = "this list"
 
-    option_list = ["AAA#Random", "Bespoke", "Create New"]
+    option_list = ["Random", "Bespoke", "Create New"]
     choice = choose_this(option_list, f"What do you want to do with {table_name}?")
     table_choice = "something malfed up here"
 
@@ -211,6 +210,7 @@ def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
 def show_me_your_dict(dinkie: object) -> None:
     """
     Prints out the dict or object's attribute dictionary.
+    should this be deprecated
     """
 
     if isinstance(dinkie, dict):
@@ -297,62 +297,86 @@ def collate_this(skill_list: list) -> list:
 ##############################################
 
 
-def store_locally(object: table.PersonaRecord) -> None:
+def store_this(record_to_store: table.PersonaRecord) -> None:
     """
-    takes chosen object and converts it to a JSONified dict and stores it locally
+    takes chosen record_to_store and converts it to a JSONified dict and stores it locally
     """
     ### setting new Date_Updated
-    object.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
+    record_to_store.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
 
-    ### retrieve file name and create JSON string
-    file_name = object.File_Name
-    record_to_store = json.dumps(object.__dict__)
+    ### retrieve file name
+    file_name_to_use = record_to_store.File_Name
 
-    ### determine the directory based on FAMILY
-    if object.FAMILY == "Toy":
-        directory_to_use = "./Records/Toys/"
-    else:
-        directory_to_use = "./Records/Referee/" if object.RP else "./Records/Players/"
+    ### create JSON to add to  file name
+    json_to_add = json.dumps(record_to_store.__dict__)
 
-    with open(f"{directory_to_use}{file_name}", "a") as file:
-        file.write(f"{record_to_store}\n")
-    print(f"\n*** Record stored at ./Records/Personas/{file_name}")
+    ### determine the directory to use
+    # beware of the ternary for ./Records/Referee/ vs ./Records/Players/
+    if record_to_store.FAMILY != "Toy":
+        store_here = "Referee" if record_to_store.RP else "Player"
+    if record_to_store.Bin:
+        store_here = "Bin"
 
-    return
+    where_to_store = {
+        "Toy":"./Records/Toys/",
+        "Player":"./Records/Players/",
+        "Referee":"./Records/Referee/",
+        "Bin":"./Records/Bin",
+    }
+    directory_to_use = where_to_store[store_here]
+
+    ### append to json lines .jsonl
+    with open(f"{directory_to_use}{file_name_to_use}", "a") as file:
+        file.write(f"{json_to_add}\n")
+
+    print(f"\n*** Record stored at {directory_to_use}{file_name_to_use}")
 
 
-def record_storage(object: dict) -> None:
+def record_storage(record_to_store: table.PersonaRecord) -> None:
     """
-    store as json in txt file, o/p JSON, create PDF
+    organizes what to do with a record and prints it out
     """
-
-    pivoteer = object.FAMILY
-
     option_list = [
-        "Save Locally",
-        "Copy Manually",
-        "Nuke This Thing!",
+        "Save",
+        "Transfer",
+        "Bin",
     ]
-    list_comment = f"\nWhat do you want to do with: {object.File_Name}?"
+
+    list_comment = f"\nWhat do you want to do with: {record_to_store.File_Name}?"
     storage_chosen = choose_this(option_list, list_comment)
 
-    if storage_chosen == "Copy Manually":
-        store_locally(object)
-        table.output_pivot_table[pivoteer][1](object)
-        print("\n\nFor JSON COPY BELOW including {}")
-        print(json.dumps(object.__dict__))
+    ### prep for outputs
+    # no pdfs
+
+    function_map_reviews = {
+        "Alien": outputs.alien_review,
+        "Anthro": outputs.anthro_review,
+        "Robot": outputs.robot_review,
+    }
+    review_screen = function_map_reviews[record_to_store.FAMILY]
+
+    if storage_chosen == "Transfer":
+        store_this(record_to_store)
+
+        review_screen(record_to_store) #prints out on screen
+
+        print("\n\nCOPY JSON BELOW for TRANSFER include curly brackets {}")
+        print(json.dumps(record_to_store.__dict__))
         print("\n\n")
         input("\nPress Enter to continue...")
         return
 
-    elif storage_chosen == "Save Locally":
-        store_locally(object)
-        table.output_pivot_table[pivoteer][0](object)
+    elif storage_chosen == "Save":
+        store_this(record_to_store)
+        review_screen(record_to_store) #prints out on screen no more stored PDFs
         return
 
-    elif storage_chosen == "Nuke This Thing":
+    elif storage_chosen == "Bin":
+        record_to_store.Bin = True
+        store_this(record_to_store)        
         clear_console()
         return
+
 
 
 def attribute_manipulation(object: dict) -> None:
@@ -388,7 +412,7 @@ def attribute_manipulation(object: dict) -> None:
             elif choice == "Exit":
                 break
 
-    store_locally(object)
+    store_this(object)
 
     return
 
@@ -396,6 +420,7 @@ def attribute_manipulation(object: dict) -> None:
 def assign_id_and_file_name(persona_record: PersonaRecord) -> None:
     """
     Assigns an ID and  File_name to persona_record for the very first time. like a version...
+    I think this is only used once per record
     """
     try:
         if persona_record.FAMILY == "Toy":
@@ -432,27 +457,26 @@ def assign_id_and_file_name(persona_record: PersonaRecord) -> None:
         print(f"PersonaRecord doesn't have the necessary attributes. {error}")
 
 
-def collect_required_records(record_type: str) -> dict:
+def collect_desired_record() -> table.PersonaRecord:
     """
     generates a list of required records, user selects one
     """
-    object = table.PersonaRecord()
-    print(f"please -- line 428 {type(object) = }")
-
+    record_type = choose_this(["Players", "Alien", "Anthro", "Robot", "Toy", "Ref"], "What directory to search?")    
+    
     # finder for long list of hard to type file names
     if record_type == "Toy":
-        directory_to_use = "./Records/Toys/"
+        directory_to_search = "./Records/Toys/"
 
     elif record_type == "Players":
-        directory_to_use = "./Records/Players/"
+        directory_to_search = "./Records/Players/"
 
-    elif record_type in ["Alien", "Anthro", "Robot", "All"]:
-        directory_to_use = "./Records/Referee/"
+    elif record_type in ["Alien", "Anthro", "Robot", "Ref"]:
+        directory_to_search = "./Records/Referee/"
     else:
         print("\n*** ERROR: directory not found")
-        quit()
+        say_goodnight_marsha()
 
-    list_of_files = os.listdir(directory_to_use)
+    list_of_files = os.listdir(directory_to_search)
 
     ### clear any pdfs from the list
     list_of_files = [x for x in list_of_files if x[-3:] != "pdf"]
@@ -461,7 +485,7 @@ def collect_required_records(record_type: str) -> dict:
         list_of_files = [x for x in list_of_files if f"_{record_type.lower()}_" in x]
 
     if len(list_of_files) == 0:
-        print(f"\n*** ERROR: no files found in {directory_to_use}")
+        print(f"\n*** ERROR: no files found in {directory_to_search}")
         if say_yes_to("Would you like to continue?"):
             a_persona_record.record_chooser()
         else:
@@ -471,16 +495,16 @@ def collect_required_records(record_type: str) -> dict:
     persona_record = choose_this(list_of_files, list_comment)
 
     # get latest record on persona (AKA last line of file)
-    with open(directory_to_use + persona_record, "r") as f:
+    with open(directory_to_search + persona_record, "r") as f:
         file_data = f.readlines()[-1]
 
-    dict_data = json.loads(file_data)
+    data_pairs = json.loads(file_data)
 
-    object = table.PersonaRecord()
-    for key, value in dict_data.items():
-        setattr(object, key, value)
+    record_to_return = table.PersonaRecord()
+    for key, value in data_pairs.items():
+        setattr(record_to_return, key, value)
 
-    return object
+    return record_to_return
 
 
 def do_referee_maintenance():
@@ -488,81 +512,50 @@ def do_referee_maintenance():
     things that referee's need to access and do
     """
 
-    if not say_yes_to("\nAre you a referee?"):  # referee check for fun 
+    # referee check for fun
+    if not say_yes_to("\nAre you a referee?"):
         a_persona_record.record_chooser()
 
-    record_type = choose_this(
-        ["Players", "Alien", "Anthro", "Robot", "Toy", "All"], "What records to search?"
-    )
-    object = collect_required_records(record_type)
+
+    object = collect_desired_record()
 
     maintenance_choice = "I like turtles"
     while maintenance_choice != "Exit":
-        pivoteer = object.FAMILY
-
         item_list = [
-            "EXPS Update",
-            "Level Update",
-            "Name Change",
-            "Review On Screen",
-            "PDF Update",
-            "PDF On Screen",
-            "PDF Backpage",
-            "Attribute Manipulation",
-            "Change Working Record",
-            "Exit",
+            "EXPS",
+            "Level",
+            "Name",
+            "Review",
+            "PDF",
+            "Attributes",
+            "Change Record",
         ]
         item_comment = f"What are you doing to {object.Persona_Name}?"
         maintenance_choice = choose_this(item_list, item_comment)
 
-        if maintenance_choice == "EXPS Update":
+        if maintenance_choice in ["EXPS","Level"]:
             vocation.update_persona_exps(object)
-            store_locally(object)
-            table.output_pivot_table[pivoteer][0](object)
 
-        elif maintenance_choice == "Level Update":
-            object.Level = int(input("\nPlease input your new Level value: "))
-            # function call to update Level in record
-            store_locally(object)
-            table.output_pivot_table[pivoteer][0](object)
-
-        elif maintenance_choice == "Name Change":
+        elif maintenance_choice == "Name":
             new_name = input("\nPlease input your new PERSONA Name: ")
-
             print(f"The new name for {object.Persona_Name} is {new_name}")
             print(f"File name {object.File_Name} does NOT change")
             setattr(object, "Persona_Name", new_name)
-            store_locally(object)
-            table.output_pivot_table[pivoteer][0](object)
+            store_this(object)
 
-        elif maintenance_choice == "Review On Screen":
-            table.output_pivot_table[pivoteer][1](object)
+        elif maintenance_choice == "Review":
+            outputs.outputs_workflow(object,"screen")
 
-        elif maintenance_choice == "PDF Update":
-            table.output_pivot_table[pivoteer][0](object)
+        elif maintenance_choice == "PDF":
+            outputs.outputs_workflow(object,"pdf")
 
-        elif maintenance_choice == "PDF Backpage":
-           table.output_pivot_table[pivoteer][3](object)
-
-
-        elif maintenance_choice == "PDF On Screen":
-            table.output_pivot_table[pivoteer][0](object)  # update the PDF
-            table.output_pivot_table[pivoteer][2](object)
-
-        elif maintenance_choice == "Attribute Manipulation":
+        elif maintenance_choice == "Attributes":
             attribute_manipulation(object)
 
-        elif maintenance_choice == "Change Working Record":
-            record_type = choose_this(
-                ["Players", "Alien", "Anthro", "Robot", "Toy", "All"],
-                "What record type?",
-            )
-            object = collect_required_records(record_type)
+        elif maintenance_choice == "Change Record":
+            object = collect_desired_record()
 
     return
-
-
-
 
 
 def clear_console() -> None:
@@ -582,9 +575,7 @@ def say_goodnight_marsha() -> None:
     Clears the console, prints a farewell message, and exits the program.
     """
     clear_console()
-
     print("".center(31, "*"))
     print("* Thank you for your service. *")
     print("".center(31, "*"), "\n") # "\n" added here to create a new line
-
     sys.exit()

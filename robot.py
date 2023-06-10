@@ -714,7 +714,7 @@ def combot(object: dict) -> None:
     elif object.Sub_Type == "Light Offensive":
 
         ### light offensive nomenclature
-        object.Sub_Type = "Light Offensive"
+        object.FAMILY_SUB = "Light Offensive"
 
         ### light offensive core values
         object.Adapt = -50

@@ -43,6 +43,7 @@ class PersonaRecord:
     RP: bool = False
     Otto: bool = False
     Show: bool = False
+    Bin: bool = False
     AWE: int = 0
     CHA: int = 0
     CON: int = 0
@@ -82,10 +83,12 @@ nil = {
     "die_roll": "1d100",
 }
 
+
+## plan is to deprecate these pivot tables from table and place in logic
 output_pivot_table = {
-    "Alien": [outputs.alien_pdf_creator, outputs.alien_review, outputs.pdf_opener, outputs.backpage_creator],
-    "Anthro": [outputs.anthro_pdf_creator, outputs.anthro_review, outputs.pdf_opener, outputs.backpage_creator],
-    "Robot": [outputs.robot_pdf_creator, outputs.robot_review, outputs.pdf_opener, outputs.backpage_creator],
+    "Alien": [outputs.alien_pdf_creator, outputs.alien_review],
+    "Anthro": [outputs.anthro_pdf_creator, outputs.anthro_review],
+    "Robot": [outputs.robot_pdf_creator, outputs.robot_review],
 }
 
 
@@ -2236,7 +2239,7 @@ introverted_personality = {
     range(31, 32): "Iconoclastic",
     range(32, 33): "Immoral",
     range(33, 34): "Imposing",
-    range(34, 61): "Insomia",
+    range(34, 61): "Insomnia",
     range(61, 62): "Iquisitive",
     range(62, 63): "Insensitive",
     range(63, 64): "Irreverent",
@@ -2334,7 +2337,7 @@ role_play_RP_religion = {
     range(61, 71): "Messiah",
     range(71, 81): "One creator",
     range(81, 91): "One creator plus hierarchy",
-    range(91, 102): "Nihilsm",
+    range(91, 102): "Nihilism",
     "name": "Role-Play RP Religion",
     "die_roll": "1d100",
 }
@@ -3634,11 +3637,11 @@ primary_robotic_peripheral = {
     range(73, 75): "Recording Equipment",
     range(75, 77): "Saw",
     range(77, 79): "Sewing",
-    range(79, 81): "Storage Comparments",
+    range(79, 81): "Storage Compartments",
     range(81, 83): "Super Stability",
     range(83, 85): "Tactics",
     range(85, 87): "Timekeeping",
-    range(87, 89): "Vacuum attachement",
+    range(87, 89): "Vacuum attachment",
     range(89, 91): "Video Playback",
     range(91, 93): "Hard Copy Printer",
     range(93, 95): "Choose",
@@ -3832,7 +3835,7 @@ shape_mangle = {
     range(1, 11): "elongated",
     range(11, 21): "flattened",
     range(21, 31): "inverted",
-    range(31, 41): "lobsided",
+    range(31, 41): "lopsided",
     range(41, 51): "involuted",
     range(51, 61): "oblong",
     range(61, 71): "rhombic",
@@ -3861,7 +3864,7 @@ adornage = {
     range(57, 61): "in and out protuberances",
     range(61, 65): "pointed protuberances",
     range(65, 69): "springy protuberances",
-    range(69, 73): "wobbley protuberances",
+    range(69, 73): "wobbly protuberances",
     range(73, 77): "gnarled protuberances",
     range(77, 81): "random sparks",
     range(81, 85): "random squirts",

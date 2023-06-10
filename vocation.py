@@ -270,12 +270,12 @@ def veterinarian(object):
     return
 
 
-# data for classes revomved from here
+# data for classes removed from here
 
 
 def list_eligible_vocations(object: dict) -> list:
     """
-    returns a list of eligibile vocations to choose one
+    returns a list of eligible vocations to choose one
     """
 
     # find eligible vocations for any attribute set
@@ -431,14 +431,14 @@ def exps_level_picker(object: dict) -> None:
     return
 
 
-def convert_levels_to_exps(object: dict) -> int:
+def convert_levels_to_exps(object: dict, new_level=0) -> int:
     """
     Returns an EXPS total based on the experience Level of the object
     does not alter object.
     """
 
     vocation = object.Vocation
-    level = object.Level
+    level = new_level if new_level > object.Level else object.Level
     top_level = table.vocation_exps_levels[vocation]["top_level"]
 
     if level > top_level:
@@ -451,31 +451,28 @@ def convert_levels_to_exps(object: dict) -> int:
         )
 
     else:
-
         for exps_range, level_number in table.vocation_exps_levels[vocation].items():
             if level == level_number:
                 exps_amount = int(
-                    (exps_range.stop - exps_range.start) / 2 + exps_range.start
+                    (exps_range[1] - exps_range[0]) / 2 + exps_range[0]
                 )
                 break
 
     return exps_amount
 
 
-def convert_exps_to_levels(object: dict) -> int:
+def convert_exps_to_levels(object: dict, new_exps = 0) -> int:
     """
     Generates an experience Level based on the EXPS of the object
     Does not alter object.
     """
 
     exps_table = table.vocation_exps_levels[object.Vocation]
-    exps_amount = object.EXPS
-
-    # print("\n\nyou get past assignment in levelizer")
-
+    exps_amount = object.EXPS + new_exps
     top = exps_table["top_amount"]
     top_level = exps_table["top_level"]
     rate = exps_table["rate"]
+
     if exps_amount > top:
         new_level = top_level + round((exps_amount - top) / rate)
     else:
@@ -485,79 +482,6 @@ def convert_exps_to_levels(object: dict) -> int:
                 break
 
     return new_level
-
-
-def update_persona_exps(object: dict) -> None:
-    """
-    increases EXPS or Level and adjust object accordingly
-    """
-    initial_exps = object.EXPS
-    initial_level = object.Level
-
-    comment_list = [
-        "Increasing EXPS from a SESSION",
-        "Increasing a LEVEL",
-        "Setting a fresh EXPS Total",
-    ]
-    experience = please.choose_this(comment_list, "Please select upgrade method.")
-
-    if experience == "Increasing EXPS from a SESSION":
-        session_exps = int(
-            input(f"Present EXPS is {initial_exps}. How much EXPS do you want to add? ")
-        )
-        session_exps = 42 if session_exps < 1 else session_exps
-        object.EXPS = initial_exps + session_exps
-        object.Level = convert_exps_to_levels(object)
-
-    elif experience == "Increasing a LEVEL":
-        new_level = int(
-            input(
-                f"Present Level is {object.Vocation} {initial_level}. What is the NEW LEVEL? "
-            )
-        )
-        if new_level - initial_level > 1:
-            if please.say_yes_to(
-                f"Do you really want to jump from {initial_level} level to {new_level} level?"
-            ):
-                print(f"New level will be a {new_level} level {object.Vocation}")
-            else:
-                print("Ok, 'll keep it the same")
-                new_level = initial_level
-
-        new_level = 0 if new_level < 1 else new_level
-        object.Level = new_level
-
-        if please.say_yes_to("Do you want to update EXPS for the new level?"):
-            object.EXPS = convert_levels_to_exps(object)
-
-    elif experience == "Setting a fresh EXPS Total":
-        new_exps = int(
-            input(f"Present EXPS Total is {initial_exps}. What is the new EXPS Total? ")
-        )
-        new_exps = 42 if new_exps < 42 else new_exps
-
-        if please.say_yes_to("Do you want to update the LEVEL for the new EXPS TOTAL?"):
-            object.Level = convert_exps_to_levels(object)
-
-    if not please.say_yes_to(
-        f"{object.Persona_Name}:  Level: {initial_level} -> {object.Level} and EXPS Total: {initial_exps} -> {object.EXPS}"
-    ):
-        object.EXPS = initial_exps
-        object.Level = initial_level
-        update_persona_exps(object)
-
-    level_increase = object.Level - initial_level
-
-    if (
-        object.Vocation in [key for key in table.attributes_improve_by_vocation.keys()]
-        and level_increase > 0
-    ):
-        # gifts are updated on the fly as the results are fixed
-        update_interests(object, level_increase)
-        update_skills(object, level_increase)
-        return
-
-    return
 
 
 def update_gifts(object: dict) -> str:
@@ -640,7 +564,7 @@ def fresh_skills(object: dict, skill_rolls: int) -> list:
 
 def update_interests(object: dict, interest_rolls: int) -> list:
     """
-    expand the interests of the persona by choice or random
+    returns a list to EXTEND object.Interests using object.Vocation and increase in level
     """
 
     ### create a list of all interests
@@ -683,6 +607,78 @@ def update_interests(object: dict, interest_rolls: int) -> list:
 
     return interest_list
 
+
+def update_persona_exps(record_to_update: dict) -> None:
+    """
+    increases EXPS or Level and adjust record_to_update accordingly
+    """
+    initial_exps = record_to_update.EXPS
+    initial_level = record_to_update.Level
+    vocation = record_to_update.Vocation
+
+    comment_list = [
+        "Change EXPS",
+        "Change LEVEL",
+        "Reset EXPS",
+    ]
+    experience = please.choose_this(comment_list, f"Presently {vocation} level {initial_level} with {initial_exps} EXPS.")
+
+    if experience == "Change EXPS":
+        session_exps = int(
+            input(f"Present EXPS is {initial_exps}. How much EXPS do you want to add? ")
+        )
+        session_exps = 42 if session_exps < 1 else session_exps #protects from negative EXPS
+        new_level = convert_exps_to_levels(record_to_update, session_exps)
+        new_exps = initial_exps + session_exps
+
+    elif experience == "Change LEVEL":
+        new_level = int(
+            input(
+                f"Present Level is {vocation} {initial_level}. What is the NEW LEVEL? "
+            )
+        )
+        new_level = initial_level if new_level < 1 else new_level #protects from negative LVL
+        new_exps = convert_levels_to_exps(record_to_update, new_level)
+
+        # record_to_update.Level = new_level
+
+
+    elif experience == "Reset EXPS":
+        new_exps = int(
+            input(f"Present EXPS Total is {initial_exps}. What is the new EXPS TOTAL? ")
+        )
+        new_exps = 42 if new_exps < 42 else new_exps # protects from negative EXPS
+        new_level = convert_exps_to_levels(record_to_update)
+
+        if not please.say_yes_to(f"{vocation} Level: {initial_level} -> {new_level} and EXPS: {initial_exps} -> {new_exps}"):
+            update_persona_exps(record_to_update)
+
+    ### change the values or start again
+    if  please.say_yes_to(
+        f"{vocation} Level: {initial_level} -> {new_level} and EXPS: {initial_exps} -> {new_exps}"
+    ):
+        record_to_update.EXPS = new_exps
+        record_to_update.Level = new_level
+        please.store_this(record_to_update)
+    else:
+        update_persona_exps(record_to_update)
+
+    ### check for adding abilities via vocation
+    level_increase = record_to_update.Level - initial_level
+
+    ### only makes changes for vocations, not aliens or robots
+    if (
+        record_to_update.Vocation in [key for key in table.attributes_improve_by_vocation.keys()]
+        and level_increase > 0
+    ):
+        # gifts are updated on the fly as the results are fixed
+        new_interests = update_interests(record_to_update, level_increase)
+        record_to_update.Interests.extend(new_interests)
+        new_skills = update_skills(record_to_update, level_increase)
+        record_to_update.Skills.extend(new_skills)
+        please.store_this(record_to_update)
+
+    return
 
 def update_skills(object: dict, skill_rolls: int) -> list:
     """

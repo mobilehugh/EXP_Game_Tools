@@ -677,7 +677,7 @@ class LightWaveManipulation(Mutation):
         self.add_mutation()
 
     def build_desc(self):
-        return "Manipulate the light around onself."
+        return "Manipulate the light around oneself."
 
 
 class MagneticControl(Mutation):
@@ -1221,7 +1221,7 @@ class RepulsionFieldGeneration(Mutation):
 
     def build_desc(self):
         spares = math.floor(self.object.Level / 2)
-        return f"Fell organics with nauseaous incapacitation spare {spares} personas."
+        return f"Fell organics with nauseous incapacitation spare {spares} personas."
 
 
 class Restoration(Mutation):
@@ -1915,7 +1915,7 @@ class DoublePhysicalPain(Mutation):
         self.add_mutation()
 
     def build_desc(self):
-        return "Pain is doubled, add 2d8 HPS damage. Heal twicas fast."
+        return "Pain is doubled, add 2d8 HPS damage. Heal twice as fast."
 
 
 class EdibleTissue(Mutation):
@@ -2055,7 +2055,7 @@ class Haste(Mutation):
         self.add_mutation()
 
     def build_desc(self):
-        return f"Double speed of everythging. Move at {self.object.Move * 2} h/u."
+        return f"Double speed of everything. Move at {self.object.Move * 2} h/u."
 
 
 class HeatGeneration(Mutation):
@@ -2449,7 +2449,7 @@ class MultipleBodyParts(Mutation):
 
         elif multi_part == "Head":
             cha_bump = -4
-            self.perm = f"Mutant has a semi-autonomous, unhideable extra head."
+            self.perm = f"Mutant has a semi-autonomous, unhidable extra head."
             if please.say_yes_to(
                 f"Multiple body parts {multi_part} has a CHA penalty of {cha_bump}. APPLY it?"
             ):
@@ -2522,7 +2522,7 @@ class NewOrgan(Mutation):
         some_thing = self.object.Mutations[self.name]
         some_thing_else = ""
 
-        if some_thing == "Blood Draining Probiscus:":
+        if some_thing == "Blood Draining Proboscis:":
             some_thing_else = f"Drains {self.object.Level}d6 HPS per unit."
 
         elif some_thing == "Electricity Storing Organ:":
@@ -2663,7 +2663,7 @@ class OversizedBodyPart(Mutation):
             elif big_booty == "Legs":
                 if please.say_yes_to("Oversized legs gives +2 PSTR. APPLY? "):
                     self.object.PSTR += 2
-                if please.say_yes_to("Oversized legs gives Move bous. APPLY? "):
+                if please.say_yes_to("Oversized legs gives Move bonus. APPLY? "):
                     self.object.Move = math.ceil(self.object.Move * 1.5)
 
     def build_desc(self):
@@ -2748,7 +2748,7 @@ class Pockets(Mutation):
 
     def build_desc(self):
         some_thing = math.ceil(self.object.Wate * 0.05)
-        return f"Create body pockets. Total storate wate is {some_thing} kgs."
+        return f"Create body pockets. Total storage wate is {some_thing} kgs."
 
 
 class PressurizedBody(Mutation):
@@ -3098,7 +3098,7 @@ class StrangeNewBodyPart(Mutation):
         some_thing_else = ""
 
         if some_thing in [
-            "Ears fold up and down accordian like.",
+            "Ears fold up and down accordion like.",
             "Eyes are concave reflectors.",
         ]:
             some_thing_else = f"AWE {2* self.object.AWE} vs ambush."
