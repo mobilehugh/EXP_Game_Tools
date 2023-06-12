@@ -7,10 +7,8 @@ smart people required
 
 from dataclasses import dataclass, field
 
-
-
 # ugly import all needed for functions listed in these tables
-import outputs
+
 from mutations import *
 from robot import (
     android,
@@ -25,8 +23,7 @@ from robot import (
     rescue,
     social,
     transport,
-    veterinarian,
-)
+    veterinarian,)
 
 @dataclass
 class PersonaRecord:
@@ -79,15 +76,6 @@ nil = {
     range(90, 101): "Nil Oops",
     "die_roll": "1d100",
 }
-
-
-## plan is to deprecate these pivot tables from table and place in logic
-output_pivot_table = {
-    "Alien": [outputs.alien_pdf_creator, outputs.alien_review],
-    "Anthro": [outputs.anthro_pdf_creator, outputs.anthro_review],
-    "Robot": [outputs.robot_pdf_creator, outputs.robot_review],
-}
-
 
 ##############################################
 # ANTHRO TABLES

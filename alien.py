@@ -1,7 +1,5 @@
 import math
-import os
 
-import a_persona_record
 import please
 import table
 import anthropomorph
@@ -31,11 +29,9 @@ def alien_workflow() -> None:
     if plan_desired in option_function_map:
         option_function_map[plan_desired]()
 
-
 ####################################
 # FRESH ALIEN FUNCTIONS
 ####################################
-
 
 def alien_attributes_fresh(object):
     """
@@ -660,11 +656,9 @@ def alien_nomenclature(object):
 
     return
 
-
 ####################################
 # BESPOKE ALIEN FUNCTIONS
 ####################################
-
 
 def alien_size_bespoke(object: dict) -> None:
     """
@@ -1185,7 +1179,6 @@ def fresh_alien():
     please.record_storage(fresh)
     return
 
-
 #####################################
 # build a BESPOKE alien persona
 #####################################
@@ -1243,7 +1236,6 @@ def bespoke_alien():
     outputs.alien_review(bespoke)
     please.record_storage(bespoke)
     return
-
 
 #####################################
 # build a RANDO alien persona

@@ -19,7 +19,7 @@ def outputs_workflow(record, out_type: str) -> None:
     if family_type == "Anthro" and out_type == "screen":
         anthro_review(record)
     elif family_type == "Anthro" and out_type == "pdf":
-        anthro_pdf_creator(record)
+        anthro_pdf_chooser(record)
     elif family_type == "Alien" and out_type == "screen":
         alien_review(record)
     elif family_type == "Alien" and out_type == "pdf":
@@ -1552,14 +1552,27 @@ def anthro_review(object):
 
     return
 
-
-
-
 #####################################
 # ANTHRO output to PDF
 #####################################
 
+def anthro_pdf_chooser(object) -> None:
+    function_map = {
+        "One Shot - Two sided": anthro_pdf_creator,
+        "Campaign - One sided": anthro_pdf_creator,
+        "Equipment sheet": anthro_pdf_creator,
+        "Notes sheet": anthro_pdf_creator,
+    }
+
+    choice_list = [key for key in function_map]
+    function_chosen  = please.choose_this(choice_list, "PDF type needed? ")
+    function_map[function_chosen](object)
+    
+
+
+
 def anthro_pdf_creator(object):
+
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
     pdf.set_margin(0)  # set margins to 0
 
@@ -1582,38 +1595,17 @@ def anthro_pdf_creator(object):
     pdf.note_lines()
     pdf.id_data(object)
 
-    ''' 
-    sub_directory = "Referee" if object.RP else "Players"
-    pdf_name = f"./Records/{sub_directory}/{object.File_Name}.pdf"
-    pdf.output(
-        name=pdf_name,
-        dest="F",
-    )
-    print(f"\n***PDF stored at ./Records/{sub_directory}/{object.File_Name}.pdf")
-    '''
-
     pdf.output(
         name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
         dest="F",
     )
     show_pdf()
-
-    '''program_folder = os.path.dirname(sys.executable)
-    print(program_folder)
-    print()
-    print("file:///C:/Users/mobil/Documents/EXP_Game_Tools/Records/Bin/")
-
-    input("did you catch that program folder?")
-
-    webbrowser.get().open_new(f"file:///C:/Users/mobil/Documents/EXP_Game_Tools/Records/Bin/last_output.pdf")
-    '''
     return
 
 
 #####################################
 # ALIEN output to screen
 #####################################
-
 
 def alien_review(alien):
     """

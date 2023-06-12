@@ -12,8 +12,8 @@ from collections import Counter
 
 import a_persona_record
 import table
-from table import PersonaRecord
-import toy
+#from table import PersonaRecord
+#import toy
 import vocation
 import outputs
 import mutations
@@ -443,7 +443,7 @@ def attribute_manipulation(object: table.PersonaRecord) -> None:
     return
 
 
-def assign_id_and_file_name(persona_record: PersonaRecord) -> None:
+def assign_id_and_file_name(persona_record: table.PersonaRecord) -> None:
     """
     Assigns an ID and  File_name to persona_record for the very first time. like a version...
     I think this is only used once per record

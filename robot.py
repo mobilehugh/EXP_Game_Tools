@@ -1,7 +1,6 @@
 import math
 import secrets
 
-import a_persona_record
 import anthropomorph
 import outputs
 import please
@@ -22,11 +21,10 @@ def robot_workflow():
         "Bespoke Robot":bespoke_robot,
         "Random Robot":rando_robot,
         "Maintenance":please.do_referee_maintenance,
-        "Back":a_persona_record.record_chooser,
     }
 
     list_comment = "Choose a robot workflow:"
-    option_list = list(workflow_function_map.keys())
+    option_list = list(workflow_function_map.keys()) # fix does not guarantee [0] default
     workflow_desired = please.choose_this(option_list, list_comment)
 
     if workflow_desired in workflow_function_map:

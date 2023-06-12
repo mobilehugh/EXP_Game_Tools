@@ -1,15 +1,14 @@
 import math
-import please
-import table
 import secrets
 
+import please
+import table
 
 #########################################################
 #                                                       #
 #        vocation functions                             #
 #                                                       #
 #########################################################
-
 
 def biologist(object: dict) -> None:
     """
@@ -377,13 +376,11 @@ def set_up_first_time(object):
 
     return
 
-
 #########################################################
 #                                                       #
 #        Level/EXPS Management                          #
 #                                                       #
 #########################################################
-
 
 def exps_level_bespoke(object: dict) -> None:
     """

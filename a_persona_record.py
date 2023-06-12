@@ -7,12 +7,12 @@ Yet to come: full robots, TOYs and isolated mutations.
 exp.sciencyfiction.com
 """
 
-import alien
-import anthropomorph
-import mutations
-import please
-import robot
-import toy
+import  alien
+import  anthropomorph
+import  mutations
+import  robot 
+import  toy 
+import  please
 
 def record_chooser():
     """
@@ -38,10 +38,7 @@ def record_chooser():
         choices_comment = "What do you want to do? "
         choices = list(choices_function_map.keys())
         record_type_desired = please.choose_this(choices, choices_comment)
-          
-
-        # restore default key to work in choices_function_map
-
+        
         if record_type_desired in choices_function_map:
             choices_function_map[record_type_desired]()
 

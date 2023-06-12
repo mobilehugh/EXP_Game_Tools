@@ -15,7 +15,6 @@ def toy_workflow() -> None:
         "Fresh Toy":fresh_toy, 
         "Bespoke Toy":fresh_toy,
         "Maintenance":fresh_toy, 
-        "Back":a_persona_record.record_chooser
         }
 
     list_comment = "Choose a TOY workflow:"

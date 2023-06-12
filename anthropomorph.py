@@ -30,7 +30,6 @@ def anthro_workflow() -> None:
     if anthro_record_type in workflow_function_map:
         workflow_function_map[anthro_record_type]()
 
-
 ####################################
 # FRESH ANTHRO FUNCTIONS
 ####################################
@@ -269,17 +268,12 @@ def determine_anthro_wate_allowance(object):
     return
 
 
-def anthro_move(object):
+def anthro_move(object: table.PersonaRecord)-> None:
     """
     dexterity determines movement rate
     """
-
-    if "Move" in object.__dict__:
-        pass
-        # print(f"Persona's move is {object.Move}")
-    else:
-        object.Move = table.anthro_movement_rate_and_DEX[object.DEX]
-        # print(f"Persona's move is {object.Move} h/u")
+    object.Move = table.anthro_movement_rate_and_DEX[object.DEX]
+    # print(f"Persona's move is {object.Move} h/u")
     return
 
 
@@ -470,11 +464,9 @@ def anthro_persona_name_fresh(object):
 
     return
 
-
 ####################################
 # BESPOKE ANTHRO FUNCTIONS
 ####################################
-
 
 def bespoke_anthro_attribute_ranges(object):
     """
@@ -869,6 +861,7 @@ def build_RP_role_play(object):
 
 #####################################
 # build a FRESH anthro persona
+# choices within the context of rolls
 #####################################
 
 def fresh_anthro():
@@ -886,7 +879,6 @@ def fresh_anthro():
     ### get mundane terran name of the player
     fresh.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
 
-    ### build list of functions
     anthro_attributes_fresh(fresh)
     anthro_hit_points_fresh(fresh)
     adjust_mstr_by_int(fresh)
@@ -908,9 +900,9 @@ def fresh_anthro():
     please.record_storage(fresh)
     return
 
-
 #####################################
 # build a BESPOKE anthro persona
+# choices that reflect story needs
 #####################################
 
 def bespoke_anthro():
@@ -1001,9 +993,9 @@ def bespoke_anthro():
     please.record_storage(bespoke)
     return
 
-
 #####################################
 # build a RANDOM anthro persona
+# does not stop uses RP flag
 #####################################
 
 def random_anthro():
