@@ -4,9 +4,11 @@ import table
 import secrets
 
 
-""" 
-huge code clean up here. replace gifts, interests and skills with update_gifts, update_interests and update_skills
-"""
+#########################################################
+#                                                       #
+#        vocation functions                             #
+#                                                       #
+#########################################################
 
 
 def biologist(object: dict) -> None:
@@ -268,9 +270,6 @@ def veterinarian(object):
     # object.Skills = skill_list
 
     return
-
-
-# data for classes removed from here
 
 
 def list_eligible_vocations(object: dict) -> list:
@@ -679,6 +678,7 @@ def update_persona_exps(record_to_update: dict) -> None:
         please.store_this(record_to_update)
 
     return
+
 
 def update_skills(object: dict, skill_rolls: int) -> list:
     """
