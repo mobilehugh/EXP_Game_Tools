@@ -16,6 +16,7 @@ from table import PersonaRecord
 import toy
 import vocation
 import outputs
+import mutations
 
 
 """ 
@@ -28,7 +29,6 @@ These are helper functions that are used by all record types
 # dice rolling functions
 #
 ###########################################
-
 
 def roll_this(die_roll_string: str) -> int:
     """
@@ -91,6 +91,7 @@ def roll_this(die_roll_string: str) -> int:
 
     return result
 
+
 def do_1d100_check(number: int) -> bool:
     """
     Checks to see if 1d100 is less than or equal to the argument
@@ -110,19 +111,15 @@ def choose_this(choices: list, message: str) -> str:
     quit or restart or chastise the user
     """
 
-    restart_commands = ["back", "reset", "restart", "RESET"]
-    quit_commands = ["quit", "q", "exit", "QUIT"]
-
     # [0] is default, sort, reinsert default and add directions
     default = choices.pop(0)
     choices.sort()
     choices.insert(0,default)
-    choices.extend(["RESET","QUIT"])
 
     while True:
         # if only one choice on list return that choice automatically
         # the option to reset or quit is no given 
-        if len(choices) < 4:
+        if len(choices) < 2:
             choice = choices[0]
             break
 
@@ -131,7 +128,7 @@ def choose_this(choices: list, message: str) -> str:
         for idx, option in enumerate(choices, start=1):
             print(f"{idx}) {option}")
 
-        choice = input(f"Please choose from above [{choices[0]}]: ")
+        choice = input(f"Please choose from above [R-reset][Q-quit] [Ret->{choices[0]}]: ")
 
         if not choice:
             choice = "1"
@@ -144,11 +141,11 @@ def choose_this(choices: list, message: str) -> str:
                 print("\nPlease select a valid number.", end="")
                 continue
 
-        if choice in quit_commands:
+        if choice == "Q":
             say_goodnight_marsha()
             break
 
-        if choice in restart_commands:
+        if choice == "R":
             a_persona_record.record_chooser()
             break
 
@@ -169,6 +166,12 @@ def say_yes_to(question: str) -> bool:
     choice = choose_this(["Yes", "No"], question)
     return True if choice == "Yes" else False
 
+def say_no_to(question: str) -> bool:
+    """
+    question string with boolean return
+    """
+    choice = choose_this(["No", "Yes"], question)
+    return True if choice == "No" else False    
 
 
 def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
@@ -198,16 +201,13 @@ def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
 
     return table_choice
 
-
-
 ###########################################
 #
 # dict and list manipulations
 #
 ###########################################
 
-
-def show_me_your_dict(dinkie: object) -> None:
+def show_me_your_dict(dinkie: table.PersonaRecord) -> None:
     """
     Prints out the dict or object's attribute dictionary.
     should this be deprecated
@@ -289,13 +289,11 @@ def collate_this(skill_list: list) -> list:
 
     return collated_list
 
-
 ##############################################
 #
 # persona record storage and manipulations
 #
 ##############################################
-
 
 def store_this(record_to_store: table.PersonaRecord) -> None:
     """
@@ -378,41 +376,69 @@ def record_storage(record_to_store: table.PersonaRecord) -> None:
         return
 
 
-
-def attribute_manipulation(object: dict) -> None:
+def attribute_manipulation(object: table.PersonaRecord) -> None:
     """
     change almost any value in the persona record dict
+    it is really easy to break the json with this function
+    needs tonnes of tard protection
     """
-
-    if say_yes_to("you ain't cheatin are ya?"):
-        a_persona_record.record_chooser()
 
     immutable_attributes = [
         "File_Name",
+        "Player_Name",
         "FAMILY",
         "ID",
-        "Date_Create",
-        "Mental_Mutations",
-        "Physical_Mutations",
-        "Interests",
-        "Skills",
+        "Date_Created",
+        "RP",
+        "Otto",
+        "Show",
+        "Bin"
     ]
 
     for key, value in object.__dict__.items():
-        if key not in immutable_attributes:
-            choices = ["No", "Yes", "Exit"]
-            choice_comment = f"{key} is {value} do you want to change this?"
-            choice = choose_this(choices, choice_comment)
-            if choice == "Yes":
-                new_value = input(f"Please enter new value for {key}: ")
-                if say_yes_to(
-                    f"please confirm changing {key} from {value} to {new_value}?"
-                ):
-                    setattr(object, key, new_value)
-            elif choice == "Exit":
-                break
+        print()
+        if key in immutable_attributes:
+            print(f'{key} == {value} <- DANGER changing this will wreck stuff')
+            if key in ["ID", "Date_Created","RP","Otto","Show","Bin"]:
+                print(f'{key} is immutable')
+                continue #leaves to dodge changing immutables
 
-    store_this(object)
+        if key == "Mutations":
+            if say_yes_to(f'Do you wanna change {key}? '):
+                mutations.pick_bespoke_mutation(object)
+                store_this(object)
+            else:
+                continue
+        
+        if isinstance(value, list):
+            print(f'{key} is a list. You are extending a list')
+            print(f'{key} == {value}')
+            if say_no_to(f'Do you wanna extend {key}? '):
+                continue
+            
+            done = False
+            element_list = []
+            while not done:
+                new_element = input("What is the new element? ")
+                element_list.append(new_element)
+                if say_no_to(f'Add another element to {element_list}? '):
+                    break
+            print()
+            print(f'Adding {element_list} to {value}')
+            object.__dict__[key] = value.extend(element_list)
+            store_this(object)
+
+        else: 
+            print(f'{key} == {value}')
+            if say_no_to(f'wanna change {key} from {value} '):
+                continue
+
+            new_attribute = input(f'What is the new value for {key}? ')
+            print(f'Changing {key} from {value} -> {new_attribute}')
+            if isinstance(value, int):
+                new_attribute= int(new_attribute)
+            object.__dict__[key] = new_attribute
+            store_this(object)
 
     return
 
@@ -516,44 +542,30 @@ def do_referee_maintenance():
     if not say_yes_to("\nAre you a referee?"):
         a_persona_record.record_chooser()
 
-
     object = collect_desired_record()
+
+    operations = {
+    "EXPS": vocation.update_persona_exps,
+    "Level": vocation.update_persona_exps,
+    "Review": lambda object: outputs.outputs_workflow(object, "screen"),
+    "PDF": lambda object: outputs.outputs_workflow(object, "pdf"),
+    "Attributes": attribute_manipulation,
+    "Change Record": lambda _: collect_desired_record(),
+}
+    operation_list = [key for key in operations]
 
     maintenance_choice = "I like turtles"
     while maintenance_choice != "Exit":
-        item_list = [
-            "EXPS",
-            "Level",
-            "Name",
-            "Review",
-            "PDF",
-            "Attributes",
-            "Change Record",
-        ]
         item_comment = f"What are you doing to {object.Persona_Name}?"
-        maintenance_choice = choose_this(item_list, item_comment)
+        maintenance_choice = choose_this(operation_list, item_comment)
 
-        if maintenance_choice in ["EXPS","Level"]:
-            vocation.update_persona_exps(object)
-
-        elif maintenance_choice == "Name":
-            new_name = input("\nPlease input your new PERSONA Name: ")
-            print(f"The new name for {object.Persona_Name} is {new_name}")
-            print(f"File name {object.File_Name} does NOT change")
-            setattr(object, "Persona_Name", new_name)
-            store_this(object)
-
-        elif maintenance_choice == "Review":
-            outputs.outputs_workflow(object,"screen")
-
-        elif maintenance_choice == "PDF":
-            outputs.outputs_workflow(object,"pdf")
-
-        elif maintenance_choice == "Attributes":
-            attribute_manipulation(object)
-
-        elif maintenance_choice == "Change Record":
-            object = collect_desired_record()
+        operation = operations.get(maintenance_choice)
+        if operation is not None:
+            operation(object)
+            continue
+        else:
+            print("operation missing")
+            say_goodnight_marsha()
 
     return
 

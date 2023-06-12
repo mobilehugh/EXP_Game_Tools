@@ -151,10 +151,6 @@ class Absorption(Mutation):
         self.hps_absorbed = self.object.HPM + self.object.Level * 3
         return f"Absorb {self.hps_absorbed} HPS from {self.perm} attacks."
 
-
-
-
-
 class AlternateBanishment(Mutation):
     def __init__(self, object):
         self.is_mental = True
@@ -3265,7 +3261,7 @@ def mutation_workflow():
 
 
 
-def make_pivot_table():
+def list_all_mutations():
     mental_comprehension = {
         name[0]: name[1]
         for (lose, name) in table.mental_mutation_random.items()
@@ -3289,7 +3285,7 @@ def single_random_mutation(object):
     else:
         object.Mutations = {}
 
-    all_mutations = make_pivot_table()
+    all_mutations = list_all_mutations()
     choice_list = list(all_mutations)
     mutation_chosen = secrets.choice(choice_list)
 
@@ -3317,13 +3313,13 @@ def pick_bespoke_mutation(object):
     else:
         object.Mutations = {}
 
-    all_mutations = make_pivot_table()
+    all_mutations = list_all_mutations()
 
     choice_list = sorted(list(all_mutations))
     choice_comment = "Here is a list of all mutations?"
     mutation_chosen = please.choose_this(choice_list, choice_comment)
 
-    if please.say_yes_to(f"Do you want to add {mutation_chosen}?"):
+    if please.say_yes_to(f"Do you want to add {mutation_chosen}? "):
         working_mutation = all_mutations[mutation_chosen](object)
         print(working_mutation)
 

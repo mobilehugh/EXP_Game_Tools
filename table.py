@@ -37,9 +37,7 @@ class PersonaRecord:
     Persona_Name: str = "Nobody"
     FAMILY: str = "Anthro"
     FAMILY_TYPE: str = "Humanoid"
-    FAMILY_SUB: str = ""
-    Anthro_Type: str = "None" # to be deprecated
-    sub_type: str = "None" # to be deprecated
+    FAMILY_SUB: str = "Generalis"
     RP: bool = False
     Otto: bool = False
     Show: bool = False
@@ -58,7 +56,6 @@ class PersonaRecord:
     Age_Cat: str = "None"
     Age: int = 0
     Size_Cat: str = "Medium"
-    Anthro_Size: str = "Medium" # to be deprecated
     Hite: int = 0
     Wate: int = 0
     Vocation: str = "Nothing"

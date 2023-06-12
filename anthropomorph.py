@@ -4,7 +4,6 @@ import secrets
 import please
 import table
 import vocation
-import a_persona_record
 
 import outputs
 import mutations
@@ -233,7 +232,7 @@ def anthro_size_fresh(object):
 
     object.Hite = Hite
     object.Wate = Wate
-    object.Anthro_Size = "Medium"  # correct anthro size to actual size of medium
+    object.Size_Cat = "Medium"  # correct anthro size to actual size of medium
     return
 
 
@@ -256,7 +255,7 @@ def anthro_size_rando(object):
 
     object.Hite = Hite
     object.Wate = Wate
-    object.Anthro_Size = "Medium"  # correct anthro size to actual size of medium
+    object.Size_Cat = "Medium"  # correct anthro size to actual size of medium
     return
 
 
@@ -943,7 +942,7 @@ def bespoke_anthro():
         42 if bespoke.Level == 1 else vocation.convert_levels_to_exps(bespoke)
     )
 
-    ### add additional interests and skills (gifts are dynamically anthrod)
+    ### add additional interests and skills (gifts are dynamic )
     if bespoke.Level > 1:
         print(f"You have {bespoke.Level - 1} extra interest(s) and skill(s) to add.")
         bespoke.Interests.extend(
@@ -998,7 +997,7 @@ def bespoke_anthro():
     if please.say_yes_to("Do you want to change the RP PERSONA NAME? "):
         bespoke.Persona_Name = input("Please re-name the RP: ")
 
-    ### ultimage RP disposition
+    ### ultimate RP disposition
     please.record_storage(bespoke)
     return
 
@@ -1031,7 +1030,7 @@ def random_anthro():
     rando.Anthro_Type = secrets.choice(
         [x for x in table.anthro_ages_by_category_and_type]
     )
-    rando.Anthro_Sub_Type = secrets.choice(table.anthro_sub_types[rando.Anthro_Type])
+    rando.FAMILY_SUB = secrets.choice(table.anthro_sub_types[rando.Anthro_Type])
 
     adjust_attributes_by_anthro_type(rando)
     anthro_size_rando(rando)
@@ -1061,6 +1060,6 @@ def random_anthro():
     please.assign_id_and_file_name(rando)
     outputs.anthro_review(rando)
 
-    ### ultimage persona disposition
+    ### ultimate persona disposition
     please.record_storage(rando)
     return

@@ -657,7 +657,7 @@ class PDF(FPDF):
             self.set_font("Helvetica", size=9)
             line_height = self.font_size * 1.25
 
-            all_mutations = mutations.make_pivot_table()
+            all_mutations = mutations.list_all_mutations()
 
             for name in sorted(self.object.Mutations.keys()):
                 working_mutation = all_mutations[name](self.object)
@@ -921,7 +921,7 @@ class PDF(FPDF):
             self.set_font("Helvetica", size=9)
             line_height = self.font_size * 1.25
 
-            all_mutations = mutations.make_pivot_table()
+            all_mutations = mutations.list_all_mutations()
 
             for name in sorted(self.object.Mutations.keys()):
                 working_mutation = all_mutations[name](self.object)
@@ -1539,7 +1539,7 @@ def anthro_review(object):
         print("None")
 
     else:
-        all_mutations = mutations.make_pivot_table()
+        all_mutations = mutations.list_all_mutations()
 
         for name, perm in sorted(object.Mutations.items()):
             working_mutation = all_mutations[name](object)
@@ -1688,7 +1688,7 @@ def alien_review(alien):
         print("None")
 
     else:
-        all_mutations = mutations.make_pivot_table()
+        all_mutations = mutations.list_all_mutations()
 
         for name, perm in sorted(alien.Mutations.items()):
             working_mutation = all_mutations[name](alien)
