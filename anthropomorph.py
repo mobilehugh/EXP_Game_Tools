@@ -1,5 +1,6 @@
 import math
 import secrets
+import types
 
 import please
 import table
@@ -7,7 +8,7 @@ import vocation
 
 import outputs
 import mutations
-from mutations import *
+#from mutations import *
 
 
 def anthro_workflow() -> None: 
@@ -298,7 +299,7 @@ def anthro_age_fresh(object):
     return
 
 
-def anthro_mutations_fresh(object):
+def anthro_mutations_fresh(object: table.PersonaRecord) -> None:
     """
     check for mutations based on player desire and anthro type
     """
@@ -331,10 +332,10 @@ def anthro_mutations_fresh(object):
 
         fresh_amount = 0
         while fresh_amount < mutation_number:
-            working_mutation = please.get_table_result(table.mental_mutation_random)[1](
-                object
-            )
-            print(working_mutation)
+            mutation_tuple = please.get_table_result(table.mental_mutation_random)
+            print(mutation_tuple[0])
+            print(mutation_tuple[1].build_desc(object))
+            working_mutation = mutation_tuple[1](object)
             fresh_amount += 1
 
             if working_mutation.kind == "defect" and object.FAMILY_TYPE== "Purestrain":
@@ -359,10 +360,10 @@ def anthro_mutations_fresh(object):
         fresh_amount = 0
         # number of mutations is random based on anthro type
         while fresh_amount < mutation_number:
-            working_mutation = please.get_table_result(table.physical_mutation_random)[
-                1
-            ](object)
-            print(working_mutation)
+            mutation_tuple = please.get_table_result(table.physical_mutation_random)
+            print(mutation_tuple[0])
+            print(mutation_tuple[1].build_desc(object))
+            working_mutation = mutation_tuple[1](object)
             fresh_amount += 1
 
             if working_mutation.kind == "defect" and object.FAMILY_TYPE== "Purestrain":
@@ -983,6 +984,7 @@ def bespoke_anthro():
     ### generate RP storage data including temporary name
     bespoke.Persona_Name = input("\nPlease input a name for your anthro Persona? ")
     please.assign_id_and_file_name(bespoke)
+
     outputs.anthro_review(bespoke)
 
     # rename check

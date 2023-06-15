@@ -1132,7 +1132,6 @@ undersized_body_part = {
 # VOCATION TABLES
 ###############################################
 
-
 # BIOLOGIST Gifts, Interests and Skills
 
 biologist_gifts = {

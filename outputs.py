@@ -34,6 +34,49 @@ def outputs_workflow(record, out_type: str) -> None:
         print("this doesn't exist yet")
     return
 
+################################################
+#
+# laws of fpdf
+#
+################################################
+
+'''
+origin point (0, 0) is located at the top-left corner of the page.
+The x-coordinate increases as you move to the right and represents the width of the page.
+The y-coordinate increases as you move down and represents the height of the page.
+US letter size, the dimensions are 215.9 x 279.4 millimeters.
+
+#### ->  MM note pixels so 5.5 etc ####
+arial 12 space = 1.8 mm 
+
+to center a circle abscissa and ordinate represent a bounding box not x,y center of circle
+hence this shite: 
+
+circle(
+    (x - radius / 2),
+    (y - radius / 2),
+    radius,
+    "D",
+        )
+
+and... 
+
+Parameters for line: (x1, y1, x2, y2) where (x1, y1) is start point and (x2, y2) is end point
+self.line(50, 50, 70, 70)  # Line 1: from point (50, 50) to point (70, 70)
+self.line(50, 70, 70, 50)  # Line 2: from point (50, 70) to point (70, 50)
+is a cross over
+
+
+### testing management 
+pdf.locutus() # puts a target where xy is 
+pdf.center_line() # puts full page targe at page center
+
+pdf.output(
+    name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+    dest="F",
+)
+show_pdf()
+'''
 
 ################################################
 #
@@ -43,53 +86,176 @@ def outputs_workflow(record, out_type: str) -> None:
 
 
 class PDF(FPDF):
+    '''
+    width = 216 = self.epw = effective page width
+    height = 279 = self.eph = effective page height
+    '''
     def perimiter_box(self):
-        # topped off  box for title space
-        # self.rect(self.x, self.y, (LETTER_WIDTH-2*self.x), (LETTER_HEIGHT-2*self.y), "D")
+        # The rectangle's top left corner is at coordinates (5, 13).
+        # subtracting 10 and 20 respectively to account for margins.
+        # The 'D' argument indicates that the rectangle should be drawn (not filled).
 
-        width = 216
-        height = 279
-        self.set_draw_color(0, 0, 0)
+        self.set_draw_color(0, 0, 0) 
         self.set_line_width(1)
+        self.rect(5, 13, (self.epw - 10), (self.eph - 20), "D")
 
-        self.x = 5
-        self.y = 13
-        # LETTER_WIDTH = 216
-        # LETTER_HEIGHT = 279
 
-        self.rect(self.x, self.y, (self.epw - 2 * self.x), (self.eph - 20), "D")
 
-    def cross_hair(self, radius):  # helps line up things during composition of pdf
-        LETTER_WIDTH = 216
-        LETTER_HEIGHT = 279
+    def notes_sheet(self, object) -> None:
+        self.title_line(object,'notes')
+        self.perimiter_box()
+        self.data_footer(object)  
+
+        ### make lines for notes
+        self.set_xy(8,22)
+        self.set_line_width(0.1)
+        self.set_draw_color(150)
+        self.set_font("Helvetica", size=12)
+        line_height = self.font_size * 1.6
+
+
+        for more_y in range(int(222 / 7)):
+            self.line(
+                8, self.y + more_y * line_height, 208, self.y + more_y * line_height
+            )
+
+        ### grey title
+
+        self.set_fill_color(200)
+        self.set_draw_color(150)
+        line_height = self.font_size * 1.6
+        self.set_xy(8, 230)
+        blob = f"**FREE NOTES**"
+        line_width = self.get_string_width(blob)
+        self.cell(
+            w=line_width,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            ln=1,
+            fill=True,
+            border=True,
+        )
+
+    def equipment_sheet(self, object) -> None:
+        self.title_line(object,'equipment')
+        self.perimiter_box()
+        self.data_footer(object)  
+
+        ### making the equipment page
+        self.set_font("Helvetica", size=12)
+        self.set_line_width(0.1)
+        self.set_draw_color(150)
+        line_height = self.font_size * 1.6
+
+        ### wate allowance to PDF
+        self.set_xy(40, 15)
+        blob = f"**Carry:** up to {self.object.WA*1.5} kg = {object.MOVE} h/u. **Sprint:** <{self.object.WA/4} kg = {object.MOVE*2} h/u. **Lift:** {self.object.WA*2.5} kg = 0 h/u."
+        line_height = self.font_size * 1.6    
+        
+        self.cell(
+            w=0,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            ln=1,
+            fill=False,
+            border=False,
+        )
+
+        ### item wate info header
+        blob = f'**ITEM**{" "*48}**WT**{" "*7}**TTL**{" "*7}**INFO**'
+        line_height = self.font_size * 1.6    
+        self.set_xy(8, 22)    
+        self.cell(
+            w=0,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            ln=1,
+            fill=False,
+            border=False,
+        )
+
+        # equipment lines to PDF
+        self.set_xy(8,33)
+        self.set_draw_color(140,140,140) #dark grey 
+        for more_y in range(30): # spacer is 4mm
+            self.line( # item 
+                8, self.y + more_y * line_height, 69, self.y + more_y * line_height
+            )
+            self.line( # wt
+                73, self.y + more_y * line_height, 86, self.y + more_y * line_height
+            )
+            self.line( # ttl
+                90, self.y + more_y * line_height, 103, self.y + more_y * line_height
+            )
+
+            self.line( # notes
+                107, self.y + more_y * line_height, 208, self.y + more_y * line_height
+            )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def center_line(self, radius=100):
         self.radius = radius
 
-        self.set_draw_color(200, 200, 200)
-        self.set_line_width(0.1)
+        self.set_draw_color(255, 0, 0)  # Set color to red.
+        self.set_line_width(0.3)  # Set line width.
+
+        # Draw a circle at the center of the page.
         self.circle(
-            (LETTER_WIDTH / 2 - self.radius / 2),
-            (LETTER_HEIGHT / 2 - self.radius / 2),
+            (self.epw / 2 - self.radius / 2),
+            (self.eph / 2 - self.radius / 2),
             self.radius,
             "D",
         )
-        self.line(LETTER_WIDTH / 2, 0, LETTER_WIDTH / 2, LETTER_HEIGHT)
-        self.line(0, LETTER_HEIGHT / 2, LETTER_WIDTH, LETTER_HEIGHT / 2)
+
+        # Draw a vertical line down the center of the page.
+        self.line(self.epw / 2, 0, self.epw / 2, self.eph)
+
+        # Draw a horizontal line across the center of the page.
+        self.line(0, self.eph / 2, self.epw, self.eph / 2)
+
 
     def locutus(self):
         """
-        makes an arrow at x and y
+        makes an target at x and y
         """
         x = self.get_x()
         y = self.get_y()
+        self.set_line_width(0.3)  # Set line width.
 
-        self.set_draw_color(256, 1, 1)
-        self.set_fill_color(1, 256, 1)
-        self.set_line_width(0.2)
-        point_one = (x, y)
-        point_two = (x - 2, y - 1)
-        point_three = (x - 2, y + 1)
+        # make a green circle around locutus
+        self.set_draw_color(0, 255, 0) # green
+        radius = 15
+        self.circle(
+            (x - radius / 2),
+            (y - radius / 2),
+            radius,
+            "D",
+        )
 
-        self.polygon([point_one, point_two, point_three], fill=True)
+        centering = radius/2
+        self.set_draw_color(0,0,255) # blue     
+        self.line(x-centering,y-centering, x+centering, y+centering)
+        self.line(x-centering,y+centering,x+centering,y-centering)
 
     def table_vomit(
         self,
@@ -129,7 +295,10 @@ class PDF(FPDF):
                 )
             self.ln()
 
-    def title_line(self, object):
+    def title_line(self, object,title_name = 'PERSONA') -> None:
+        '''
+        outputs a bespoke title at top of page. 
+        '''
         self.object = object
 
         # print out PERSONA NAME BIG and LEFT justified
@@ -138,7 +307,7 @@ class PDF(FPDF):
         self.cell(
             w=0,
             markdown=True,
-            txt=f"**PERSONA RECORD** for {self.object.Persona_Name}",
+            txt=f"**{title_name.upper()} RECORD** for {self.object.Persona_Name}",
             ln=0,
         )
 
@@ -1035,13 +1204,13 @@ class PDF(FPDF):
 
         self.set_xy(10, 120)
 
-    def id_data(self, object):
+    def data_footer(self, object):
         self.object = object
         self.set_font("Helvetica", size=7)
         line_height = self.font_size * 1.6
         self.set_xy(8, 273)
         self.object.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
-        blob = f" **Updated:** {self.object.Date_Updated} **Created:** {self.object.Date_Created} **File Name:** {self.object.File_Name}"
+        blob = f" **Printed:** {self.object.Date_Updated} **Created:** {self.object.Date_Created} **ID:** {self.object.ID}"
 
         self.cell(
             w=0,
@@ -1558,18 +1727,263 @@ def anthro_review(object):
 
 def anthro_pdf_chooser(object) -> None:
     function_map = {
-        "One Shot - Two sided": anthro_pdf_creator,
-        "Campaign - One sided": anthro_pdf_creator,
-        "Equipment sheet": anthro_pdf_creator,
-        "Notes sheet": anthro_pdf_creator,
+        "One Shot - One sheet": anthro_pdf_creator,
+        "Campaign - Three sheets": anthro_campaign_creator,
+        "Notes sheet": notes_sheet,
+        "Testing": testing_pdf_creator,
     }
 
     choice_list = [key for key in function_map]
     function_chosen  = please.choose_this(choice_list, "PDF type needed? ")
     function_map[function_chosen](object)
     
+def testing_pdf_creator(object):
+    pass
 
 
+def anthro_campaign_creator(object) -> None:
+    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
+    pdf.set_margin(0)  # set margins to 0
+
+    ### persona information composed from object
+    pdf.add_page() # front page 1
+    pdf.perimiter_box()
+    pdf.title_line(object)
+    pdf.attributes_lines(object)
+    pdf.description_line(object)
+    pdf.combat_table_titler(object, "Vocation")
+    pdf.combat_table_pd_effer(object, "Vocation")
+
+    pdf.task_info(object)
+    pdf.biologic_info(object)
+    pdf.note_lines()  
+
+    ### please no use 
+    pdf.add_page() # back page 1
+    pdf.perimiter_box()
+    pdf.title_line(object,'Campaign')
+    pdf.data_footer(object)
+
+    ### fuck the page
+    pdf.set_xy(8,22)
+    pdf.set_line_width(0.7)
+    pdf.set_draw_color(0)
+    pdf.set_font("Helvetica", size=12)
+    line_height = pdf.font_size * 1.6
+
+    for more_y in range(int(260 / 7)):
+        pdf.line(
+            8, pdf.y + more_y * line_height, 208, pdf.y + more_y * line_height
+        )
+
+    for more_x in range(8,208, 7):
+        pdf.line(
+            more_x, 15, more_x, 271
+        )
+
+    ### print do not use
+    pdf.set_fill_color(200)
+    pdf.set_draw_color(150)
+    line_height = pdf.font_size * 1.6
+    pdf.set_xy(pdf.epw/2,pdf.eph/2)
+
+    blob = f"**DO NOT USE**"
+    line_width = pdf.get_string_width(blob)
+
+    pdf.set_x(pdf.epw/2-pdf.get_string_width(blob)/2)
+    pdf.cell(
+        w=line_width,
+        h=line_height,
+        markdown=True,
+        txt=blob,
+        ln=1,
+        fill=True,
+        border=True,
+    )
+
+    ### please use attached sheets
+    blob = f"**Keep notes on attached sheets**"
+    line_width = pdf.get_string_width(blob)
+    pdf.set_y(pdf.get_y() + 7)
+    pdf.set_x(pdf.epw/2-pdf.get_string_width(blob)/2)
+    pdf.cell(
+        w=line_width,
+        h=line_height,
+        markdown=True,
+        txt=blob,
+        ln=1,
+        fill=True,
+        border=True,
+    )
+
+    ### equipment page
+    pdf.add_page() # front page 2
+    pdf.equipment_sheet(object)
+    pdf.add_page() # back page 2
+    pdf.notes_sheet(object)
+
+    ### notes page
+    pdf.add_page() # front page 3
+    pdf.notes_sheet(object)
+    pdf.add_page() # back page 3
+    pdf.notes_sheet(object)
+    
+
+    pdf.output(
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+        dest="F",
+    )
+    show_pdf()
+
+def notes_sheet(object) -> None:
+    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
+    pdf.set_margin(0)  # set margins to 0
+    pdf.add_page()
+    pdf.perimiter_box() 
+    pdf.title_line(object,'notes')
+    pdf.data_footer(object)      
+
+    ### make lines for notes
+    pdf.set_xy(8,22)
+    pdf.set_line_width(0.1)
+    pdf.set_draw_color(150)
+    pdf.set_font("Helvetica", size=12)
+    line_height = pdf.font_size * 1.6
+
+
+    for more_y in range(int(222 / 7)):
+        pdf.line(
+            8, pdf.y + more_y * line_height, 208, pdf.y + more_y * line_height
+        )
+
+    ### grey title
+
+    pdf.set_fill_color(200)
+    pdf.set_draw_color(150)
+    line_height = pdf.font_size * 1.6
+    pdf.set_xy(8, 230)
+    blob = f"**NOTES**"
+    line_width = pdf.get_string_width(blob)
+    pdf.cell(
+        w=line_width,
+        h=line_height,
+        markdown=True,
+        txt=blob,
+        ln=1,
+        fill=True,
+        border=True,
+    )
+
+
+def equipment_sheet(self, object) -> None:
+    self.title_line(object,'equipment')
+    self.data_footer(object)  
+
+    ### making the equipment page
+    self.set_font("Helvetica", size=12)
+    self.set_line_width(0.1)
+    self.set_draw_color(150)
+    line_height = self.font_size * 1.6
+
+    ### wate allowance to PDF
+    self.set_xy(40, 15)
+    blob = f"**Carry:** up to {self.object.WA*1.5} kg = {object.MOVE} h/u. **Sprint:** <{self.object.WA/4} kg = {object.MOVE*2} h/u. **Lift:** {self.object.WA*2.5} kg = 0 h/u."
+    line_height = self.font_size * 1.6    
+    
+    self.cell(
+        w=0,
+        h=line_height,
+        markdown=True,
+        txt=blob,
+        ln=1,
+        fill=False,
+        border=False,
+    )
+
+    ### item wate info header
+    blob = f'**ITEM**{" "*48}**WT**{" "*7}**TTL**{" "*7}**INFO**'
+    line_height = self.font_size * 1.6    
+    self.set_xy(8, 22)    
+    self.cell(
+        w=0,
+        h=line_height,
+        markdown=True,
+        txt=blob,
+        ln=1,
+        fill=False,
+        border=False,
+    )
+
+    # equipment lines to PDF
+    self.set_xy(8,33)
+    self.set_draw_color(140,140,140) #dark grey 
+    for more_y in range(30): # spacer is 4mm
+        self.line( # item 
+            8, self.y + more_y * line_height, 69, self.y + more_y * line_height
+        )
+        self.line( # wt
+            73, self.y + more_y * line_height, 86, self.y + more_y * line_height
+        )
+        self.line( # ttl
+            90, self.y + more_y * line_height, 103, self.y + more_y * line_height
+        )
+
+        self.line( # notes
+            107, self.y + more_y * line_height, 208, self.y + more_y * line_height
+        )
+
+    ### grey title
+    self.set_fill_color(200)
+    self.set_draw_color(150)
+    line_height = self.font_size * 1.6
+    self.set_xy(8, 232)
+    blob = f"**NOTES**"
+    line_width = self.get_string_width(blob)
+    self.cell(
+        w=line_width,
+        h=line_height,
+        markdown=True,
+        txt=blob,
+        ln=1,
+        fill=True,
+        border=True,
+    )
+
+
+    '''   
+    self.add_page()
+    pdf.perimiter_box() 
+    pdf.title_line(object,'notes')
+    pdf.data_footer(object)
+
+    ### make lines for notes
+    pdf.set_xy(8,22)
+    pdf.set_line_width(0.1)
+    pdf.set_draw_color(150)
+
+    for more_y in range(int(222 / 7)):
+        pdf.line(
+            8, pdf.y + more_y * line_height, 208, pdf.y + more_y * line_height
+        )
+
+ 
+    ### grey title
+    pdf.set_font("Helvetica", size=12)
+    pdf.set_fill_color(200)
+    pdf.set_draw_color(150)
+    line_height = pdf.font_size * 1.6
+    pdf.set_xy(8, 230)
+    blob = f"**NOTES**"
+    line_width = pdf.get_string_width(blob)
+    pdf.cell(
+        w=line_width,
+        h=line_height,
+        markdown=True,
+        txt=blob,
+        ln=1,
+        fill=True,
+        border=True,
+    )'''
 
 def anthro_pdf_creator(object):
 
@@ -1593,7 +2007,7 @@ def anthro_pdf_creator(object):
     pdf.perimiter_box()
     pdf.wate_allowance(object)
     pdf.note_lines()
-    pdf.id_data(object)
+    pdf.data_footer(object)
 
     pdf.output(
         name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
@@ -1745,7 +2159,7 @@ def alien_pdf_creator(alien) -> None:
     pdf.perimiter_box()
     pdf.wate_allowance(alien)
     pdf.note_lines()
-    pdf.id_data(alien)
+    pdf.data_footer(alien)
 
     pdf.output(
         name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
@@ -1877,7 +2291,7 @@ def robot_pdf_creator(robot):
     pdf.perimiter_box()
     pdf.wate_allowance(robot)
     pdf.note_lines()
-    pdf.id_data(robot)
+    pdf.data_footer(robot)
 
     pdf.output(
         name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",

@@ -453,7 +453,7 @@ def robot_defensive_systems(object: dict, number: int) -> list:
                 )[1](object)
                 if (
                     working_mutation.kind == "Defect"
-                    or working_mutation.kind == "non-comnbat"
+                    or working_mutation.kind == "non-combat"
                 ):
                     fresh_amount = True
                     object.Mutations.pop(working_mutation.name)
@@ -597,7 +597,7 @@ def android(object: dict) -> None:
 
     ### robot nomenclature
     object.FAMILY = "Robot"
-    object.Robot_Type = "Android"
+    object.F = "Android"
     object.Sub_Type = object.Base_Family
 
     ### core values
@@ -611,10 +611,11 @@ def android(object: dict) -> None:
     object.Peripherals = []
 
     ### hite and wate EXCEPTION for android
-    #ob__ject.Anthro_Type = object.Base_Family
+    #object.Anthro_Type = object.Base_Family
     # this is wrong Anthro_Type is now FAMILY_TYPE == Android
     # must now get wate with Base_Family
     # points out error of using objects and side effects 
+
     anthropomorph.anthro_size_fresh(object)
     object.Wate = round(object.Wate * 1.3)
 
@@ -639,7 +640,7 @@ def combot(object: dict) -> None:
     """
     ### robot nomenclature
     object.FAMILY = "Robot"
-    object.Robot_Type = "Combot"
+    object.F = "Combot"
 
     ### subtype determination
     sub_types = ["Expendable"]
@@ -779,7 +780,7 @@ def datalyzer(object: dict) -> None:
 
     ### datalyzer nomenclature
     object.FAMILY = "Robot"
-    object.Robot_Type = "Datalyzer"
+    object.F = "Datalyzer"
     object.Sub_Type = "Data Nerd"
 
     ### core values

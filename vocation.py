@@ -5,9 +5,9 @@ import please
 import table
 
 #########################################################
-#                                                       #
-#        vocation functions                             #
-#                                                       #
+#                                                       
+#        vocation functions                             
+#                                                       
 #########################################################
 
 def biologist(object: dict) -> None:
