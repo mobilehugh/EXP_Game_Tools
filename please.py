@@ -91,7 +91,6 @@ def roll_this(die_roll_string: str) -> int:
 
     return result
 
-
 def do_1d100_check(number: int) -> bool:
     """
     Checks to see if 1d100 is less than or equal to the argument
@@ -158,7 +157,6 @@ def choose_this(choices: list, message: str) -> str:
 
     return choice
 
-
 def say_yes_to(question: str) -> bool:
     """
     question string with boolean return
@@ -172,7 +170,6 @@ def say_no_to(question: str) -> bool:
     """
     choice = choose_this(["No", "Yes"], question)
     return True if choice == "No" else False    
-
 
 def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
     """
@@ -234,10 +231,8 @@ def show_me_your_dict(dinkie: table.PersonaRecord) -> None:
             print(f"{key}: {value}", end='   ')
         print()  # Print newline after each batch
 
-
 def colour_my_whirled(*args):
     pass
-
 
 def get_table_result(table: dict) -> str:
     """
@@ -250,7 +245,6 @@ def get_table_result(table: dict) -> str:
             result = table[key]
             break
     return result
-
 
 def list_table_choices(table_chosen:dict) -> list:
     """
@@ -276,7 +270,6 @@ def list_table_choices(table_chosen:dict) -> list:
         raise TypeError("Input to list_table_choices must be a list or a dictionary.")
 
     return choices
-
 
 def collate_this(skill_list: list) -> list:
     """
@@ -329,7 +322,6 @@ def store_this(record_to_store: table.PersonaRecord) -> None:
 
     print(f"\n*** Record stored at {directory_to_use}{file_name_to_use}")
 
-
 def record_storage(record_to_store: table.PersonaRecord) -> None:
     """
     organizes what to do with a record and prints it out
@@ -374,7 +366,6 @@ def record_storage(record_to_store: table.PersonaRecord) -> None:
         store_this(record_to_store)        
         clear_console()
         return
-
 
 def attribute_manipulation(object: table.PersonaRecord) -> None:
     """
@@ -442,7 +433,6 @@ def attribute_manipulation(object: table.PersonaRecord) -> None:
 
     return
 
-
 def assign_id_and_file_name(persona_record: table.PersonaRecord) -> None:
     """
     Assigns an ID and  File_name to persona_record for the very first time. like a version...
@@ -481,7 +471,6 @@ def assign_id_and_file_name(persona_record: table.PersonaRecord) -> None:
         persona_record.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
     except AttributeError as error:
         print(f"PersonaRecord doesn't have the necessary attributes. {error}")
-
 
 def collect_desired_record() -> table.PersonaRecord:
     """
@@ -532,43 +521,37 @@ def collect_desired_record() -> table.PersonaRecord:
 
     return record_to_return
 
-
 def do_referee_maintenance():
     """
     things that referee's need to access and do
     """
 
-    # referee check for fun
-    if not say_yes_to("\nAre you a referee?"):
-        a_persona_record.record_chooser()
-
-    object = collect_desired_record()
+    persona = collect_desired_record()
 
     operations = {
     "EXPS": vocation.update_persona_exps,
     "Level": vocation.update_persona_exps,
-    "Review": lambda object: outputs.outputs_workflow(object, "screen"),
-    "PDF": lambda object: outputs.outputs_workflow(object, "pdf"),
+    "Review": lambda persona: outputs.outputs_workflow(persona, "screen"),
+    "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"),
     "Attributes": attribute_manipulation,
-    "Change Record": lambda _: collect_desired_record(),
+    "Change Record": lambda persona: do_referee_maintenance(),
 }
     operation_list = [key for key in operations]
 
     maintenance_choice = "I like turtles"
     while maintenance_choice != "Exit":
-        item_comment = f"What are you doing to {object.Persona_Name}?"
+        item_comment = f"What are you doing to {persona.Persona_Name.upper()}?"
         maintenance_choice = choose_this(operation_list, item_comment)
 
         operation = operations.get(maintenance_choice)
         if operation is not None:
-            operation(object)
+            operation(persona)
             continue
         else:
             print("operation missing")
             say_goodnight_marsha()
 
     return
-
 
 def clear_console() -> None:
     """

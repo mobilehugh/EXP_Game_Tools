@@ -1,6 +1,5 @@
 import math
 import secrets
-import types
 
 import please
 import table
@@ -8,7 +7,7 @@ import vocation
 
 import outputs
 import mutations
-#from mutations import *
+
 
 
 def anthro_workflow() -> None: 

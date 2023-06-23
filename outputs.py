@@ -10,24 +10,25 @@ import mutations
 import vocation
 import table
 
-def outputs_workflow(record, out_type: str) -> None:
+def outputs_workflow(persona, out_type: str) -> None:
     '''
     simplify output calls  by directing TYPE and needs
     '''
-    family_type = record.FAMILY
+
+    family_type = persona.FAMILY
 
     if family_type == "Anthro" and out_type == "screen":
-        anthro_review(record)
+        anthro_screen(persona)  
     elif family_type == "Anthro" and out_type == "pdf":
-        anthro_pdf_chooser(record)
+        anthro_pdf_chooser(persona)
     elif family_type == "Alien" and out_type == "screen":
-        alien_review(record)
+        alien_screen(persona)
     elif family_type == "Alien" and out_type == "pdf":
-        alien_pdf_creator(record)
+        alien_pdf_creator(persona)
     elif family_type == "Robot" and out_type == "screen":
-        robot_review(record)
+        robot_screen(persona)
     elif family_type == "Robot" and out_type == "pdf":
-        robot_pdf_creator(record)
+        robot_pdf_creator(persona)
     elif family_type == "Toy" and out_type == "screen":
         print("this doesn't exist yet")
     elif family_type == "Toy" and out_type == "pdf":
@@ -39,20 +40,30 @@ def outputs_workflow(record, out_type: str) -> None:
 # laws of fpdf
 #
 ################################################
-
 '''
-origin point (0, 0) is located at the top-left corner of the page.
-The x-coordinate increases as you move to the right and represents the width of the page.
-The y-coordinate increases as you move down and represents the height of the page.
-US letter size, the dimensions are 215.9 x 279.4 millimeters.
+US LETTER =
+origin point = (0, 0) = top-left corner
+x-coordinate increases moves right =  width = 215.9 = self.epw = effective page width
+y-coordinate increases moves down  = height = 279.4 = self.eph = effective page height
 
-#### ->  MM note pixels so 5.5 etc ####
+LINE SAFETY:
+1) set x,y start point outside of functions
+2) only alter position in function if multiline 
+
+numbers are  mm (millimeters) NOT pixels
+font size is in points 1/72 of an inch
+there are 25.4 mm in 1 inch
+12 point font is 4.23 mm
 arial 12 space = 1.8 mm 
 
-to center a circle abscissa and ordinate represent a bounding box not x,y center of circle
-hence this shite: 
+def convert_points_to_mm(font_size_points):
+    inches = font_size_points / 72  # convert points to inches
+    mm = inches * 25.4  # convert inches to mm
+    return mm
 
-circle(
+
+to center a circle abscissa and ordinate represent a bounding box not x,y center of circle
+self.circle(
     (x - radius / 2),
     (y - radius / 2),
     radius,
@@ -66,11 +77,11 @@ self.line(50, 50, 70, 70)  # Line 1: from point (50, 50) to point (70, 70)
 self.line(50, 70, 70, 50)  # Line 2: from point (50, 70) to point (70, 50)
 is a cross over
 
-
 ### testing management 
 pdf.locutus() # puts a target where xy is 
 pdf.center_line() # puts full page targe at page center
 
+### display the build PDF
 pdf.output(
     name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
     dest="F",
@@ -84,12 +95,8 @@ show_pdf()
 #
 ################################################
 
-
 class PDF(FPDF):
-    '''
-    width = 216 = self.epw = effective page width
-    height = 279 = self.eph = effective page height
-    '''
+
     def perimiter_box(self):
         # The rectangle's top left corner is at coordinates (5, 13).
         # subtracting 10 and 20 respectively to account for margins.
@@ -99,34 +106,261 @@ class PDF(FPDF):
         self.set_line_width(1)
         self.rect(5, 13, (self.epw - 10), (self.eph - 20), "D")
 
+    def title_line(self, persona, title_name: str = 'PERSONA') -> None:
+        # outputs a bespoke title at top of page. 
+        blob_left =f"**{title_name.upper()} RECORD** for {persona.Persona_Name}"
+        blob_right = f"**Player:** {persona.Player_Name}"
+        x=3.3
+        y=4
 
+        # print out PERSONA NAME BIG and LEFT justified
+        self.print_MD_string(blob_left,18,x,y)
 
-    def notes_sheet(self, object) -> None:
-        self.title_line(object,'notes')
-        self.perimiter_box()
-        self.data_footer(object)  
+        # print out PLAYER NAME Small and RIGHT justified
+        self.set_xy(3.3,6.3) # y adjust smaller font
+        self.set_font("helvetica","", 12)
+        right_most = self.epw - 10
+        self.cell(
+            w=(right_most),
+            markdown=True,
+            txt=blob_right,
+            fill=False,
+            border=False,
+            align="R",
+        )
 
-        ### make lines for notes
-        self.set_xy(8,22)
-        self.set_line_width(0.1)
-        self.set_draw_color(150)
-        self.set_font("Helvetica", size=12)
+    def data_footer(self, persona):
+        self.set_font("Helvetica", size=7)
         line_height = self.font_size * 1.6
+        self.set_xy(8, 273)
+        persona.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
+        blob = f" **Printed:** {persona.Date_Updated} **Created:** {persona.Date_Created} **ID:** {persona.ID}"
 
+        self.cell(
+            w=0,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            ln=1,
+            fill=False,
+            border=False,
+            align="C",
+        )
 
-        for more_y in range(int(222 / 7)):
-            self.line(
-                8, self.y + more_y * line_height, 208, self.y + more_y * line_height
+    def description_line(self, persona,x:float = 0, y:float=0):
+
+        if persona.FAMILY == "Anthro":
+            blob = f"{persona.Persona_Name} is a {persona.Age} year-old {persona.FAMILY_TYPE} {persona.FAMILY_SUB.lower()} {persona.Vocation.lower()}."
+        elif persona.FAMILY == "Alien":
+            blob = f"{persona.Persona_Name} is a {persona.Quick_Description}"
+        elif persona.FAMILY == "Robot":
+            blob = f"{persona.Persona_Name} is a {persona.Description}"
+        else:
+            blob = "ERROR: No description for this persona"
+
+        self.print_MD_string(blob,14,x,y)
+
+    def attributes_lines(self, persona, x:float=0,y:float=0)->None:
+        self.set_xy(x,y)
+        ### title box 
+        self.grey_box_title('ATTRIBUTES',5,y)
+
+        ### description line
+        x += self.get_string_width('ATTRIBUTES')
+        self.set_xy(x,y)
+        self.description_line(persona,x,y)
+
+        ### [0] acronym and styling align-style, [1] long and center, [2] Prime for bot
+        attribute_formatting = [
+                ("**AWE**","Awareness",False),
+                ("**CHA**","Charisma",False),
+                ("**CON**","Constitution", True if persona.FAMILY == "Robot" else False),
+                ("**DEX**","Dexterity",True if persona.FAMILY == "Robot" else False),
+                ("**INT**","Intelligence",True if persona.FAMILY == "Robot" else False),
+                ("**MSTR**","Mind",False),
+                ("**PSTR**","Strength",True if persona.FAMILY == "Robot" else False),
+                ("**SOC**","Privilege",False),
+                ("**HPM**","Max Hit Points",False),
+        ]
+
+        self.set_xy(x+8,y+11)
+
+        ### acronym line
+        start_x = 18
+        right_bump = 0 # total bump along x-axis
+        bumpit = 22 # bump along x-axis increment
+
+        self.set_font(family="helvetica",size=14)
+        self.set_text_color(0) # black
+        for attuple in attribute_formatting:
+            acronym = attuple[0]
+            self.set_x(start_x + right_bump)
+            right_bump += bumpit #bump the next element right 
+            self.cell(txt=acronym, align='X', markdown=True)
+
+        ### value line
+        ### uses stripped acronym to get data from record
+        self.set_y(self.get_y()+8) 
+        right_bump = 0
+        self.set_font(family="helvetica",size=16)
+        self.set_text_color(0) # black
+
+        for attuple in attribute_formatting:
+            acronym = attuple[0]
+            acronym = acronym.strip("*")
+            self.set_x(start_x + right_bump)
+            right_bump += bumpit #bump the next attribute element right 
+            blob = str(getattr(persona, acronym))
+
+            # check for robotic primes
+            if persona.FAMILY == "Robot":
+                prime = acronym + '_PRIME'
+                prime_add = int(getattr(persona,prime))
+                blob += f'({prime_add})'
+            self.cell(txt=blob, align='X', markdown=True)
+
+        ### long version line
+        self.set_y(self.get_y()+8)
+        right_bump = 0
+        self.set_font(family="helvetica",size=9)
+        self.set_text_color(0) # black
+        for attuple in attribute_formatting:
+            long_name = attuple[1]
+            self.set_x(start_x + right_bump)
+            right_bump += bumpit #bump the next attribute element right 
+            self.cell(txt=long_name, align='X', markdown=True)
+    
+
+    def persona_level_info(self, persona, x:float = 0, y:float = 0):
+
+        exps_next = list(table.vocation_exps_levels[persona.Vocation].keys())[
+            persona.Level - 1
+        ].stop  # pulls next exps goal from range based on level
+
+        # build a blob to use
+        vocation_info = f'{persona.Vocation}' if persona.FAMILY == "Anthro" else f'{persona.FAMILY}'
+        exps_info = f' **Level** {persona.Level} **EXPS** ({persona.EXPS}/{exps_next})'
+        self.print_MD_string((vocation_info + exps_info),12,x,y)
+
+    def combat_table_pd_effer(self, persona, table_title:str, x:float = 0, y:float = 0):
+        self.set_xy(x,y)
+        # which table to use
+        if table_title == "Vocation":
+            combat_table = vocation_combat_tabler(persona, "return", "all")
+
+        elif table_title == "Alien":
+            combat_table = alien_combat_tabler(persona, "return", "all")
+
+        elif table_title == "Robot":
+            combat_table = robot_combat_tabler(persona, "return", "all")
+
+        # calculate the combat table
+        ABP = combat_table["A"]["BP"]
+        ABNP = combat_table["A"]["BNP"]
+        AMR = combat_table["A"]["MR"]
+        ADB = combat_table["A"]["ADB"]
+        # APROF = combat_table["A"]["PROF"] number of proficiencies, not being used
+
+        BBP = combat_table["B"]["BP"]
+        BBNP = combat_table["B"]["BNP"]
+        BMR = combat_table["B"]["MR"]
+        BDB = combat_table["B"]["BDB"]
+        # BPROF = combat_table["B"]["PROF"] number of proficiencies, not being used
+
+        CBP = combat_table["C"]["BP"]
+        CBNP = combat_table["C"]["BNP"]
+        CMR = combat_table["C"]["MR"]
+        CDB = combat_table["C"]["CDB"]
+        # CPROF = combat_table["C"]["PROF"] number of proficiencies, not being used
+
+        data = [
+            [
+                "Type:LB",
+                "Raw:CB",
+                "Skilled:CB",
+                "Max:CB",
+                "Force:CB",
+            ]
+        ]
+
+        # build data if BP exists.
+        if ABP > 0:
+            data.append(
+                [
+                    "Strike:LB",
+                    f"{ABNP}:CI",
+                    f"{ABP}:CI",
+                    f"{AMR}:CI",
+                    f"{ADB}:CI",
+                ]
             )
 
-        ### grey title
+        if BBP > 0:
+            data.append(
+                [
+                    "Fling:LB",
+                    f"{BBNP}:CI",
+                    f"{BBP}:CI",
+                    f"{BMR}:CI",
+                    f"{BDB}:CI",
+                ]
+            )
 
+        if CBP > 0:
+            data.append(
+                [
+                    "Shoot:LB",
+                    f"{CBNP}:CI",
+                    f"{CBP}:CI",
+                    f"{CMR}:CI",
+                    f"{CDB}:CI",
+                ]
+            )
+ 
+        # table_vomit the ABCs of combat table
+        self.table_vomit(data, 9, 105, self.get_y(), 1.5, 0.25)
+
+
+    def combat_table_explainer(self, x:float = 0, y:float = 0):
+        self.print_MD_string(f"**Raw:** Add to Unskilled Attack Rolls  **Skilled:** Add to Skilled Attack Rolls **Max:**  Maximum Attack Roll **Force:** Add to damage roll",10,x,y)
+        self.print_MD_string(f"**Strike:** fist, sword, club  **Fling:** bow, spear, spit **Shoot:** gun, lazer, fission **Sotto/Flotto:** = Shoot **Grenade:** = Fling, no Force",10,x,y+5.4)
+
+
+    def alien_move(self, persona):
+        move_type = ["Move_Land", "Move_Air", "Move_Water"]
+        blob = ""
+
+        for terrain in move_type:
+            move_rate = getattr(persona, terrain)
+            if move_rate > 0:
+                blob += f'**{terrain.replace("_", " ")}:** {move_rate} h/u '
+
+        self.set_font("Helvetica", size=12)
+        line_height = self.font_size * 1.5
+        self.set_xy(8, self.get_y())
+
+        self.cell(
+            w=0,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            ln=1,
+        )
+
+
+        
+    def grey_box_title(self,blob, x=0,y=0)->None:
+        '''
+        takes the blob string and makes it a box for it
+        '''
+        self.set_xy(x,y)
         self.set_fill_color(200)
-        self.set_draw_color(150)
+        self.set_draw_color(75)
+        self.set_line_width(.2)
+        self.set_font("Helvetica", style='B',size=14)
         line_height = self.font_size * 1.6
-        self.set_xy(8, 230)
-        blob = f"**FREE NOTES**"
-        line_width = self.get_string_width(blob)
+        line_width = self.get_string_width(blob, markdown=True) + 2 # + x is padding
+
         self.cell(
             w=line_width,
             h=line_height,
@@ -136,23 +370,14 @@ class PDF(FPDF):
             fill=True,
             border=True,
         )
+    
 
-    def equipment_sheet(self, object) -> None:
-        self.title_line(object,'equipment')
-        self.perimiter_box()
-        self.data_footer(object)  
-
-        ### making the equipment page
-        self.set_font("Helvetica", size=12)
-        self.set_line_width(0.1)
-        self.set_draw_color(150)
+    def print_MD_string(self, blob: str = 'where da blob', font_size: int = 12, x:float = 0, y:float = 0)-> None:
+        self.set_font("Helvetica", "", font_size)
+        self.set_draw_color(0)
         line_height = self.font_size * 1.6
+        self.set_xy(x,y)
 
-        ### wate allowance to PDF
-        self.set_xy(40, 15)
-        blob = f"**Carry:** up to {self.object.WA*1.5} kg = {object.MOVE} h/u. **Sprint:** <{self.object.WA/4} kg = {object.MOVE*2} h/u. **Lift:** {self.object.WA*2.5} kg = 0 h/u."
-        line_height = self.font_size * 1.6    
-        
         self.cell(
             w=0,
             h=line_height,
@@ -163,59 +388,11 @@ class PDF(FPDF):
             border=False,
         )
 
-        ### item wate info header
-        blob = f'**ITEM**{" "*48}**WT**{" "*7}**TTL**{" "*7}**INFO**'
-        line_height = self.font_size * 1.6    
-        self.set_xy(8, 22)    
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
-
-        # equipment lines to PDF
-        self.set_xy(8,33)
-        self.set_draw_color(140,140,140) #dark grey 
-        for more_y in range(30): # spacer is 4mm
-            self.line( # item 
-                8, self.y + more_y * line_height, 69, self.y + more_y * line_height
-            )
-            self.line( # wt
-                73, self.y + more_y * line_height, 86, self.y + more_y * line_height
-            )
-            self.line( # ttl
-                90, self.y + more_y * line_height, 103, self.y + more_y * line_height
-            )
-
-            self.line( # notes
-                107, self.y + more_y * line_height, 208, self.y + more_y * line_height
-            )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def center_line(self, radius=100):
+    def liner_up(self, radius=100)-> None:
+        '''
+        places a circle around the center of the page and two lines
+        '''
         self.radius = radius
-
         self.set_draw_color(255, 0, 0)  # Set color to red.
         self.set_line_width(0.3)  # Set line width.
 
@@ -232,6 +409,46 @@ class PDF(FPDF):
 
         # Draw a horizontal line across the center of the page.
         self.line(0, self.eph / 2, self.epw, self.eph / 2)
+
+        self.set_draw_color(190)  # Set color to light grey .
+        self.set_line_width(0.2)  # Set line width.
+
+        #cover page horizontal lines
+        for y in range(0,int(self.eph),10):
+            self.line(0,y,self.epw,y)
+
+        #cover page in vertical lines
+        for x in range(0,int(self.epw),10):
+            self.line(x,0,x,self.eph)
+
+    def obfuscate(self)->None:
+        self.set_draw_color(32) # dark lines
+        self.set_line_width(.3)
+
+        # x = epw = 216, y = eph = 280  
+        # perimeter  TL= 5, 13, TR= (self.epw - 10),13 BL= 5,(self.eph - 20) BR= (self.epw - 10), (self.eph - 20)
+
+        #bezier top left to right side 
+        for y in range(13,int(self.eph-10),10):
+            self.line(5,13,self.epw-5,y)
+
+        #bezier top right to left side 
+        for y in range(13,int(self.eph-5),10):
+            self.line(self.epw-10,13,  5,y)
+
+        #bezier middle
+        for x in range(5,int(self.epw-5),10):
+            self.line((self.epw-10)/2,13, x, self.eph-8)
+
+        blob = "DO NOT USE"
+        x=((self.epw/2)-(self.get_string_width(blob)/2))
+        y=self.eph/2
+        self.grey_box_title(blob,x,y)
+        y+=12
+
+        blob = f"Keep notes on attached sheets"
+        x=((self.epw/2)-(self.get_string_width(blob)/2))
+        self.grey_box_title(blob,x,y)
 
 
     def locutus(self):
@@ -295,682 +512,183 @@ class PDF(FPDF):
                 )
             self.ln()
 
-    def title_line(self, object,title_name = 'PERSONA') -> None:
-        '''
-        outputs a bespoke title at top of page. 
-        '''
-        self.object = object
-
-        # print out PERSONA NAME BIG and LEFT justified
-        self.set_font("helvetica", size=18)
-        self.set_xy(3, 5.8)
-        self.cell(
-            w=0,
-            markdown=True,
-            txt=f"**{title_name.upper()} RECORD** for {self.object.Persona_Name}",
-            ln=0,
-        )
-
-        # print out PLAYER NAME Small and RIGHT justified
-        self.set_font("helvetica", size=12)
-        blob = f"**Player:** {self.object.Player_Name}"
-        txt_width = 210 - self.get_string_width(blob, markdown=True)
-        self.set_xy(txt_width, 7.8)
-        self.cell(
-            w=0,
-            markdown=True,
-            txt=blob,
-            ln=0,
-        )
-
-    def attributes_lines(self, object):
-        self.object = object
-        x_left = 5
-        x_right = 213
-
-        ## attribute acronym set up
-        data = [
-            [],
-            [
-                "AWE:CB",
-                "CHA:CB",
-                "CON:CB",
-                "DEX:CB",
-                "INT:CB",
-                "MSTR:CB",
-                "PSTR:CB",
-                "SOC:CB",
-                "HPM:CB",
-                "HPS:CB",
-            ],
-        ]
-
-        # attribute acronyms output
-        self.set_font("Helvetica", size=12)
-        self.table_vomit(data, x_left, x_right, 12, 1.1, 0)
-
-        ## attribute values set up
-        data[1][-1] = "HPM:CB"  # swap out HPS title for HPS on attribute value line
-
-        working_data = [
-            getattr(self.object, attribby.split(":")[0]) for attribby in data[1]
-        ]
-        data[1] = [f"{str(x)}:CI" for x in working_data]
-
-        ## attribute value line output
-        self.set_font("Helvetica", size=13)
-        self.table_vomit(data, x_left, x_right, 17, 1.1, 0)
-
-        ## attribute descriptor set up
-        self.set_font("Helvetica", size=7)
-
-        data = [
-            [],
-            [
-                "Awareness:CN",
-                "Charisma:CN",
-                "Constitution:CN",
-                "Dexterity:CN",
-                "Intelligence:CN",
-                "Psionics:CN",
-                "Strength:CN",
-                "Privilege:CN",
-                "Max Hit Points:CN",
-                "Hit Points Now:CN",
-            ],
-        ]
-
-        ## attribute description line
-        self.set_font("Helvetica", size=7)
-        self.table_vomit(data, 6, 212, 22, 1.1, 0)
-
-        ## HPS BOX
-        self.set_draw_color(0, 0, 0)
-        self.set_line_width(0.25)
-
-        self.x = 193.5
-        self.y = 31
-        # LETTER_WIDTH = 216
-        # LETTER_HEIGHT = 279
-
-        self.rect(self.x, self.y, 16, self.y + 21.3, "D")
-
-    def description_line(self, object):
-        self.object = object
-
-        self.set_font("Helvetica", size=12)
-        line_height = self.font_size * 2
-
-        if self.object.FAMILY == "Anthro":
-            blob = f"**DESCRIPTION:** {self.object.Age} year-old {self.object.FAMILY_SUB.lower()} {self.object.Vocation.lower()}."
-
-        elif self.object.FAMILY == "Alien":
-            blob = f"**DESCRIPTION:** {self.object.Quick_Description}"
-
-        elif self.object.FAMILY == "Robot":
-            blob = f"**DESCRIPTION:** {self.object.Description}"
-
-        else:
-            print("ERROR: No description for this persona")
-
-        self.set_xy(8, 33)
-        self.cell(w=0, h=line_height, markdown=True, txt=blob, ln=True)
-
-    def combat_table_titler(self, object, *args):
-        self.object = object
-        self.table_title = args[0]
-
-        exps_next = list(table.vocation_exps_levels[self.object.Vocation].keys())[
-            self.object.Level - 1
-        ].stop  # pulls next exps goal from range based on level
-
-        # which blob to use
-
-        if self.table_title == "Vocation":
-            blob = f"**COMBAT INFO** for {self.object.Vocation} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
-
-        elif self.table_title == "Alien":
-            blob = f"**COMBAT INFO** for {self.object.FAMILY_TYPE} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
-
-        elif self.table_title == "Robot":
-            blob = f"**COMBAT INFO** for {self.object.Robot_Type} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
-
-        # Combat Info Title
-        self.set_font("Helvetica", size=12)
-        self.set_fill_color(200)
-        self.set_draw_color(150)
-        line_height = self.font_size * 1.6
-        self.set_xy(8, self.get_y() + 2)
-        line_width = self.get_string_width(blob, markdown=True) + 5
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
-        )
-
-        line_height = self.font_size * 1.5  # restore list line height
-        self.set_y(self.get_y() + 1)
-
-    def combat_table_explainer(self):
-        self.set_font("Helvetica", size=9)
-        line_height = self.font_size * 1.2
-        self.set_xy(8, self.get_y() + 0.5)
-
-        self.multi_cell(
-            w=0,
-            align="L",
-            h=line_height,
-            markdown=True,
-            txt=f"**Raw:** Add to Unskilled Attack Rolls  **Skilled:** Add to Skilled Attack Rolls **Max:**  Maximum Attack Roll **Force:** Add to damage roll\n**Strike:** fist, sword, club  **Fling:** bow, spear, spit **Shoot:** gun, lazer, fission **Sotto/Flotto:** = Shoot **Grenade:** = Fling, no Force",
-        )
-
-        return
-
-    def ar_move_show(self):
-        self.set_font("Helvetica", size=12)
-        line_height = self.font_size * 1.4
-        self.set_xy(8, self.get_y() + 0.0)
-
-        movement = (
-            f"{self.object.Move} h/u" if self.object.FAMILY != "Alien" else "See below"
-        )
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=f"**ARMOUR RATING (AR):** {self.object.AR}      **MOVE:** {movement}",
-            ln=1,
-        )
-
-        return
-
-    def combat_table_pd_effer(self, object, *args):
-        self.object = object
-
-        self.table_title = args[0]
-
-        # which table to use
-        if self.table_title == "Vocation":
-            combat_table = vocation_combat_tabler(self.object, "return", "all")
-
-        elif self.table_title == "Alien":
-            combat_table = alien_combat_tabler(self.object, "return", "all")
-
-        elif self.table_title == "Robot":
-            combat_table = robot_combat_tabler(self.object, "return", "all")
-
-        # calculate the combat table
-        ABP = combat_table["A"]["BP"]
-        ABNP = combat_table["A"]["BNP"]
-        AMR = combat_table["A"]["MR"]
-        ADB = combat_table["A"]["ADB"]
-        APROF = combat_table["A"]["PROF"]
-
-        BBP = combat_table["B"]["BP"]
-        BBNP = combat_table["B"]["BNP"]
-        BMR = combat_table["B"]["MR"]
-        BDB = combat_table["B"]["BDB"]
-        BPROF = combat_table["B"]["PROF"]
-
-        CBP = combat_table["C"]["BP"]
-        CBNP = combat_table["C"]["BNP"]
-        CMR = combat_table["C"]["MR"]
-        CDB = combat_table["C"]["CDB"]
-        CPROF = combat_table["C"]["PROF"]
-
-        data = [
-            [
-                "Type:LB",
-                "Raw:CB",
-                "Skilled:CB",
-                "Max:CB",
-                "Force:CB",
-            ]
-        ]
-
-        # build data if BP exists.
-        if ABP > 0:
-            data.append(
-                [
-                    "Strike:LB",
-                    f"{ABNP}:CI",
-                    f"{ABP}:CI",
-                    f"{AMR}:CI",
-                    f"{ADB}:CI",
-                ]
-            )
-
-        if BBP > 0:
-            data.append(
-                [
-                    "Fling:LB",
-                    f"{BBNP}:CI",
-                    f"{BBP}:CI",
-                    f"{BMR}:CI",
-                    f"{BDB}:CI",
-                ]
-            )
-
-        if CBP > 0:
-            data.append(
-                [
-                    "Shoot:LB",
-                    f"{CBNP}:CI",
-                    f"{CBP}:CI",
-                    f"{CMR}:CI",
-                    f"{CDB}:CI",
-                ]
-            )
-
-        # table_vomit the ABCs of combat table
-        align_proficiency = self.get_y()
-        self.table_vomit(data, 9, 105, self.get_y(), 1.5, 0.25)
-
-        # table proficiencies
-        if type(APROF) == int:
-            prof_slot = "___________ " if APROF not in [4, 5] else "______ "
-            APROF = f"{APROF} {prof_slot*APROF}"
-
-        if type(BPROF) == int:
-            prof_slot = "___________ " if BPROF not in [4, 5] else "______ "
-            BPROF = f"{BPROF} {prof_slot*BPROF}"
-
-        if type(CPROF) == int:
-            prof_slot = "___________ " if CPROF not in [4, 5] else "______ "
-            CPROF = f"{CPROF} {prof_slot*CPROF}"
-
-        data = [["Skilled Weapons:LB"]]
-
-        if ABP > 0:
-            data.append([f"{APROF}:LI"])
-
-        if BBP > 0:
-            data.append([f"{BPROF}:LI"])
-
-        if CBP > 0:
-            data.append([f"{CPROF}:LI"])
-
-        # table_vomit the proficiencies for ABC
-        self.table_vomit(data, 106, 192, align_proficiency, 1.5, 0.25)
-
-        # explainer for the combat table acronyms
-        if self.table_title == "Vocation":
-            self.combat_table_explainer()
-            self.ar_move_show()
-
-        elif self.table_title == "Alien" and self.object.Vocation == "Alien":
-            self.combat_table_explainer()
-            self.ar_move_show()
-
-        elif self.table_title == "Robot" and self.object.Vocation == "Robot":
-            self.combat_table_explainer()
-            self.ar_move_show()
-
-    def alien_move(self, object):
-        self.object = object
-        move_type = ["Move_Land", "Move_Air", "Move_Water"]
-        blob = ""
-
-        for terrain in move_type:
-            move_rate = getattr(self.object, terrain)
-            if move_rate > 0:
-                blob += f'**{terrain.replace("_", " ")}:** {move_rate} h/u '
-
-        self.set_font("Helvetica", size=12)
-        line_height = self.font_size * 1.5
-        self.set_xy(8, self.get_y())
-
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-        )
-
-    def task_info(self, object):
-        self.object = object
-        exps_next = list(table.vocation_exps_levels[self.object.Vocation].keys())[
-            self.object.Level - 1
-        ].stop  # pulls next exps goal from range based on level
-
-        # Task Info Title
-        self.set_font("Helvetica", size=12)
-        self.set_fill_color(200)
-        self.set_draw_color(150)
-        line_height = self.font_size * 1.6
-        self.set_xy(8, self.get_y() + 2)
-        blob = f"**TASK INFO** for {self.object.Vocation} **Level** {self.object.Level} **EXPS** ({self.object.EXPS}/{exps_next})"
-        line_width = self.get_string_width(blob, markdown=True) + 5
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
-        )
-
-        self.set_font("Helvetica", size=10)
-        line_height = self.font_size * 1.25  # restore list line height
+    def task_info(self, persona,x:float=0,y:float=0):
+        y_bump = 5.4
+        x_bump = 40
+        task_title_top = y
+
+        if persona.Vocation == "Alien":
+            self.print_MD_string('**Alien Tasks** Find sustenance and reproduce.', 12, x,task_title_top)
+            y+=y_bump
+            return y
+ 
+        if persona.Vocation == "Robot":
+            self.print_MD_string('**Robot Tasks** Do what they are meant to do.', 12, x,task_title_top)
+            y+=y_bump
+            return y
 
         ### vocation GIFTS
-        task_top_gifts = self.get_y() + 1.5
-        self.set_xy(8, task_top_gifts)
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=f"**GIFTS**",
-            ln=1,
-        )
-
-        gift_list = vocation.update_gifts(self.object)
-        for x, gift in enumerate(gift_list):
-            self.set_x(8)
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"{x+1}) {gift}",
-                ln=1,
-            )
-
-        task_bottom_gifts = self.get_y()
+        self.print_MD_string('**GIFTS**', 12, x,task_title_top)
+        y+=y_bump
+        gift_list = vocation.update_gifts(persona)
+        for number,gift in enumerate(gift_list,1):
+            self.print_MD_string(f"{number}) {gift}",12,x,y)
+            y+=y_bump
 
         ### vocation INTERESTS
-        self.set_xy(38, task_top_gifts)
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=f"**INTERESTS**",
-            ln=1,
-        )
-
-        collated_interests = please.collate_this(self.object.Interests)
-        for x, interest in enumerate(collated_interests):
-            self.set_x(38)
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"{x+1}) {interest}",
-                ln=1,
-            )
-
-        task_bottom_interests = self.get_y()
-
-        skill_bottom = (
-            task_bottom_interests
-            if task_bottom_interests > task_bottom_gifts
-            else task_bottom_gifts
-        )
+        x+=x_bump
+        y=task_title_top
+        self.print_MD_string('**INTERESTS**',12,x,y)
+        y+=y_bump
+        collated_interests = please.collate_this(persona.Interests)
+        for number, interest in enumerate(collated_interests,1):
+            self.print_MD_string(f"{number}) {interest}",12,x,y)
+            y+=y_bump
 
         ### vocation  SKILLS
-        self.set_xy(78, task_top_gifts)
+        ### skills are 3 column
+        x+=x_bump
+        y=task_title_top
+        self.print_MD_string("**SKILLS**",12,x,y)
+        y+=y_bump
 
-        # skills_y_start = task_bottom_gifts
-        # self.set_xy(8, skills_y_start)
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=f"**SKILLS**",
-            ln=1,
-        )
+        collated_skills = please.collate_this(persona.Skills)
+        for number, skill in enumerate(collated_skills,1):
+            if number == 4: #shift to row 2
+                x+=x_bump 
+                y=task_title_top + y_bump
+            if number == 7: # shift to row 3
+                x+=x_bump
+                y=task_title_top + y_bump
+            if number == 10: # shift to row 4
+                x+=x_bump
+                y=task_title_top + y_bump
+            self.print_MD_string(f"{number}) {skill}",12,x,y)
+            y+=y_bump
 
-        collated_skills = please.collate_this(object.Skills)
+        line_amount = [len(gift_list), len(collated_interests),len(collated_skills)]
+        one2three = max(line_amount)
+        y = 3+task_title_top + y_bump*(3 if one2three > 2 else one2three)
 
-        ### stacking the skills by 3
-        skill_x = 78
-        skill_top = self.get_y()
-        for x, skill in enumerate(collated_skills):
-            if (x + 1) in [4, 7]:
-                skill_x = skill_x + 34
-                self.set_y(skill_top)
-            self.set_x(skill_x)
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"{x+1}) {skill}",
-                ln=1,
-            )
-            if (x + 1) == 3:
-                skill_bottom = self.get_y()
+        ### additional skill explainer
+        x=8
+        y+=3 
+        blob = f'**Gifts:** Auto success. **Interests:** General knowledge (+1) **Skills:** Specific knowledge (+2)'
+        if persona.Vocation == "Spie":
+            blob = f"{persona.Spie_Fu}"
 
-        ### reset y to lowest
-        # self.set_y(skill_bottom + 1.5)
-
-        self.set_xy(8, skill_bottom + 1.5)
-
-        if self.object.Vocation == "Spie":
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"{self.object.Spie_Fu}",
-                ln=1,
-            )
-
-        if object.Vocation == "Nothing":
-            if object.EXPS > object.Vocay_Aspiration_EXPS:
+        if persona.Vocation == "Nothing":
+            if persona.EXPS > persona.Vocay_Aspiration_EXPS:
                 achievation = "Achieved!"
             else:
-                fraction = int((object.EXPS / object.Vocay_Aspiration_EXPS) * 100)
+                fraction = int((persona.EXPS / persona.Vocay_Aspiration_EXPS) * 100)
                 achievation = f"{fraction}% achieved"
+            blob = f"Aspiration: {persona.Vocay_Aspiration} Objective: {achievation}"
+        self.print_MD_string(blob,10,x,y)
+        y+= y_bump
 
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"Aspiration: {object.Vocay_Aspiration} Objective: {achievation}",
-                ln=1,
-            )
+        return y
 
-    def biologic_info(self, object):
-        self.object = object
+    def anthro_biologic_info(self, persona,x:float=0,y:float=0)->None:
+        y_bump = 5.3
 
-        # BIOLOGIC Info Title
-        self.set_font("Helvetica", size=12)
-        self.set_fill_color(200)
-        self.set_draw_color(150)
-        line_height = self.font_size * 1.6
-        # self.set_xy(8, self.get_y() + 2)
-        self.set_x(8)
-        blob = f'**BIOLOGIC INFO** for {self.object.FAMILY} {self.object.FAMILY_TYPE}  {self.object.FAMILY_SUB if self.object.FAMILY_SUB else " "}'
-        line_width = self.get_string_width(blob)
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
-        )
+        self.grey_box_title('BIO INFO',5,y)
 
-        self.set_font("Helvetica", size=10)
-        self.set_xy(8, self.get_y() + 1)
-        blob = f"**Family** {self.object.FAMILY} **Type:** {self.object.FAMILY_TYPE} **Sub Type:** {self.object.FAMILY_SUB} **Age:** {self.object.Age} years **Hite:** {self.object.Hite} cms **Wate:** {self.object.Wate} kgs"
-        self.cell(w=0, markdown=True, txt=blob, ln=True, fill=False)
+        ### heading bio data
+        x = 9 + self.get_string_width('BIO INFO')
+        self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,x,y+.5)
+        y+= y_bump
+
+        blob = f"**Family** {persona.FAMILY} **Type:** {persona.FAMILY_TYPE} **Sub Type:** {persona.FAMILY_SUB} **Age:** {persona.Age} years **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} kgs"
+        self.print_MD_string(blob,12,x,y)
+        y+=y_bump
 
         # print out Mutations
-        self.set_xy(8, self.get_y())
-        line_height = self.font_size * 1.5
-        if len(self.object.Mutations) == 0:
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"**Mutations:** None",
-            )
-
+        if len(persona.Mutations) == 0:
+            self.print_MD_string(f"**Mutations:** None", 12, x, y)
+            y+=y_bump
+            
         else:
-            self.set_xy(8, self.get_y())
-
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"**Mutations:**",
-                ln=1,
-            )
-
-            self.set_font("Helvetica", size=9)
-            line_height = self.font_size * 1.25
-
             all_mutations = mutations.list_all_mutations()
-
-            for name in sorted(self.object.Mutations.keys()):
-                working_mutation = all_mutations[name](self.object)
+            tiny_bump = 3.4
+            for name in sorted(persona.Mutations.keys()):
+                working_mutation = all_mutations[name](persona)
                 header, details, param = working_mutation.return_details(
                     working_mutation.__class__
                 )
 
-                self.set_x(8)
-                self.cell(
-                    w=0,
-                    h=line_height,
-                    markdown=True,
-                    txt=f"**{header}**",
-                    # ln=1,
-                )
-                self.set_xy(8, self.get_y() + line_height)
-                self.cell(
-                    w=0,
-                    h=line_height,
-                    markdown=True,
-                    txt=f"{details}",
-                    # ln=1,
-                )
-                self.set_xy(8, self.get_y() + line_height)
-                self.cell(
-                    w=0,
-                    h=line_height,
-                    markdown=True,
-                    txt=f"{param}",
-                    # ln=1,
-                )
+                self.print_MD_string(f"**{header}**",10,x,y)
+                x+=4 + self.get_string_width(f"**{header}**",markdown=True)
+                self.print_MD_string(f"{details}",8,x,y+.5)
+                y+=tiny_bump
+                x=8
+                self.print_MD_string(f"{param}",8,x,y)
+                y+=tiny_bump
+        return y
 
-                self.set_xy(8, self.get_y() + 1.4 * line_height)
+    def referee_persona_fun(self,persona,x:float=0,y:float=0)-> None:
+        y_bump = 5.6
+        self.grey_box_title("ROLE PLAY FUN",x,y)
+        y += 2+y_bump
+        for fun in persona.RP_Fun:
+            self.print_MD_string(fun,12,8,y)
+            y += y_bump
 
-        if self.object.RP and self.object.Vocation in [
-            voc for voc in table.vocations_gifts_pivot
-        ]:
-            # RP FUN
-            self.set_xy(8, self.get_y() + 5)
-            self.set_font("Helvetica", size=10)
-            line_height = self.font_size * 1.4
-            blob = f"**RP FUN** for {self.object.Persona_Name}"
-            line_width = 0  # full width
-            self.cell(
-                w=line_width,
-                h=line_height,
-                markdown=True,
-                txt=blob,
-                ln=1,
-                fill=False,
-                border=False,
-            )
+    def trackers(self,x:float=0,y:float=0):
+        y_bump = 8
+        self.grey_box_title('TRACKERS',5,y)
+        y+=y_bump*1.5
+        self.set_xy(8,y)
+        self.set_font('ZapfDingbats','',18)
+        self.cell(txt=f'{"m"*5}  {"m"*5} {"m"*5}     {"m"*5}  {"m"*5} {"m"*5}', align='L')
+        y += y_bump
+        self.set_xy(8,y)
+        self.cell(txt=f'{"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}', align='L')
 
-            for fun in self.object.RP_Fun:
+    def alien_biologic_info(self, persona,x:float=0,y:float=0)->Float:
+        y_bump = 5.3
 
-                self.set_x(8)
-                self.cell(
-                    w=line_width,
-                    h=line_height,
-                    markdown=True,
-                    txt=fun,
-                    ln=1,
-                    fill=False,
-                    border=False,
-                )
+        self.grey_box_title('XENO INFO',5,y)
 
-    def alien_biologic_info(self, object):
-        self.object = object
-
-        ### ALIEN BIOLOGIC Info Title
-        self.set_font("Helvetica", size=12)
-        self.set_fill_color(200)
-        self.set_draw_color(150)
-        line_height = self.font_size * 1.6
-        self.set_xy(8, self.get_y() + 2)
-        blob = f"**XENOLOGIC INFO** for {self.object.FAMILY} **SPECIES:** {self.object.FAMILY_TYPE}"
-        line_width = self.get_string_width(blob)
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
-        )
+        x = 8 + self.get_string_width('XENO INFO')
+        self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,x,y+.5)
+        y+= y_bump
 
         # specific person age hite and wate
-        self.set_xy(8, self.get_y())
-        self.set_font("Helvetica", size=10)
-        line_height = self.font_size * 1.4
-        blob = f"**Specific Alien:** {self.object.Persona_Name} **Age:** {self.object.Age} {self.object.Alien_Age_Suffix} old. **Hite:** {self.object.Size} **Wate:** {self.object.Wate} {self.object.Wate_Suffix}."
-        line_width = 0  # full width
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
+        blob = f"**Specific Alien:** {self.persona.Persona_Name} **Age:** {self.persona.Age} {self.persona.Alien_Age_Suffix} old. **Hite:** {self.persona.Size} **Wate:** {self.persona.Wate} {self.persona.Wate_Suffix}."
+        self.print_MD_string(blob,12,x,y)
+        y+=y_bump
 
         ### assign the y for Description
-        top_desc_and_life_y = self.get_y()
-        left_desc_xeno_x = 8
-        left_life_society_x = 98
+        top_desc_and_life_y = y
+        x = 8
+        x_bump = 90
 
-        ### desc detailed description
+        ### Build left column list
+        left_column =[]
+        left_column.append('**Detailed Desc')
 
-        ### need to make list because multi_cell does not work as expected
         desc_parts = [
-            f"Head: {object.Head.split(' (')[0]}{object.Head_Adorn}",
-            f"Body: {object.Body.split(' (')[0]}{object.Body_Adorn}",
-            f"Arms: {object.Arms.split(' (')[0]}{object.Arms_Adorn}",
-            f"Legs: {object.Legs.split(' (')[0]}",
+            f"Head: {persona.Head.split(' (')[0]}{persona.Head_Adorn}",
+            f"Body: {persona.Body.split(' (')[0]}{persona.Body_Adorn}",
+            f"Arms: {persona.Arms.split(' (')[0]}{persona.Arms_Adorn}",
+            f"Legs: {persona.Legs.split(' (')[0]}",
         ]
+        left_column.extend(desc_parts)
 
-        self.set_xy(left_desc_xeno_x, top_desc_and_life_y)
-        self.set_font("Helvetica", size=10)
-        line_height = self.font_size * 1.3
-        blob = f"**Description:**"
-        line_width = 0  # full width
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
+        ### adding xenobio
+        left_column.append('**Xenobiology**')
 
-        for part in desc_parts:
-            self.set_x(left_desc_xeno_x)
-            self.cell(
-                w=line_width,
-                h=line_height,
-                markdown=True,
-                txt=part,
-                ln=1,
-                fill=False,
-                border=False,
-            )
+        for xeno in persona.Biology:
+
+
+
+
+
+
+
+
+
 
         ### life Life Span information
         self.set_xy(left_life_society_x, top_desc_and_life_y)
@@ -988,7 +706,7 @@ class PDF(FPDF):
             border=False,
         )
 
-        for stage in self.object.Life_Cycle:
+        for stage in self.persona.Life_Cycle:
             self.set_x(left_life_society_x)
             self.cell(
                 w=line_width,
@@ -1000,42 +718,16 @@ class PDF(FPDF):
                 border=False,
             )
 
-        ### xeno Xenologic information
-        top_of_xeno = self.get_y()
-        self.set_xy(left_desc_xeno_x, self.get_y())
-        self.set_font("Helvetica", size=10)
-        line_height = self.font_size * 1.3
-        blob = f"**Xenobiology**"
-        line_width = 0  # full width
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
 
-        for xeno in self.object.Biology:
-            self.set_x(left_desc_xeno_x)
-            self.cell(
-                w=line_width,
-                h=line_height,
-                markdown=True,
-                txt=xeno,
-                ln=1,
-                fill=False,
-                border=False,
-            )
 
-        bottom_of_xeno = self.get_y()
+
+
 
         # Society information
         self.set_xy(left_life_society_x, top_of_xeno)
         self.set_font("Helvetica", size=10)
         line_height = self.font_size * 1.3
-        blob = f"**Society** of {self.object.FAMILY_TYPE}"
+        blob = f"**Society** of {self.persona.FAMILY_TYPE}"
         line_width = 0  # full width
         self.cell(
             w=line_width,
@@ -1047,7 +739,7 @@ class PDF(FPDF):
             border=False,
         )
 
-        for techno in self.object.Society:
+        for techno in self.persona.Society:
             self.set_x(left_life_society_x)
             self.cell(
                 w=line_width,
@@ -1068,7 +760,7 @@ class PDF(FPDF):
 
         self.set_xy(8, top_mutations)
         line_height = self.font_size * 1.4
-        if len(self.object.Mutations) == 0:
+        if len(self.persona.Mutations) == 0:
             self.cell(
                 w=0,
                 h=line_height,
@@ -1092,8 +784,8 @@ class PDF(FPDF):
 
             all_mutations = mutations.list_all_mutations()
 
-            for name in sorted(self.object.Mutations.keys()):
-                working_mutation = all_mutations[name](self.object)
+            for name in sorted(self.persona.Mutations.keys()):
+                working_mutation = all_mutations[name](self.persona)
                 header, details, param = working_mutation.return_details(
                     working_mutation.__class__
                 )
@@ -1125,105 +817,45 @@ class PDF(FPDF):
 
                 self.set_xy(8, self.get_y() + 1.4 * line_height)
 
-    def note_lines(self):
-        self.x = self.get_x()
-        self.y = self.get_y()
-        lines = 275 - 5 - self.y
-        if lines < 10:
-            return
+        return y
 
-        # More Info Title
-        self.set_font("Helvetica", size=12)
+    def note_lines(self, lines:int, x:float = 0, y:float =0)-> None:
+        y_bump = 8
+
+        self.grey_box_title('NOTES',5,y)
+        y+= y_bump
+
+        self.set_draw_color(120) #dark grey 
         self.set_line_width(0.1)
-        self.set_fill_color(200)
-        self.set_draw_color(150)
-        line_height = self.font_size * 1.6
-        self.set_xy(8, self.get_y() + line_height)
-        blob = f"**MORE INFO**"
-        line_width = self.get_string_width(blob)
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
-        )
 
-        for more_y in range(int(lines / 7)):
-            self.line(
-                8, self.y + more_y * line_height, 210, self.y + more_y * line_height
-            )
+        for more_y in range(int(y),int(y+y_bump*lines),8):
+            self.line(8, more_y, 210, more_y)
 
-    def wate_allowance(self, object):
-        self.object = object
-        self.set_font("Helvetica", size=12)
+    def equipment_lines(self, persona, lines:int, x:float = 0, y:float = 0):
+        ### wate allowance to PDF
+        y_bump = 8
+        self.grey_box_title('TOYS',5,y)
+        x+= 3 + self.get_string_width("TOYS")
+        self.print_MD_string(f"**Carry:** up to {persona.WA*1.5} kg = {persona.MOVE} h/u. **Sprint:** <{persona.WA/4} kg = {persona.MOVE*2} h/u. **Lift:** {persona.WA*2.5} kg = 0 h/u.",12,x,y)
+        y+= 3 + y_bump
+
+        ### item wate info header
+        self.print_MD_string(f'**ITEM**{" "*48}**WT**{" "*7}**TTL**{" "*7}**INFO**',12,8,y)
+        y+= y_bump*1.5
+
+        # equipment lines to PDF
+        self.set_draw_color(120) #dark grey 
         self.set_line_width(0.1)
-        self.set_fill_color(200)
-        self.set_draw_color(150)
-        line_height = self.font_size * 1.6
-        self.set_xy(8, self.get_y() + 2)
-        blob = f"**TOYS**"
-        line_width = self.get_string_width(blob)
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
-        )
 
-        self.set_font("Helvetica", size=12)
-        line_height = self.font_size * 1.6
-        self.set_xy(40, 15)
+        for more_y in range(int(y),int(y+y_bump*lines),8):
+            self.line(8, more_y, 69,more_y) # item
+            self.line(73,more_y, 86,more_y) #wt
+            self.line(90,more_y, 103,more_y) #ttl
+            self.line(107,more_y, 208,more_y) #info
+            
+        return more_y
 
-        blob = f"**Carry Capacity:** up to {self.object.WA*1.5} kg. **No penalty:** <{self.object.WA/4} kg. **Lift Only:** {self.object.WA*2.5} kg."
-
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
-
-        self.line(8, self.y, 210, self.y)  # hack to fill an ugly gap
-
-        for more_y in range(int(15)):
-            self.line(
-                8, self.y + more_y * line_height, 103, self.y + more_y * line_height
-            )
-            self.line(
-                107, self.y + more_y * line_height, 208, self.y + more_y * line_height
-            )
-
-        self.set_xy(10, 120)
-
-    def data_footer(self, object):
-        self.object = object
-        self.set_font("Helvetica", size=7)
-        line_height = self.font_size * 1.6
-        self.set_xy(8, 273)
-        self.object.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
-        blob = f" **Printed:** {self.object.Date_Updated} **Created:** {self.object.Date_Created} **ID:** {self.object.ID}"
-
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-            align="C",
-        )
-
-    def combat_tabler(object, *args):
+    def combat_tabler(persona, *args):
         if args[0] not in ["output", "Output", "return", "Return"]:
             print(f"{args[0]} is not a valid option for combat_tabler")
             quit()
@@ -1247,44 +879,44 @@ class PDF(FPDF):
         # alien, alien = alien
         # robot, robot = robot
 
-        vocation_yes = object.Vocation in [x for x in table.vocation_level_bonus.keys()]
+        vocation_yes = persona.Vocation in [x for x in table.vocation_level_bonus.keys()]
 
-        if object.FAMILY == "Anthro":
-            combat_table = vocation_combat_tabler(object, arg_one, arg_two)
+        if persona.FAMILY == "Anthro":
+            combat_table = vocation_combat_tabler(persona, arg_one, arg_two)
             return
 
-        if object.FAMILY == "Alien" and vocation_yes:
-            combat_table = vocation_combat_tabler(object, arg_one, arg_two)
-            combat_table = alien_combat_tabler(object, arg_one, arg_two)
+        if persona.FAMILY == "Alien" and vocation_yes:
+            combat_table = vocation_combat_tabler(persona, arg_one, arg_two)
+            combat_table = alien_combat_tabler(persona, arg_one, arg_two)
             pass
 
-        if object.FAMILY == "Alien" and vocation_yes:
-            # vocation_combat_tabler(object, *args)
-            # robot_combat_tabler(object, *args)
+        if persona.FAMILY == "Alien" and vocation_yes:
+            # vocation_combat_tabler(persona, *args)
+            # robot_combat_tabler(persona, *args)
             # done and leave
             pass
 
-        if object.FAMILY == "Alien" and not vocation_yes:
-            # alien_combat_tabler(object, *args)
+        if persona.FAMILY == "Alien" and not vocation_yes:
+            # alien_combat_tabler(persona, *args)
             # done and leave
             pass
 
-        if object.FAMILY == "Alien" and not vocation_yes:
-            # robot_combat_tabler(object, *args)
+        if persona.FAMILY == "Alien" and not vocation_yes:
+            # robot_combat_tabler(persona, *args)
             # done and leave
             pass
 
         if (
-            object.Vocation in [x for x in table.vocation_level_bonus.keys()]
-            and object.FAMILY != "Robot"
+            persona.Vocation in [x for x in table.vocation_level_bonus.keys()]
+            and persona.FAMILY != "Robot"
         ):
-            combat_table = vocation_combat_tabler(object, args)
+            combat_table = vocation_combat_tabler(persona, args)
 
-        if object.FAMILY == "Alien":
-            combat_table = alien_combat_tabler(object, args)
+        if persona.FAMILY == "Alien":
+            combat_table = alien_combat_tabler(persona, args)
 
-        if object.FAMILY == "Robot":
-            combat_table = robot_combat_tabler(object, args)
+        if persona.FAMILY == "Robot":
+            combat_table = robot_combat_tabler(persona, args)
 
         return combat_table
 
@@ -1301,17 +933,16 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     then shows it in the default browser
     """
     try:
-        for root, dirs, files in os.walk(search_path):
+        for root, _, files in os.walk(search_path):
             if file_name in files:
                 found_file = os.path.join(root, file_name)
                 browser_file = "file:///" + found_file.replace('\\','/')
-                webbrowser.get().open_new(browser_file)
+                webbrowser.get('windows-default').open_new(browser_file)
                 break
     except PermissionError:
         print(f"Permission denied for directory {root}. Continuing search...")
     except Exception as e:
         print(f"An error occurred: {e}")
-
 
 def vocation_combat_tabler(calc, *args):
     # args test
@@ -1415,7 +1046,6 @@ def vocation_combat_tabler(calc, *args):
 
     return combat_table
 
-
 def alien_combat_tabler(calc, *args):
     # args test
     if args[0] not in ["output", "Output", "return", "Return"]:
@@ -1517,7 +1147,6 @@ def alien_combat_tabler(calc, *args):
 
     return combat_table
 
-
 def robot_combat_tabler(calc, *args):
     # args test
     if args[0] not in ["output", "Output", "return", "Return"]:
@@ -1589,8 +1218,7 @@ def robot_combat_tabler(calc, *args):
 
     return combat_table
 
-
-def output_combat_tabler(object, combat_table):
+def output_combat_tabler(persona, combat_table):
     # prep the combat table
     ABP = combat_table["A"]["BP"]
     ABNP = combat_table["A"]["BNP"]
@@ -1643,80 +1271,79 @@ def output_combat_tabler(object, combat_table):
     if CBP > 0:
         print(f"Type C {CBP:>5} {CBNP:>5} {CMR:>5} {CDB:>5}  {CPROF}")
 
-    if object.FAMILY != "Alien":
+    if persona.FAMILY != "Alien":
         print(f'{combat_table["ARMOVE"]}')
 
     return
-
 
 #####################################
 # ANTHRO output to screen
 #####################################
 
-def anthro_review(object):
+def anthro_screen(persona) -> None:
     please.clear_console()
     print(
         f"\n\nANTHRO PERSONA RECORD\n"
-        f"Persona: {object.Persona_Name} \t\t\tPlayer: {object.Player_Name} \tCreated: {object.Date_Created}\n"
-        f"AWE: {object.AWE} CHA: {object.CHA} CON: {object.CON} DEX: {object.DEX} "
-        f"INT: {object.INT} MSTR: {object.MSTR} PSTR: {object.PSTR} HPS: {object.HPM} SOC: {object.SOC} WA: {object.WA}\n"
-        f"Family: {object.FAMILY} Type: {object.FAMILY_TYPE} SubType: {object.FAMILY_SUB}\n"
-        f"Age: {object.Age} years Hite: {object.Hite} cms Wate: {object.Wate} kgs\n"
-        f"Vocation: {object.Vocation} Level: {object.Level} EXPS: {object.EXPS}"
+        f"Persona: {persona.Persona_Name} \t\t\tPlayer: {persona.Player_Name} \tCreated: {persona.Date_Created}\n"
+        f"AWE: {persona.AWE} CHA: {persona.CHA} CON: {persona.CON} DEX: {persona.DEX} "
+        f"INT: {persona.INT} MSTR: {persona.MSTR} PSTR: {persona.PSTR} HPS: {persona.HPM} SOC: {persona.SOC} WA: {persona.WA}\n"
+        f"Family: {persona.FAMILY} Type: {persona.FAMILY_TYPE} SubType: {persona.FAMILY_SUB}\n"
+        f"Age: {persona.Age} years Hite: {persona.Hite} cms Wate: {persona.Wate} kgs\n"
+        f"Vocation: {persona.Vocation} Level: {persona.Level} EXPS: {persona.EXPS}"
     )
 
     # show the combat table
-    vocation_combat_tabler(object, "output")
+    vocation_combat_tabler(persona, "output")
 
     # anthro Gifts
-    gift_list = vocation.update_gifts(object)
-    print(f"\n{object.Vocation} GIFTS: ")
+    gift_list = vocation.update_gifts(persona)
+    print(f"\n{persona.Vocation} GIFTS: ")
     for x, gift in enumerate(gift_list):
         print(f"{x + 1}) {gift}")
 
     # anthro  Interest list
-    print(f"\n{object.Vocation} INTERESTS: ")
-    collated_interests = please.collate_this(object.Interests)
+    print(f"\n{persona.Vocation} INTERESTS: ")
+    collated_interests = please.collate_this(persona.Interests)
 
     for x, interest in enumerate(collated_interests):
         print(f"{x + 1}) {interest}")
 
     # anthro  Skills
-    print(f"\n{object.Vocation} SKILLS: ")
-    collated_skills = please.collate_this(object.Skills)
+    print(f"\n{persona.Vocation} SKILLS: ")
+    collated_skills = please.collate_this(persona.Skills)
     for x, skill in enumerate(collated_skills):
         print(f"{x + 1}) {skill}")
 
     # special cases for nothing and spie
 
-    if object.Vocation == "Spie":
-        print(f"{object.Spie_Fu}")
+    if persona.Vocation == "Spie":
+        print(f"{persona.Spie_Fu}")
 
-    if object.Vocation == "Nothing":
-        if object.EXPS > object.Vocay_Aspiration_EXPS:
+    if persona.Vocation == "Nothing":
+        if persona.EXPS > persona.Vocay_Aspiration_EXPS:
             achievation = "Achieved!"
         else:
-            fraction = int((object.EXPS / object.Vocay_Aspiration_EXPS) * 100)
+            fraction = int((persona.EXPS / persona.Vocay_Aspiration_EXPS) * 100)
             achievation = f"{fraction}% achieved"
 
-        print(f"Aspiration: {object.Vocay_Aspiration} Objective: {achievation}")
+        print(f"Aspiration: {persona.Vocay_Aspiration} Objective: {achievation}")
 
     # print out Mutations
     print("\nMUTATIONS", end=" ")
 
-    if len(object.Mutations) == 0:
+    if len(persona.Mutations) == 0:
         print("None")
 
     else:
         all_mutations = mutations.list_all_mutations()
 
-        for name, perm in sorted(object.Mutations.items()):
-            working_mutation = all_mutations[name](object)
+        for name, perm in sorted(persona.Mutations.items()):
+            working_mutation = all_mutations[name](persona)
             working_mutation.post_details(working_mutation.__class__)
 
-    if object.RP:
+    if persona.RP:
         print("\nReferee Persona ROLE-PLAYING CUES")
-        for fun in object.RP_Fun:
+        for fun in persona.RP_Fun:
             print(f"{fun}")
 
     return
@@ -1725,109 +1352,55 @@ def anthro_review(object):
 # ANTHRO output to PDF
 #####################################
 
-def anthro_pdf_chooser(object) -> None:
+def anthro_pdf_chooser(persona) -> None:
     function_map = {
-        "One Shot - One sheet": anthro_pdf_creator,
-        "Campaign - Three sheets": anthro_campaign_creator,
-        "Notes sheet": notes_sheet,
-        "Testing": testing_pdf_creator,
+        "One Shot - One sheet": anthro_one_shot_creator,
+        "Campaign - Two sheets": anthro_campaign_creator,
     }
-
     choice_list = [key for key in function_map]
     function_chosen  = please.choose_this(choice_list, "PDF type needed? ")
-    function_map[function_chosen](object)
+    function_map[function_chosen](persona)
     
-def testing_pdf_creator(object):
-    pass
-
-
-def anthro_campaign_creator(object) -> None:
+def anthro_campaign_creator(persona) -> None:
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
     pdf.set_margin(0)  # set margins to 0
 
-    ### persona information composed from object
-    pdf.add_page() # front page 1
-    pdf.perimiter_box()
-    pdf.title_line(object)
-    pdf.attributes_lines(object)
-    pdf.description_line(object)
-    pdf.combat_table_titler(object, "Vocation")
-    pdf.combat_table_pd_effer(object, "Vocation")
+    ### PAGE ONE front
+    anthro_front_sheet(pdf,persona)
 
-    pdf.task_info(object)
-    pdf.biologic_info(object)
-    pdf.note_lines()  
-
-    ### please no use 
+    ### PAGE ONE back
     pdf.add_page() # back page 1
+    pdf.obfuscate() # here for lowest z
+    pdf.title_line(persona,'Campaign')
+    pdf.data_footer(persona)
     pdf.perimiter_box()
-    pdf.title_line(object,'Campaign')
-    pdf.data_footer(object)
 
-    ### fuck the page
-    pdf.set_xy(8,22)
-    pdf.set_line_width(0.7)
-    pdf.set_draw_color(0)
-    pdf.set_font("Helvetica", size=12)
-    line_height = pdf.font_size * 1.6
+    ### PAGE TWO front
+    pdf.add_page()
+    pdf.title_line(persona,'Campaign')
+    pdf.equipment_lines(persona, 28,8,16)
+    pdf.data_footer(persona)
+    pdf.perimiter_box()
 
-    for more_y in range(int(260 / 7)):
-        pdf.line(
-            8, pdf.y + more_y * line_height, 208, pdf.y + more_y * line_height
-        )
+    ### PAGE TWO back
+    pdf.add_page()
+    pdf.title_line(persona,'Campaign')
+    pdf.note_lines(28,8,16)
+    pdf.data_footer(persona)
+    pdf.perimiter_box()
 
-    for more_x in range(8,208, 7):
-        pdf.line(
-            more_x, 15, more_x, 271
-        )
-
-    ### print do not use
-    pdf.set_fill_color(200)
-    pdf.set_draw_color(150)
-    line_height = pdf.font_size * 1.6
-    pdf.set_xy(pdf.epw/2,pdf.eph/2)
-
-    blob = f"**DO NOT USE**"
-    line_width = pdf.get_string_width(blob)
-
-    pdf.set_x(pdf.epw/2-pdf.get_string_width(blob)/2)
-    pdf.cell(
-        w=line_width,
-        h=line_height,
-        markdown=True,
-        txt=blob,
-        ln=1,
-        fill=True,
-        border=True,
-    )
-
-    ### please use attached sheets
-    blob = f"**Keep notes on attached sheets**"
-    line_width = pdf.get_string_width(blob)
-    pdf.set_y(pdf.get_y() + 7)
-    pdf.set_x(pdf.epw/2-pdf.get_string_width(blob)/2)
-    pdf.cell(
-        w=line_width,
-        h=line_height,
-        markdown=True,
-        txt=blob,
-        ln=1,
-        fill=True,
-        border=True,
-    )
-
-    ### equipment page
-    pdf.add_page() # front page 2
-    pdf.equipment_sheet(object)
-    pdf.add_page() # back page 2
-    pdf.notes_sheet(object)
-
-    ### notes page
-    pdf.add_page() # front page 3
-    pdf.notes_sheet(object)
-    pdf.add_page() # back page 3
-    pdf.notes_sheet(object)
     
+    pdf.output(
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+        dest="F",
+    )
+    show_pdf()
+
+def anthro_one_shot_creator(persona) -> None:
+    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
+
+    anthro_front_sheet(pdf, persona)
+    do_not_use_back_sheet(pdf,persona)
 
     pdf.output(
         name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
@@ -1835,193 +1408,116 @@ def anthro_campaign_creator(object) -> None:
     )
     show_pdf()
 
-def notes_sheet(object) -> None:
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    pdf.set_margin(0)  # set margins to 0
-    pdf.add_page()
-    pdf.perimiter_box() 
-    pdf.title_line(object,'notes')
-    pdf.data_footer(object)      
-
-    ### make lines for notes
-    pdf.set_xy(8,22)
-    pdf.set_line_width(0.1)
-    pdf.set_draw_color(150)
-    pdf.set_font("Helvetica", size=12)
-    line_height = pdf.font_size * 1.6
-
-
-    for more_y in range(int(222 / 7)):
-        pdf.line(
-            8, pdf.y + more_y * line_height, 208, pdf.y + more_y * line_height
-        )
-
-    ### grey title
-
-    pdf.set_fill_color(200)
-    pdf.set_draw_color(150)
-    line_height = pdf.font_size * 1.6
-    pdf.set_xy(8, 230)
-    blob = f"**NOTES**"
-    line_width = pdf.get_string_width(blob)
-    pdf.cell(
-        w=line_width,
-        h=line_height,
-        markdown=True,
-        txt=blob,
-        ln=1,
-        fill=True,
-        border=True,
-    )
-
-
-def equipment_sheet(self, object) -> None:
-    self.title_line(object,'equipment')
-    self.data_footer(object)  
-
-    ### making the equipment page
-    self.set_font("Helvetica", size=12)
-    self.set_line_width(0.1)
-    self.set_draw_color(150)
-    line_height = self.font_size * 1.6
-
-    ### wate allowance to PDF
-    self.set_xy(40, 15)
-    blob = f"**Carry:** up to {self.object.WA*1.5} kg = {object.MOVE} h/u. **Sprint:** <{self.object.WA/4} kg = {object.MOVE*2} h/u. **Lift:** {self.object.WA*2.5} kg = 0 h/u."
-    line_height = self.font_size * 1.6    
+def anthro_front_sheet(pdf, persona):
+    pdf.set_margin(0)
+    the_y = 18
     
-    self.cell(
-        w=0,
-        h=line_height,
-        markdown=True,
-        txt=blob,
-        ln=1,
-        fill=False,
-        border=False,
-    )
-
-    ### item wate info header
-    blob = f'**ITEM**{" "*48}**WT**{" "*7}**TTL**{" "*7}**INFO**'
-    line_height = self.font_size * 1.6    
-    self.set_xy(8, 22)    
-    self.cell(
-        w=0,
-        h=line_height,
-        markdown=True,
-        txt=blob,
-        ln=1,
-        fill=False,
-        border=False,
-    )
-
-    # equipment lines to PDF
-    self.set_xy(8,33)
-    self.set_draw_color(140,140,140) #dark grey 
-    for more_y in range(30): # spacer is 4mm
-        self.line( # item 
-            8, self.y + more_y * line_height, 69, self.y + more_y * line_height
-        )
-        self.line( # wt
-            73, self.y + more_y * line_height, 86, self.y + more_y * line_height
-        )
-        self.line( # ttl
-            90, self.y + more_y * line_height, 103, self.y + more_y * line_height
-        )
-
-        self.line( # notes
-            107, self.y + more_y * line_height, 208, self.y + more_y * line_height
-        )
-
-    ### grey title
-    self.set_fill_color(200)
-    self.set_draw_color(150)
-    line_height = self.font_size * 1.6
-    self.set_xy(8, 232)
-    blob = f"**NOTES**"
-    line_width = self.get_string_width(blob)
-    self.cell(
-        w=line_width,
-        h=line_height,
-        markdown=True,
-        txt=blob,
-        ln=1,
-        fill=True,
-        border=True,
-    )
-
-
-    '''   
-    self.add_page()
-    pdf.perimiter_box() 
-    pdf.title_line(object,'notes')
-    pdf.data_footer(object)
-
-    ### make lines for notes
-    pdf.set_xy(8,22)
-    pdf.set_line_width(0.1)
-    pdf.set_draw_color(150)
-
-    for more_y in range(int(222 / 7)):
-        pdf.line(
-            8, pdf.y + more_y * line_height, 208, pdf.y + more_y * line_height
-        )
-
- 
-    ### grey title
-    pdf.set_font("Helvetica", size=12)
-    pdf.set_fill_color(200)
-    pdf.set_draw_color(150)
-    line_height = pdf.font_size * 1.6
-    pdf.set_xy(8, 230)
-    blob = f"**NOTES**"
-    line_width = pdf.get_string_width(blob)
-    pdf.cell(
-        w=line_width,
-        h=line_height,
-        markdown=True,
-        txt=blob,
-        ln=1,
-        fill=True,
-        border=True,
-    )'''
-
-def anthro_pdf_creator(object):
-
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    pdf.set_margin(0)  # set margins to 0
-
     pdf.add_page()
-    pdf.perimiter_box()
-    pdf.title_line(object)
-    pdf.attributes_lines(object)
-    pdf.description_line(object)
-    pdf.combat_table_titler(object, "Vocation")
-    pdf.combat_table_pd_effer(object, "Vocation")
+    pdf.title_line(persona)
+    pdf.data_footer(persona)
 
-    pdf.task_info(object)
-    pdf.biologic_info(object)
-    pdf.note_lines()
+    ### attributes 3 line all calculated
+    pdf.attributes_lines(persona,8,the_y)   
 
+    ### combat heading
+    the_y+=32
+    pdf.grey_box_title('COMBAT INFO',5,the_y)
+
+    ### combat info
+    x=9 + pdf.get_string_width('COMBAT INFO')
+    pdf.persona_level_info(persona,x,the_y+.5)
+    
+    ### building move, AR, line 
+    x=8
+    the_y+=8
+    
+    ### movement
+    blob = '**MOVE**'
+
+    if persona.FAMILY == 'ALIEN':
+        blob += f'  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'      
+    else:
+        blob += f'  {persona.Move} h/u'
+
+    pdf.print_MD_string(blob, 14,x,the_y)
+
+    ### armour rating
+    x+= 4 + pdf.get_string_width(blob)
+    pdf.print_MD_string("**ARMOUR RATING (AR)**",14,x,the_y)
+    x+= 3+ pdf.get_string_width("**ARMOUR RATING (AR)**", markdown=True)
+    pdf.print_MD_string(f'{persona.AR}   **_____   _____**',14,x,the_y)
+
+    ### attack table header
+    the_y+=8
+    pdf.print_MD_string('**ATTACK TABLE**', 14,8,the_y)
+    
+    ### hit points header
+    pdf.print_MD_string(f'**HIT POINTS (MAX = {persona.HPM})**', 14,105,the_y)
+
+    ### proficiencies header
+    pdf.print_MD_string('**Skilled Attacks**',14,162,the_y)
+
+    ### hit points box
+    the_y +=8
+    pdf.set_line_width(.3)
+    pdf.rect(106, the_y, 54, 29.6, "D")
+
+    ### skilled weapon lines
+    pdf.set_line_width(.2)
+    pdf.set_draw_color(80)
+    for y in range(the_y,the_y+36,6):
+        pdf.line(162,y,208,y)
+
+    ### combat table output
+    pdf.combat_table_pd_effer(persona, "Vocation",8,the_y)
+
+    ### combat table explainer
+    the_y += 30
+    pdf.combat_table_explainer(8,the_y+.5)
+
+    ### task info plus level info
+    the_y+=14
+    pdf.grey_box_title('TASK INFO',5,the_y)
+    x = 9 + pdf.get_string_width('TASK INFO')
+    pdf.persona_level_info(persona,x,the_y+.5)
+
+    ### output multicolumn gifts, interests, skills
+    the_y+=8
+    the_y = 2+pdf.task_info(persona,8,the_y)
+
+    ### bio (xeno and tech ) data
+    if persona.FAMILY == 'Anthro':
+        the_y = 3 + pdf.anthro_biologic_info(persona,8,the_y)
+    elif persona.FAMILY == 'Alien':
+        the_y = 3 + pdf.alien_biologic_info(persona,8,the_y)
+
+    if persona.RP:
+        pdf.referee_persona_fun(persona,5,the_y)
+        the_y+=32
+
+    if the_y < 250:
+        pdf.trackers(8,the_y)
+
+    pdf.perimiter_box() #placed here for z cover
+
+    ##################################################
+    # back page one off anthro
+    #################################################
+
+def do_not_use_back_sheet(pdf, persona):
     pdf.add_page()
-    pdf.title_line(object)
+    pdf.title_line(persona)
+    the_y = pdf.equipment_lines(persona, 14,8,16)
+    the_y += 3
+    pdf.note_lines(13,5,the_y)
+    pdf.data_footer(persona)
     pdf.perimiter_box()
-    pdf.wate_allowance(object)
-    pdf.note_lines()
-    pdf.data_footer(object)
-
-    pdf.output(
-        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
-        dest="F",
-    )
-    show_pdf()
-    return
-
 
 #####################################
 # ALIEN output to screen
 #####################################
 
-def alien_review(alien):
+def alien_screen(alien):
     """
     print the alien to screen
     """
@@ -2113,11 +1609,9 @@ def alien_review(alien):
 
     return
 
-
 #####################################
 # AlIEN output to PDF
 #####################################
-
 
 def alien_pdf_creator(alien) -> None:
     '''
@@ -2138,11 +1632,11 @@ def alien_pdf_creator(alien) -> None:
     pdf.attributes_lines(alien)
     pdf.description_line(alien)
 
-    pdf.combat_table_titler(alien, "Alien")
+    pdf.persona_level_info(alien, "Alien")
     pdf.combat_table_pd_effer(alien, "Alien")
 
     if alien.Vocation != "Alien":
-        pdf.combat_table_titler(alien, "Vocation")
+        pdf.persona_level_info(alien, "Vocation")
         pdf.combat_table_pd_effer(alien, "Vocation")
 
     pdf.alien_move(alien)
@@ -2157,7 +1651,7 @@ def alien_pdf_creator(alien) -> None:
     pdf.add_page()
     pdf.title_line(alien)
     pdf.perimiter_box()
-    pdf.wate_allowance(alien)
+    pdf.equipment_lines(alien)
     pdf.note_lines()
     pdf.data_footer(alien)
 
@@ -2167,12 +1661,11 @@ def alien_pdf_creator(alien) -> None:
     )
     show_pdf()
 
-
 #####################################
 # ROBOT output to screen
 #####################################
 
-def robot_review(robot) -> None:
+def robot_screen(robot) -> None:
     """
     print the robot to screen
     """
@@ -2259,11 +1752,9 @@ def robot_review(robot) -> None:
 
     return
 
-
 #####################################
 # ROBOT output to PDF
 #####################################
-
 
 def robot_pdf_creator(robot):
     '''
@@ -2279,9 +1770,9 @@ def robot_pdf_creator(robot):
     pdf.attributes_lines(robot)
     pdf.description_line(robot)
     if robot.Vocation != "Robot":
-        pdf.combat_table_titler(robot, "Vocation")
+        pdf.persona_level_info(robot, "Vocation")
         pdf.combat_table_pd_effer(robot, "Vocation")
-    pdf.combat_table_titler(robot, "Robot")
+    pdf.persona_level_info(robot, "Robot")
     pdf.combat_table_pd_effer(robot, "Robot")
     if robot.Vocation != "Robot":
         pdf.task_info(robot)
@@ -2289,7 +1780,7 @@ def robot_pdf_creator(robot):
     pdf.add_page()
     pdf.title_line(robot)
     pdf.perimiter_box()
-    pdf.wate_allowance(robot)
+    pdf.equipment_lines(robot)
     pdf.note_lines()
     pdf.data_footer(robot)
 
@@ -2298,35 +1789,5 @@ def robot_pdf_creator(robot):
         dest="F",
     )
     show_pdf()
-
-
-#####################################
-# Bespoke Back pager PDF
-#####################################
-
-def backpage_creator(object):
-    print ("at backpage_creator")
-    please.show_me_your_dict(object)
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    pdf.set_margin(0)  # set margins to 0
-
-    pdf.add_page()
-    pdf.perimiter_box()
-    pdf.title_line(object)
-    pdf.note_lines()
-
-    pdf.add_page()
-    pdf.title_line(object)
-    pdf.perimiter_box()
-    pdf.note_lines()
-
-    sub_directory = "Referee" if object.RP else "Players"
-    pdf_name = f"./Records/{sub_directory}/{object.File_Name}.BACKPAGER.pdf"
-    pdf.output(
-        name=pdf_name,
-        dest="F",
-    )
-    print(f"\n***PDF stored at ./Records/{sub_directory}/{object.File_Name}.pdf")
-    return
 
 
