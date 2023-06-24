@@ -19,12 +19,10 @@ def outputs_workflow(persona, out_type: str) -> None:
 
     if family_type == "Anthro" and out_type == "screen":
         anthro_screen(persona)  
-    elif family_type == "Anthro" and out_type == "pdf":
+    elif family_type in ["Anthro","Alien"] and out_type == "pdf":
         anthro_pdf_chooser(persona)
     elif family_type == "Alien" and out_type == "screen":
         alien_screen(persona)
-    elif family_type == "Alien" and out_type == "pdf":
-        alien_pdf_creator(persona)
     elif family_type == "Robot" and out_type == "screen":
         robot_screen(persona)
     elif family_type == "Robot" and out_type == "pdf":
@@ -240,38 +238,22 @@ class PDF(FPDF):
         # build a blob to use
         vocation_info = f'{persona.Vocation}' if persona.FAMILY == "Anthro" else f'{persona.FAMILY}'
         exps_info = f' **Level** {persona.Level} **EXPS** ({persona.EXPS}/{exps_next})'
-        self.print_MD_string((vocation_info + exps_info),12,x,y)
+        blob = vocation_info + exps_info
+        self.print_MD_string(blob,12,x,y)
 
-    def combat_table_pd_effer(self, persona, table_title:str, x:float = 0, y:float = 0):
+    def combat_table_pd_effer(self, persona, x:float = 0, y:float = 0):
+        '''
+        organizes the table does a pdf output using table_vomit
+        A = Strike, B = Fling, C = Shoot
+        BP = Skilled, BNP = Raw, MR = Max, DB = Force
+        '''
         self.set_xy(x,y)
-        # which table to use
-        if table_title == "Vocation":
-            combat_table = vocation_combat_tabler(persona, "return", "all")
+        attack_table = universal_combat_tabler(persona)
 
-        elif table_title == "Alien":
-            combat_table = alien_combat_tabler(persona, "return", "all")
+        print(please.show_me_your_dict(attack_table))
+        print()
+        input("safe to continue? ")
 
-        elif table_title == "Robot":
-            combat_table = robot_combat_tabler(persona, "return", "all")
-
-        # calculate the combat table
-        ABP = combat_table["A"]["BP"]
-        ABNP = combat_table["A"]["BNP"]
-        AMR = combat_table["A"]["MR"]
-        ADB = combat_table["A"]["ADB"]
-        # APROF = combat_table["A"]["PROF"] number of proficiencies, not being used
-
-        BBP = combat_table["B"]["BP"]
-        BBNP = combat_table["B"]["BNP"]
-        BMR = combat_table["B"]["MR"]
-        BDB = combat_table["B"]["BDB"]
-        # BPROF = combat_table["B"]["PROF"] number of proficiencies, not being used
-
-        CBP = combat_table["C"]["BP"]
-        CBNP = combat_table["C"]["BNP"]
-        CMR = combat_table["C"]["MR"]
-        CDB = combat_table["C"]["CDB"]
-        # CPROF = combat_table["C"]["PROF"] number of proficiencies, not being used
 
         data = [
             [
@@ -284,39 +266,43 @@ class PDF(FPDF):
         ]
 
         # build data if BP exists.
-        if ABP > 0:
+        if attack_table["A"]["BP"] > 0:
             data.append(
                 [
                     "Strike:LB",
-                    f"{ABNP}:CI",
-                    f"{ABP}:CI",
-                    f"{AMR}:CI",
-                    f"{ADB}:CI",
+                    f'{attack_table["A"]["BNP"]}:CI',
+                    f'{attack_table["A"]["BP"]}:CI',
+                    f'{attack_table["A"]["MR"]}:CI',
+                    f'{attack_table["A"]["ADB"]}:CI',
                 ]
             )
 
-        if BBP > 0:
+        if attack_table["B"]["BP"] > 0:
             data.append(
                 [
                     "Fling:LB",
-                    f"{BBNP}:CI",
-                    f"{BBP}:CI",
-                    f"{BMR}:CI",
-                    f"{BDB}:CI",
+                    f'{attack_table["B"]["BNP"]}:CI',
+                    f'{attack_table["B"]["BP"]}:CI',
+                    f'{attack_table["B"]["MR"]}:CI',
+                    f'{attack_table["B"]["BDB"]}:CI',
                 ]
             )
 
-        if CBP > 0:
+        if attack_table["C"]["BP"] > 0:
             data.append(
                 [
                     "Shoot:LB",
-                    f"{CBNP}:CI",
-                    f"{CBP}:CI",
-                    f"{CMR}:CI",
-                    f"{CDB}:CI",
+                    f'{attack_table["C"]["BNP"]}:CI',
+                    f'{attack_table["C"]["BP"]}:CI',
+                    f'{attack_table["C"]["MR"]}:CI',
+                    f'{attack_table["C"]["CDB"]}:CI',
                 ]
             )
  
+        print(data)
+        print()
+        input("safe to continue? ")
+
         # table_vomit the ABCs of combat table
         self.table_vomit(data, 9, 105, self.get_y(), 1.5, 0.25)
 
@@ -346,9 +332,7 @@ class PDF(FPDF):
             txt=blob,
             ln=1,
         )
-
-
-        
+ 
     def grey_box_title(self,blob, x=0,y=0)->None:
         '''
         takes the blob string and makes it a box for it
@@ -496,9 +480,10 @@ class PDF(FPDF):
             col_width = table_width / (len(row) if len(row) > 0 else 1)
             self.set_x(x_left)
             for datum in row:
+                print(f'in table_vomit {datum = }')
                 content, styling = datum.split(":")
                 alignment = styling[0]
-                accenture = styling[1] if styling[1] != "N" else ""
+                accenture = styling[1] if len(styling) > 1 and styling[1] != "N" else ""
 
                 self.set_font(self.font_family, accenture, self.font_size_pt)
                 self.multi_cell(
@@ -589,26 +574,25 @@ class PDF(FPDF):
 
         return y
 
-    def anthro_biologic_info(self, persona,x:float=0,y:float=0)->None:
-        y_bump = 5.3
+    def mutation_to_pdf(self,persona,x:float=0,y:float=0)->None:
+        if persona.FAMILY == "Anthro":
+            family_header = "Mutations:"
+        elif persona.FAMILY == "Alien":
+            family_header = "Powers:"
+        elif persona.FAMILY == "Robot":
+            family_header = "Malfunctations:"
+        else:
+            family_header = "Oops wrong family header"
+        
+        y_bump = 5.6
 
-        self.grey_box_title('BIO INFO',5,y)
-
-        ### heading bio data
-        x = 9 + self.get_string_width('BIO INFO')
-        self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,x,y+.5)
-        y+= y_bump
-
-        blob = f"**Family** {persona.FAMILY} **Type:** {persona.FAMILY_TYPE} **Sub Type:** {persona.FAMILY_SUB} **Age:** {persona.Age} years **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} kgs"
-        self.print_MD_string(blob,12,x,y)
-        y+=y_bump
-
-        # print out Mutations
         if len(persona.Mutations) == 0:
-            self.print_MD_string(f"**Mutations:** None", 12, x, y)
+            self.print_MD_string(f"**{family_header}** None", 12, x, y)
             y+=y_bump
             
         else:
+            self.print_MD_string(f"**{family_header}**", 12, x, y)
+            y+=y_bump            
             all_mutations = mutations.list_all_mutations()
             tiny_bump = 3.4
             for name in sorted(persona.Mutations.keys()):
@@ -616,7 +600,6 @@ class PDF(FPDF):
                 header, details, param = working_mutation.return_details(
                     working_mutation.__class__
                 )
-
                 self.print_MD_string(f"**{header}**",10,x,y)
                 x+=4 + self.get_string_width(f"**{header}**",markdown=True)
                 self.print_MD_string(f"{details}",8,x,y+.5)
@@ -624,6 +607,25 @@ class PDF(FPDF):
                 x=8
                 self.print_MD_string(f"{param}",8,x,y)
                 y+=tiny_bump
+        return y
+
+    def anthro_biologic_info(self, persona,x:float=0,y:float=0)->None:
+        y_bump = 5.3
+
+        self.grey_box_title('BIO INFO',5,y)
+
+        ### heading bio data
+        # x = 7 + self.get_string_width('BIO INFO')
+        self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,(x+9+self.get_string_width('BIO INFO')),y+.5)
+        y+= 3 + y_bump
+
+        blob = f"**Family** {persona.FAMILY} **Type:** {persona.FAMILY_TYPE} **Sub Type:** {persona.FAMILY_SUB} **Age:** {persona.Age} years **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} kgs"
+        self.print_MD_string(blob,12,x,y)
+        y+=y_bump
+
+        # print out Mutations
+        y = self.mutation_to_pdf(persona, 8,y)
+
         return y
 
     def referee_persona_fun(self,persona,x:float=0,y:float=0)-> None:
@@ -645,11 +647,10 @@ class PDF(FPDF):
         self.set_xy(8,y)
         self.cell(txt=f'{"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}', align='L')
 
-    def alien_biologic_info(self, persona,x:float=0,y:float=0)->Float:
+    def alien_biologic_info(self, persona,x:float=0,y:float=0)->float:
         y_bump = 5.3
 
         self.grey_box_title('XENO INFO',5,y)
-
         x = 8 + self.get_string_width('XENO INFO')
         self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,x,y+.5)
         y+= y_bump
@@ -660,13 +661,12 @@ class PDF(FPDF):
         y+=y_bump
 
         ### assign the y for Description
-        top_desc_and_life_y = y
+        top_y = y
         x = 8
         x_bump = 90
 
         ### Build left column list
-        left_column =[]
-        left_column.append('**Detailed Desc')
+        left_column =['**Detailed Desc']
 
         desc_parts = [
             f"Head: {persona.Head.split(' (')[0]}{persona.Head_Adorn}",
@@ -676,146 +676,34 @@ class PDF(FPDF):
         ]
         left_column.extend(desc_parts)
 
-        ### adding xenobio
+        ### adding xenobiology
         left_column.append('**Xenobiology**')
 
-        for xeno in persona.Biology:
+        ### adding list of Biology
+        left_column.append(persona.Biology)
 
+        ### right column
+        right_column = ["**Life Cycle**"]
+        right_column.extend(persona.Life_Cycle)
+        right_column.append("**Society**")
+        right_column.extend(persona.Society)
 
+        for element in left_column:
+            self.print_MD_string(element,11,x,y)
+            y+=y_bump
 
+        left_bottom = y #store bottom y
+        y = top_y
+        x += x_bump # move column
 
+        for element in right_column:
+            self.print_MD_string(element,11,x,y)
+            y+=y_bump
 
+        y = left_bottom if left_bottom>y else y
+        x = 8
 
-
-
-
-
-        ### life Life Span information
-        self.set_xy(left_life_society_x, top_desc_and_life_y)
-        self.set_font("Helvetica", size=10)
-        line_height = self.font_size * 1.3
-        blob = f"**Life Span:**"
-        line_width = 0  # full width
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
-
-        for stage in self.persona.Life_Cycle:
-            self.set_x(left_life_society_x)
-            self.cell(
-                w=line_width,
-                h=line_height,
-                markdown=True,
-                txt=stage,
-                ln=1,
-                fill=False,
-                border=False,
-            )
-
-
-
-
-
-
-        # Society information
-        self.set_xy(left_life_society_x, top_of_xeno)
-        self.set_font("Helvetica", size=10)
-        line_height = self.font_size * 1.3
-        blob = f"**Society** of {self.persona.FAMILY_TYPE}"
-        line_width = 0  # full width
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
-
-        for techno in self.persona.Society:
-            self.set_x(left_life_society_x)
-            self.cell(
-                w=line_width,
-                h=line_height,
-                markdown=True,
-                txt=techno,
-                ln=1,
-                fill=False,
-                border=False,
-            )
-
-        bottom_of_society = self.get_y()
-
-        # print out Mutations aka powers
-        top_mutations = (
-            bottom_of_society if bottom_of_society > bottom_of_xeno else bottom_of_xeno
-        )
-
-        self.set_xy(8, top_mutations)
-        line_height = self.font_size * 1.4
-        if len(self.persona.Mutations) == 0:
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"**Powers:** None",
-            )
-
-        else:
-            self.set_xy(8, self.get_y())
-
-            self.cell(
-                w=0,
-                h=line_height,
-                markdown=True,
-                txt=f"**Powers:**",
-                ln=1,
-            )
-
-            self.set_font("Helvetica", size=9)
-            line_height = self.font_size * 1.25
-
-            all_mutations = mutations.list_all_mutations()
-
-            for name in sorted(self.persona.Mutations.keys()):
-                working_mutation = all_mutations[name](self.persona)
-                header, details, param = working_mutation.return_details(
-                    working_mutation.__class__
-                )
-
-                self.set_x(8)
-                self.cell(
-                    w=0,
-                    h=line_height,
-                    markdown=True,
-                    txt=f"**{header}**",
-                    # ln=1,
-                )
-                self.set_xy(8, self.get_y() + line_height)
-                self.cell(
-                    w=0,
-                    h=line_height,
-                    markdown=True,
-                    txt=f"{details}",
-                    # ln=1,
-                )
-                self.set_xy(8, self.get_y() + line_height)
-                self.cell(
-                    w=0,
-                    h=line_height,
-                    markdown=True,
-                    txt=f"{param}",
-                    # ln=1,
-                )
-
-                self.set_xy(8, self.get_y() + 1.4 * line_height)
+        ### mutations are called Abilities or Powers for aliens
 
         return y
 
@@ -855,72 +743,6 @@ class PDF(FPDF):
             
         return more_y
 
-    def combat_tabler(persona, *args):
-        if args[0] not in ["output", "Output", "return", "Return"]:
-            print(f"{args[0]} is not a valid option for combat_tabler")
-            quit()
-
-        elif args[0] in ["return", "Return"] and args[1] not in ["All", "all"]:
-            print(f"{args[1]} is not a valid option for combat_tabler")
-            quit()
-
-        # rebuild args
-        if args[0] in ["return", "Return"]:
-            arg_one = args[0]
-            arg_two = args[1]
-
-        else:
-            arg_one = args[0]
-            arg_two = "wangafangabobanga"
-
-        # anthro, vocation = vocation and tasks
-        # alien, vocation = vocation and tasks, and alien
-        # robot, vocation = vocation and tasks, and robot
-        # alien, alien = alien
-        # robot, robot = robot
-
-        vocation_yes = persona.Vocation in [x for x in table.vocation_level_bonus.keys()]
-
-        if persona.FAMILY == "Anthro":
-            combat_table = vocation_combat_tabler(persona, arg_one, arg_two)
-            return
-
-        if persona.FAMILY == "Alien" and vocation_yes:
-            combat_table = vocation_combat_tabler(persona, arg_one, arg_two)
-            combat_table = alien_combat_tabler(persona, arg_one, arg_two)
-            pass
-
-        if persona.FAMILY == "Alien" and vocation_yes:
-            # vocation_combat_tabler(persona, *args)
-            # robot_combat_tabler(persona, *args)
-            # done and leave
-            pass
-
-        if persona.FAMILY == "Alien" and not vocation_yes:
-            # alien_combat_tabler(persona, *args)
-            # done and leave
-            pass
-
-        if persona.FAMILY == "Alien" and not vocation_yes:
-            # robot_combat_tabler(persona, *args)
-            # done and leave
-            pass
-
-        if (
-            persona.Vocation in [x for x in table.vocation_level_bonus.keys()]
-            and persona.FAMILY != "Robot"
-        ):
-            combat_table = vocation_combat_tabler(persona, args)
-
-        if persona.FAMILY == "Alien":
-            combat_table = alien_combat_tabler(persona, args)
-
-        if persona.FAMILY == "Robot":
-            combat_table = robot_combat_tabler(persona, args)
-
-        return combat_table
-
-
 ##############################################
 #
 # functions to support outputs
@@ -944,279 +766,141 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def vocation_combat_tabler(calc, *args):
-    # args test
-    if args[0] not in ["output", "Output", "return", "Return"]:
-        print(f"{args[0]} is not a valid option")
-        quit()
+def universal_combat_tabler(persona)->dict:
+    '''
+    creates an attack table based on FAMILY 
+    '''
+    # collect core needed data
+    awe = persona.AWE
+    dex = persona.DEX
+    intel = persona.INT
+    pstr = persona.PSTR
+    family = persona.FAMILY
+    vocation = persona.Vocation
+    level = persona.Level
+    table_level = (
+        persona.Level - 1 if persona.Level < 11 else 9
+    )  # no level bonus for level one
 
-    elif args[0] in ["return", "Return"] and args[1] not in ["All", "all"]:
-        print(f"{args[1]} is not a valid option")
-        quit()
-
-    # collect needed data
-    awe = calc.AWE
-    dex = calc.DEX
-    intel = calc.INT
-    pstr = calc.PSTR
-    family = calc.FAMILY
-    vocation = calc.Vocation
-    level = calc.Level
-    prof_level = (
-        calc.Level - 1 if calc.Level < 11 else 9
-    )  # safety to between 0 and 9 for prof list
-    if family == "Alien":  # safety for alien with vocation and Move dummy value
-        calc.Move = dex
-
-    # print ("AWE", awe, "DEX", dex, "INT", intel, "PSTR", pstr, "VOC", vocation, "LVL", level)
-
-    combat_table = {
+    ### define the empty combat dictionary
+    attack_table = {
         "A": {"BP": 0, "BNP": 0, "MR": 0, "DB": 0, "PROF": 0},
         "B": {"BP": 0, "BNP": 0, "MR": 0, "DB": 0, "PROF": 0},
         "C": {"BP": 0, "BNP": 0, "MR": 0, "DB": 0, "PROF": 0},
-        "TITLE": f"{vocation} LVL {level}",
-        "ARMOVE": f"Armour Rating (AR): {calc.AR}      Move: {calc.Move} h/u",
+        #"TITLE": f"{vocation} LVL {level}",
+        #"ARMOVE": f"Armour Rating (AR): {calc.AR}      Move: {calc.Move} h/u",
     }
 
-    # TYPE A THRUSTING AND STRIKING WEAPONS
-    ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
-    ABP = ABP + table.vocation_level_bonus[vocation]["A"] * level
-    ABNP = math.ceil(ABP * table.vocation_non_proficient[vocation]["A"] / 100)
-    AMR = 625 + ABP
-    ADB = math.ceil(pstr / 2)
-    APROF = table.vocation_proficiencies[vocation]["A"][prof_level]
+    ### determine which attack table info is applicable
+    if vocation not in ["Alien","Robot"]: 
+        # Vocation STRIKE row (Type A)
+        ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
+        ABP = ABP + table.vocation_level_bonus[vocation]["A"] * level
+        ABNP = math.ceil(ABP * table.vocation_non_proficient[vocation]["A"] / 100)
+        AMR = 625 + ABP
+        ADB = math.ceil(pstr / 2)
+        APROF = table.vocation_proficiencies[vocation]["A"][table_level]
 
-    # assign (ABP, ABNP, AMR, ADB)
-    combat_table["A"]["BP"] = ABP
-    combat_table["A"]["BNP"] = ABNP
-    combat_table["A"]["MR"] = AMR
-    combat_table["A"]["ADB"] = ADB
+        # Vocation FLING row (Type B)
+        BBP = awe + (4 * dex) + intel + (2 * pstr)
+        BBP = BBP + table.vocation_level_bonus[vocation]["B"] * level
+        BBNP = math.ceil(BBP * (table.vocation_non_proficient[vocation]["B"] / 100))
+        BMR = 650 + BBP
+        BDB = math.ceil(pstr / 4)
+        BPROF = table.vocation_proficiencies[vocation]["B"][table_level]
 
-    # TYPE B THROWING AND MISSILE WEAPONS
-    BBP = awe + (4 * dex) + intel + (2 * pstr)
-    BBP = BBP + table.vocation_level_bonus[vocation]["B"] * level
-    BBNP = math.ceil(BBP * (table.vocation_non_proficient[vocation]["B"] / 100))
-    BMR = 650 + BBP
-    BDB = math.ceil(pstr / 4)
-    BPROF = table.vocation_proficiencies[vocation]["B"][prof_level]
+        # Vocation SHOOT row (Type C)
+        CBP = awe + (9 * dex) + intel + pstr
+        CBP = CBP + table.vocation_level_bonus[vocation]["C"] * level
+        CBNP = math.ceil(CBP * (table.vocation_non_proficient[vocation]["C"] / 100))
+        CMR = 675 + CBP
+        CDB = 0
+        CPROF = table.vocation_proficiencies[vocation]["C"][table_level]
 
-    # print(BBP, BBNP, BMR, BDB)
-    combat_table["B"]["BP"] = BBP
-    combat_table["B"]["BNP"] = BBNP
-    combat_table["B"]["MR"] = BMR
-    combat_table["B"]["BDB"] = BDB
+        # Vocation PROF assignment
+        if APROF == 42 and vocation == "Mercenary":
+            APROF = BPROF = CPROF = "All weapons."
 
-    # TYPE C POWERED WEAPONS
-    CBP = awe + (9 * dex) + intel + pstr
-    CBP = CBP + table.vocation_level_bonus[vocation]["C"] * level
-    CBNP = math.ceil(CBP * (table.vocation_non_proficient[vocation]["C"] / 100))
-    CMR = 675 + CBP
-    CDB = 0
-    CPROF = table.vocation_proficiencies[vocation]["C"][prof_level]
+        elif APROF == 42 and vocation == "Nothing":
+            APROF = BPROF = CPROF = "There can be only one."
 
-    # (CBP, CBNP, CMR, CDB)
-    combat_table["C"]["BP"] = CBP
-    combat_table["C"]["BNP"] = CBNP
-    combat_table["C"]["MR"] = CMR
-    combat_table["C"]["CDB"] = CDB
+    elif vocation == "Alien":
+        # specific alien attributes
+        attacks = persona.Attacks
+        per_unit = persona.Attack_Desc
+        damage = f"{persona.Damage}"
 
-    # work through proficiency sentence
-    if APROF == 42 and vocation == "Mercenary":
-        APROF = "All weapons."
-        BPROF = "All weapons."
-        CPROF = "All weapons."
-
-    elif APROF == 42 and vocation == "Nothing":
-        APROF = " "
-        BPROF = "One single proficiency."
-        CPROF = " "
-
-    combat_table["A"]["PROF"] = APROF
-    combat_table["B"]["PROF"] = BPROF
-    combat_table["C"]["PROF"] = CPROF
-
-    # where to go with the combat_table
-    if args[0] in [
-        "output",
-        "Output",
-    ]:
-        output_combat_tabler(calc, combat_table)
-    elif args[0] in ["return", "Return"]:
-        return combat_table
-
-    return combat_table
-
-def alien_combat_tabler(calc, *args):
-    # args test
-    if args[0] not in ["output", "Output", "return", "Return"]:
-        print(f"{args[0]} is not a valid option")
-        quit()
-
-    elif args[0] in ["return", "Return"] and args[1] not in ["All", "all"]:
-        print(f"{args[1]} is not a valid option")
-        quit()
-
-    # collect needed data
-    dex = calc.DEX
-    intel = calc.INT
-    pstr = calc.PSTR
-    level = calc.Level
-    attack_type = calc.Attack_Type
-    attacks = calc.Attacks
-    attack_desc = calc.Attack_Desc
-    damage = f"{calc.Damage}"
-
-    combat_table = {
-        "A": {
-            "BP": 0,
-            "BNP": 0,
-            "MR": 0,
-            "ADB": 0,
-            "PROF": f"Natural - {attacks} {attack_desc} for {damage} HPS.",
-        },
-        "B": {
-            "BP": 0,
-            "BNP": 0,
-            "MR": 0,
-            "BDB": 0,
-            "PROF": f"Natural - {attacks} {attack_desc} for {damage} HPS.",
-        },
-        "C": {
-            "BP": 0,
-            "BNP": 0,
-            "MR": 0,
-            "CDB": 0,
-            "PROF": f"Natural - {attacks} {attack_desc} for {damage} HPS.",
-        },
-        "TITLE": f"{calc.FAMILY_TYPE} LVL {level}",
-        "ARMOVE": f"Armour Rating (AR): {calc.AR}     Move: See below",
-    }
-
-    # TYPE A NON-POWERED STRIKING WEAPONS
-    if attack_type == "Type A (contact)":
+        # Alien STRIKE row (Type A)
         ABP = ABNP = 10 * (pstr + level)
         AMR = 700 + ABP
         ADB = level
-        PROF = "APROF"
-        combat_table["A"]["BP"] = ABP
-        combat_table["A"]["BNP"] = ABNP
-        combat_table["A"]["MR"] = AMR
-        combat_table["A"]["ADB"] = ADB
-        # combat_table["A"]["PROF"] = APROF
 
-    # TYPE B NON-POWERED MISSILE WEAPONS
-    if attack_type == "Type B (ranged)":
+        # Alien FLING row (Type B)
         BBP = BBNP = 10 * (dex + level)
         BMR = 700 + BBP
         BDB = level
-        PROF = "BPROF"
 
-        # print(BBP, BBNP, BMR, BDB)
-        combat_table["B"]["BP"] = BBP
-        combat_table["B"]["BNP"] = BBNP
-        combat_table["B"]["MR"] = BMR
-        combat_table["B"]["BDB"] = BDB
-        # combat_table["B"]["PROF"] = BPROF
-
-    # TYPE C POWERED MISSILE WEAPONS
-    if attack_type == "Type C (power ranged)":
+        # Alien SHOOT row (Type C)
         CBP = CBNP = 10 * (intel + level)
         CMR = 700 + CBP
-        CDB = level
-        PROF = "CPROF"
+        CDB = 0
+        
+        # populate the PROF column
+        APROF = BPROF = CPROF = f"Natural - {attacks} {per_unit} for {damage} HPS."
 
-        # (CBP, CBNP, CMR, CDB)
-        combat_table["C"]["BP"] = CBP
-        combat_table["C"]["BNP"] = CBNP
-        combat_table["C"]["MR"] = CMR
-        combat_table["C"]["CDB"] = CDB
-        # combat_table["C"]["PROF"] = CPROF
+    elif family == "Robot":
+        # specific robot attributes
+        pstr_prime = persona.PSTR_Prime
+        dex_prime = persona.DEX_Prime
+        intel_prime = persona.INT_Prime
 
-    combat_table[
-        "ARMOVE"
-    ] = f"{table.numbers_2_words[attacks].capitalize()} {table.attack_type_words[PROF]} attack {attack_desc}. {damage} total damage.\n\nArmour Rating (AR): {calc.AR}     Move: See below"
+        # Alien STRIKE row (Type A)
+        ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
+        ABNP = 0
+        AMR = "---"
+        ADB = pstr
 
-    # where to go with the combat_table
-    if args[0] in [
-        "output",
-        "Output",
-    ]:
-        output_combat_tabler(calc, combat_table)
-    elif args[0] == ["return", "Return"]:
-        return combat_table
+        # Alien FLING row (Type B)
+        BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (level * dex)
+        BBNP = 0
+        BMR = "---"
+        BDB = math.ceil(pstr / 2)
 
-    return combat_table
+        # Alien SHOOT row (Type C)
+        CBP = (5 * awe) + (5 * dex) + (intel_prime * intel) + (level * intel)
+        CBNP = 0
+        CMR = "---"
+        CDB = 0
+        
+        # populate the PROF column
+        APROF = BPROF = CPROF = "None"
 
-def robot_combat_tabler(calc, *args):
-    # args test
-    if args[0] not in ["output", "Output", "return", "Return"]:
-        print(f"{args[0]} is not a valid option")
-        quit()
+    ### build the attack table to return
+    # assign STRIKE row(ABP, ABNP, AMR, ADB)
+    attack_table["A"]["BP"] = ABP
+    attack_table["A"]["BNP"] = ABNP
+    attack_table["A"]["MR"] = AMR
+    attack_table["A"]["ADB"] = ADB
 
-    elif args[0] in ["return", "Return"] and args[1] not in ["All", "all"]:
-        print(f"{args[1]} is not a valid option")
-        quit()
+    # assign FLING row (BBP, BBNP, BNR, BDB)
+    attack_table["B"]["BP"] = BBP
+    attack_table["B"]["BNP"] = BBNP
+    attack_table["B"]["MR"] = BMR
+    attack_table["B"]["BDB"] = BDB
 
-    dex = calc.DEX
-    intel = calc.INT
-    pstr = calc.PSTR
-    awe = calc.AWE
-    lvl = calc.Level
-    pstr_prime = calc.PSTR_Prime
-    dex_prime = calc.DEX_Prime
-    intel_prime = calc.INT_Prime
+    # assign SHOOT row (CBP, CBNP, CMR, CDB)
+    attack_table["C"]["BP"] = CBP
+    attack_table["C"]["BNP"] = CBNP
+    attack_table["C"]["MR"] = CMR
+    attack_table["C"]["CDB"] = CDB
 
-    combat_table = {
-        "A": {"BP": 0, "BNP": 0, "MR": 0, "ADB": 0, "PROF": "Baked in attacks only."},
-        "B": {"BP": 0, "BNP": 0, "MR": 0, "BDB": 0, "PROF": "Baked in attacks only."},
-        "C": {"BP": 0, "BNP": 0, "MR": 0, "CDB": 0, "PROF": "Baked in attacks only."},
-        "TITLE": f"{calc.Robot_Type} LVL {lvl}",
-        "ARMOVE": f"Armour Rating (AR): {calc.AR}     Move: {calc.Move}",
-    }
+    # assign the Proficiency Column
+    attack_table["A"]["PROF"] = APROF
+    attack_table["B"]["PROF"] = BPROF
+    attack_table["C"]["PROF"] = CPROF
 
-    # TYPE A THRUSTING AND STRIKING WEAPONS
-    ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (lvl * pstr)
-    ABNP = 0
-    AMR = "---"
-    ADB = pstr
-    # print(ABP, ABNP, AMR, ADB)
-    combat_table["A"]["BP"] = ABP
-    combat_table["A"]["BNP"] = ABNP
-    combat_table["A"]["MR"] = AMR
-    combat_table["A"]["ADB"] = ADB
+    return attack_table
 
-    # TYPE B THROWING AND MISSILE WEAPONS
-    BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (lvl * dex)
-    BBNP = 0
-    BMR = "---"
-    BDB = math.ceil(pstr / 2)
-    # print(BBP, BBNP, BMR, BDB)
-    combat_table["B"]["BP"] = BBP
-    combat_table["B"]["BNP"] = BBNP
-    combat_table["B"]["MR"] = BMR
-    combat_table["B"]["ADB"] = BDB
-
-    # TYPE C POWERED WEAPONS
-    CBP = (5 * awe) + (5 * dex) + (intel_prime * intel) + (lvl * intel)
-    CBNP = 0
-    CMR = "---"
-    CDB = 0
-    # (CBP, CBNP, CMR, CDB)
-    combat_table["C"]["BP"] = CBP
-    combat_table["C"]["BNP"] = CBNP
-    combat_table["C"]["MR"] = CMR
-    combat_table["C"]["ADB"] = CDB
-
-    # where to go with the combat_table
-    if args[0] in [
-        "output",
-        "Output",
-    ]:
-        output_combat_tabler(calc, combat_table)
-    elif args[0] == ["return", "Return"]:
-        return combat_table
-
-    return combat_table
 
 def output_combat_tabler(persona, combat_table):
     # prep the combat table
@@ -1366,7 +1050,7 @@ def anthro_campaign_creator(persona) -> None:
     pdf.set_margin(0)  # set margins to 0
 
     ### PAGE ONE front
-    anthro_front_sheet(pdf,persona)
+    persona_front_sheet(pdf,persona)
 
     ### PAGE ONE back
     pdf.add_page() # back page 1
@@ -1399,7 +1083,7 @@ def anthro_campaign_creator(persona) -> None:
 def anthro_one_shot_creator(persona) -> None:
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
 
-    anthro_front_sheet(pdf, persona)
+    persona_front_sheet(pdf, persona)
     do_not_use_back_sheet(pdf,persona)
 
     pdf.output(
@@ -1408,7 +1092,7 @@ def anthro_one_shot_creator(persona) -> None:
     )
     show_pdf()
 
-def anthro_front_sheet(pdf, persona):
+def persona_front_sheet(pdf, persona):
     pdf.set_margin(0)
     the_y = 18
     
@@ -1434,7 +1118,7 @@ def anthro_front_sheet(pdf, persona):
     ### movement
     blob = '**MOVE**'
 
-    if persona.FAMILY == 'ALIEN':
+    if persona.FAMILY == 'Alien':
         blob += f'  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'      
     else:
         blob += f'  {persona.Move} h/u'
@@ -1469,7 +1153,7 @@ def anthro_front_sheet(pdf, persona):
         pdf.line(162,y,208,y)
 
     ### combat table output
-    pdf.combat_table_pd_effer(persona, "Vocation",8,the_y)
+    pdf.combat_table_pd_effer(persona,8,the_y)
 
     ### combat table explainer
     the_y += 30
@@ -1618,48 +1302,7 @@ def alien_pdf_creator(alien) -> None:
     creates an alien pdf and then shows it on the browser
     pdfs are no longer stored
     '''
-
-    ### create the pdf
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    pdf.set_margin(0)  # set margins to 0
-
-    ### add the page and create the box
-    pdf.add_page()
-    pdf.perimiter_box()
-    pdf.title_line(alien)
-
-    ### output the persona
-    pdf.attributes_lines(alien)
-    pdf.description_line(alien)
-
-    pdf.persona_level_info(alien, "Alien")
-    pdf.combat_table_pd_effer(alien, "Alien")
-
-    if alien.Vocation != "Alien":
-        pdf.persona_level_info(alien, "Vocation")
-        pdf.combat_table_pd_effer(alien, "Vocation")
-
-    pdf.alien_move(alien)
-
-    if alien.Vocation != "Alien":
-        pdf.task_info(alien)
-
-    pdf.alien_biologic_info(alien)
-
-    pdf.note_lines()
-
-    pdf.add_page()
-    pdf.title_line(alien)
-    pdf.perimiter_box()
-    pdf.equipment_lines(alien)
-    pdf.note_lines()
-    pdf.data_footer(alien)
-
-    pdf.output(
-        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
-        dest="F",
-    )
-    show_pdf()
+    
 
 #####################################
 # ROBOT output to screen

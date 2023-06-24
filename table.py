@@ -55,7 +55,7 @@ class PersonaRecord:
     Size_Cat: str = "Medium"
     Hite: int = 0
     Wate: int = 0
-    Vocation: str = "Nothing"
+    Vocation: str = "None"
     Level: int = 1
     EXPS: int = 42
     Mutations: dict = field(default_factory=dict)
