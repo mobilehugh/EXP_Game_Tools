@@ -12,25 +12,23 @@ import table
 
 def outputs_workflow(persona, out_type: str) -> None:
     '''
-    simplify output calls  by directing TYPE and needs
+    divides outputs between screen and pdf
+    pdf has been rationalized for all families
+    screen has not 
     '''
-
     family_type = persona.FAMILY
 
-    if family_type == "Anthro" and out_type == "screen":
+    if out_type == "pdf":
+        pdf_output_chooser(persona)
+    elif family_type == 'Toy':
+        input("this doesn't exist yet!")
+        please.say_goodnight_marsha
+    elif family_type == "Anthro" and out_type == "screen":
         anthro_screen(persona)  
-    elif family_type in ["Anthro","Alien"] and out_type == "pdf":
-        anthro_pdf_chooser(persona)
     elif family_type == "Alien" and out_type == "screen":
         alien_screen(persona)
     elif family_type == "Robot" and out_type == "screen":
         robot_screen(persona)
-    elif family_type == "Robot" and out_type == "pdf":
-        robot_pdf_creator(persona)
-    elif family_type == "Toy" and out_type == "screen":
-        print("this doesn't exist yet")
-    elif family_type == "Toy" and out_type == "pdf":
-        print("this doesn't exist yet")
     return
 
 ################################################
@@ -95,17 +93,19 @@ show_pdf()
 
 class PDF(FPDF):
 
-    def perimiter_box(self):
-        # The rectangle's top left corner is at coordinates (5, 13).
-        # subtracting 10 and 20 respectively to account for margins.
-        # The 'D' argument indicates that the rectangle should be drawn (not filled).
-
+    def perimiter_box(self)->None:
+        '''
+        draws a rectangle around entire page 
+        must be called last for z value coverage
+        '''
         self.set_draw_color(0, 0, 0) 
         self.set_line_width(1)
         self.rect(5, 13, (self.epw - 10), (self.eph - 20), "D")
 
     def title_line(self, persona, title_name: str = 'PERSONA') -> None:
-        # outputs a bespoke title at top of page. 
+        '''
+        prints the top line title above the perimeter box 
+        '''
         blob_left =f"**{title_name.upper()} RECORD** for {persona.Persona_Name}"
         blob_right = f"**Player:** {persona.Player_Name}"
         x=3.3
@@ -128,6 +128,9 @@ class PDF(FPDF):
         )
 
     def data_footer(self, persona):
+        '''
+        prints the info at page bottom outside perimeter box
+        '''
         self.set_font("Helvetica", size=7)
         line_height = self.font_size * 1.6
         self.set_xy(8, 273)
@@ -145,7 +148,10 @@ class PDF(FPDF):
             align="C",
         )
 
-    def description_line(self, persona,x:float = 0, y:float=0):
+    def description_line(self, persona,x:float = 0, y:float=0) -> float:
+        '''
+        prints  description of the persona
+        '''
 
         if persona.FAMILY == "Anthro":
             blob = f"{persona.Persona_Name} is a {persona.Age} year-old {persona.FAMILY_TYPE} {persona.FAMILY_SUB.lower()} {persona.Vocation.lower()}."
@@ -157,8 +163,13 @@ class PDF(FPDF):
             blob = "ERROR: No description for this persona"
 
         self.print_MD_string(blob,14,x,y)
+        return y
 
     def attributes_lines(self, persona, x:float=0,y:float=0)->None:
+        '''
+        prints the three attribute lines: acronym, value, long form
+        '''
+
         self.set_xy(x,y)
         ### title box 
         self.grey_box_title('ATTRIBUTES',5,y)
@@ -211,7 +222,7 @@ class PDF(FPDF):
             blob = str(getattr(persona, acronym))
 
             # check for robotic primes
-            if persona.FAMILY == "Robot":
+            if attuple[2]: # boolean if is a prime
                 prime = acronym + '_PRIME'
                 prime_add = int(getattr(persona,prime))
                 blob += f'({prime_add})'
@@ -229,7 +240,10 @@ class PDF(FPDF):
             self.cell(txt=long_name, align='X', markdown=True)
     
 
-    def persona_level_info(self, persona, x:float = 0, y:float = 0):
+    def persona_level_info(self, persona, x:float = 0, y:float = 0) -> None:
+        '''
+        prints the persona's vocation and level and exps goal
+        '''
 
         exps_next = list(table.vocation_exps_levels[persona.Vocation].keys())[
             persona.Level - 1
@@ -241,19 +255,15 @@ class PDF(FPDF):
         blob = vocation_info + exps_info
         self.print_MD_string(blob,12,x,y)
 
-    def combat_table_pd_effer(self, persona, x:float = 0, y:float = 0):
+    def pdf_attack_table(self, persona, x:float = 0, y:float = 0)->float:
         '''
-        organizes the table does a pdf output using table_vomit
+        prints the attack table  makes a list for table_vomit
         A = Strike, B = Fling, C = Shoot
         BP = Skilled, BNP = Raw, MR = Max, DB = Force
         '''
+
         self.set_xy(x,y)
-        attack_table = universal_combat_tabler(persona)
-
-        print(please.show_me_your_dict(attack_table))
-        print()
-        input("safe to continue? ")
-
+        attack_table = attack_table_composer(persona)
 
         data = [
             [
@@ -299,43 +309,35 @@ class PDF(FPDF):
                 ]
             )
  
-        print(data)
-        print()
-        input("safe to continue? ")
-
         # table_vomit the ABCs of combat table
         self.table_vomit(data, 9, 105, self.get_y(), 1.5, 0.25)
 
 
-    def combat_table_explainer(self, x:float = 0, y:float = 0):
+    def combat_table_explainer(self, persona, x:float = 0, y:float = 0) -> float:
+        '''
+        prints an explainer and proficiency information
+        '''
+        attack_table = attack_table_composer(persona)
+        y_bump = 5.4
         self.print_MD_string(f"**Raw:** Add to Unskilled Attack Rolls  **Skilled:** Add to Skilled Attack Rolls **Max:**  Maximum Attack Roll **Force:** Add to damage roll",10,x,y)
-        self.print_MD_string(f"**Strike:** fist, sword, club  **Fling:** bow, spear, spit **Shoot:** gun, lazer, fission **Sotto/Flotto:** = Shoot **Grenade:** = Fling, no Force",10,x,y+5.4)
+        y+=y_bump
+        self.print_MD_string(f"**Strike:** fist, sword, club  **Fling:** bow, spear, spit **Shoot:** gun, lazer, fission **Sotto/Flotto:** = Shoot **Grenade:** = Fling, no Force",10,x,y)
+        y+=y_bump
+        if persona.Vocation in ["Alien","Robot"]:
+            blob = f'**Skilled Attacks**: {attack_table["A"]["PROF"]}'
+        elif persona.Vocation in ["Mercenary", "Nothing"]:
+            blob = f'**Skilled Attacks**: {attack_table["A"]["PROF"]}'
+        else:
+            blob = f'**Skilled Attacks**: Strike - {attack_table["A"]["PROF"]}, Fling - {attack_table["B"]["PROF"]}, Shoot - {attack_table["C"]["PROF"]}.'
+
+        self.print_MD_string(blob,10,x,y)
+        y+=y_bump
+        return y
 
 
-    def alien_move(self, persona):
-        move_type = ["Move_Land", "Move_Air", "Move_Water"]
-        blob = ""
-
-        for terrain in move_type:
-            move_rate = getattr(persona, terrain)
-            if move_rate > 0:
-                blob += f'**{terrain.replace("_", " ")}:** {move_rate} h/u '
-
-        self.set_font("Helvetica", size=12)
-        line_height = self.font_size * 1.5
-        self.set_xy(8, self.get_y())
-
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-        )
- 
     def grey_box_title(self,blob, x=0,y=0)->None:
         '''
-        takes the blob string and makes it a box for it
+        prints a formatted title for string
         '''
         self.set_xy(x,y)
         self.set_fill_color(200)
@@ -372,9 +374,9 @@ class PDF(FPDF):
             border=False,
         )
 
-    def liner_up(self, radius=100)-> None:
+    def center_grid(self, radius=25)-> None:
         '''
-        places a circle around the center of the page and two lines
+        draws a center circle and grid lines
         '''
         self.radius = radius
         self.set_draw_color(255, 0, 0)  # Set color to red.
@@ -405,7 +407,12 @@ class PDF(FPDF):
         for x in range(0,int(self.epw),10):
             self.line(x,0,x,self.eph)
 
-    def obfuscate(self)->None:
+    def pdf_do_not_use(self)->None:
+        '''
+        draws a obfuscating pattern
+        prints plea to not use this page
+        '''
+
         self.set_draw_color(32) # dark lines
         self.set_line_width(.3)
 
@@ -435,9 +442,9 @@ class PDF(FPDF):
         self.grey_box_title(blob,x,y)
 
 
-    def locutus(self):
+    def locutus(self)->None:
         """
-        makes an target at x and y
+        draws an target at x and y on page
         """
         x = self.get_x()
         y = self.get_y()
@@ -467,6 +474,10 @@ class PDF(FPDF):
         line_height: float,
         border: float,
     ) -> None:
+        '''
+        prints out the given list
+        only used for attack table
+        '''
 
         table_width = x_right - x_left
         line_height = self.font_size * line_height
@@ -480,7 +491,6 @@ class PDF(FPDF):
             col_width = table_width / (len(row) if len(row) > 0 else 1)
             self.set_x(x_left)
             for datum in row:
-                print(f'in table_vomit {datum = }')
                 content, styling = datum.split(":")
                 alignment = styling[0]
                 accenture = styling[1] if len(styling) > 1 and styling[1] != "N" else ""
@@ -497,7 +507,10 @@ class PDF(FPDF):
                 )
             self.ln()
 
-    def task_info(self, persona,x:float=0,y:float=0):
+    def task_info(self, persona,x:float=0,y:float=0)->float:
+        '''
+        prints task info for vocation, alien and robot
+        '''
         y_bump = 5.4
         x_bump = 40
         task_title_top = y
@@ -574,7 +587,11 @@ class PDF(FPDF):
 
         return y
 
-    def mutation_to_pdf(self,persona,x:float=0,y:float=0)->None:
+    def mutation_to_pdf(self,persona,x:float=0,y:float=0)->float:
+        '''
+        prints mutation status and existing mutations 
+        '''
+
         if persona.FAMILY == "Anthro":
             family_header = "Mutations:"
         elif persona.FAMILY == "Alien":
@@ -609,7 +626,10 @@ class PDF(FPDF):
                 y+=tiny_bump
         return y
 
-    def anthro_biologic_info(self, persona,x:float=0,y:float=0)->None:
+    def anthro_biologic_info(self, persona,x:float=0,y:float=0)->float:
+        '''
+        prints anthro bio info (physical attributes and mutations)
+        '''
         y_bump = 5.3
 
         self.grey_box_title('BIO INFO',5,y)
@@ -628,35 +648,21 @@ class PDF(FPDF):
 
         return y
 
-    def referee_persona_fun(self,persona,x:float=0,y:float=0)-> None:
-        y_bump = 5.6
-        self.grey_box_title("ROLE PLAY FUN",x,y)
-        y += 2+y_bump
-        for fun in persona.RP_Fun:
-            self.print_MD_string(fun,12,8,y)
-            y += y_bump
-
-    def trackers(self,x:float=0,y:float=0):
-        y_bump = 8
-        self.grey_box_title('TRACKERS',5,y)
-        y+=y_bump*1.5
-        self.set_xy(8,y)
-        self.set_font('ZapfDingbats','',18)
-        self.cell(txt=f'{"m"*5}  {"m"*5} {"m"*5}     {"m"*5}  {"m"*5} {"m"*5}', align='L')
-        y += y_bump
-        self.set_xy(8,y)
-        self.cell(txt=f'{"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}', align='L')
 
     def alien_biologic_info(self, persona,x:float=0,y:float=0)->float:
+        '''
+        prints the alien xenologic info 
+        '''
         y_bump = 5.3
 
         self.grey_box_title('XENO INFO',5,y)
         x = 8 + self.get_string_width('XENO INFO')
         self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,x,y+.5)
-        y+= y_bump
+        y+= 3+y_bump
+        x=8
 
         # specific person age hite and wate
-        blob = f"**Specific Alien:** {self.persona.Persona_Name} **Age:** {self.persona.Age} {self.persona.Alien_Age_Suffix} old. **Hite:** {self.persona.Size} **Wate:** {self.persona.Wate} {self.persona.Wate_Suffix}."
+        blob = f"**Specific Alien:** {persona.Persona_Name} **Age:** {persona.Age} {persona.Alien_Age_Suffix} old. **Hite:** {persona.Size} **Wate:** {persona.Wate} {persona.Wate_Suffix}."
         self.print_MD_string(blob,12,x,y)
         y+=y_bump
 
@@ -666,7 +672,7 @@ class PDF(FPDF):
         x_bump = 90
 
         ### Build left column list
-        left_column =['**Detailed Desc']
+        left_column =['**Detailed Desc**']
 
         desc_parts = [
             f"Head: {persona.Head.split(' (')[0]}{persona.Head_Adorn}",
@@ -680,7 +686,7 @@ class PDF(FPDF):
         left_column.append('**Xenobiology**')
 
         ### adding list of Biology
-        left_column.append(persona.Biology)
+        left_column.extend(persona.Biology)
 
         ### right column
         right_column = ["**Life Cycle**"]
@@ -688,6 +694,10 @@ class PDF(FPDF):
         right_column.append("**Society**")
         right_column.extend(persona.Society)
 
+        print(f'alien biologic info {left_column = }')
+        print()
+        print(f'alien biologic info {right_column = }')
+        
         for element in left_column:
             self.print_MD_string(element,11,x,y)
             y+=y_bump
@@ -708,6 +718,9 @@ class PDF(FPDF):
         return y
 
     def note_lines(self, lines:int, x:float = 0, y:float =0)-> None:
+        '''
+        draws a chosen number of lines
+        '''
         y_bump = 8
 
         self.grey_box_title('NOTES',5,y)
@@ -719,8 +732,12 @@ class PDF(FPDF):
         for more_y in range(int(y),int(y+y_bump*lines),8):
             self.line(8, more_y, 210, more_y)
 
-    def equipment_lines(self, persona, lines:int, x:float = 0, y:float = 0):
-        ### wate allowance to PDF
+    def equipment_lines(self, persona, lines:int, x:float = 0, y:float = 0)->float:
+        '''
+        prints weight allowance and equipment title lines
+        draws split lines for equipment
+        '''
+        
         y_bump = 8
         self.grey_box_title('TOYS',5,y)
         x+= 3 + self.get_string_width("TOYS")
@@ -742,6 +759,30 @@ class PDF(FPDF):
             self.line(107,more_y, 208,more_y) #info
             
         return more_y
+    
+    def referee_persona_fun(self,persona,x:float=0,y:float=0)-> float:
+        '''
+        prints referee persona role playing suggestions
+        '''
+        y_bump = 5.6
+        self.grey_box_title("ROLE PLAY FUN",x,y)
+        y += 2+y_bump
+        for fun in persona.RP_Fun:
+            self.print_MD_string(fun,12,8,y)
+            y += y_bump
+        return y
+
+    def trackers(self,x:float=0,y:float=0):
+        y_bump = 8
+        self.grey_box_title('TRACKERS',5,y)
+        y+=y_bump*1.5
+        self.set_xy(8,y)
+        self.set_font('ZapfDingbats','',18)
+        self.cell(txt=f'{"m"*5}  {"m"*5} {"m"*5}     {"m"*5}  {"m"*5} {"m"*5}', align='L')
+        y += y_bump
+        self.set_xy(8,y)
+        self.cell(txt=f'{"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}', align='L')
+
 
 ##############################################
 #
@@ -766,9 +807,9 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def universal_combat_tabler(persona)->dict:
+def attack_table_composer(persona)->dict:
     '''
-    creates an attack table based on FAMILY 
+    creates an attack table dictionary based on FAMILY 
     '''
     # collect core needed data
     awe = persona.AWE
@@ -819,7 +860,7 @@ def universal_combat_tabler(persona)->dict:
 
         # Vocation PROF assignment
         if APROF == 42 and vocation == "Mercenary":
-            APROF = BPROF = CPROF = "All weapons."
+            APROF = BPROF = CPROF = "All personal weapons."
 
         elif APROF == 42 and vocation == "Nothing":
             APROF = BPROF = CPROF = "There can be only one."
@@ -829,21 +870,31 @@ def universal_combat_tabler(persona)->dict:
         attacks = persona.Attacks
         per_unit = persona.Attack_Desc
         damage = f"{persona.Damage}"
+        type = persona.Attack_Type
 
         # Alien STRIKE row (Type A)
-        ABP = ABNP = 10 * (pstr + level)
-        AMR = 700 + ABP
-        ADB = level
+        if type == "Striking":
+            ABP = ABNP = 10 * (pstr + level)
+            AMR = 700 + ABP
+            ADB = level
+        else:
+            ABP = ABNP = AMR = ADB = 0
 
         # Alien FLING row (Type B)
-        BBP = BBNP = 10 * (dex + level)
-        BMR = 700 + BBP
-        BDB = level
+        if type == "Flinging":
+            BBP = BBNP = 10 * (dex + level)
+            BMR = 700 + BBP
+            BDB = level
+        else:
+            BBP = BBNP = BMR = BDB = 0
 
         # Alien SHOOT row (Type C)
-        CBP = CBNP = 10 * (intel + level)
-        CMR = 700 + CBP
-        CDB = 0
+        if type == "Shooting":
+            CBP = CBNP = 10 * (intel + level)
+            CMR = 700 + CBP
+            CDB = 0
+        else:
+            CBP = CBNP = CMR = CDB = 0
         
         # populate the PROF column
         APROF = BPROF = CPROF = f"Natural - {attacks} {per_unit} for {damage} HPS."
@@ -854,26 +905,26 @@ def universal_combat_tabler(persona)->dict:
         dex_prime = persona.DEX_Prime
         intel_prime = persona.INT_Prime
 
-        # Alien STRIKE row (Type A)
+        # Robot STRIKE row (Type A)
         ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
         ABNP = 0
         AMR = "---"
         ADB = pstr
 
-        # Alien FLING row (Type B)
+        # Robot FLING row (Type B)
         BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (level * dex)
         BBNP = 0
         BMR = "---"
         BDB = math.ceil(pstr / 2)
 
-        # Alien SHOOT row (Type C)
+        # Robot SHOOT row (Type C)
         CBP = (5 * awe) + (5 * dex) + (intel_prime * intel) + (level * intel)
         CBNP = 0
         CMR = "---"
         CDB = 0
         
         # populate the PROF column
-        APROF = BPROF = CPROF = "None"
+        APROF = BPROF = CPROF = "Robots have no weapon skills."
 
     ### build the attack table to return
     # assign STRIKE row(ABP, ABNP, AMR, ADB)
@@ -902,25 +953,31 @@ def universal_combat_tabler(persona)->dict:
     return attack_table
 
 
-def output_combat_tabler(persona, combat_table):
+def screen_attack_table(persona) -> None:
+    '''
+    screen prints the attack table
+    '''
+
+    attack_table = attack_table_composer(persona)
+
     # prep the combat table
-    ABP = combat_table["A"]["BP"]
-    ABNP = combat_table["A"]["BNP"]
-    AMR = combat_table["A"]["MR"]
-    ADB = combat_table["A"]["ADB"]
-    APROF = combat_table["A"]["PROF"]
+    ABP = attack_table["A"]["BP"]
+    ABNP = attack_table["A"]["BNP"]
+    AMR = attack_table["A"]["MR"]
+    ADB = attack_table["A"]["ADB"]
+    APROF = attack_table["A"]["PROF"]
 
-    BBP = combat_table["B"]["BP"]
-    BBNP = combat_table["B"]["BNP"]
-    BMR = combat_table["B"]["MR"]
-    BDB = combat_table["B"]["BDB"]
-    BPROF = combat_table["B"]["PROF"]
+    BBP = attack_table["B"]["BP"]
+    BBNP = attack_table["B"]["BNP"]
+    BMR = attack_table["B"]["MR"]
+    BDB = attack_table["B"]["BDB"]
+    BPROF = attack_table["B"]["PROF"]
 
-    CBP = combat_table["C"]["BP"]
-    CBNP = combat_table["C"]["BNP"]
-    CMR = combat_table["C"]["MR"]
-    CDB = combat_table["C"]["CDB"]
-    CPROF = combat_table["C"]["PROF"]
+    CBP = attack_table["C"]["BP"]
+    CBNP = attack_table["C"]["BNP"]
+    CMR = attack_table["C"]["MR"]
+    CDB = attack_table["C"]["CDB"]
+    CPROF = attack_table["C"]["PROF"]
 
     ### sort between different PROF types.
     # mercenary all profs
@@ -940,13 +997,13 @@ def output_combat_tabler(persona, combat_table):
     else:
         # has int for PROF == Vocation
         for proficiency in ["APROF", "BPROF", "CPROF"]:
-            nummer_profs = combat_table[proficiency[0]][proficiency[1:]]
-            combat_table[proficiency[0]][
+            nummer_profs = attack_table[proficiency[0]][proficiency[1:]]
+            attack_table[proficiency[0]][
                 proficiency[1:]
             ] = f"{table.numbers_2_words[nummer_profs].capitalize()} {table.attack_type_words[proficiency]} weapons."
 
     # print out the combat table
-    print(f'\nCOMBAT TABLE -- {combat_table["TITLE"]}')
+    print(f'\nATTACK TABLE -- {attack_table["TITLE"]}')
     print(f'{" ":>6} {"BP":>5} {"BNP":>5} {"MR":>5} {"DB":>5} {"PROF":>5}')
     if ABP > 0:
         print(f"Type A {ABP:>5} {ABNP:>5} {AMR:>5} {ADB:>5}  {APROF}")
@@ -955,97 +1012,39 @@ def output_combat_tabler(persona, combat_table):
     if CBP > 0:
         print(f"Type C {CBP:>5} {CBNP:>5} {CMR:>5} {CDB:>5}  {CPROF}")
 
-    if persona.FAMILY != "Alien":
-        print(f'{combat_table["ARMOVE"]}')
-
-    return
-
-#####################################
-# ANTHRO output to screen
-#####################################
-
-def anthro_screen(persona) -> None:
-    please.clear_console()
-    print(
-        f"\n\nANTHRO PERSONA RECORD\n"
-        f"Persona: {persona.Persona_Name} \t\t\tPlayer: {persona.Player_Name} \tCreated: {persona.Date_Created}\n"
-        f"AWE: {persona.AWE} CHA: {persona.CHA} CON: {persona.CON} DEX: {persona.DEX} "
-        f"INT: {persona.INT} MSTR: {persona.MSTR} PSTR: {persona.PSTR} HPS: {persona.HPM} SOC: {persona.SOC} WA: {persona.WA}\n"
-        f"Family: {persona.FAMILY} Type: {persona.FAMILY_TYPE} SubType: {persona.FAMILY_SUB}\n"
-        f"Age: {persona.Age} years Hite: {persona.Hite} cms Wate: {persona.Wate} kgs\n"
-        f"Vocation: {persona.Vocation} Level: {persona.Level} EXPS: {persona.EXPS}"
-    )
-
-    # show the combat table
-    vocation_combat_tabler(persona, "output")
-
-    # anthro Gifts
-    gift_list = vocation.update_gifts(persona)
-    print(f"\n{persona.Vocation} GIFTS: ")
-    for x, gift in enumerate(gift_list):
-        print(f"{x + 1}) {gift}")
-
-    # anthro  Interest list
-    print(f"\n{persona.Vocation} INTERESTS: ")
-    collated_interests = please.collate_this(persona.Interests)
-
-    for x, interest in enumerate(collated_interests):
-        print(f"{x + 1}) {interest}")
-
-    # anthro  Skills
-    print(f"\n{persona.Vocation} SKILLS: ")
-    collated_skills = please.collate_this(persona.Skills)
-    for x, skill in enumerate(collated_skills):
-        print(f"{x + 1}) {skill}")
-
-    # special cases for nothing and spie
-
-    if persona.Vocation == "Spie":
-        print(f"{persona.Spie_Fu}")
-
-    if persona.Vocation == "Nothing":
-        if persona.EXPS > persona.Vocay_Aspiration_EXPS:
-            achievation = "Achieved!"
-        else:
-            fraction = int((persona.EXPS / persona.Vocay_Aspiration_EXPS) * 100)
-            achievation = f"{fraction}% achieved"
-
-        print(f"Aspiration: {persona.Vocay_Aspiration} Objective: {achievation}")
-
-    # print out Mutations
-    print("\nMUTATIONS", end=" ")
-
-    if len(persona.Mutations) == 0:
-        print("None")
-
+    if persona.FAMILY == 'Alien':
+        blob = f'  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'      
     else:
-        all_mutations = mutations.list_all_mutations()
+        blob = f'  {persona.Move} h/u'
 
-        for name, perm in sorted(persona.Mutations.items()):
-            working_mutation = all_mutations[name](persona)
-            working_mutation.post_details(working_mutation.__class__)
-
-    if persona.RP:
-        print("\nReferee Persona ROLE-PLAYING CUES")
-        for fun in persona.RP_Fun:
-            print(f"{fun}")
+    ### fix add AR to screen print  
+    print(blob)    
 
     return
 
+
+
 #####################################
-# ANTHRO output to PDF
+#  PDF print outs
 #####################################
 
-def anthro_pdf_chooser(persona) -> None:
+def pdf_output_chooser(persona) -> None:
+    '''
+    choose between pdf styles
+    '''
     function_map = {
-        "One Shot - One sheet": anthro_one_shot_creator,
-        "Campaign - Two sheets": anthro_campaign_creator,
+        "One Shot - One sheet": pdf_one_shot,
+        "Campaign - Two sheets": pdf_campaign,
     }
     choice_list = [key for key in function_map]
     function_chosen  = please.choose_this(choice_list, "PDF type needed? ")
     function_map[function_chosen](persona)
     
-def anthro_campaign_creator(persona) -> None:
+def pdf_campaign(persona) -> None:
+    '''
+    generates a campaign PDF 2 PAGES 4 sided
+    allows for equipment and notes to be preserved between front_sheet updates 
+    '''
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
     pdf.set_margin(0)  # set margins to 0
 
@@ -1054,7 +1053,7 @@ def anthro_campaign_creator(persona) -> None:
 
     ### PAGE ONE back
     pdf.add_page() # back page 1
-    pdf.obfuscate() # here for lowest z
+    pdf.pdf_do_not_use() # here for lowest z
     pdf.title_line(persona,'Campaign')
     pdf.data_footer(persona)
     pdf.perimiter_box()
@@ -1080,11 +1079,14 @@ def anthro_campaign_creator(persona) -> None:
     )
     show_pdf()
 
-def anthro_one_shot_creator(persona) -> None:
+def pdf_one_shot(persona) -> None:
+    '''
+    generates a one_shot PDF 1 sheet 2 pages
+    used for RPs or minimal note personas
+    '''
     pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-
     persona_front_sheet(pdf, persona)
-    do_not_use_back_sheet(pdf,persona)
+    equip_notes_one_shot(pdf,persona)
 
     pdf.output(
         name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
@@ -1092,7 +1094,10 @@ def anthro_one_shot_creator(persona) -> None:
     )
     show_pdf()
 
-def persona_front_sheet(pdf, persona):
+def persona_front_sheet(pdf, persona)->None:
+    '''
+    organizes print out of all persona data on one page
+    '''
     pdf.set_margin(0)
     the_y = 18
     
@@ -1128,8 +1133,8 @@ def persona_front_sheet(pdf, persona):
     ### armour rating
     x+= 4 + pdf.get_string_width(blob)
     pdf.print_MD_string("**ARMOUR RATING (AR)**",14,x,the_y)
-    x+= 3+ pdf.get_string_width("**ARMOUR RATING (AR)**", markdown=True)
-    pdf.print_MD_string(f'{persona.AR}   **_____   _____**',14,x,the_y)
+    x+= 1 + pdf.get_string_width("**ARMOUR RATING (AR)**", markdown=True)
+    pdf.print_MD_string(f'{persona.AR}   **____   ____**',14,x,the_y)
 
     ### attack table header
     the_y+=8
@@ -1139,7 +1144,7 @@ def persona_front_sheet(pdf, persona):
     pdf.print_MD_string(f'**HIT POINTS (MAX = {persona.HPM})**', 14,105,the_y)
 
     ### proficiencies header
-    pdf.print_MD_string('**Skilled Attacks**',14,162,the_y)
+    pdf.print_MD_string('**Conditions**',14,162,the_y)
 
     ### hit points box
     the_y +=8
@@ -1153,14 +1158,14 @@ def persona_front_sheet(pdf, persona):
         pdf.line(162,y,208,y)
 
     ### combat table output
-    pdf.combat_table_pd_effer(persona,8,the_y)
+    # for now aliens only get vocation table if they have a vocation
+    pdf.pdf_attack_table(persona,8,the_y)
 
     ### combat table explainer
     the_y += 30
-    pdf.combat_table_explainer(8,the_y+.5)
+    the_y = pdf.combat_table_explainer(persona,8,the_y)
 
     ### task info plus level info
-    the_y+=14
     pdf.grey_box_title('TASK INFO',5,the_y)
     x = 9 + pdf.get_string_width('TASK INFO')
     pdf.persona_level_info(persona,x,the_y+.5)
@@ -1179,16 +1184,20 @@ def persona_front_sheet(pdf, persona):
         pdf.referee_persona_fun(persona,5,the_y)
         the_y+=32
 
+    if persona.RP and persona.FAMILY == "Alien":
+        pdf.referee_combat_block(persona)
+
     if the_y < 250:
         pdf.trackers(8,the_y)
 
     pdf.perimiter_box() #placed here for z cover
 
-    ##################################################
-    # back page one off anthro
-    #################################################
+def equip_notes_one_shot(pdf, persona)->None:
+    '''
+    full page of equip and notes for one shot
+    '''
 
-def do_not_use_back_sheet(pdf, persona):
+    # fix should aliens not have equipment if feral?
     pdf.add_page()
     pdf.title_line(persona)
     the_y = pdf.equipment_lines(persona, 14,8,16)
@@ -1203,7 +1212,7 @@ def do_not_use_back_sheet(pdf, persona):
 
 def alien_screen(alien):
     """
-    print the alien to screen
+    screen prints alien persona
     """
 
     # clearance for Clarence
@@ -1229,27 +1238,12 @@ def alien_screen(alien):
     print(f"{alien.Arms.split(' (')[0]} arms{alien.Arms_Adorn}")
     print(f"{alien.Legs.split(' (')[0]} legs")
 
-    """
-    print(f"Head: {alien.Head.split(' (')[0]}{alien.Head_Adorn}")
-    print(f"Trso: {alien.Body.split(' (')[0]}{alien.Body_Adorn}")
-    print(f"Arms: {alien.Arms.split(' (')[0]}{alien.Arms_Adorn}")
-    print(f"Legs: {alien.Legs.split(' (')[0]}")
-    """
-
     # show the combat table
-    alien_combat_tabler(alien, "output")
-
-    print("\nCOMBAT MOVEMENT RATES")
-    if alien.Move_Land > 0:
-        print(f"LAND: {alien.Move_Land} h/u ", end="")
-    if alien.Move_Air > 0:
-        print(f"AIR: {alien.Move_Air} h/u ", end="")
-    if alien.Move_Water > 0:
-        print(f"WATER: {alien.Move_Water} h/u ")
+    screen_attack_table(alien)
 
     if alien.Vocation != "Alien":
         # alien  Interest list
-        vocation_combat_tabler(alien, "output")
+        screen_attack_table(alien)
         print(f"\n{alien.Vocation} GIFTS: ")
         gift_list = vocation.update_gifts(alien)
         for x, gift in enumerate(gift_list):
@@ -1276,7 +1270,7 @@ def alien_screen(alien):
     else:
         all_mutations = mutations.list_all_mutations()
 
-        for name, perm in sorted(alien.Mutations.items()):
+        for name, _ in sorted(alien.Mutations.items()):
             working_mutation = all_mutations[name](alien)
             working_mutation.post_details(working_mutation.__class__)
 
@@ -1292,17 +1286,6 @@ def alien_screen(alien):
         print(f"{soc_line}")
 
     return
-
-#####################################
-# AlIEN output to PDF
-#####################################
-
-def alien_pdf_creator(alien) -> None:
-    '''
-    creates an alien pdf and then shows it on the browser
-    pdfs are no longer stored
-    '''
-    
 
 #####################################
 # ROBOT output to screen
@@ -1369,7 +1352,7 @@ def robot_screen(robot) -> None:
             print(f"{x + 1}) {periph}")
 
     # show the combat table
-    robot_combat_tabler(robot, "output")
+    screen_attack_table(robot)
 
     if robot.Vocation != "Robot":
         print("\nRobots do not get a VOCATION COMBAT TABLE. Sorry.\n")
@@ -1393,44 +1376,78 @@ def robot_screen(robot) -> None:
         for x, skill in enumerate(collated_skills):
             print(f"{x + 1}) {skill}")
 
-    return
-
 #####################################
-# ROBOT output to PDF
+# ANTHRO output to screen
 #####################################
 
-def robot_pdf_creator(robot):
+def anthro_screen(persona) -> None:
     '''
-    creates a pdf for a robot 
-    shows it in the browser PDFs are no longer stored
+    screen prints the anthro
     '''
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    pdf.set_margin(0)  # set margins to 0
 
-    pdf.add_page()
-    pdf.perimiter_box()
-    pdf.title_line(robot)
-    pdf.attributes_lines(robot)
-    pdf.description_line(robot)
-    if robot.Vocation != "Robot":
-        pdf.persona_level_info(robot, "Vocation")
-        pdf.combat_table_pd_effer(robot, "Vocation")
-    pdf.persona_level_info(robot, "Robot")
-    pdf.combat_table_pd_effer(robot, "Robot")
-    if robot.Vocation != "Robot":
-        pdf.task_info(robot)
 
-    pdf.add_page()
-    pdf.title_line(robot)
-    pdf.perimiter_box()
-    pdf.equipment_lines(robot)
-    pdf.note_lines()
-    pdf.data_footer(robot)
-
-    pdf.output(
-        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
-        dest="F",
+    please.clear_console()
+    print(
+        f"\n\nANTHRO PERSONA RECORD\n"
+        f"Persona: {persona.Persona_Name} \t\t\tPlayer: {persona.Player_Name} \tCreated: {persona.Date_Created}\n"
+        f"AWE: {persona.AWE} CHA: {persona.CHA} CON: {persona.CON} DEX: {persona.DEX} "
+        f"INT: {persona.INT} MSTR: {persona.MSTR} PSTR: {persona.PSTR} HPS: {persona.HPM} SOC: {persona.SOC} WA: {persona.WA}\n"
+        f"Family: {persona.FAMILY} Type: {persona.FAMILY_TYPE} SubType: {persona.FAMILY_SUB}\n"
+        f"Age: {persona.Age} years Hite: {persona.Hite} cms Wate: {persona.Wate} kgs\n"
+        f"Vocation: {persona.Vocation} Level: {persona.Level} EXPS: {persona.EXPS}"
     )
-    show_pdf()
 
+    # show the combat table
+    screen_attack_table(persona)
+
+    # anthro Gifts
+    gift_list = vocation.update_gifts(persona)
+    print(f"\n{persona.Vocation} GIFTS: ")
+    for x, gift in enumerate(gift_list):
+        print(f"{x + 1}) {gift}")
+
+    # anthro  Interest list
+    print(f"\n{persona.Vocation} INTERESTS: ")
+    collated_interests = please.collate_this(persona.Interests)
+
+    for x, interest in enumerate(collated_interests):
+        print(f"{x + 1}) {interest}")
+
+    # anthro  Skills
+    print(f"\n{persona.Vocation} SKILLS: ")
+    collated_skills = please.collate_this(persona.Skills)
+    for x, skill in enumerate(collated_skills):
+        print(f"{x + 1}) {skill}")
+
+    # special cases for nothing and spie
+
+    if persona.Vocation == "Spie":
+        print(f"{persona.Spie_Fu}")
+
+    if persona.Vocation == "Nothing":
+        if persona.EXPS > persona.Vocay_Aspiration_EXPS:
+            achievation = "Achieved!"
+        else:
+            fraction = int((persona.EXPS / persona.Vocay_Aspiration_EXPS) * 100)
+            achievation = f"{fraction}% achieved"
+
+        print(f"Aspiration: {persona.Vocay_Aspiration} Objective: {achievation}")
+
+    # print out Mutations
+    print("\nMUTATIONS", end=" ")
+
+    if len(persona.Mutations) == 0:
+        print("None")
+
+    else:
+        all_mutations = mutations.list_all_mutations()
+
+        for name, perm in sorted(persona.Mutations.items()):
+            working_mutation = all_mutations[name](persona)
+            working_mutation.post_details(working_mutation.__class__)
+
+    if persona.RP:
+        print("\nReferee Persona ROLE-PLAYING CUES")
+        for fun in persona.RP_Fun:
+            print(f"{fun}")
 

@@ -7,8 +7,7 @@ smart people required
 
 from dataclasses import dataclass, field
 
-# ugly import all needed for functions listed in these tables
-
+# fix ugly import all needed for functions listed in these tables
 from mutations import *
 from robot import (
     android,
@@ -25,6 +24,7 @@ from robot import (
     transport,
     veterinarian,)
 
+# fix partial initialization cyclic call error
 @dataclass
 class PersonaRecord:
     """
@@ -68,14 +68,6 @@ class PersonaRecord:
     ID: str = "None"
     File_Name: str = "None" # ID + ".jsonl"
 
-nil = {
-    range(1, 5): "Nil Oops",
-    range(5, 15): "Nil Oops",
-    range(15, 65): "Nil Oops",
-    range(65, 90): "Nil Oops",
-    range(90, 101): "Nil Oops",
-    "die_roll": "1d100",
-}
 
 ##############################################
 # ANTHRO TABLES
@@ -674,6 +666,7 @@ anthro_type_mutation_chance = {
     },
 }
 
+# fix kill the ranges
 mental_mutation_random = {
     range(1, 3): ("Absorption", Absorption),
     range(3, 4): ("Alternate Banishment", AlternateBanishment),
@@ -2626,9 +2619,9 @@ alien_attack_damage = {
 }
 
 alien_attack_type = {
-    range(1, 76): "Type A (contact)",
-    range(76, 98): "Type B (ranged)",
-    range(98, 101): "Type C (power ranged)",
+    range(1, 76): "Striking",
+    range(76, 98): "Flinging",
+    range(98, 101): "Shooting",
     "name": "Alien Attack Type",
     "die_roll": "1d100",
 }
@@ -2871,7 +2864,7 @@ alien_life_span_descriptors = {
 }
 
 
-### note alien biome uses the same data as nomadic biome
+### alien biome uses the same data as nomadic biome
 
 alien_biology_energy_source = {
     range(1, 2): "Herbivore",

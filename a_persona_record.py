@@ -8,7 +8,7 @@ exp.sciencyfiction.com
 """
 
 import  alien
-import  anthropomorph
+import  anthro
 import  mutations
 import  robot 
 import  toy 
@@ -27,7 +27,7 @@ def record_chooser():
         please.clear_console()
 
         choices_function_map = {
-            "Anthro": anthropomorph.anthro_workflow,
+            "Anthro": anthro.anthro_workflow,
             "Alien": alien.alien_workflow,
             "Robot": robot.robot_workflow,
             "Toy": toy.toy_workflow,

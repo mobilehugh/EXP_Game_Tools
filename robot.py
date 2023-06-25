@@ -1,7 +1,7 @@
 import math
 import secrets
 
-import anthropomorph
+import anthro
 import outputs
 import please
 import table
@@ -226,7 +226,7 @@ def robotic_peripherals(object: dict, number: int) -> list:
             choice = please.choose_this(choices, "Choose a secondary peripheral")
             peripheral_list.append(choice)
 
-    ### review peripheral list for secondary effects
+    ### fix peripheral list for secondary effects
     for position, peripheral in enumerate(peripheral_list):
 
         if peripheral == "Vocation Computer":
@@ -604,7 +604,7 @@ def android(object: dict) -> None:
     object.Adapt = 1
     object.Value = 100000000
     object.Size = "Medium"
-    anthropomorph.anthro_hit_points_fresh(object)
+    anthro.anthro_hit_points_fresh(object)
 
     object.Attacks = []
     object.Defences = []
@@ -616,7 +616,7 @@ def android(object: dict) -> None:
     # must now get wate with Base_Family
     # points out error of using objects and side effects 
 
-    anthropomorph.anthro_size_fresh(object)
+    anthro.anthro_size_fresh(object)
     object.Wate = round(object.Wate * 1.3)
 
     ### vocation EXCEPTION for android
@@ -1355,7 +1355,7 @@ def social(object):
     # ob__ject.Anthro_Type = basefamily
     # this is no longer correct FAMILY_TYPE == social now
 
-    anthropomorph.AnthroHiteWate(object)
+    anthro.AnthroHiteWate(object)
     object.Wate = round(object.Wate * 1.5)
     # RobotAttacks chance
     if please.do_1d100_check(10):

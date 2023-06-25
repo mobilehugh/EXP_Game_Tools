@@ -2,7 +2,7 @@ import math
 
 import please
 import table
-import anthropomorph
+import anthro
 import vocation
 import mutations
 import outputs
@@ -102,7 +102,7 @@ def alien_wate_allowance(object: dict) -> None:
     determine WA by PSTR and then modify by size.
     """
 
-    anthropomorph.determine_anthro_wate_allowance(object)
+    anthro.determine_anthro_wate_allowance(object)
     base_WA = object.WA
     size_mod = table.alien_size_and_WA[object.Size]
     setattr(object, "WA", base_WA + size_mod)
@@ -403,7 +403,7 @@ def alien_life_span_fresh(object):
     life_cycle = []
 
     life_cycle.append(
-        f"Life Span : 0 to {str(life_span)} {years} Life stages are in {years}"
+        f"Life Span : 0 to {str(life_span)} {years}."
     )
     life_cycle.append(
         f"Child: 0 to {child:.2f}; Adol: {child:.2f} to {(child + adol):.2f}"
@@ -456,7 +456,7 @@ def alien_biology(object):
     ### alien energy source and procurement
     source = please.get_table_result(table.alien_biology_energy_source)
     procure = please.get_table_result(table.alien_biology_energy_procurement)
-    alien_biology.append(f"Energy: {source} PROCUREMENT: {procure}.")
+    alien_biology.append(f"Energy: {source} by {procure}.")
 
     ### alien reproduction
     repro = please.get_table_result(table.alien_biology_reproduction)
@@ -474,10 +474,6 @@ def alien_biology(object):
     ### alien sounds
     sounds = alien_voice()
     object.Sounds = sounds
-
-    ### alien grouping size and sounds
-    grouping = please.get_table_result(table.alien_biology_group_size)
-    alien_biology.append(f"Group Size: {grouping}. Group Sounds: {sounds}.")
 
     object.Biology = alien_biology
 
@@ -714,14 +710,14 @@ def alien_attributes_bespoke(object: dict) -> None:
 
     if choice == "Bespoke":
         alien_attributes_fresh(object)
-        anthropomorph.bespoke_anthro_attribute_ranges(object)
+        anthro.bespoke_anthro_attribute_ranges(object)
 
     elif choice == "Random":
         alien_attributes_fresh(object)
 
     elif choice == "Descriptive":
         alien_attributes_fresh(object)
-        anthropomorph.anthro_descriptive_attributes(object)
+        anthro.anthro_descriptive_attributes(object)
 
     else:
         print("error in bespoke_anthro_attribute methods")
@@ -1059,7 +1055,7 @@ def alien_society_bespoke(object: dict) -> None:
         vocay = not vocay
 
     if vocay:
-        anthropomorph.anthro_vocation_bespoke(object)
+        anthro.anthro_vocation_bespoke(object)
         language = True
         culture = True
         education = True
