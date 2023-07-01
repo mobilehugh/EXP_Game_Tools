@@ -153,7 +153,7 @@ def fresh_robot_type(object):
     comment = "Please choose a robot type:"
     choice = please.choose_this(choices, comment)
     object.Bot_Type = choice
-    table.robot_type_function_pivot[object.Bot_Type](object)
+    robot_type_function_pivot[object.Bot_Type](object)
     return  # return for robot typing
 
 
@@ -269,7 +269,7 @@ def robotic_peripherals(object: dict, number: int) -> list:
             add_mutation = True
             while add_mutation:
                 working_mutation = please.get_table_result(
-                    table.mental_mutation_random
+                    mutations.mental_mutation_random
                 )[1](object)
                 if working_mutation.kind != "defect":
                     peripheral_list[
@@ -284,7 +284,7 @@ def robotic_peripherals(object: dict, number: int) -> list:
             add_mutation = True
             while add_mutation:
                 working_mutation = please.get_table_result(
-                    table.physical_mutation_random
+                    mutations.physical_mutation_random
                 )[1](object)
                 if working_mutation.kind != "defect":
                     peripheral_list[
@@ -449,7 +449,7 @@ def robot_defensive_systems(object: dict, number: int) -> list:
             while fresh_amount:
                 fresh_amount = False
                 working_mutation = please.get_table_result(
-                    table.mental_mutation_random
+                    mutations.mental_mutation_random
                 )[1](object)
                 if (
                     working_mutation.kind == "Defect"
@@ -803,7 +803,7 @@ def datalyzer(object: dict) -> None:
     ):
         no_mutation_yet = True
         while no_mutation_yet:
-            working_mutation = please.get_table_result(table.mental_mutation_random)[1](
+            working_mutation = please.get_table_result(mutations.mental_mutation_random)[1](
                 object
             )
             if working_mutation.kind != "defect":
@@ -1578,7 +1578,7 @@ def fresh_robot():
 
     # temporary until we have a proper robot persona
     fresh.Bot_Type = secrets.choice(["Android", "Combot", "Datalyzer"])
-    table.robot_type_function_pivot[fresh.Bot_Type](fresh)
+    robot_type_function_pivot[fresh.Bot_Type](fresh)
     # fresh_robot_type(fresh)
 
     # offensive systems is called by robot type
@@ -1615,3 +1615,21 @@ def bespoke_robot():
 
 def rando_robot():
     pass
+
+
+
+robot_type_function_pivot = {
+    "Android": android,
+    "Combot": combot,
+    "Datalyzer": datalyzer,
+    "Explorations": explorations,
+    "Hobbot": hobbot,
+    "Industrial": industrial,
+    "Janitorial": janitorial,
+    "Maintenance": maintenance,
+    "Police": police,
+    "Rescue": rescue,
+    "Social": social,
+    "Transport": transport,
+    "Veterinarian": veterinarian,
+}

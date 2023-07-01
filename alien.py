@@ -344,7 +344,7 @@ def alien_natural_powers_fresh(object):
 
     fresh_amount = 0
     while fresh_amount < mutation_number and mutation_number > 0:
-        working_mutation = please.get_table_result(table.mental_mutation_random)[1](
+        working_mutation = please.get_table_result(mutations.mental_mutation_random)[1](
             object
         )
         print(working_mutation)
@@ -362,7 +362,7 @@ def alien_natural_powers_fresh(object):
     fresh_amount = 0
     # number of mutations is random based on anthro type
     while fresh_amount < mutation_number and mutation_number > 0:
-        working_mutation = please.get_table_result(table.physical_mutation_random)[1](
+        working_mutation = please.get_table_result(mutations.physical_mutation_random)[1](
             object
         )
         print(working_mutation)

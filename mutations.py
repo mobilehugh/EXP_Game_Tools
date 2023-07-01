@@ -5,6 +5,29 @@ import a_persona_record
 import please
 import table
 
+def mutation_workflow():
+    """
+    Mutate now avoid the post bomb rush
+    """
+    # clearance for Clarence
+    please.clear_console()
+
+    option_list = ["Fresh Mutation", "Bespoke Mutation", "Back"]
+    list_comment = "Please Choose:"
+    plan_desired = please.choose_this(option_list, list_comment)
+
+    if plan_desired == "Fresh Mutation":
+        pass # todo fresh mutation
+    elif plan_desired == "Bespoke Mutation":
+        pass # todo bespoke mutation
+    elif plan_desired == "Maintenance":
+        pass # todo Maintenance mutations
+    elif plan_desired == "Back":
+        a_persona_record.record_chooser()
+    else:
+        # BuildSupport(object)
+        print("Bad mutation methods were chosen some how")
+    return
 
 class Mutation:
 
@@ -92,17 +115,11 @@ class Mutation:
         tuple = self.return_details(self)
         print(tuple)
         
-        
-        
-        
-        
-        
         return
 
 #######################################
 # MENTAL MUTATIONS
 #######################################
-
 
 class Atestical(Mutation):
     '''
@@ -3233,43 +3250,15 @@ class Wings(Mutation):
         some_thing = self.object.Move if self.object.Move > 8 else 8
         return f"Big beautiful wings for flying at {some_thing} h/u."
 
-
-def mutation_workflow():
-    """
-    Mutate now avoid the post bomb rush
-    """
-
-    # clearance for Clarence
-    please.clear_console()
-
-    option_list = ["Fresh Mutation", "Bespoke Mutation", "Back"]
-    list_comment = "Please Choose:"
-    plan_desired = please.choose_this(option_list, list_comment)
-
-    if plan_desired == "Fresh Mutation":
-        pass
-    elif plan_desired == "Bespoke Mutation":
-        pass
-    elif plan_desired == "Maintenance":
-        pass
-    elif plan_desired == "Back":
-        a_persona_record.record_chooser()
-    else:
-        # BuildSupport(object)
-        print("Bad mutation methods were chosen some how")
-    return
-
-
-
 def list_all_mutations():
     mental_comprehension = {
         name[0]: name[1]
-        for (lose, name) in table.mental_mutation_random.items()
+        for (lose, name) in mental_mutation_random.items() # changed from table
         if lose != "name" and lose != "die_roll"
     }
     physical_comprehension = {
         name[0]: name[1]
-        for (lose, name) in table.physical_mutation_random.items()
+        for (lose, name) in physical_mutation_random.items()
         if lose != "name" and lose != "die_roll"
     }
     return {**mental_comprehension, **physical_comprehension}
@@ -3330,3 +3319,291 @@ def pick_bespoke_mutation(object):
         pick_bespoke_mutation(object)
     else:
         return
+
+    # fix kill the ranges
+mental_mutation_random = {
+    (1, 3):('Absorption', Absorption),
+    (4, 4):('Alternate Banishment', AlternateBanishment),
+    (5, 6):('Alien Attachment', AlienAttachment),
+    (7, 8):('Calculations', Calculations),
+    (9, 10):('Communicate', Communicate),
+    (11, 11):('Cryokinesis', Cryokinesis),
+    (12, 12):('Death Field Generation', DeathFieldGeneration),
+    (13, 13):('Density Control', DensityControl),
+    (14, 15):('Detections', Detections),
+    (16, 17):('Directional Sense', DirectionalSense),
+    (18, 18):('Empathy', Empathy),
+    (19, 20):('Energy Attraction', EnergyAttraction),
+    (21, 21):('Seizure Projection', SeizureProjection),
+    (22, 22):('Extra Sensory Projection', ExtraSensoryProjection),
+    (23, 23):('Force Field Generation', ForceFieldGeneration),
+    (24, 24):('Gyrokinesis', Gyrokinesis),
+    (25, 26):('Heightened Brain Talent', HeightenedBrainTalent),
+    (27, 28):('Hostility Field', HostilityField),
+    (29, 29):('Illusion Generation', IllusionGeneration),
+    (30, 31):('Information Eradication', InformationEradication),
+    (32, 33):('Intuition', Intuition),
+    (34, 35):('Knowledge Transmission', KnowledgeTransmission),
+    (36, 36):('Levitation', Levitation),
+    (37, 37):('Life Leech', LifeLeech),
+    (38, 38):('Light Wave Manipulation', LightWaveManipulation),
+    (39, 40):('Magnetic Control', MagneticControl),
+    (41, 41):('Mass Mind', MassMind),
+    (42, 43):('Mechanical Sense', MechanicalSense),
+    (44, 44):('Mental Blast', MentalBlast),
+    (45, 45):('Mental Control', MentalControl),
+    (46, 46):('Mental Physiostasis', MentalPhysiostasis),
+    (47, 48):('Mental Defenselessness', MentalDefenselessness),
+    (49, 49):('Molecular Disruption', MolecularDisruption),
+    (50, 51):('Molecular Examination', MolecularExamination),
+    (52, 52):('Molecular Phase Transformation', MolecularPhaseTransformation),
+    (53, 53):('Molecular Phase Transmutation', MolecularPhaseTransmutation),
+    (54, 54):('Muscle Manipulation', MuscleManipulation),
+    (55, 55):('Neuronegation', Neuronegation),
+    (56, 56):('Phase', Phase),
+    (57, 58):('Planal Hide Away', PlanalHideAway),
+    (59, 60):('Planal Hold Away', PlanalHoldAway),
+    (61, 62):('Polar Disruption', PolarDisruption),
+    (63, 64):('Power Drain', PowerDrain),
+    (65, 66):('Precognition', Precognition),
+    (67, 67):('Projected Sense', ProjectedSense),
+    (68, 68):('Protection Shell', ProtectionShell),
+    (69, 69):('Psionic Defence', PsionicDefence),
+    (70, 70):('Purify', Purify),
+    (71, 72):('Pyrokinesis', Pyrokinesis),
+    (73, 74):('Repulsion Field Generation', RepulsionFieldGeneration),
+    (75, 76):('Restoration', Restoration),
+    (77, 78):('Sensory Deprivation', SensoryDeprivation),
+    (79, 79):('Sociability Field Generation', SociabilityFieldGeneration),
+    (80, 81):('Sonar', Sonar),
+    (82, 82):('Sonic Attack', SonicAttack),
+    (83, 84):('Sonic Reproduction', SonicReproduction),
+    (85, 85):('Suggestion', Suggestion),
+    (86, 86):('Telekinesis', Telekinesis),
+    (87, 87):('Telekinetic Arm', TelekineticArm),
+    (88, 88):('Telekinetic Flight', TelekineticFlight),
+    (89, 89):('Telempathy', Telempathy),
+    (90, 90):('Teleport', Teleport),
+    (91, 91):('Thought Imitation', ThoughtImitation),
+    (92, 92):('Time Stop', TimeStop),
+    (93, 94):('Time Tell', TimeTell),
+    (95, 95):('Total Recuperation', TotalRecuperation),
+    (96, 96):('Ventriloquism', Ventriloquism),
+    (97, 98):('Weapon Discharging', WeaponDischarging),
+    (99, 100):('Weather Tell', WeatherTell),
+    "name": "Mental Mutations",
+    "die_roll": "1d100",
+} 
+ 
+physical_mutation_random = {
+    (1, 3):('Acidic Enzymes', AcidicEnzymes),
+    (4, 4):('Adaptation', Adaptation),
+    (5, 7):('Attraction Odor', AttractionOdor),
+    (8, 9):('Arms', Arms),
+    (10, 10):('Body Structure Change', BodyStructureChange),
+    (11, 12):('Carapace', Carapace),
+    (13, 14):('Chameleon', Chameleon),
+    (15, 16):('Decoy', Decoy),
+    (17, 18):('Density Manipulation', DensityManipulation),
+    (19, 20):('Diminished Sense', DiminishedSense),
+    (21, 22):('Double Physical Pain', DoublePhysicalPain),
+    (23, 24):('Edible Tissue', EdibleTissue),
+    (25, 25):('Electric Shock', ElectricShock),
+    (26, 26):('Enthalpy Attack', EnthalpyAttack),
+    (27, 28):('Fat Cell Accumulation', FatCellAccumulation),
+    (29, 29):('Haste', Haste),
+    (30, 30):('Gas Generation', GasGeneration),
+    (31, 32):('Heat Generation', HeatGeneration),
+    (33, 36):('Heightened Attribute', HeightenedAttribute),
+    (37, 38):('Heightened Vision', HeightenedVision),
+    (39, 40):('Increased Metabolism', IncreasedMetabolism),
+    (41, 42):('Launchable Quills', LaunchableQuills),
+    (43, 44):('Light Generation', LightGeneration),
+    (45, 45):('Mechanical Insertion', MechanicalInsertion),
+    (46, 47):('Mechanical Prosthesis', MechanicalProsthesis),
+    (48, 48):('Mitosis', Mitosis),
+    (49, 50):('Multiple Body Parts', MultipleBodyParts),
+    (51, 51):('New Organ', NewOrgan),
+    (52, 52):('Non Breathing', NonBreathing),
+    (53, 54):('No Resistance To Disease', NoResistanceToDisease),
+    (55, 56):('No Resistance To Poison', NoResistanceToPoison),
+    (57, 57):('Oversized Body Part', OversizedBodyPart),
+    (58, 58):('Photosynthetic Skin', PhotosyntheticSkin),
+    (59, 61):('Phosphorescent Skin', PhosphorescentSkin),
+    (62, 64):('Pockets', Pockets),
+    (65, 66):('Pressurized Body', PressurizedBody),
+    (67, 68):('Radiating Eyes', RadiatingEyes),
+    (69, 70):('Regeneration', Regeneration),
+    (71, 72):('Rubbery Skin', RubberySkin),
+    (73, 74):('Rust', Rust),
+    (75, 75):('Self Destruction', SelfDestruction),
+    (76, 76):('Shape Change', ShapeChange),
+    (77, 77):('Size Manipulation', SizeManipulation),
+    (78, 78):('Skin Structure Change', SkinStructureChange),
+    (79, 79):('Smoke Screen', SmokeScreen),
+    (80, 80):('Sonar Attack', SonarAttack),
+    (81, 81):('Spit Poison', SpitPoison),
+    (82, 83):('Static Quills', StaticQuills),
+    (84, 85):('Strange New Body Part', StrangeNewBodyPart),
+    (86, 86):('Symbiotic Attachment', SymbioticAttachment),
+    (87, 87):('Tear Away Body Part', TearAwayBodyPart),
+    (88, 90):('Undersized Body Part', UndersizedBodyPart),
+    (91, 93):('Vibrations', Vibrations),
+    (95, 96):('Wate Manipulation', WateManipulation),
+    (97, 100):('Wings', Wings),
+    "name": "Physical Mutations",
+    "die_roll": "1d100",
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+    mental_mutation_random = {
+        range(1, 3): ("Absorption", Absorption),
+        range(3, 4): ("Alternate Banishment", AlternateBanishment),
+        range(4, 6): ("Alien Attachment", AlienAttachment),
+        range(6, 8): ("Calculations", Calculations),
+        range(8, 10): ("Communicate", Communicate),
+        range(10, 11): ("Cryokinesis", Cryokinesis),
+        range(11, 12): ("Death Field Generation", DeathFieldGeneration),
+        range(12, 13): ("Density Control", DensityControl),
+        range(13, 15): ("Detections", Detections),
+        range(15, 17): ("Directional Sense", DirectionalSense),
+        range(17, 18): ("Empathy", Empathy),
+        range(18, 20): ("Energy Attraction", EnergyAttraction),
+        range(20, 21): ("Seizure Projection", SeizureProjection),
+        range(21, 22): ("Extra Sensory Projection", ExtraSensoryProjection),
+        range(22, 23): ("Force Field Generation", ForceFieldGeneration),
+        range(23, 24): ("Gyrokinesis", Gyrokinesis),
+        range(24, 26): ("Heightened Brain Talent", HeightenedBrainTalent),
+        range(26, 28): ("Hostility Field", HostilityField),
+        range(28, 29): ("Illusion Generation", IllusionGeneration),
+        range(29, 31): ("Information Eradication", InformationEradication),
+        range(31, 33): ("Intuition", Intuition),
+        range(33, 35): ("Knowledge Transmission", KnowledgeTransmission),
+        range(35, 36): ("Levitation", Levitation),
+        range(36, 37): ("Life Leech", LifeLeech),
+        range(37, 38): ("Light Wave Manipulation", LightWaveManipulation),
+        range(38, 40): ("Magnetic Control", MagneticControl),
+        range(40, 41): ("Mass Mind", MassMind),
+        range(41, 43): ("Mechanical Sense", MechanicalSense),
+        range(43, 44): ("Mental Blast", MentalBlast),
+        range(44, 45): ("Mental Control", MentalControl),
+        range(45, 46): ["Mental Physiostasis", MentalPhysiostasis],
+        range(46, 48): ("Mental Defenselessness", MentalDefenselessness),
+        range(48, 49): ("Molecular Disruption", MolecularDisruption),
+        range(49, 51): ("Molecular Examination", MolecularExamination),
+        range(51, 52): ("Molecular Phase Transformation", MolecularPhaseTransformation),
+        range(52, 53): ("Molecular Phase Transmutation", MolecularPhaseTransmutation),
+        range(53, 54): ("Muscle Manipulation", MuscleManipulation),
+        range(54, 55): ("Neuronegation", Neuronegation),
+        range(55, 56): ("Phase", Phase),
+        range(56, 58): ("Planal Hide Away", PlanalHideAway),
+        range(58, 60): ("Planal Hold Away", PlanalHoldAway),
+        range(60, 62): ("Polar Disruption", PolarDisruption),
+        range(62, 64): ("Power Drain", PowerDrain),
+        range(64, 66): ("Precognition", Precognition),
+        range(66, 67): ("Projected Sense", ProjectedSense),
+        range(67, 68): ("Protection Shell", ProtectionShell),
+        range(68, 69): ("Psionic Defence", PsionicDefence),
+        range(69, 70): ("Purify", Purify),
+        range(70, 72): ("Pyrokinesis", Pyrokinesis),
+        range(72, 74): ("Repulsion Field Generation", RepulsionFieldGeneration),
+        range(74, 76): ("Restoration", Restoration),
+        range(76, 78): ("Sensory Deprivation", SensoryDeprivation),
+        range(78, 79): ("Sociability Field Generation", SociabilityFieldGeneration),
+        range(79, 81): ("Sonar", Sonar),
+        range(81, 82): ("Sonic Attack", SonicAttack),
+        range(82, 84): ("Sonic Reproduction", SonicReproduction),
+        range(84, 85): ("Suggestion", Suggestion),
+        range(85, 86): ("Telekinesis", Telekinesis),
+        range(86, 87): ("Telekinetic Arm", TelekineticArm),
+        range(87, 88): ("Telekinetic Flight", TelekineticFlight),
+        range(88, 89): ("Telempathy", Telempathy),
+        range(89, 90): ("Teleport", Teleport),
+        range(90, 91): ("Thought Imitation", ThoughtImitation),
+        range(91, 92): ("Time Stop", TimeStop),
+        range(92, 94): ("Time Tell", TimeTell),
+        range(94, 95): ("Total Recuperation", TotalRecuperation),
+        range(95, 96): ("Ventriloquism", Ventriloquism),
+        range(96, 98): ("Weapon Discharging", WeaponDischarging),
+        range(98, 101): ("Weather Tell", WeatherTell),
+        "name": "Mental Mutations",
+        "die_roll": "1d100",
+    }
+
+
+    physical_mutation_random = {
+        range(1, 3): ("Acidic Enzymes", AcidicEnzymes),
+        range(3, 4): ("Adaptation", Adaptation),
+        range(4, 7): ("Attraction Odor", AttractionOdor),
+        range(7, 9): ("Arms", Arms),
+        range(9, 10): ("Body Structure Change", BodyStructureChange),
+        range(10, 12): ("Carapace", Carapace),
+        range(12, 14): ("Chameleon", Chameleon),
+        range(14, 16): ("Decoy", Decoy),
+        range(16, 18): ("Density Manipulation", DensityManipulation),
+        range(18, 20): ("Diminished Sense", DiminishedSense),
+        range(20, 22): ("Double Physical Pain", DoublePhysicalPain),
+        range(22, 24): ("Edible Tissue", EdibleTissue),
+        range(24, 25): ("Electric Shock", ElectricShock),
+        range(25, 26): ("Enthalpy Attack", EnthalpyAttack),
+        range(26, 28): ("Fat Cell Accumulation", FatCellAccumulation),
+        range(28, 29): ("Haste", Haste),
+        range(29, 30): ("Gas Generation", GasGeneration),
+        range(30, 32): ("Heat Generation", HeatGeneration),
+        range(32, 36): ("Heightened Attribute", HeightenedAttribute),
+        range(36, 38): ("Heightened Vision", HeightenedVision),
+        range(38, 40): ("Increased Metabolism", IncreasedMetabolism),
+        range(40, 42): ("Launchable Quills", LaunchableQuills),
+        range(42, 44): ("Light Generation", LightGeneration),
+        range(44, 45): ("Mechanical Insertion", MechanicalInsertion),
+        range(45, 47): ("Mechanical Prosthesis", MechanicalProsthesis),
+        range(47, 48): ("Mitosis", Mitosis),
+        range(48, 50): ("Multiple Body Parts", MultipleBodyParts),
+        range(50, 51): ("New Organ", NewOrgan),
+        range(51, 52): ("Non Breathing", NonBreathing),
+        range(52, 54): ("No Resistance To Disease", NoResistanceToDisease),
+        range(54, 56): ("No Resistance To Poison", NoResistanceToPoison),
+        range(56, 57): ("Oversized Body Part", OversizedBodyPart),
+        range(57, 58): ("Photosynthetic Skin", PhotosyntheticSkin),
+        range(58, 61): ("Phosphorescent Skin", PhosphorescentSkin),
+        range(61, 64): ("Pockets", Pockets),
+        range(64, 66): ("Pressurized Body", PressurizedBody),
+        range(66, 68): ("Radiating Eyes", RadiatingEyes),
+        range(68, 70): ("Regeneration", Regeneration),
+        range(70, 72): ("Rubbery Skin", RubberySkin),
+        range(72, 74): ("Rust", Rust),
+        range(74, 75): ("Self Destruction", SelfDestruction),
+        range(75, 76): ("Shape Change", ShapeChange),
+        range(76, 77): ("Size Manipulation", SizeManipulation),
+        range(77, 78): ("Skin Structure Change", SkinStructureChange),
+        range(78, 79): ("Smoke Screen", SmokeScreen),
+        range(79, 80): ("Sonar Attack", SonarAttack),
+        range(80, 81): ("Spit Poison", SpitPoison),
+        range(81, 83): ("Static Quills", StaticQuills),
+        range(83, 85): ("Strange New Body Part", StrangeNewBodyPart),
+        range(85, 86): ("Symbiotic Attachment", SymbioticAttachment),
+        range(86, 87): ("Tear Away Body Part", TearAwayBodyPart),
+        range(87, 90): ("Undersized Body Part", UndersizedBodyPart),
+        range(90, 93): ("Vibrations", Vibrations),
+        range(94, 96): ("Wate Manipulation", WateManipulation),
+        range(96, 101): ("Wings", Wings),
+        "name": "Physical Mutations",
+        "die_roll": "1d100",
+    }
+'''

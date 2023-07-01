@@ -14,7 +14,7 @@ import  robot
 import  toy 
 import  please
 
-def record_chooser():
+def record_chooser()->None:
     """
     Interactively prompt the user to choose a record type, then generate the
     corresponding record using the appropriate module. The user can continue
@@ -43,7 +43,7 @@ def record_chooser():
             choices_function_map[record_type_desired]()
 
 
-def main():
+def main()->None:
     # Introduction
     please.clear_console()
     print("\nWelcome to the record generator for EXP The game of technological chaos.")

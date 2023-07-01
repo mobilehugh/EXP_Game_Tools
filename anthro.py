@@ -298,18 +298,18 @@ def anthro_age_fresh(object):
     return
 
 
-def anthro_mutations_fresh(object: table.PersonaRecord) -> None:
+def anthro_mutations_fresh(persona: table.PersonaRecord) -> None:
     """
     check for mutations based on player desire and anthro type
     """
 
     # determine the chance of mutations based on anthro type
-    anthro_type = object.FAMILY_TYPE
+    anthro_type = persona.FAMILY_TYPE
     mentchance = table.anthro_type_mutation_chance[anthro_type]["mentchance"]
     physchance = table.anthro_type_mutation_chance[anthro_type]["physchance"]
 
     # create the mutations dict
-    object.Mutations = {}
+    persona.Mutations = {}
 
     # mutation chances increase if desired
     mutate_yes = please.say_yes_to("Do you want to mutate?")
@@ -331,18 +331,18 @@ def anthro_mutations_fresh(object: table.PersonaRecord) -> None:
 
         fresh_amount = 0
         while fresh_amount < mutation_number:
-            mutation_tuple = please.get_table_result(table.mental_mutation_random)
-            print(mutation_tuple[0])
-            print(mutation_tuple[1].build_desc(object))
-            working_mutation = mutation_tuple[1](object)
+            mutation_tuple = please.get_table_result(mutations.mental_mutation_random)
+            print(f'{mutation_tuple[0] = } {mutation_tuple[1] = }')
+            #print(mutation_tuple[1].build_desc(persona))
+            working_mutation = mutation_tuple[1](persona)
             fresh_amount += 1
 
-            if working_mutation.kind == "defect" and object.FAMILY_TYPE== "Purestrain":
+            if working_mutation.kind == "defect" and persona.FAMILY_TYPE== "Purestrain":
                 print("\nYou are a purestrain, you cannot have a defect mutation.")
                 fresh_amount -= 2
-                object.Mutations.pop(working_mutation.name)
+                persona.Mutations.pop(working_mutation.name)
 
-            if working_mutation.kind == "defect" and object.FAMILY_TYPE!= "Purestrain":
+            if working_mutation.kind == "defect" and persona.FAMILY_TYPE!= "Purestrain":
                 if please.say_yes_to("A Defect DOES NOT count as a mutation? "):
                     fresh_amount -= 1
 
@@ -359,18 +359,18 @@ def anthro_mutations_fresh(object: table.PersonaRecord) -> None:
         fresh_amount = 0
         # number of mutations is random based on anthro type
         while fresh_amount < mutation_number:
-            mutation_tuple = please.get_table_result(table.physical_mutation_random)
-            print(mutation_tuple[0])
-            print(mutation_tuple[1].build_desc(object))
-            working_mutation = mutation_tuple[1](object)
+            mutation_tuple = please.get_table_result(mutations.physical_mutation_random)
+            print(f'{mutation_tuple[0] = } {mutation_tuple[1] = }')
+            #print(mutations.mutation_tuple[1].build_desc(persona))
+            working_mutation = mutation_tuple[1](persona)
             fresh_amount += 1
 
-            if working_mutation.kind == "defect" and object.FAMILY_TYPE== "Purestrain":
+            if working_mutation.kind == "defect" and persona.FAMILY_TYPE== "Purestrain":
                 print("\nYou are a purestrain, you cannot have a defect mutation.")
                 fresh_amount -= 2
-                object.Mutations.pop(working_mutation.name)
+                persona.Mutations.pop(working_mutation.name)
 
-            if working_mutation.kind == "defect" and object.FAMILY_TYPE!= "Purestrain":
+            if working_mutation.kind == "defect" and persona.FAMILY_TYPE!= "Purestrain":
                 if please.say_yes_to("A Defect DOES NOT count as a mutation? "):
                     fresh_amount -= 2
 
@@ -404,7 +404,7 @@ def anthro_mutations_rando(object):
 
         fresh_amount = 0
         while fresh_amount < mutation_number:
-            working_mutation = please.get_table_result(table.mental_mutation_random)[1](
+            working_mutation = please.get_table_result(mutations.mental_mutation_random)[1](
                 object
             )
             fresh_amount += 1
@@ -427,7 +427,7 @@ def anthro_mutations_rando(object):
         fresh_amount = 0
         # number of mutations is random based on anthro type
         while fresh_amount < mutation_number:
-            working_mutation = please.get_table_result(table.physical_mutation_random)[
+            working_mutation = please.get_table_result(mutations.physical_mutation_random)[
                 1
             ](object)
             fresh_amount += 1
@@ -893,9 +893,9 @@ def fresh_anthro():
     anthro_mutations_fresh(fresh)
     anthro_vocations_fresh(fresh)
     vocation.set_up_first_time(fresh)
-    outputs.anthro_review(fresh)
+    outputs.anthro_screen(fresh)
     anthro_persona_name_fresh(fresh)
-    outputs.anthro_review(fresh)
+    outputs.anthro_screen(fresh)
     please.assign_id_and_file_name(fresh)
     please.record_storage(fresh)
     return

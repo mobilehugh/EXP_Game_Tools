@@ -236,6 +236,21 @@ def colour_my_whirled(*args):
 
 def get_table_result(table: dict) -> str:
     """
+    return a single result from a random table
+    this is the deranged version using tuples that are more table like 
+    """
+    random = roll_this(table["die_roll"])
+    for key in table:
+        chance_list = range(key[0],(key[1]+1))
+        if random in chance_list:
+            result = table[key]
+            break
+    return result
+
+
+'''
+def get_table_result(table: dict) -> str:
+    """
     THIS WILL BE DEPRECATED ONCE DERANGED Tables are ACTIVATED
     return a single result from a random table
     """
@@ -244,7 +259,7 @@ def get_table_result(table: dict) -> str:
         if random in key:
             result = table[key]
             break
-    return result
+    return result'''
 
 def list_table_choices(table_chosen:dict) -> list:
     """
@@ -339,9 +354,9 @@ def record_storage(record_to_store: table.PersonaRecord) -> None:
     # no pdfs
 
     function_map_reviews = {
-        "Alien": outputs.alien_review,
-        "Anthro": outputs.anthro_review,
-        "Robot": outputs.robot_review,
+        "Alien": outputs.alien_screen,
+        "Anthro": outputs.anthro_screen,
+        "Robot": outputs.robot_screen,
     }
     review_screen = function_map_reviews[record_to_store.FAMILY]
 
@@ -531,7 +546,7 @@ def do_referee_maintenance():
     operations = {
     "EXPS": vocation.update_persona_exps,
     "Level": vocation.update_persona_exps,
-    "Review": lambda persona: outputs.outputs_workflow(persona, "screen"),
+    "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
     "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"),
     "Attributes": attribute_manipulation,
     "Change Record": lambda persona: do_referee_maintenance(),

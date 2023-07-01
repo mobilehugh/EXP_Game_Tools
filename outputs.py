@@ -988,7 +988,7 @@ def screen_attack_table(persona) -> None:
 
     # manipulate the proficiency sentence for screen output
 
-    if str(BPROF) in ["All weapons.", "One single proficiency."]:
+    '''    if str(BPROF) in ["All weapons.", "One single proficiency."]:
         # if mercenary or nothing
         pass
     elif str(APROF).split("-")[0] in ["Baked in attacks only.", "Natural "]:
@@ -1000,10 +1000,16 @@ def screen_attack_table(persona) -> None:
             nummer_profs = attack_table[proficiency[0]][proficiency[1:]]
             attack_table[proficiency[0]][
                 proficiency[1:]
-            ] = f"{table.numbers_2_words[nummer_profs].capitalize()} {table.attack_type_words[proficiency]} weapons."
+            ] = f"{table.numbers_2_words[int(nummer_profs)].capitalize()} {table.attack_type_words[proficiency]} weapons."
+    '''
+
+    # assign proficiencies 
+    APROF = table.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
+    BPROF = table.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
+    CPROF = table.numbers_2_words[CPROF] if isinstance(CPROF,int) else CPROF
 
     # print out the combat table
-    print(f'\nATTACK TABLE -- {attack_table["TITLE"]}')
+    print(f'\nATTACK TABLE -- {persona.Vocation}')
     print(f'{" ":>6} {"BP":>5} {"BNP":>5} {"MR":>5} {"DB":>5} {"PROF":>5}')
     if ABP > 0:
         print(f"Type A {ABP:>5} {ABNP:>5} {AMR:>5} {ADB:>5}  {APROF}")
@@ -1013,11 +1019,10 @@ def screen_attack_table(persona) -> None:
         print(f"Type C {CBP:>5} {CBNP:>5} {CMR:>5} {CDB:>5}  {CPROF}")
 
     if persona.FAMILY == 'Alien':
-        blob = f'  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'      
+        blob = f'MOVE:  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u. ARMOUR RATING: {persona.AR}'      
     else:
-        blob = f'  {persona.Move} h/u'
+        blob = f'MOVE:  {persona.Move} h/u  ARMOUR RATING: {persona.AR}'
 
-    ### fix add AR to screen print  
     print(blob)    
 
     return
