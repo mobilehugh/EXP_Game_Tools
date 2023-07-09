@@ -1,6 +1,5 @@
 import math
 import secrets
-
 import please
 import table
 

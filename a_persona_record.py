@@ -44,8 +44,9 @@ def record_chooser()->None:
 
 
 def main()->None:
-    # Introduction
-    please.clear_console()
+    '''
+    this is where is all starts
+    '''
     print("\nWelcome to the record generator for EXP The game of technological chaos.")
     print("Decreasing crunchiness and increasing fun.")
     print("For all your persona, toy, and mutation needs.")

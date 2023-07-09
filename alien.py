@@ -6,15 +6,13 @@ import anthro
 import vocation
 import mutations
 import outputs
-
+import core
 
 def alien_workflow() -> None:
     """
     player alien versus referee person vs persona maintenance
     """
-    # clearance for Clarence
     please.clear_console()
-
     option_function_map = {
         "Fresh Alien (New Player)":fresh_alien, 
         "Bespoke Alien":bespoke_alien, 
@@ -33,22 +31,6 @@ def alien_workflow() -> None:
 # FRESH ALIEN FUNCTIONS
 ####################################
 
-def alien_attributes_fresh(object):
-    """
-    hit points max (HPM) depends on CON and SIZE
-    """
-
-    fresh_dict = {
-        key: value["dice"]
-        for (key, value) in table.alien_attribute_ranges.items()
-        if key != "HPM" and key != "EXPS"
-    }
-
-    for key in fresh_dict:
-        die_roll = please.roll_this(fresh_dict[key])
-        setattr(object, key, die_roll)
-
-    return
 
 
 def alien_size_fresh(object):
@@ -709,14 +691,14 @@ def alien_attributes_bespoke(object: dict) -> None:
     choice = please.choose_this(methods, choice_comment)
 
     if choice == "Bespoke":
-        alien_attributes_fresh(object)
+        core.attributes_fresh(object)
         anthro.bespoke_anthro_attribute_ranges(object)
 
     elif choice == "Random":
-        alien_attributes_fresh(object)
+        core.attributes_fresh(object)
 
     elif choice == "Descriptive":
-        alien_attributes_fresh(object)
+        core.attributes_fresh(object)
         anthro.anthro_descriptive_attributes(object)
 
     else:
@@ -1138,9 +1120,9 @@ def fresh_alien():
     fresh = table.PersonaRecord()
     fresh.FAMILY = "Alien"
     fresh.Vocation = "Alien"
-    fresh.FAMILY_TYPE = "Undiscovered"
-    fresh.Persona_Name = "Nebulous"
-    fresh.Date_Created = "Still Evolving"
+    fresh.FAMILY_TYPE = "unevolved"
+    fresh.Persona_Name = "unevolved"
+    fresh.Date_Created = "Start Evolving"
     fresh.RP = False
     setattr(fresh, "Level", 1)
     setattr(fresh, "EXPS", 42)
@@ -1149,7 +1131,7 @@ def fresh_alien():
     ### get mundane player name
     fresh.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
 
-    alien_attributes_fresh(fresh)
+    core.attributes_fresh(fresh)
     alien_size_fresh(fresh)
     alien_wate_allowance(fresh)
     alien_hpm_fresh(fresh)

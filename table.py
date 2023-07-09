@@ -19,8 +19,8 @@ class PersonaRecord:
     FAMILY: str = "Anthro"
     FAMILY_TYPE: str = "Humanoid"
     FAMILY_SUB: str = "Generalis"
+    Workflow: str = "Fresh"
     RP: bool = False
-    Otto: bool = False
     Show: bool = False
     Bin: bool = False
     AWE: int = 0
@@ -1579,6 +1579,7 @@ suggested_anthro_attribute_ranges = {
         "dice": "1d1000",
         "comment": "Please roll Kilo Die",
     },
+    # HPM depends on CON and is generated after final CON
     "HPM": {
         "long_name": "Hit Points Maximum",
         "minimum": 1,
@@ -1592,7 +1593,7 @@ suggested_anthro_attribute_ranges = {
         "minimum": 0,
         "start_min": 42,
         "start_max": 42000000,
-        "dice": "42 for fresh persona.",
+        "dice": "42d1",
         "comment": "Please input 42 for new persona.",
     },
 }
@@ -2013,22 +2014,6 @@ role_play_RP_arc_goal = {
 
 
 alien_attribute_ranges = {
-    "AWE": {
-        "long_name": "Awareness",
-        "minimum": 1,
-        "start_min": 3,
-        "start_max": 18,
-        "dice": "3d6",
-        "comment": "Please roll 3d6",
-    },
-    "CHA": {
-        "long_name": "Charisma",
-        "minimum": 1,
-        "start_min": 3,
-        "start_max": 18,
-        "dice": "3d6",
-        "comment": "Please roll 3d6",
-    },
     "CON": {
         "long_name": "Constitution",
         "minimum": 1,
@@ -2068,22 +2053,6 @@ alien_attribute_ranges = {
         "start_max": 31,
         "dice": "6d6-5",
         "comment": "Please roll 6d6-5",
-    },
-    "SOC": {
-        "long_name": "Social Standing",
-        "minimum": 1,
-        "start_min": 1,
-        "start_max": 1000,
-        "dice": "1d1000",
-        "comment": "Please roll Kilo Die",
-    },
-    "EXPS": {
-        "long_name": "Experience Points",
-        "minimum": 1,
-        "start_min": 42,
-        "start_max": 42000000,
-        "dice": "Input 42 for new persona.",
-        "comment": "Please input 42 for new persona.",
     },
 }
 

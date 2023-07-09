@@ -5,6 +5,8 @@ import a_persona_record
 import please
 import table
 
+#fix LIST NOT DICT
+
 def mutation_workflow():
     """
     Mutate now avoid the post bomb rush
@@ -3318,7 +3320,6 @@ def pick_bespoke_mutation(object):
     else:
         return
 
-    # fix kill the ranges
 mental_mutation_random = {
     (1, 3):('Absorption', Absorption),
     (4, 4):('Alternate Banishment', AlternateBanishment),

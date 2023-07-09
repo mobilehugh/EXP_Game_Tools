@@ -4,11 +4,10 @@ import secrets
 import please
 import table
 import vocation
+import core
 
 import outputs
 import mutations
-
-
 
 def anthro_workflow() -> None: 
     """
@@ -34,28 +33,11 @@ def anthro_workflow() -> None:
 # FRESH ANTHRO FUNCTIONS
 ####################################
 
-def anthro_attributes_fresh(persona_record:dict):
-    """
-    hit points max (HPM) depends on CON and is generated separately
-    """
-
-    fresh_dict = {
-        key: value["dice"]
-        for (key, value) in table.suggested_anthro_attribute_ranges.items()
-        if key != "HPM" and key != "EXPS"
-    }
-
-    for attribute in fresh_dict:
-        die_roll = please.roll_this(fresh_dict[attribute])
-        setattr(persona_record, attribute, die_roll)
-
-    return
-
 
 def anthro_hit_points_fresh(object):
     """
     calculates HPM based on CON
-    prints out with list of other fresh attributes from anthro_attributes_fresh
+    prints out with list of other fresh attributes from core.attributes_fresh
     """
     con = object.CON
     dice = math.ceil(con / 2)
@@ -65,7 +47,6 @@ def anthro_hit_points_fresh(object):
     object.HPM = hpm
 
     return
-
 
 def adjust_mstr_by_int(object):
     """
@@ -80,7 +61,6 @@ def adjust_mstr_by_int(object):
     object.MSTR = mstr
 
     return
-
 
 def list_eligible_anthro_types(object):
     """
@@ -103,7 +83,6 @@ def list_eligible_anthro_types(object):
 
     return anthro_type_choices
 
-
 def anthro_type_fresh(object):
     """
     pick from the eligible anthro types
@@ -114,7 +93,6 @@ def anthro_type_fresh(object):
     object.FAMILY_TYPE= type_choice
 
     return
-
 
 def anthro_sub_type_selection(object):
     """
@@ -144,7 +122,6 @@ def anthro_sub_type_selection(object):
     object.FAMILY_SUB = sub_type
     # print(f"Persona is a {object.FAMILY_TYPE} {object.FAMILY_SUB}")
     return
-
 
 def adjust_attributes_by_anthro_type(object):
     """
@@ -209,7 +186,6 @@ def adjust_attributes_by_anthro_type(object):
 
     return
 
-
 def anthro_size_fresh(object):
 
     anthro_type = object.FAMILY_TYPE
@@ -234,7 +210,6 @@ def anthro_size_fresh(object):
     object.Size_Cat = "Medium"  # correct anthro size to actual size of medium
     return
 
-
 def anthro_size_rando(object):
 
     anthro_type = object.FAMILY_TYPE
@@ -257,7 +232,6 @@ def anthro_size_rando(object):
     object.Size_Cat = "Medium"  # correct anthro size to actual size of medium
     return
 
-
 def determine_anthro_wate_allowance(object):
     """
     PSTR determines wate allowance
@@ -267,7 +241,6 @@ def determine_anthro_wate_allowance(object):
 
     return
 
-
 def anthro_move(object: table.PersonaRecord)-> None:
     """
     dexterity determines movement rate
@@ -275,7 +248,6 @@ def anthro_move(object: table.PersonaRecord)-> None:
     object.Move = table.anthro_movement_rate_and_DEX[object.DEX]
     # print(f"Persona's move is {object.Move} h/u")
     return
-
 
 def anthro_base_AR(object):
     """
@@ -286,7 +258,6 @@ def anthro_base_AR(object):
 
     return
 
-
 def anthro_age_fresh(object):
     """
     generates the persona age at level one start
@@ -296,7 +267,6 @@ def anthro_age_fresh(object):
     object.Age = please.roll_this(table.anthro_starting_ages[AnthroType])
 
     return
-
 
 def anthro_mutations_fresh(persona: table.PersonaRecord) -> None:
     """
@@ -312,7 +282,7 @@ def anthro_mutations_fresh(persona: table.PersonaRecord) -> None:
     persona.Mutations = {}
 
     # mutation chances increase if desired
-    mutate_yes = please.say_yes_to("Do you want to mutate?")
+    mutate_yes = please.say_yes_to("Do you want to mutate? ")
 
     if mutate_yes and anthro_type != "Humanoid":
         mentchance = mentchance * 2
@@ -342,8 +312,8 @@ def anthro_mutations_fresh(persona: table.PersonaRecord) -> None:
                 fresh_amount -= 2
                 persona.Mutations.pop(working_mutation.name)
 
-            if working_mutation.kind == "defect" and persona.FAMILY_TYPE!= "Purestrain":
-                if please.say_yes_to("A Defect DOES NOT count as a mutation? "):
+            if working_mutation.kind == "defect" and persona.FAMILY_TYPE != "Purestrain":
+                if please.say_yes_to("A Defect DOES NOT count as a mutation. Add? "):
                     fresh_amount -= 1
 
     else:
@@ -376,7 +346,6 @@ def anthro_mutations_fresh(persona: table.PersonaRecord) -> None:
 
     else:
         print(f"Persona has no physical mutations.")
-
 
 def anthro_mutations_rando(object):
     """
@@ -439,7 +408,6 @@ def anthro_mutations_rando(object):
     else:
         print(f"glib glorp glap.")
 
-
 def anthro_vocations_fresh(object):
     choices = vocation.list_eligible_vocations(object)
     choice_comment = "Which VOCATION do you want?"
@@ -447,7 +415,6 @@ def anthro_vocations_fresh(object):
     object.Vocation = type_choice
 
     return
-
 
 def anthro_persona_name_fresh(object):
     """
@@ -529,7 +496,6 @@ def bespoke_anthro_attribute_ranges(object):
 
     return
 
-
 def anthro_descriptive_attributes(object):
     """
     referee persona attribute shifts based on descriptive words
@@ -596,7 +562,6 @@ def anthro_descriptive_attributes(object):
 
     return
 
-
 def anthro_attributes_bespoke(object):
 
     methods = ["Random", "Bespoke", "Descriptive"]
@@ -604,7 +569,7 @@ def anthro_attributes_bespoke(object):
     choice = please.choose_this(methods, choice_comment)
 
     if choice == "Bespoke":
-        anthro_attributes_fresh(object)
+        core.attributes_fresh(object)
         anthro_hit_points_fresh(object)
         bespoke_anthro_attribute_ranges(object)
         anthro_move(object)
@@ -612,14 +577,14 @@ def anthro_attributes_bespoke(object):
         determine_anthro_wate_allowance(object)
 
     elif choice == "Random":
-        anthro_attributes_fresh(object)
+        core.attributes_fresh(object)
         anthro_hit_points_fresh(object)
         anthro_move(object)
         anthro_base_AR(object)
         determine_anthro_wate_allowance(object)
 
     elif choice == "Descriptive":
-        anthro_attributes_fresh(object)
+        core.attributes_fresh(object)
         anthro_hit_points_fresh(object)
         anthro_move(object)
         anthro_descriptive_attributes(object)
@@ -629,7 +594,6 @@ def anthro_attributes_bespoke(object):
         print("error in bespoke_anthro_attribute methods")
 
     return
-
 
 def improve_attributes_by_anthro_type(object):
     """
@@ -647,7 +611,6 @@ def improve_attributes_by_anthro_type(object):
     die_roll = old_attribute if die_roll < old_attribute else die_roll
     setattr(object, attribute_to_adjust, die_roll)
     return
-
 
 def anthro_type_bespoke(object):
 
@@ -684,7 +647,6 @@ def anthro_type_bespoke(object):
 
     return
 
-
 def anthro_mutations_bespoke(object):
 
     ### determine RP anthro mutations
@@ -709,7 +671,6 @@ def anthro_mutations_bespoke(object):
                 mutations.single_random_mutation(object)
         return
     return
-
 
 def anthro_vocation_bespoke(object: dict) -> None:
     """
@@ -738,7 +699,6 @@ def anthro_vocation_bespoke(object: dict) -> None:
     else:
         print("\nYou have not selected a valid anthro vocation type selection method")
 
-
 def choose_anthro_age_category(object):
     """
     allow user to select an anthro age category
@@ -758,7 +718,6 @@ def choose_anthro_age_category(object):
     print(f"Persona is {object.Age_Cat} and {object.Age} years old.")
 
     return
-
 
 def random_anthro_age_category(object):
     """
@@ -780,7 +739,6 @@ def random_anthro_age_category(object):
 
     return
 
-
 def role_play_RP_arc():
     """
     return referee person arc in relation to expedition now
@@ -790,7 +748,6 @@ def role_play_RP_arc():
     goal = please.get_table_result(table.role_play_RP_arc_goal)
 
     return f"Past: {past}, Present: {present}, Goal: {goal}."
-
 
 def role_play_RP_beliefs(object: dict) -> str:
     """
@@ -817,7 +774,6 @@ def role_play_RP_beliefs(object: dict) -> str:
 
     return f"Beliefs: {religious}, {philosophy}, {politics}."
 
-
 def role_play_RP_personality():
     """
     personality descriptor
@@ -839,7 +795,6 @@ def role_play_RP_personality():
 
     return personality
 
-
 def build_RP_role_play(object):
     """
     create all the fun role_play elements for a referee persona
@@ -857,7 +812,6 @@ def build_RP_role_play(object):
     object.RP_Fun.append(f"{role_play_RP_beliefs(object)}")
 
     return
-
 
 #####################################
 # build a FRESH anthro persona
@@ -879,7 +833,7 @@ def fresh_anthro():
     ### get mundane terran name of the player
     fresh.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
 
-    anthro_attributes_fresh(fresh)
+    core.attributes_fresh(fresh)
     anthro_hit_points_fresh(fresh)
     adjust_mstr_by_int(fresh)
     anthro_type_fresh(fresh)
@@ -1017,7 +971,7 @@ def random_anthro():
     rando.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
 
     ### build list of functions
-    anthro_attributes_fresh(rando)
+    core.attributes_fresh(rando)
     anthro_hit_points_fresh(rando)
     adjust_mstr_by_int(rando)
     rando.Anthro_Type = secrets.choice(

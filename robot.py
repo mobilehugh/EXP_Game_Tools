@@ -6,6 +6,7 @@ import outputs
 import please
 import table
 import vocation
+import core
 
 
 def robot_workflow():
@@ -31,29 +32,6 @@ def robot_workflow():
         workflow_function_map[workflow_desired]()
 
 
-def fresh_robot_attributes(object: dict) -> None:
-    """
-    Generates the robotic prime attributes (CON, DEX, INT, PSTR)
-    then regular attributes (AWE, CHA, CON, DEX, INT, MSTR, PSTR)
-    """
-
-    ### prime attributes
-    object.CON_Prime = please.roll_this("1d4")
-    object.DEX_Prime = please.roll_this("1d4")
-    object.INT_Prime = please.roll_this("1d4")
-    object.PSTR_Prime = please.roll_this("1d4")
-
-    ### all other attributes
-    object.AWE = please.roll_this("3d6")
-    object.CHA = please.roll_this("3d6")
-    object.CON = please.roll_this(table.robot_attributes[object.CON_Prime]["CON"])
-    object.DEX = please.roll_this(table.robot_attributes[object.DEX_Prime]["DEX"])
-    object.INT = please.roll_this(table.robot_attributes[object.INT_Prime]["INT"])
-    object.MSTR = 0
-    object.PSTR = please.roll_this(table.robot_attributes[object.PSTR_Prime]["PSTR"])
-    object.SOC = please.roll_this("1d1000")
-
-    return
 
 
 def robot_fabricator_family(object: dict) -> None:
@@ -1568,7 +1546,7 @@ def fresh_robot():
     ### get mundane terran name of the player
     fresh.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
 
-    fresh_robot_attributes(fresh)
+    core.attributes_fresh(fresh)
     robot_fabricator_family(fresh)
     control_factor(fresh)
     robotic_movement_rate(fresh)
@@ -1616,7 +1594,7 @@ def bespoke_robot():
 def rando_robot():
     pass
 
-
+# todo all robots
 
 robot_type_function_pivot = {
     "Android": android,
