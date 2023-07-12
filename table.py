@@ -5,21 +5,21 @@ by converting .adoc tables to python dictionaries.
 smart people required
 """
 
+# todo move pivot tables to function maps
+
 from dataclasses import dataclass, field
 
 @dataclass
 class PersonaRecord:
     """
     Class for storing persona records mutated by anthro, alien, robot
-    # fix partial initialization cyclic call error
-    # fix misuse of PersonaRecord as a dict and not dataclass
     """
     Player_Name: str = "Player_One"
     Persona_Name: str = "Nobody"
     FAMILY: str = "Anthro"
     FAMILY_TYPE: str = "Humanoid"
     FAMILY_SUB: str = "Generalis"
-    Workflow: str = "Fresh"
+    Fallthrough: bool = False
     RP: bool = False
     Show: bool = False
     Bin: bool = False
@@ -33,7 +33,7 @@ class PersonaRecord:
     SOC: int = 42
     HPM: int = 0
     AR: int = 500
-    MOVE: int = 0
+    Move: int = 0
     Age_Cat: str = "None"
     Age: int = 0
     Size_Cat: str = "Medium"
@@ -1598,27 +1598,41 @@ suggested_anthro_attribute_ranges = {
     },
 }
 
-anthro_descriptive_attributes_list = {
+
+
+descriptive_attributes_higher = {
     "Alert": ["AWE", "1d6+16"],
-    "Clumsy": ["DEX", "1d6+1"],
-    "Delicate": ["Error", "1d6+1"],
-    "Docile": ["MSTR", "1d6+1"],
-    "Dumb": ["INT", "1d6+1"],
     "Famous": ["SOC", "1d100+900"],
-    "Fast": ["Error", "1d6+16"],
+    "Fast": ["Move", "2"],
     "Handsome": ["CHA", "1d6+16"],
     "Nimble": ["DEX", "1d6+16"],
-    "Resilient": ["Error", "1d6+16"],
+    "Resilient": ["HPM", "2"],
     "Resolute": ["MSTR", "1d6+16"],
-    "Shunned": ["SOC", "1d50"],
-    "Slow": ["Error", "1d1000"],
     "Smart": ["INT", "1d6+16"],
     "Strong": ["PSTR", "1d6+16"],
-    "Tough": ["CON", "1d6+16"],
+    "Vital": ["CON", "1d6+16"],
+}
+
+descriptive_attributes_lower = {
+    "Clumsy": ["DEX", "1d6+1"],
+    "Delicate": ["HPM", "2d6"],
+    "Docile": ["MSTR", "1d6+1"],
+    "Dumb": ["INT", "1d6+1"],
+    "Shunned": ["SOC", "1d50"],
+    "Slow": ["Move", "1d3-1"],
     "Ugly": ["CHA", "1d12-6"],
-    "Unaware": ["AWE", "1d6+1"],
+    "Oblivious": ["AWE", "1d6+1"],
     "Weak": ["PSTR", "1d6+1"],
-    "Exit": ["Exit", "Exit"],
+    "Fragile": ["CON", "1d6"],
+}
+
+alien_descriptive_attributes = {
+    "Nimble": ["DEX", "1d6+20"],
+    "Resolute": ["MSTR", "1d6+20"],
+    "Smart": ["INT", "1d6+20"],
+    "Strong": ["PSTR", "1d6+25"],
+    "Tough": ["CON", "1d6+20"],
+
 }
 
 attribute_improve_by_anthro_type = {
@@ -1646,17 +1660,17 @@ attributes_improve_by_vocation = {
 
 
 random_EXPS_levels_list = {
-    (1, 10):"1",
-    (11, 30):"2",
-    (31, 50):"3",
-    (51, 65):"4",
-    (66, 75):"5",
-    (76, 83):"6",
-    (84, 89):"7",
-    (90, 93):"8",
-    (94, 98):"9",
-    (99, 99):"10",
-    (100, 100):"13",
+    (1, 10):1,
+    (11, 30):2,
+    (31, 50):3,
+    (51, 65):4,
+    (66, 75):5,
+    (76, 83):6,
+    (84, 89):7,
+    (90, 93):8,
+    (94, 98):9,
+    (99, 99):10,
+    (100, 100):13,
     "name":"Random EXPS Levels",
     "die_roll":"1d100",
 } 

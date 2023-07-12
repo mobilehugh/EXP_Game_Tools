@@ -10,6 +10,9 @@ import mutations
 import vocation
 import table
 
+# todo RP combat block: weak strong cannon fodder, canon fodder and canonical
+# todo proficiency slot with actual weapons
+
 def outputs_workflow(persona, out_type: str) -> None:
     '''
     divides outputs between screen and pdf
@@ -741,7 +744,7 @@ class PDF(FPDF):
         y_bump = 8
         self.grey_box_title('TOYS',5,y)
         x+= 3 + self.get_string_width("TOYS")
-        self.print_MD_string(f"**Carry:** up to {persona.WA*1.5} kg = {persona.MOVE} h/u. **Sprint:** <{persona.WA/4} kg = {persona.MOVE*2} h/u. **Lift:** {persona.WA*2.5} kg = 0 h/u.",12,x,y)
+        self.print_MD_string(f"**Carry:** up to {persona.WA*1.5} kg = {persona.Move} h/u. **Sprint:** <{persona.WA/4} kg = {persona.Move*2} h/u. **Lift:** {persona.WA*2.5} kg = 0 h/u.",12,x,y)
         y+= 3 + y_bump
 
         ### item wate info header
@@ -790,17 +793,24 @@ class PDF(FPDF):
 #
 ##############################################
 
+
+# fix broken pdf to browser 
 def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str = "C:/") -> None:
     """
     finds the specified file on computer
     then shows it in the default browser
     """
+    print(f'{file_name = } {search_path = }')
     try:
         for root, _, files in os.walk(search_path):
             if file_name in files:
                 found_file = os.path.join(root, file_name)
                 browser_file = "file:///" + found_file.replace('\\','/')
+                print(f'{browser_file = }')
                 webbrowser.get('windows-default').open_new(browser_file)
+                # webbrowser.open_new(browser_file)
+                # webbrowser.open(browser_file)
+                input('you good bro? ')
                 break
     except PermissionError:
         print(f"Permission denied for directory {root}. Continuing search...")
@@ -865,6 +875,7 @@ def attack_table_composer(persona)->dict:
         elif APROF == 42 and vocation == "Nothing":
             APROF = BPROF = CPROF = "There can be only one."
 
+    # todo calculate alien movement on the fly
     elif vocation == "Alien":
         # specific alien attributes
         attacks = persona.Attacks
@@ -1202,7 +1213,7 @@ def equip_notes_one_shot(pdf, persona)->None:
     full page of equip and notes for one shot
     '''
 
-    # fix should aliens not have equipment if feral?
+    # todo should aliens NOT have equipment if feral?
     pdf.add_page()
     pdf.title_line(persona)
     the_y = pdf.equipment_lines(persona, 14,8,16)

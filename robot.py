@@ -61,15 +61,6 @@ def control_factor(object: dict) -> None:
     return
 
 
-def robotic_movement_rate(object):
-    object.Move = table.anthro_movement_rate_and_DEX[object.DEX] * 2
-    object.Accel = object.PSTR_Prime
-    return
-
-
-def robotic_wate_allowance(object):
-    object.WA = table.wate_allowance_and_PSTR[object.PSTR] * object.PSTR_Prime
-    return
 
 
 def robotic_power_source(object):
@@ -575,8 +566,8 @@ def android(object: dict) -> None:
 
     ### robot nomenclature
     object.FAMILY = "Robot"
-    object.F = "Android"
-    object.Sub_Type = object.Base_Family
+    object.FAMILY_TYPE =  "Android"
+    object.FAMILY_SUB = object.Base_Family
 
     ### core values
     object.Adapt = 1
@@ -605,7 +596,7 @@ def android(object: dict) -> None:
     vocation.set_up_first_time(object)
 
     ### building the spec sheet
-    specs = [f"Built in the image of their maker ({object.Sub_Type})."]
+    specs = [f"Built in the image of their maker ({object.FAMILY_SUB})."]
     specs.append(f"Has no biologic life force.")
     specs.append(f"Works as a {object.Vocation}.")
     object.Spec_Sheet = specs
@@ -618,7 +609,7 @@ def combot(object: dict) -> None:
     """
     ### robot nomenclature
     object.FAMILY = "Robot"
-    object.F = "Combot"
+    object.FAMILY_TYPE =  "Combot"
 
     ### subtype determination
     sub_types = ["Expendable"]
@@ -629,7 +620,7 @@ def combot(object: dict) -> None:
     if object.CON >= 23 and object.PSTR >= 27:
         sub_types.append("Heavy Offensive")
     comment = "Please choose combot sub-type,"
-    object.Sub_Type = please.choose_this(sub_types, comment)
+    object.FAMILY_SUB = please.choose_this(sub_types, comment)
 
     ### core values may be overridden
     object.Adapt = 0
@@ -644,10 +635,10 @@ def combot(object: dict) -> None:
     ### generic spec sheet
     specs = [f"Not too concerned about base family ({object.Base_Family})."]
 
-    if object.Sub_Type == "Expendable":
+    if object.FAMILY_SUB == "Expendable":
 
         ### expendable nomenclature
-        object.Sub_Type = "Expendable"
+        object.FAMILY_SUB = "Expendable"
 
         ### expendable core values
         object.Attacks = robot_offensive_systems(object, 1, 1)
@@ -661,10 +652,10 @@ def combot(object: dict) -> None:
         object.Spec_Sheet = specs
         return
 
-    elif object.Sub_Type == "Defensive":
+    elif object.FAMILY_SUB == "Defensive":
 
         ### defensive nomenclature
-        object.Sub_Type = "Defensive"
+        object.FAMILY_SUB = "Defensive"
 
         ### defensive core values
         object.Adapt = 1
@@ -688,7 +679,7 @@ def combot(object: dict) -> None:
 
         return
 
-    elif object.Sub_Type == "Light Offensive":
+    elif object.FAMILY_SUB == "Light Offensive":
 
         ### light offensive nomenclature
         object.FAMILY_SUB = "Light Offensive"
@@ -714,10 +705,10 @@ def combot(object: dict) -> None:
         object.Spec_Sheet = specs
         return
 
-    elif object.Sub_Type == "Heavy Offensive":
+    elif object.FAMILY_SUB == "Heavy Offensive":
 
         ### heavy offensive nomenclature
-        object.Sub_Type = "Heavy Offensive"
+        object.FAMILY_SUB = "Heavy Offensive"
 
         ### heavy offensive core values
         object.Adapt = -100
@@ -758,8 +749,8 @@ def datalyzer(object: dict) -> None:
 
     ### datalyzer nomenclature
     object.FAMILY = "Robot"
-    object.F = "Datalyzer"
-    object.Sub_Type = "Data Nerd"
+    object.FAMILY_TYPE =  "Datalyzer"
+    object.FAMILY_SUB = "Data Nerd"
 
     ### core values
     object.Adapt = 15
@@ -807,7 +798,7 @@ def explorations(object):
     choice = please.choose_this(choices, comment)
 
     if choice == "Planetary":
-        object.Sub_Type = "Planetary"
+        object.FAMILY_SUB = "Planetary"
         specs.append("Created to explore their own planet.")
         object.Adapt = 0
         object.Value = 250000
@@ -831,7 +822,7 @@ def explorations(object):
         object.Spec_Sheet = specs
 
     elif choice == "Extra-planetary":
-        object.Sub_Type = "Extra-planetary"
+        object.FAMILY_SUB = "Extra-planetary"
         specs.append("Created to explore unknown planets.")
         object.Adapt = 0
         object.AR = 800
@@ -856,7 +847,7 @@ def explorations(object):
 
 
 def hobbot(object):
-    object.Sub_Type = ";ldsafkjdsf"
+    object.FAMILY_SUB = ";ldsafkjdsf"
     specs = ["Highly modified hobbyist machines."]
     con = object.CON
     object.Adapt = 84
@@ -911,7 +902,7 @@ def industrial(object):
     choice = please.choose_this(choices, comment)
 
     if choice == "Construction":
-        object.Sub_Type = "Construction"
+        object.FAMILY_SUB = "Construction"
         specs.append("Fabricator Mechanichus.")
         object.Adapt = 5
         object.Value = 50000
@@ -936,7 +927,7 @@ def industrial(object):
         object.Spec_Sheet = specs
 
     elif choice == "Lifting":
-        object.Sub_Type = "Lifting"
+        object.FAMILY_SUB = "Lifting"
         specs.append("Putting everything in it's place.")
         object.Adapt = 5
         object.Value = 30000
@@ -965,7 +956,7 @@ def industrial(object):
         object.Spec_Sheet = specs
 
     elif choice == "Moving":
-        object.Sub_Type = "Moving"
+        object.FAMILY_SUB = "Moving"
         specs.append("Sentient delivery bots.")
         object.Adapt = 5
         object.Value = 20000
@@ -1012,7 +1003,7 @@ def janitorial(object):
     choice = please.choose_this(choices, comment)
 
     if choice == "Industrial":
-        object.Sub_Type = "Industrial"
+        object.FAMILY_SUB = "Industrial"
         object.Adapt = 30
         object.Value = 20000
         object.HPM = please.roll_this("1d6") * con
@@ -1034,7 +1025,7 @@ def janitorial(object):
         object.Spec_Sheet = specs
 
     elif choice == "Domestic":
-        object.Sub_Type = "Domestic"
+        object.FAMILY_SUB = "Domestic"
         object.Adapt = 10
         object.Value = 35000
         object.HPM = please.roll_this("1d6") * con
@@ -1059,7 +1050,7 @@ def janitorial(object):
 
 
 def maintenance(object):
-    object.Sub_Type = "Mechanic"
+    object.FAMILY_SUB = "Mechanic"
     specs = ["Mechanic in a drum."]
     intel = object.INT
     con = object.CON
@@ -1121,7 +1112,7 @@ def police(object):
     choice = please.choose_this(choices, comment)
 
     if choice == "Civil":
-        object.Sub_Type = "Civil"
+        object.FAMILY_SUB = "Civil"
         specs.append("Mechanical street cop.")
         object.Adapt = 10
         object.Value = 600000
@@ -1139,7 +1130,7 @@ def police(object):
         object.Spec_Sheet = specs
 
     elif choice == "Riot":
-        object.Sub_Type = "Riot"
+        object.FAMILY_SUB = "Riot"
         specs.append("Less lethal mob control. AKA riobot.")
         object.Adapt = 10
         object.Value = 300000
@@ -1194,7 +1185,7 @@ def police(object):
         object.Spec_Sheet = specs
 
     elif choice == "Special":
-        object.Sub_Type = "Special"
+        object.FAMILY_SUB = "Special"
         specs.append("Detective, sleuth, criminologist.")
         object.Adapt = 10
         object.Value = 900000
@@ -1250,7 +1241,7 @@ def rescue(object):
     choice = please.choose_this(choices, comment)
 
     if choice == "Retrieval":
-        object.Sub_Type = "Retrieval"
+        object.FAMILY_SUB = "Retrieval"
         specs.append("Built to retrieve entities and equipment from danger.")
         object.Adapt = 10
         object.Value = 950000
@@ -1286,11 +1277,11 @@ def rescue(object):
                 "Zero resiliency.",
             ]
             object.Peripherals = ["A bowl to collect the tears of children."]
-            object.Sub_Type = "JIBC"
+            object.FAMILY_SUB = "JIBC"
             object.Spec_Sheet = ["Pretends to be a veterinarian, but has no specs."]
 
     elif choice == "Spillage":
-        object.Sub_Type = "Spillage"
+        object.FAMILY_SUB = "Spillage"
         specs.append("Built to contain spillage of toxins, including fire.")
         object.Adapt = 10
         object.Value = 750000
@@ -1322,7 +1313,7 @@ def rescue(object):
 
 
 def social(object):
-    object.Sub_Type = basefamily = object.Base_Family
+    object.FAMILY_SUB = basefamily = object.Base_Family
     specs = [f"Built to serve {basefamily}."]
     intel = object.INT
     con = object.CON
@@ -1375,7 +1366,7 @@ def transport(object):
     choice = please.choose_this(choices, comment)
 
     if choice == "Planetary":
-        object.Sub_Type = "Planetary"
+        object.FAMILY_SUB = "Planetary"
         specs.append("Planet side chauffer.")
         object.Adapt = 22
         object.Value = 450000
@@ -1405,7 +1396,7 @@ def transport(object):
         object.Spec_Sheet = specs
 
     elif choice == "Extra-Planetary":
-        object.Sub_Type = "Extra-Planetary"
+        object.FAMILY_SUB = "Extra-Planetary"
         specs.append("Space vehicle pilot.")
         object.Adapt = 22
         object.Value = 450000
@@ -1457,7 +1448,7 @@ def veterinarian(object):
     choice = please.choose_this(choices, comment)
 
     if choice == "Diagnostic":
-        object.Sub_Type = "Diagnostic"
+        object.FAMILY_SUB = "Diagnostic"
         specs.append("Prefers to figure out rather than fix.")
         object.Adapt = 10
         object.Value = 2250000
@@ -1483,7 +1474,7 @@ def veterinarian(object):
         object.Spec_Sheet = specs
 
     elif choice == "Interventional":
-        object.Sub_Type = "Interventional"
+        object.FAMILY_SUB = "Interventional"
         specs.append("Prefers to fix rather than figure out.")
         object.Adapt = 10
         object.Value = 5000000
@@ -1525,39 +1516,42 @@ def fresh_robot():
     """
     builds A FRESH robot persona using EXP persona creation
     """
-    
+    # todo robot is a class or a function 
+
     # clearance for Clarence
     please.clear_console()
     print("\nYou are generating a fresh ROBOT PERSONA")
 
     fresh = table.PersonaRecord()
     fresh.FAMILY = "Robot"
-    fresh.Mutations = {}
-    fresh.RP = False
-    fresh.Persona_Name = "unmarketed"
-    fresh.Date_Created = "pre-release"
+    fresh.FAMILY_TYPE = "Unknown_Type"
+    fresh.FAMILY_SUB = "Unknown_Sub"
     fresh.Vocation = "Robot"
-    fresh.Sub_Type = "Robot"
     fresh.Robot_Model = "Robot"
-    fresh.AR = 700
-    setattr(fresh, "Level", 1)
-    setattr(fresh, "EXPS", 42)
+
 
     ### get mundane terran name of the player
     fresh.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
 
-    core.attributes_fresh(fresh)
+    core.initial_attributes(fresh)
     robot_fabricator_family(fresh)
     control_factor(fresh)
-    robotic_movement_rate(fresh)
-    robotic_wate_allowance(fresh)
+    core.movement_rate(fresh)
+    core.wate_allowance(fresh)
     robotic_power_source(fresh)
     robotic_sensors(fresh)
+    core.base_armour_rating(fresh)
 
     # temporary until we have a proper robot persona
     fresh.Bot_Type = secrets.choice(["Android", "Combot", "Datalyzer"])
     robot_type_function_pivot[fresh.Bot_Type](fresh)
     # fresh_robot_type(fresh)
+
+
+    # robot HPM based on CON and type
+    # string value per robot multiplied by CON
+    # present structure of robots as functions does not allow for values just yet
+    # the HPM is calculated and assigned by the function 
 
     # offensive systems is called by robot type
     # defensive systems is called by robot type
@@ -1594,7 +1588,7 @@ def bespoke_robot():
 def rando_robot():
     pass
 
-# todo all robots
+
 
 robot_type_function_pivot = {
     "Android": android,

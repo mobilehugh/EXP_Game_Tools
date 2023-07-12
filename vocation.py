@@ -119,13 +119,13 @@ def nomad(object: dict) -> None:
     return
 
 
-def nothing(object: dict) -> None:
+def nothing(nothing_happening: table.PersonaRecord) -> table.PersonaRecord:
     """
     set up the nothing vocation.
     """
     # collect Data
-    soc = object.SOC
-    intel = object.INT
+    soc = nothing_happening.SOC
+    intel = nothing_happening.INT
     interest_rolls = math.ceil(soc / 200)
     skill_rolls = math.ceil(intel / 3)
 
@@ -133,24 +133,23 @@ def nothing(object: dict) -> None:
     # done in real time
 
     # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
+    nothing_happening.Interests = fresh_interests(nothing_happening, interest_rolls)
 
     # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
+    nothing_happening.Skills = fresh_skills(nothing_happening, skill_rolls)
 
     ### Vocation aspiration is specific to the nothing vocation
-    choices = list(table.vocation_aspiration_exps.keys())
-    comment = "Please choose a vocation aspiration."
-
-    if object.Otto:
-        vocation_desired = secrets.choice(choices)
+    if nothing_happening.Fallthrough:
+        vocation_desired = secrets.choice(list(table.vocation_aspiration_exps.keys()))
 
     else:
+        choices = list(table.vocation_aspiration_exps.keys())
+        comment = "Please choose a vocation aspiration. "
         vocation_desired = please.choose_this(choices, comment)
 
     ### initiate the nothing aspiration goal. managed in outputs.py
-    object.Vocay_Aspiration = vocation_desired
-    object.Vocay_Aspiration_EXPS = table.vocation_aspiration_exps[vocation_desired]
+    nothing_happening.Vocay_Aspiration = vocation_desired
+    nothing_happening.Vocay_Aspiration_EXPS = table.vocation_aspiration_exps[vocation_desired]
 
     return
 
@@ -426,7 +425,7 @@ def exps_level_picker(object: dict) -> None:
     return
 
 
-def convert_levels_to_exps(object: dict, new_level=0) -> int:
+def convert_levels_to_exps(object: dict, new_level:int = 0) -> int:
     """
     Returns an EXPS total based on the experience Level of the object
     does not alter object.
@@ -512,13 +511,13 @@ def fresh_interests(object: dict, interest_rolls: int) -> list:
             interest_rolls += 1
             interest_list.pop()
 
-        if interest == "Choose" and not object.Otto:
+        if interest == "Choose" and not object.Fallthrough:
             interest_list.pop()
             choices = please.list_table_choices(interest_table)
             choice_comment = f"Choose a {object.Vocation} interest."
             choice = please.choose_this(choices, choice_comment)
             interest_list.append(choice)
-        elif interest == "Choose" and object.Otto:
+        elif interest == "Choose" and object.Fallthrough:
             interest_list.pop()
 
     return interest_list
@@ -545,13 +544,13 @@ def fresh_skills(object: dict, skill_rolls: int) -> list:
             skill_rolls += 1
             skill_list.pop()
 
-        if skill == "Choose" and not object.Otto:
+        if skill == "Choose" and not object.Fallthrough:
             skill_list.pop()
             choices = please.list_table_choices(skills_table)
             choice_comment = f"Choose a {object.Vocation} skill."
             choice = please.choose_this(choices, choice_comment)
             skill_list.append(choice)
-        elif skill == "Choose" and object.Otto:
+        elif skill == "Choose" and object.Fallthrough:
             skill_list.pop()
 
     return skill_list
@@ -584,7 +583,7 @@ def update_interests(object: dict, interest_rolls: int) -> list:
     ### create interest list to return
     interest_list = []
 
-    if object.Otto:
+    if object.Fallthrough:
         for __ in range(interest_rolls):
             interest_list.append(secrets.choice(all_interests))
         return interest_list
@@ -689,7 +688,7 @@ def update_skills(object: dict, skill_rolls: int) -> list:
 
     ### check to see if any extra rolls, this is a hack for skills 2% chance of extra
     base_number = skill_rolls
-    for __ in range(base_number):
+    for _ in range(base_number):
         if secrets.choice(all_skills) == "Extra Roll":
             skill_rolls += 1
 
@@ -702,20 +701,20 @@ def update_skills(object: dict, skill_rolls: int) -> list:
     if object.Vocation == "Spie":
         object.Spie_Fu = spie_martial_arts(object)
 
-    if object.Otto:
-        for __ in range(skill_rolls):
+    if object.Fallthrough:
+        for _ in range(skill_rolls):
             skills_list.append(secrets.choice(all_skills))
         return skills_list
 
     if please.say_yes_to(f"Would you like to pick each ({skill_rolls}) skill?"):
-        for __ in range(skill_rolls):
+        for _ in range(skill_rolls):
             interest = please.choose_this(
                 sorted(all_skills), "Choose an interest to add."
             )
             skills_list.append(interest)
 
     else:
-        for __ in range(skill_rolls):
+        for _ in range(skill_rolls):
             skills_list.append(secrets.choice(all_skills))
 
     return skills_list

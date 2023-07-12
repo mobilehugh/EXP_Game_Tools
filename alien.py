@@ -1,4 +1,5 @@
 import math
+import re
 
 import please
 import table
@@ -31,8 +32,6 @@ def alien_workflow() -> None:
 # FRESH ALIEN FUNCTIONS
 ####################################
 
-
-
 def alien_size_fresh(object):
 
     size, kgs_roll = please.get_table_result(table.alien_sizes)
@@ -62,35 +61,6 @@ def alien_size_fresh(object):
         object.Wate = please.roll_this("6d1000+600") """
 
     return
-
-
-def alien_hpm_fresh(object: dict) -> None:
-    """
-    calculate Hit points max based on CON and Size
-    """
-    size = object.Size
-    con = str(object.CON)
-    object.HPM = please.roll_this(con + table.alien_HPM_size_and_dice[size])
-
-    if object.Size == "Minute":
-        new_hpm = math.ceil(object.HPM * ((object.Wate / 1000)))
-        setattr(object, "HPM", new_hpm)
-
-    return
-
-
-def alien_wate_allowance(object: dict) -> None:
-    """
-    determine WA by PSTR and then modify by size.
-    """
-
-    anthro.determine_anthro_wate_allowance(object)
-    base_WA = object.WA
-    size_mod = table.alien_size_and_WA[object.Size]
-    setattr(object, "WA", base_WA + size_mod)
-
-    pass
-
 
 def alien_attacks_per_unit(object):
 
@@ -124,11 +94,6 @@ def alien_damage_per_attack(object: dict) -> None:
 
 def alien_attack_type_fresh(object):
     object.Attack_Type = please.get_table_result(table.alien_attack_type)
-
-
-def alien_armour_rating_fresh(object):
-    object.AR = 500 + please.roll_this("3d100")
-    return
 
 
 def alien_shape_fresh(object):
@@ -217,36 +182,29 @@ def alien_adornments_fresh(object):
     return
 
 
-def alien_move_fresh(object):
+# todo move terrain movements to calculated in outputs, and not stored
+
+def assign_terrain_movements(moving_time: table.PersonaRecord) -> table.PersonaRecord:
+    '''assigns alien movements (head, body, arms, legs) -> land, air, water (l,a,w)'''
 
     four_quarter_parts = ["Head", "Body", "Arms", "Legs"]
-    movement_rates = {"Land": 0, "Air": 0, "Water": 0}
-    move = object.DEX
-    object.Move_Base = move
+    movements = []
+    ### build a list of combined terrain types (l, a, w, s, s-w)
+    for part in four_quarter_parts:
+        body_part = getattr(moving_time, part)
+        terrains = re.search('\((.*?)\)', body_part).group(1) # regex capture of string inside the brackets
 
-    ### this works please leave alone
-    for key in four_quarter_parts:
-        BodyPart = getattr(object, key)
+        if "," in terrains:
+            multiple_terrains = terrains.split(",")
+            movements.extend(multiple_terrains)
+        else:
+            movements.append(terrains)
 
-        __, terrains = BodyPart.split("(")
-        terrains = terrains.replace(")", "")
-        if terrains[0] == "s":
-            terrains = "s"
+    moving_time.Move_Land = math.ceil(moving_time.DEX * (movements.count("l") / 4))
+    moving_time.Move_Air = math.ceil(moving_time.DEX * (movements.count("a") / 4))
+    moving_time.Move_Water = math.ceil(moving_time.DEX * (movements.count("w") / 4))
 
-        for x in range(len(terrains)):
-            if terrains[x] == "l":
-                movement_rates["Land"] += 1
-
-            elif terrains[x] == "a":
-                movement_rates["Air"] += 1
-
-            elif terrains[x] == "w":
-                movement_rates["Water"] += 1
-
-    object.Move_Land = math.ceil(move * (movement_rates["Land"] / 4))
-    object.Move_Air = math.ceil(move * (movement_rates["Air"] / 4))
-    object.Move_Water = math.ceil(move * (movement_rates["Water"] / 4))
-    return
+    return moving_time # is altered by side effect
 
 
 def alien_quick_description_builder(object):
@@ -625,12 +583,7 @@ def alien_nomenclature(object):
             exit()
     object.FAMILY_TYPE = alien_species
 
-    persona_name = input("\nPlease input the name of your personal ALIEN PERSONA? ")
-    if persona_name == "quit" or persona_name == "Quit":
-        if please.say_yes_to("Do you want to QUIT the program"):
-            print("\n*** program terminated")
-            exit()
-    object.Persona_Name = persona_name
+    core.assign_persona_name
 
     return
 
@@ -691,15 +644,15 @@ def alien_attributes_bespoke(object: dict) -> None:
     choice = please.choose_this(methods, choice_comment)
 
     if choice == "Bespoke":
-        core.attributes_fresh(object)
+        core.initial_attributes(object)
         anthro.bespoke_anthro_attribute_ranges(object)
 
     elif choice == "Random":
-        core.attributes_fresh(object)
+        core.initial_attributes(object)
 
     elif choice == "Descriptive":
-        core.attributes_fresh(object)
-        anthro.anthro_descriptive_attributes(object)
+        core.initial_attributes(object)
+        anthro.core.descriptive_attributes(object)
 
     else:
         print("error in bespoke_anthro_attribute methods")
@@ -1121,27 +1074,24 @@ def fresh_alien():
     fresh.FAMILY = "Alien"
     fresh.Vocation = "Alien"
     fresh.FAMILY_TYPE = "unevolved"
-    fresh.Persona_Name = "unevolved"
+    fresh.FAMILY_SUB = "undiscovered"
     fresh.Date_Created = "Start Evolving"
     fresh.RP = False
-    setattr(fresh, "Level", 1)
-    setattr(fresh, "EXPS", 42)
-    setattr(fresh, "FAMILY", "Alien")
 
     ### get mundane player name
     fresh.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
 
-    core.attributes_fresh(fresh)
+    core.initial_attributes(fresh)
     alien_size_fresh(fresh)
-    alien_wate_allowance(fresh)
-    alien_hpm_fresh(fresh)
+    core.wate_allowance(fresh)
+    core.hit_points_max(fresh)
     alien_attacks_per_unit(fresh)
     alien_damage_per_attack(fresh)
     alien_attack_type_fresh(fresh)
-    alien_armour_rating_fresh(fresh)
+    core.base_armour_rating(fresh)
     alien_shape_fresh(fresh)
     alien_adornments_fresh(fresh)
-    alien_move_fresh(fresh)
+    core.movement_rate(fresh)
     alien_quick_description_builder(fresh)
     alien_natural_powers_fresh(fresh)
     alien_life_span_fresh(fresh)
@@ -1149,7 +1099,7 @@ def fresh_alien():
     alien_biology(fresh)
     alien_society_fresh(fresh)
     alien_vocation_check(fresh)
-    outputs.alien_review(fresh)
+    outputs.outputs_workflow(fresh, "Screen")
     alien_nomenclature(fresh)
     please.assign_id_and_file_name(fresh)
 
@@ -1187,14 +1137,14 @@ def bespoke_alien():
 
     alien_attributes_bespoke(bespoke)
     alien_size_bespoke(bespoke)
-    alien_wate_allowance(bespoke)
-    alien_hpm_fresh(bespoke)
+    core.wate_allowance(bespoke)
+    core.hit_points_max(bespoke)
     alien_damage_per_attack(bespoke)
     alien_attacks_bespoke(bespoke)
-    alien_armour_rating_fresh(bespoke)
+    core.base_armour_rating(bespoke)
     alien_shape_fresh(bespoke)
     alien_adornments_fresh(bespoke)
-    alien_move_fresh(bespoke)
+    core.movement_rate(bespoke)
     alien_quick_description_builder(bespoke)
     alien_natural_powers_bespoke(bespoke)
     alien_life_span_bespoke(bespoke)

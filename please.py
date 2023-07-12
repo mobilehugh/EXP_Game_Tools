@@ -6,14 +6,12 @@ import re
 import subprocess
 import secrets
 import time
-from typing import Union
+from typing import Union, List
 from itertools import islice
 from collections import Counter
 
 import a_persona_record
 import table
-#from table import PersonaRecord
-#import toy
 import vocation
 import outputs
 import mutations
@@ -103,6 +101,34 @@ def do_1d100_check(number: int) -> bool:
 #
 ###########################################
 
+# todo apply clean_this_input to every input
+def clean_this_input(message: str, for_a_list: bool = True) ->  Union[str, List[str]]:
+    ''' protects input data and returns str or list'''
+
+    def evil_characters(is_input_evil:str) -> bool:
+        '''are there any evil characters in the str? '''
+        special_chars = ["%", "@", "#", "$", "(", ")", "<", ">", "&", "/", ";", "|"]
+        for char in special_chars:
+            if char in is_input_evil:
+                return True
+        return False
+    
+
+    safer = input(message)
+    while len(safer) not in range(3,30) or evil_characters(safer):
+        print(f'Too short, too long or knotty characters.')
+        safer = input(message)
+
+    if for_a_list:
+        a_list = []
+        a_list.append(safer)
+    else:
+        a_list = safer
+    
+    return a_list
+
+# todo connect choose this with clean this input
+# todo what should R really do?
 def choose_this(choices: list, message: str) -> str:
     """
     Choose from a list of choices and return the chosen item
@@ -118,9 +144,11 @@ def choose_this(choices: list, message: str) -> str:
     while True:
         # if only one choice on list return that choice automatically
         # the option to reset or quit is no given 
-        if len(choices) < 2:
+
+        # removes the one jump back for checking
+        '''if len(choices) < 2:
             choice = choices[0]
-            break
+            break'''
 
         # present the message and options
         print(f"\n{message}")
@@ -396,7 +424,7 @@ def attribute_manipulation(object: table.PersonaRecord) -> None:
         "ID",
         "Date_Created",
         "RP",
-        "Otto",
+        "Random",
         "Show",
         "Bin"
     ]
@@ -405,7 +433,7 @@ def attribute_manipulation(object: table.PersonaRecord) -> None:
         print()
         if key in immutable_attributes:
             print(f'{key} == {value} <- DANGER changing this will wreck stuff')
-            if key in ["ID", "Date_Created","RP","Otto","Show","Bin"]:
+            if key in ["ID", "Date_Created","RP","Random","Show","Bin"]:
                 print(f'{key} is immutable')
                 continue #leaves to dodge changing immutables
 

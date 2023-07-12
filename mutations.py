@@ -5,7 +5,8 @@ import a_persona_record
 import please
 import table
 
-#fix LIST NOT DICT
+# todo LIST NOT DICT
+# todo allow Fallthrough to skip mutation choices
 
 def mutation_workflow():
     """
@@ -2091,7 +2092,7 @@ class HeatGeneration(Mutation):
     def build_desc(self):
         return f"Shoot searing flame attack (C) for 3d6+{self.object.Level} HPS damage."
 
-
+# todo reassess persona DEX -> move, PSTR -> WA, CON -> HPM
 class HeightenedAttribute(Mutation):
     def __init__(self, object):
         self.is_mental = False
