@@ -5,6 +5,7 @@ from dataclasses import asdict
 import table
 import please
 import alien
+import mutations
 
 
 def initial_attributes(attributes_creating:table.PersonaRecord) -> table.PersonaRecord:
@@ -227,3 +228,30 @@ def manual_persona_update(updating: table.PersonaRecord) -> table.PersonaRecord:
             print(f'{attr} = {value}')
 
     return updating # altered by side effects in this function
+
+
+def mutations_bespoke(mutate_RP: table.PersonaRecord) -> table.PersonaRecord:
+
+    ### determine RP anthro mutations
+    choices = ["Anthro Type Determined", "Bespoke", "Random"]
+    choice_comment = "What selection method do you want for MUTATIONS?"
+    method_type_selection = please.choose_this(choices, choice_comment)
+
+    if method_type_selection == "Anthro Type Determined":
+        mental_amount, physical_amount = mutations.biologic_mutations_number(mutate_RP)
+        mutations.mutation_assignment(mutate_RP,mental_amount, physical_amount,"any")
+
+    elif method_type_selection == "Bespoke":
+        mutations.pick_bespoke_mutation(mutate_RP)
+
+    # todo exit get's sorted because choose this sorts it
+    elif method_type_selection == "Random":
+        more_random = True
+
+        while more_random:
+            mutations.single_random_mutation(mutate_RP, ['any'])
+            if not please.say_yes_to("Give me another mutation! "):
+                break
+
+    return mutate_RP # altered by side effect at functions outside this function
+

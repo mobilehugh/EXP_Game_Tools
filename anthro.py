@@ -385,32 +385,6 @@ def anthro_type_bespoke(object):
 
     return
 
-def anthro_mutations_bespoke(mutate_RP: table.PersonaRecord) -> table.PersonaRecord:
-
-    ### determine RP anthro mutations
-    choices = ["Anthro Type Determined", "Bespoke", "Random"]
-    choice_comment = "What selection method do you want for MUTATIONS?"
-    method_type_selection = please.choose_this(choices, choice_comment)
-
-    if method_type_selection == "Anthro Type Determined":
-        mental_amount, physical_amount = mutations.biologic_mutations_number(mutate_RP)
-        mutations.mutation_assignment(mutate_RP,mental_amount, physical_amount,"Any")
-
-    elif method_type_selection == "Bespoke":
-        mutations.pick_bespoke_mutation(mutate_RP)
-
-    # todo exit get's sorted because choose this sorts it
-    elif method_type_selection == "Random":
-        plan_desired = "plan 9"
-        while plan_desired != "Exit":
-            option_list = ["Get a mutation", "Exit"]
-            list_comment = "Would you like to: "
-            plan_desired = please.choose_this(option_list, list_comment)
-
-            if plan_desired == "Get a Mutation":
-                mutations.single_random_mutation(object)
-        return
-    return mutate_RP # altered by side effect at functions outside this function
 
 def anthro_vocation_bespoke(object: dict) -> None:
     """
@@ -602,14 +576,13 @@ def bespoke_anthro():
     ### get mundane terran name of the player
     bespoke.Player_Name = str(please.input_this("\nPlease input your MUNDANE TERRAN NAME: "))
 
-
     ### build list of functions
     anthro_attributes_bespoke(bespoke)
     anthro_type_bespoke(bespoke)
     anthro_sub_type_selection(bespoke)
     anthro_size_chooser(bespoke)
     vocation.exps_level_picker(bespoke)
-    anthro_mutations_bespoke(bespoke)
+    core.mutations_bespoke(bespoke)
     anthro_vocation_bespoke(bespoke)
     vocation.set_up_first_time(bespoke)
     bespoke.EXPS = (

@@ -3380,6 +3380,7 @@ def mutation_list_builder(directions:list = ['any']) -> list:
     fake_record = table.PersonaRecord
     build_mutations = []
 
+    # todo this may be redundant now that list is built
     ## input safety checking
     if not directions:
         directions = ['any']
@@ -3428,36 +3429,16 @@ def mutation_list_builder(directions:list = ['any']) -> list:
 
     return build_mutations
 
-def single_random_mutation(object):
+def single_random_mutation(random_mutating:table.PersonaRecord, directions:list =['any']) -> table.PersonaRecord:
     """
-    return a mutation of either type.
+    return or add a mutation of 
     """
-    # todo change to the new mutation paradigm 
+    mutuple_list = mutation_list_builder(directions)
+    mutuple = secrets.choice(mutuple_list)
+    working_mutation = mutuple[1](random_mutating)
+    working_mutation.build_desc()
 
-    if hasattr(object, "Mutations"):
-        pass
-    else:
-        object.Mutations = {}
-
-    all_mutations = mutation_list_builder()
-    choice_list = list(all_mutations)
-    mutation_chosen = secrets.choice(choice_list)
-
-    if please.say_yes_to(f"Do you want to add {mutation_chosen.upper()}?"):
-        working_mutation = all_mutations[mutation_chosen](object)
-        print(working_mutation)
-
-    else:
-        print("Ok. Mutation skipped.")
-
-
-
-    if please.say_yes_to("Do you want to add another mutation? "):
-        single_random_mutation(object)
-    else:
-        pass
-
-    return
+    return random_mutating # adjusted by side effect  in build_desc
 
 
 def pick_bespoke_mutation(bespoke_mutating:table.PersonaRecord) -> table.PersonaRecord:
@@ -3492,9 +3473,6 @@ def pick_bespoke_mutation(bespoke_mutating:table.PersonaRecord) -> table.Persona
         working_mutation.build_desc()
 
     return bespoke_mutating # altered by side effects in .build_desc func
-
-
-
 
 
 mental_mutation_random = {

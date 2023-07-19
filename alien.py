@@ -689,29 +689,6 @@ def alien_attacks_bespoke(object: dict) -> None:
         ]
         object.Attack_Type = please.choose_this(choices, "Choose an ATTACK TYPE.")
 
-
-def alien_natural_powers_bespoke(object: dict) -> None:
-    """
-    determine natural powers (mutations) for bespoke aliens
-    """
-
-    ### determine RP anthro mutations
-    choices = ["Attribute Determined", "Bespoke", "Random"]
-    choice_comment = "What selection method do you want for MUTATIONS?"
-    method_type_selection = please.choose_this(choices, choice_comment)
-
-    if method_type_selection == "Attribute Determined":
-        alien_natural_powers_fresh(object)
-
-    elif method_type_selection == "Bespoke":
-        mutations.pick_bespoke_mutation(object)
-
-    elif method_type_selection == "Random":
-        mutations.single_random_mutation(object)
-
-    return
-
-
 def alien_life_span_bespoke(object: dict) -> None:
     """
     determine alien life span
@@ -1146,7 +1123,7 @@ def bespoke_alien():
     alien_adornments_fresh(bespoke)
     core.movement_rate(bespoke)
     alien_quick_description_builder(bespoke)
-    alien_natural_powers_bespoke(bespoke)
+    core.mutations_bespoke(bespoke)
     alien_life_span_bespoke(bespoke)
     alien_age_fresh(bespoke)
     vocation.exps_level_picker(bespoke)
