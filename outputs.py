@@ -613,10 +613,14 @@ class PDF(FPDF):
         else:
             self.print_MD_string(f"**{family_header}**", 12, x, y)
             y+=y_bump            
-            all_mutations = mutations.list_all_mutations()
             tiny_bump = 3.4
-            for name in sorted(persona.Mutations.keys()):
-                working_mutation = all_mutations[name](persona)
+
+            all_mutations = mutations.mutation_list_builder()
+            for mutation_name in sorted(persona.Mutations.keys()):
+                mutuple = next((t for t in all_mutations if t[0] == mutation_name), None)
+
+                working_mutation = mutuple[1](persona)
+
                 header, details, param = working_mutation.return_details(
                     working_mutation.__class__
                 )
@@ -800,17 +804,18 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     finds the specified file on computer
     then shows it in the default browser
     """
-    print(f'{file_name = } {search_path = }')
+    file_dos = r'C:\Users\mobil\Documents\EXP_Game_Tools\Records\Bin\37bf560f9d0916a5467d7909.pdf'
+
     try:
         for root, _, files in os.walk(search_path):
             if file_name in files:
                 found_file = os.path.join(root, file_name)
                 browser_file = "file:///" + found_file.replace('\\','/')
-                print(f'{browser_file = }')
-                webbrowser.get('windows-default').open_new(browser_file)
-                # webbrowser.open_new(browser_file)
-                # webbrowser.open(browser_file)
-                input('you good bro? ')
+                print(f'{file_name = } {browser_file = }')
+                webbrowser.get('windows-default').open_new('file:///C:/Users/mobil/Documents/EXP_Game_Tools/Records/Bin/37bf560f9d0916a5467d7909.pdf')
+                #webbrowser.get('brave').open_new(browser_file)
+                #webbrowser.open_new(browser_file)
+                #webbrowser.open(browser_file)
                 break
     except PermissionError:
         print(f"Permission denied for directory {root}. Continuing search...")
@@ -1284,7 +1289,7 @@ def alien_screen(alien):
         print("None")
 
     else:
-        all_mutations = mutations.list_all_mutations()
+        all_mutations = mutations.mutation_list_builder()
 
         for name, _ in sorted(alien.Mutations.items()):
             working_mutation = all_mutations[name](alien)
@@ -1398,9 +1403,8 @@ def robot_screen(robot) -> None:
 
 def anthro_screen(persona) -> None:
     '''
-    screen prints the anthro
+    screen prints an anthro
     '''
-
 
     please.clear_console()
     print(
@@ -1426,14 +1430,14 @@ def anthro_screen(persona) -> None:
     print(f"\n{persona.Vocation} INTERESTS: ")
     collated_interests = please.collate_this(persona.Interests)
 
-    for x, interest in enumerate(collated_interests):
-        print(f"{x + 1}) {interest}")
+    for x, interest in enumerate(collated_interests, 1):
+        print(f"{x}) {interest}")
 
     # anthro  Skills
     print(f"\n{persona.Vocation} SKILLS: ")
     collated_skills = please.collate_this(persona.Skills)
-    for x, skill in enumerate(collated_skills):
-        print(f"{x + 1}) {skill}")
+    for x, skill in enumerate(collated_skills, 1):
+        print(f"{x}) {skill}")
 
     # special cases for nothing and spie
 
@@ -1456,10 +1460,10 @@ def anthro_screen(persona) -> None:
         print("None")
 
     else:
-        all_mutations = mutations.list_all_mutations()
-
-        for name, perm in sorted(persona.Mutations.items()):
-            working_mutation = all_mutations[name](persona)
+        all_mutations = mutations.mutation_list_builder()
+        for mutation_name in persona.Mutations.keys():
+            mutuple = next((t for t in all_mutations if t[0] == mutation_name), None)
+            working_mutation = mutuple[1](persona)
             working_mutation.post_details(working_mutation.__class__)
 
     if persona.RP:

@@ -1,4 +1,5 @@
 import math
+from dataclasses import asdict
 
 
 import table
@@ -147,7 +148,7 @@ def assign_persona_name(avatar_name: table.PersonaRecord) -> table.PersonaRecord
     I know it is only only one line, but I want to make build_show work
     """
     ### get mundane terran name of the player
-    name_safe = please.clean_this_input(f'\nPlease input your PERSONA NAME: ')
+    name_safe = please.input_this(f'\nPlease input your PERSONA NAME: ')
     avatar_name.Persona_Name = please.choose_this(name_safe,"Are you happy with this name? ")
 
     return avatar_name # is modified by side effect
@@ -158,6 +159,7 @@ def descriptive_attributes(describing_changes: table.PersonaRecord) -> table.Per
     persona attribute shifts based on descriptive words
     """
     # todo descriptive attributes missing size, age, AR, 
+    # todo descriptive knock on effects of PSTR -> WA, DEX -> Move, CON -> HPS
     # builds a combined table 
     if describing_changes.FAMILY == "Alien":
         upwards_table = table.descriptive_attributes_higher.update(table.alien_descriptive_attributes)
@@ -167,33 +169,61 @@ def descriptive_attributes(describing_changes: table.PersonaRecord) -> table.Per
     upwards_list = list(upwards_table.keys())
     downwards_list = list(table.descriptive_attributes_lower.keys())
     choices = sorted(upwards_list + downwards_list)
-    choices.append("Exit")
+    choices.insert(0,"EXIT")
 
     altering_descriptor = "Start"
-    while altering_descriptor != "Exit":
+    while altering_descriptor != "EXIT":
         choice_comment = "Choose an  attribute descriptor? "
         altering_descriptor = please.choose_this(choices, choice_comment)
-
         if altering_descriptor in upwards_list:
+            alter_attribute = upwards_table[altering_descriptor][0]
+            alter_amount = upwards_table[altering_descriptor][1]
+
             if altering_descriptor == "Fast":
                 describing_changes.Move *= 2
             elif altering_descriptor == "Resilient":
                 describing_changes.HPM *=2
                 describing_changes.HPM = describing_changes.HPM if describing_changes.HPM > 70 else 70
             else:
-                old_attribute = getattr(describing_changes, altering_descriptor)
-                new_attribute = please.roll_this(upwards_table[altering_descriptor][1])
+                old_attribute = getattr(describing_changes, alter_attribute)
+                new_attribute = please.roll_this(alter_amount)
                 new_attribute = new_attribute if new_attribute > old_attribute else old_attribute + please.roll_this("1d3")
-                setattr(describing_changes, altering_descriptor, new_attribute)
+                setattr(describing_changes, alter_attribute, new_attribute)
 
         if altering_descriptor in downwards_list:
+            alter_attribute = table.descriptive_attributes_lower[altering_descriptor][0]
+            alter_amount = table.descriptive_attributes_lower[altering_descriptor][1]
             if altering_descriptor == "Slow":
                 describing_changes.Move = math.floor(describing_changes.Move/2)
             else:
-                new_attribute = please.roll_this(table.descriptive_attributes_lower[altering_descriptor][1])
-                setattr(describing_changes, altering_descriptor, new_attribute)
+                new_attribute = please.roll_this(alter_amount)
+                setattr(describing_changes, alter_attribute, new_attribute)
                
         if altering_descriptor == "Exit":
             exit
 
-    return
+    return describing_changes # is altered by side effect
+
+
+def manual_persona_update(updating: table.PersonaRecord) -> table.PersonaRecord:
+    ''' painfully update every element in persona record'''
+    FORBIDDEN = ["Player_Name", "FAMILY", "FAMILY_TYPE", "Fallthrough", "RP", "Show", "Bin", "Date_Created", "Date_Updated", "ID", "File_Name"]
+
+    print(f"Manually adjusting {len(asdict(updating).keys())} items in {updating.Persona_Name}")
+    for attr, value in asdict(updating).items():
+
+        if attr not in FORBIDDEN:
+            print()
+            if please.say_no_to(f'Do you want to change {attr} from {value}? '):
+                continue
+            else:
+                change = please.input_this(f'Change {attr} from {value} to what? ')
+                setattr(updating, attr, change)
+
+    print()
+
+    for attr, value in asdict(updating).items():
+        if attr not in FORBIDDEN:
+            print(f'{attr} = {value}')
+
+    return updating # altered by side effects in this function

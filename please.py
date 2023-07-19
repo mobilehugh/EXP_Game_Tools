@@ -11,6 +11,7 @@ from itertools import islice
 from collections import Counter
 
 import a_persona_record
+import core
 import table
 import vocation
 import outputs
@@ -101,23 +102,43 @@ def do_1d100_check(number: int) -> bool:
 #
 ###########################################
 
-# todo apply clean_this_input to every input
-def clean_this_input(message: str, for_a_list: bool = True) ->  Union[str, List[str]]:
+# todo apply input_this to every input
+# todo input_this needs to get for_a_list flag called 
+
+def input_this(message: str, for_a_list: bool = False) ->  Union[str, List[str]]:
     ''' protects input data and returns str or list'''
 
     def evil_characters(is_input_evil:str) -> bool:
         '''are there any evil characters in the str? '''
         special_chars = ["%", "@", "#", "$", "(", ")", "<", ">", "&", "/", ";", "|"]
+
+        if isinstance(is_input_evil, int):
+            return False
+
         for char in special_chars:
             if char in is_input_evil:
                 return True
         return False
     
+    def too_short_word(is_too_short:str) -> bool:
+        ''' allows for short digits for input but not short words'''
+        if isinstance(is_too_short, int):
+            return False
+        if len(is_too_short) in range(3,30):
+            return False
+        else:
+            return True
+
 
     safer = input(message)
-    while len(safer) not in range(3,30) or evil_characters(safer):
+    if safer.isdigit():
+        safer = int(safer)
+
+    while too_short_word(safer) or evil_characters(safer):
         print(f'Too short, too long or knotty characters.')
         safer = input(message)
+        if safer.isdigit():
+            safer = int(safer)
 
     if for_a_list:
         a_list = []
@@ -128,7 +149,7 @@ def clean_this_input(message: str, for_a_list: bool = True) ->  Union[str, List[
     return a_list
 
 # todo connect choose this with clean this input
-# todo what should R really do?
+# todo what should R reset  do?
 def choose_this(choices: list, message: str) -> str:
     """
     Choose from a list of choices and return the chosen item
@@ -145,15 +166,14 @@ def choose_this(choices: list, message: str) -> str:
         # if only one choice on list return that choice automatically
         # the option to reset or quit is no given 
 
-        # removes the one jump back for checking
-        '''if len(choices) < 2:
-            choice = choices[0]
-            break'''
-
         # present the message and options
         print(f"\n{message}")
-        for idx, option in enumerate(choices, start=1):
-            print(f"{idx}) {option}")
+
+        if len(choices) == 2: # keeps say what ever to to one line list
+            print (f'1) {choices[0]} 2) {choices[1]}')
+        else:
+            for idx, option in enumerate(choices, start=1):
+                print(f"{idx}) {option}")
 
         choice = input(f"Please choose from above [R-reset][Q-quit] [Ret->{choices[0]}]: ")
 
@@ -410,71 +430,6 @@ def record_storage(record_to_store: table.PersonaRecord) -> None:
         clear_console()
         return
 
-def attribute_manipulation(object: table.PersonaRecord) -> None:
-    """
-    change almost any value in the persona record dict
-    it is really easy to break the json with this function
-    needs tonnes of tard protection
-    """
-
-    immutable_attributes = [
-        "File_Name",
-        "Player_Name",
-        "FAMILY",
-        "ID",
-        "Date_Created",
-        "RP",
-        "Random",
-        "Show",
-        "Bin"
-    ]
-
-    for key, value in object.__dict__.items():
-        print()
-        if key in immutable_attributes:
-            print(f'{key} == {value} <- DANGER changing this will wreck stuff')
-            if key in ["ID", "Date_Created","RP","Random","Show","Bin"]:
-                print(f'{key} is immutable')
-                continue #leaves to dodge changing immutables
-
-        if key == "Mutations":
-            if say_yes_to(f'Do you wanna change {key}? '):
-                mutations.pick_bespoke_mutation(object)
-                store_this(object)
-            else:
-                continue
-        
-        if isinstance(value, list):
-            print(f'{key} is a list. You are extending a list')
-            print(f'{key} == {value}')
-            if say_no_to(f'Do you wanna extend {key}? '):
-                continue
-            
-            done = False
-            element_list = []
-            while not done:
-                new_element = input("What is the new element? ")
-                element_list.append(new_element)
-                if say_no_to(f'Add another element to {element_list}? '):
-                    break
-            print()
-            print(f'Adding {element_list} to {value}')
-            object.__dict__[key] = value.extend(element_list)
-            store_this(object)
-
-        else: 
-            print(f'{key} == {value}')
-            if say_no_to(f'wanna change {key} from {value} '):
-                continue
-
-            new_attribute = input(f'What is the new value for {key}? ')
-            print(f'Changing {key} from {value} -> {new_attribute}')
-            if isinstance(value, int):
-                new_attribute= int(new_attribute)
-            object.__dict__[key] = new_attribute
-            store_this(object)
-
-    return
 
 def assign_id_and_file_name(persona_record: table.PersonaRecord) -> None:
     """
@@ -561,14 +516,12 @@ def collect_desired_record() -> table.PersonaRecord:
     record_to_return = table.PersonaRecord()
     for key, value in data_pairs.items():
         setattr(record_to_return, key, value)
-
     return record_to_return
 
 def do_referee_maintenance():
     """
     things that referee's need to access and do
     """
-
     persona = collect_desired_record()
 
     operations = {
@@ -576,9 +529,9 @@ def do_referee_maintenance():
     "Level": vocation.update_persona_exps,
     "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
     "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"),
-    "Attributes": attribute_manipulation,
-    "Change Record": lambda persona: do_referee_maintenance(),
-}
+    "Attributes": lambda persona: core.manual_persona_update(),
+    "Change Record": lambda persona: do_referee_maintenance(),}
+    
     operation_list = [key for key in operations]
 
     maintenance_choice = "I like turtles"

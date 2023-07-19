@@ -168,7 +168,6 @@ def anthro_size_rando(rando_size):
 
 def anthro_age_calc(years_old: table.PersonaRecord, ager: str) -> table.PersonaRecord:
     '''add the anthro age and age_cat to the persona record'''
-
     anthro_type = years_old.FAMILY_TYPE
     age_categories = [val for val  in table.anthro_random_age_category.values() if val != "1d100"]
     die_roll = table.anthro_ages_by_category_and_type[anthro_type][age_categories.index(ager)]
@@ -179,85 +178,6 @@ def anthro_age_calc(years_old: table.PersonaRecord, ager: str) -> table.PersonaR
 
     return years_old # modified by side effect
 
-def anthro_mutations_fresh(persona: table.PersonaRecord) -> None:
-    """
-    check for mutations based on player desire and anthro type
-    """
-
-    # determine the chance of mutations based on anthro type
-    anthro_type = persona.FAMILY_TYPE
-    mentchance = table.anthro_type_mutation_chance[anthro_type]["mentchance"]
-    physchance = table.anthro_type_mutation_chance[anthro_type]["physchance"]
-
-    # create the mutations dict
-    persona.Mutations = {}
-
-    # mutation chances increase if desired
-    mutate_yes = please.say_yes_to("Do you want to mutate? ")
-
-    if mutate_yes and anthro_type != "Humanoid":
-        mentchance = mentchance * 2
-        physchance = physchance * 2
-
-    elif mutate_yes and anthro_type == "Humanoid":
-        mentchance = 100
-        physchance = 100
-
-    ##### Mental Mutation chance, number and generation
-    # percent chance mentchance
-    if please.do_1d100_check(mentchance):
-        mutation_number = please.roll_this(
-            table.anthro_type_mutation_chance[anthro_type]["mentnumber"]
-        )
-
-        fresh_amount = 0
-        while fresh_amount < mutation_number:
-            mutation_tuple = please.get_table_result(mutations.mental_mutation_random)
-            # print(f'{mutation_tuple[0] = } {mutation_tuple[1] = }')
-            # todo mutation print out after added to dict?
-            print(mutation_tuple[1].build_desc(persona))
-            working_mutation = mutation_tuple[1](persona)
-            fresh_amount += 1
-
-            if working_mutation.kind == "defect" and persona.FAMILY_TYPE== "Purestrain":
-                print("\nYou are a purestrain, you cannot have a defect mutation.")
-                fresh_amount -= 2
-                persona.Mutations.pop(working_mutation.name)
-
-            if working_mutation.kind == "defect" and persona.FAMILY_TYPE != "Purestrain":
-                if please.say_yes_to("A Defect DOES NOT count as a mutation. Add? "):
-                    fresh_amount -= 1
-
-    else:
-        print(f"Persona has no mental mutations.")
-
-    ##### Physical Mutation chance, number and generation
-    # percent chance physchance
-    if please.do_1d100_check(physchance):
-        mutation_number = please.roll_this(
-            table.anthro_type_mutation_chance[anthro_type]["physnumber"]
-        )
-
-        fresh_amount = 0
-        # number of mutations is random based on anthro type
-        while fresh_amount < mutation_number:
-            mutation_tuple = please.get_table_result(mutations.physical_mutation_random)
-            print(f'{mutation_tuple[0] = } {mutation_tuple[1] = }')
-            #print(mutations.mutation_tuple[1].build_desc(persona))
-            working_mutation = mutation_tuple[1](persona)
-            fresh_amount += 1
-
-            if working_mutation.kind == "defect" and persona.FAMILY_TYPE== "Purestrain":
-                print("\nYou are a purestrain, you cannot have a defect mutation.")
-                fresh_amount -= 2
-                persona.Mutations.pop(working_mutation.name)
-
-            if working_mutation.kind == "defect" and persona.FAMILY_TYPE!= "Purestrain":
-                if please.say_yes_to("A Defect DOES NOT count as a mutation? "):
-                    fresh_amount -= 2
-
-    else:
-        print(f"Persona has no physical mutations.")
 
 def anthro_mutations_rando(randomly_mutating: table.PersonaRecord) -> table.PersonaRecord:
     """
@@ -387,7 +307,6 @@ def bespoke_anthro_attribute_ranges(object):
 
     return
 
-
 def anthro_attributes_bespoke(attribute_adjusting: table.PersonaRecord) -> table.PersonaRecord:
     '''allows player to adjust attributes of their persona'''
 
@@ -404,7 +323,7 @@ def anthro_attributes_bespoke(attribute_adjusting: table.PersonaRecord) -> table
     choice = please.choose_this(methods, choice_comment)
 
     if choice == "Manual":
-        bespoke_anthro_attribute_ranges(attribute_adjusting)
+        core.manual_persona_update(attribute_adjusting)
 
     elif choice == "Random":
         pass
@@ -466,7 +385,7 @@ def anthro_type_bespoke(object):
 
     return
 
-def anthro_mutations_bespoke(object):
+def anthro_mutations_bespoke(mutate_RP: table.PersonaRecord) -> table.PersonaRecord:
 
     ### determine RP anthro mutations
     choices = ["Anthro Type Determined", "Bespoke", "Random"]
@@ -474,11 +393,13 @@ def anthro_mutations_bespoke(object):
     method_type_selection = please.choose_this(choices, choice_comment)
 
     if method_type_selection == "Anthro Type Determined":
-        anthro_mutations_fresh(object)
+        mental_amount, physical_amount = mutations.biologic_mutations_number(mutate_RP)
+        mutations.mutation_assignment(mutate_RP,mental_amount, physical_amount,"Any")
 
     elif method_type_selection == "Bespoke":
-        mutations.pick_bespoke_mutation(object)
+        mutations.pick_bespoke_mutation(mutate_RP)
 
+    # todo exit get's sorted because choose this sorts it
     elif method_type_selection == "Random":
         plan_desired = "plan 9"
         while plan_desired != "Exit":
@@ -489,7 +410,7 @@ def anthro_mutations_bespoke(object):
             if plan_desired == "Get a Mutation":
                 mutations.single_random_mutation(object)
         return
-    return
+    return mutate_RP # altered by side effect at functions outside this function
 
 def anthro_vocation_bespoke(object: dict) -> None:
     """
@@ -628,9 +549,13 @@ def fresh_anthro() -> table.PersonaRecord:
     ### set up the object for Anthro persona
     fresh = table.PersonaRecord()
 
+
     ### get mundane terran name of the player
-    name_safe = please.clean_this_input(f'\nPlease input your MUNDANE TERRAN NAME: ')
-    fresh.Player_Name = please.choose_this(name_safe,"Are you happy with your name? ")
+    # fix still not screening input and choice properly
+    #name_safe = please.input_this(f'\nPlease input your MUNDANE TERRAN NAME: ')
+    #fresh.Player_Name = please.choose_this(name_safe,"Are you happy with your name? ")
+    fresh.Player_Name = please.input_this(f'\nPlease input your MUNDANE TERRAN NAME: ')
+
 
     core.initial_attributes(fresh)
     core.hit_points_max(fresh)
@@ -643,7 +568,9 @@ def fresh_anthro() -> table.PersonaRecord:
     core.base_armour_rating(fresh)
     core.wate_allowance(fresh)
     anthro_age_calc(fresh, "Adolescent")
-    anthro_mutations_fresh(fresh)
+    mental_amount, physical_amount = mutations.biologic_mutations_number(fresh)
+    mutations.mutation_assignment(fresh, mental_amount, physical_amount,"any")
+    #anthro_mutations_fresh(fresh)
     anthro_vocations_fresh(fresh)
     vocation.set_up_first_time(fresh)
     outputs.anthro_screen(fresh)
@@ -673,7 +600,8 @@ def bespoke_anthro():
     bespoke.RP = True if please.say_yes_to("Is this a referee persona? ") else False
 
     ### get mundane terran name of the player
-    bespoke.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
+    bespoke.Player_Name = str(please.input_this("\nPlease input your MUNDANE TERRAN NAME: "))
+
 
     ### build list of functions
     anthro_attributes_bespoke(bespoke)

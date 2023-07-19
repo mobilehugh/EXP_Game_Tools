@@ -1,12 +1,14 @@
 import math
 import secrets
+from typing import Sequence
 
-import a_persona_record
+
 import please
 import table
 
-# todo LIST NOT DICT
+# fix show_details and return_details may not be using build 
 # todo allow Fallthrough to skip mutation choices
+# fix defects get worse as level increases!
 
 def mutation_workflow():
     """
@@ -25,18 +27,10 @@ def mutation_workflow():
         pass # todo bespoke mutation
     elif plan_desired == "Maintenance":
         pass # todo Maintenance mutations
-    elif plan_desired == "Back":
-        a_persona_record.record_chooser()
-    else:
-        # BuildSupport(object)
-        print("Bad mutation methods were chosen some how")
     return
 
 class Mutation:
-
-    # methods that create output from the object
-    # def __str__(self):
-    #     return self.headline()
+    '''super class for mutations holding repeated methods'''
 
     def title(self) -> str:
         '''
@@ -55,7 +49,7 @@ class Mutation:
         returns the parameters of the mutation
         not all some of these are returned as null
         '''
-        return f"{self.calculate_parameter(self.distance)}  {self.calculate_parameter(self.frequency)}  {self.calculate_parameter(self.duration)}  {self.calculate_parameter(self.roll_bonus)}"
+        return f"{self.calculate_parameter(self.distance)}{self.calculate_parameter(self.frequency)}{self.calculate_parameter(self.duration)}{self.calculate_parameter(self.roll_bonus)}" # space is added in str return from function
 
     def calculate_parameter(self, parameter) -> str:
         '''
@@ -70,7 +64,7 @@ class Mutation:
         self.parameter = parameter
 
         if isinstance(self.parameter, str):
-            return f"{self.param_pivot[self.parameter]}{self.parameter}"
+            return f"{self.param_pivot[self.parameter]}{self.parameter} "
 
         elif self.parameter is None:
             return ""
@@ -80,11 +74,10 @@ class Mutation:
             self.level_adjustment = (
                 0 if self.statribute == "Level" else self.object.Level
             )  # corrects for level based parameters not doubling
-            return f"{self.param_pivot[self.parameter]}{math.ceil((self.object.__dict__[self.statribute] + self.level_adjustment)/self.divisor)} {self.unit}"
+            return f"{self.param_pivot[self.parameter]}{math.ceil((self.object.__dict__[self.statribute] + self.level_adjustment)/self.divisor)} {self.unit} " # space is important for formatting line
 
         return
 
-    # methods that regulate the object
 
     def post_details(self, subclass):
         self.desc = subclass.build_desc(self)
@@ -97,25 +90,29 @@ class Mutation:
         self.header = self.headline()
         # self.details = f"\n{self.headline()}\n{self.desc}\n{self.param_line()}"
         return self.header, self.desc, self.params
+    
 
-    def add_mutation(self):
-        # ultimately will manage FAMILY and TOY information
-        if self.name not in self.object.Mutations and self.table_name is not None:
-            self.perm = please.get_table_result(self.table_name)
-        elif self.name not in self.object.Mutations and self.table_name is None:
-            self.perm = None
-        elif self.name in self.object.Mutations:
-            self.perm = self.object.Mutations[self.name]
+    ##################################
+    #
+    # super() connected methods of Mutation
+    #
+    ##################################
 
-        self.object.Mutations[self.name] = self.perm
-        return
+    def return_perm(self, name:str, table:dict) -> str:
+        '''returns a new perm, or protects the perm for MOST mutations'''
+        if name in self.object.Mutations:
+            return self.object.Mutations[name]
+        elif table:
+            return please.get_table_result(table)
+        else:
+            return None
 
-    def show_mutation_data(self):
-        print("\nWelcome to show_mutation_data")
-        print(self.headline())
-        tuple = self.return_details(self)
-        print(tuple)
-        
+    def add_mutation(self, name:str, perm:str, sentence:str) -> None:
+        '''side effect on record to add mutation or returns doing nothing'''
+        if name in self.object.Mutations:
+            return 
+        if please.say_yes_to(f'{name.upper()} : {sentence} Add mutations? '):
+            self.object.Mutations[name] = perm
         return
 
 #######################################
@@ -126,11 +123,10 @@ class Atestical(Mutation):
     '''
     testing grounds for the class and not used
     '''
-    
     def __init__(self, object):
         self.is_mental = True
         self.object = object
-        self.name = "Absorption"
+        self.name = "Atestical"
         self.kind = "combat"
         self.distance = "Persona"
         self.duration = "Until Dead"
@@ -141,11 +137,32 @@ class Atestical(Mutation):
         self.table_name = table.mutation_absorbs
         self.link = "#_absorption"
 
+    """ template
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f''
+        #pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            self.object. 
+
+        return description
+    """
 
     def build_desc(self):
-        self.perm = self.object.Mutations[self.name]
-        self.hps_absorbed = self.object.HPM + self.object.Level * 3
-        return f"Absorb {self.hps_absorbed} HPS from {self.perm} attacks."
+        # level dependent build
+        hps_absorbed = self.object.HPM + self.object.Level * 3
+
+        # permanent item build 
+        perm = super().return_perm(self.name, self.table_name)
+        # build description
+        description = f'Absorb {hps_absorbed} HPS from {perm} attacks.'
+
+        self.add_mutation(self.name, perm, description)
+
+        return description
 
 
 class Absorption(Mutation):
@@ -162,13 +179,15 @@ class Absorption(Mutation):
         self.attribute_bonus = None
         self.table_name = table.mutation_absorbs
         self.link = "#_absorption"
-        self.add_mutation()
-
-    def build_desc(self):
-        self.perm = self.object.Mutations[self.name]
-        self.hps_absorbed = self.object.HPM + self.object.Level * 3
-        return f"Absorb {self.hps_absorbed} HPS from {self.perm} attacks."
-
+        
+    def build_desc(self) -> str:
+        '''sentence for mutation side effect adjust Mutations'''
+        hps_absorbed = self.object.HPM + self.object.Level * 3  # level part
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Absorb {hps_absorbed} HPS from {perm} attacks.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
+    
 class AlternateBanishment(Mutation):
     def __init__(self, object):
         self.is_mental = True
@@ -183,12 +202,14 @@ class AlternateBanishment(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_alternate_banishment"
-        self.add_mutation()
 
-    def build_desc(self):
-        self.wate_banished = math.ceil(self.object.Wate / 2 + self.object.Level * 5)
-        return f"Banish up to {self.wate_banished} kg of target to an alternate dimension. Save vs MSTR."
-
+    def build_desc(self) -> str:
+        """returns mutation description and side effect via add_mutation()"""
+        level_part = math.ceil(self.object.Wate / 2 + self.object.Level * 5) # level part
+        perm = None
+        description = f"Banish {level_part} kg sized target to an alternate dimension."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class AlienAttachment(Mutation):
     def __init__(self, object):
@@ -204,16 +225,16 @@ class AlienAttachment(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_alien_attachment"
-        self.add_mutation()
-
-    def build_desc(self):
-        self.alien_wate = math.ceil(self.object.Wate / 2)
-        self.alien_smart = math.ceil(self.object.INT / 3)
-        self.alien_number = (
-            self.calculate_parameter(self.frequency).split(":")[1].strip()
-        )
-        return f"Befriend up to {self.alien_number} at once. Max wate {self.alien_wate} Wate and max INT {self.alien_smart} each."
-
+		
+    def build_desc(self) -> str:
+        """returns mutation description and side effect via add_mutation()"""
+        alien_wate = math.ceil(self.object.Wate / 2) + (5 * self.object.Level)
+        alien_smart = math.ceil(self.object.INT / 3) + self.object.Level
+        alien_number = (self.calculate_parameter(self.frequency).split(":")[1].strip())
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f"Befriend {alien_number}. Alien max wate {alien_wate} kgs, max INT {alien_smart}."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Calculations(Mutation):
     def __init__(self, object):
@@ -229,11 +250,13 @@ class Calculations(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_calculations"
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Rapidly solve complex maths."
-
+		
+    def build_desc(self) -> str:
+        """returns mutation description and side effect via add_mutation()"""
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = "Rapidly solve complex maths."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Communicate(Mutation):
     def __init__(self, object):
@@ -249,13 +272,15 @@ class Communicate(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_communicate"
-        self.add_mutation()
 
-    def build_desc(self):
-        self.learn_chance = (self.object.INT + self.object.Level) * 3
-        self.lang_max = self.object.INT + self.object.Level
-        return f"Understand languages. {self.learn_chance}% chance to learn, maximum {self.lang_max} languages."
-
+    def build_desc(self) -> str:
+        """returns mutation description and side effect via add_mutation()"""
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        learn_chance = (self.object.INT + self.object.Level) * 3
+        lang_max = self.object.INT + self.object.Level
+        description = f"Understand languages. {learn_chance}% to learn. Max {lang_max} languages."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Cryokinesis(Mutation):
     def __init__(self, object):
@@ -271,11 +296,13 @@ class Cryokinesis(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_cryokinesis"
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Brain freeze targets. 1d4, then 2d4, and so on each unit."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Worsening brain freeze per unit. Increasing damage 1d4, 2d4, 3d4, etc per unit.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class DeathFieldGeneration(Mutation):
     def __init__(self, object):
@@ -291,11 +318,14 @@ class DeathFieldGeneration(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_death_field_generation"
-        self.add_mutation()
 
-    def build_desc(self):
-        self.desc = f"Drain all HPS in range and collapse. Spare {math.floor(self.object.Level/3)} persona(s)."
-
+    def build_desc(self) -> str:
+        """returns mutation description and side effect via add_mutation()"""
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        spare =  math.floor(self.object.Level/3)
+        description = f'Drain all HPS in range and collapse. Spare {spare} persona(s).'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class DensityControl(Mutation):
     def __init__(self, object):
@@ -311,11 +341,13 @@ class DensityControl(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_density_control_mental"
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Change a target's density."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Mess with the density of a target.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Detections(Mutation):
     def __init__(self, object):
@@ -332,18 +364,22 @@ class Detections(Mutation):
         self.table_name = table.detection_types
         self.link = "#_detections"
 
-        self.line_of_detections = "Detect: "
-        for detects in range(math.ceil(self.object.AWE / 5)):
-            self.line_of_detections += (
-                f"{detects + 1 }) {please.get_table_result(self.table_name)} "
-            )
-
-        self.perm = self.line_of_detections
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        # building complex perm does not use perm function
         if self.name not in self.object.Mutations:
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
 
-    def build_desc(self):
-        return self.object.Mutations[self.name]
+            perm = "Detect the following: "
+            for detects in range(math.ceil(self.object.AWE / 5)):
+                perm += (
+                    f"{detects + 1 }) {please.get_table_result(self.table_name)} "
+                )
+        else:          
+            perm = super().return_perm(self.name, self.table_name) # perm part
+    
+        description = perm
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class DirectionalSense(Mutation):
@@ -360,10 +396,14 @@ class DirectionalSense(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_directional_sense"
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Can always find their way."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'You can always find your way.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
+
 
 
 class Empathy(Mutation):
@@ -380,11 +420,13 @@ class Empathy(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_empathy"
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Listen in on organic persona emotions."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Secretly listen to organic emotions'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class EnergyAttraction(Mutation):
     def __init__(self, object):
@@ -400,11 +442,13 @@ class EnergyAttraction(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_energy_attraction"
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Deadly energy redirects to mutant."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Deadly energies redirect toward persona.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class SeizureProjection(Mutation):
     def __init__(self, object):
@@ -416,16 +460,17 @@ class SeizureProjection(Mutation):
         self.duration = "Special"
         self.frequency = ("MSTR", "per day", 1.0)
         self.CR = "+4"
-        self.roll_bonus = "None"
-        None
+        self.roll_bonus = None
+        self.attribute_bonus = None
         self.table_name = None
         self.link = "#_seizure_projection"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Induce random muscle contractions on an organic target."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Induce random muscle contractions in organic target.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class ExtraSensoryProjection(Mutation):
     def __init__(self, object):
@@ -438,15 +483,16 @@ class ExtraSensoryProjection(Mutation):
         self.frequency = "Special"
         self.CR = "0"
         self.roll_bonus = "+20 on interpersonal rolls"
-        None
+        self.attribute_bonus = None
         self.table_name = None
         self.link = "#_extra_sensory_projection"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Listen in on the thoughts of nearby personas."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Listen in on the thoughts of organic personas.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class ForceFieldGeneration(Mutation):
     def __init__(self, object):
@@ -459,15 +505,21 @@ class ForceFieldGeneration(Mutation):
         self.frequency = "1 per rest"
         self.CR = "*2"
         self.roll_bonus = "None"
-        None
+        self.attribute_bonus = None
         self.table_name = None
         self.link = "#_force_field_generation"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        self.ffabsorbs = 10 * (self.object.MSTR + self.object.Level)
-        return f"Personal energy shield absorbs {self.ffabsorbs} HPS."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        ffabsorbs = 10 * (self.object.MSTR + self.object.Level)
+        description = f'Personal energy shield absorbs {ffabsorbs} HPS.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
+
+
 
 
 class Gyrokinesis(Mutation):
@@ -481,15 +533,16 @@ class Gyrokinesis(Mutation):
         self.frequency = ("MSTR", "per day", 6.0)
         self.CR = "+3"
         self.roll_bonus = "None"
-        None
+        self.attribute_bonus = None
         self.table_name = None
         self.link = "#_gyrokinesis"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Force target to revolve against it's will."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Force target to revolve.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class HeightenedBrainTalent(Mutation):
     def __init__(self, object):
@@ -505,16 +558,15 @@ class HeightenedBrainTalent(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_heightened_brain_talent"
-        self.add_mutation()
 
-    def build_desc(self):
-        self.perm = (
-            (90 + self.object.Level + self.object.INT)
-            if (90 + self.object.Level + self.object.INT) < 100
-            else 99
-        )
-        return f"{self.perm}% chance to figure something out. Cannot ruin story plots."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        base_chance = 70 + self.object.Level + self.object.INT
+        chance = base_chance if base_chance <100 else 98
+        description = f'{chance}% chance to figure out, none plot point, problems. Cannot ruin stories.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class HostilityField(Mutation):
     def __init__(self, object):
@@ -531,11 +583,13 @@ class HostilityField(Mutation):
         self.table_name = None
         self.link = "#_hostility_field"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Gives off hostile vibes."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Gives off hostile vibes.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class IllusionGeneration(Mutation):
     def __init__(self, object):
@@ -543,7 +597,7 @@ class IllusionGeneration(Mutation):
         self.object = object
         self.name = "Illusion Generation"
         self.kind = "non-combat"
-        self.distance = ("MSTR", "per day", 5.0)
+        self.distance = ("MSTR", "hexes", 5.0)
         self.duration = "Special"
         self.frequency = ("MSTR", "per day", 4.0)
         self.CR = "0"
@@ -551,11 +605,13 @@ class IllusionGeneration(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_illusion_generation"
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Place hallucinations into organic targets."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Place hallucinations into organic targets.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class InformationEradication(Mutation):
     def __init__(self, object):
@@ -572,11 +628,12 @@ class InformationEradication(Mutation):
         self.table_name = None
         self.link = "#_information_eradication"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Force target to forget specific memories."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Force target to forget specific memories.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Intuition(Mutation):
     def __init__(self, object):
@@ -593,11 +650,12 @@ class Intuition(Mutation):
         self.table_name = None
         self.link = "#_intuition"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Get a yes/no answer to an imminent question."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Get a yes/no answer to an imminent question.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class KnowledgeTransmission(Mutation):
     def __init__(self, object):
@@ -614,10 +672,14 @@ class KnowledgeTransmission(Mutation):
         self.table_name = None
         self.link = "#_knowledge_transmission"
 
-        self.add_mutation()
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Walking organic thumb drive.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
-    def build_desc(self):
-        return "Walking organic thumb drive."
+
 
 
 class Levitation(Mutation):
@@ -635,20 +697,20 @@ class Levitation(Mutation):
         self.table_name = None
         self.link = "#_levitation"
 
-        self.add_mutation()
 
-    # does not work for robots or aliens.
-    def build_desc(self):
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         if self.object.FAMILY == "Anthro":
             dexmove = self.object.Move
             mstrmove = table.anthro_movement_rate_and_DEX[self.object.MSTR]
             levimove = (dexmove if dexmove > mstrmove else mstrmove) * 2
-
         else:
             levimove = self.object.Move
 
-        return f"Fly up or down at {levimove} h/u."
+        description = f'Float straight up or down at {levimove} h/u.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class LifeLeech(Mutation):
@@ -665,13 +727,15 @@ class LifeLeech(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_life_leech"
-        self.add_mutation()
 
-    def build_desc(self):
-        self.amount = self.object.Level + 5
-        self.well = self.object.HPM * 2
-        return f"Drain {self.amount} HPS per unit. Max storage is {self.well} HPS. "
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        amount = self.object.Level + 5
+        storage = self.object.HPM * 2
+        description = f'Drain {amount} HPS per unit. Store up to {storage} HPS.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class LightWaveManipulation(Mutation):
     def __init__(self, object):
@@ -688,11 +752,13 @@ class LightWaveManipulation(Mutation):
         self.table_name = None
         self.link = "#_light_wave_manipulation"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Manipulate the light around oneself."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Manipulate the light around oneself.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MagneticControl(Mutation):
     def __init__(self, object):
@@ -709,11 +775,12 @@ class MagneticControl(Mutation):
         self.table_name = None
         self.link = "#_magnetic_control"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Become a walking metallic magnet."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Become a walking metallic magnet.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MassMind(Mutation):
     def __init__(self, object):
@@ -730,11 +797,12 @@ class MassMind(Mutation):
         self.table_name = None
         self.link = "#_mass_mind"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Amplify, combine or deflect psionic attacks."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Amplify, combine or deflect psionic attacks.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MechanicalSense(Mutation):
     def __init__(self, object):
@@ -750,16 +818,14 @@ class MechanicalSense(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_mechanical_sense"
-        self.add_mutation()
 
-    # organic mechanical sense is not possible
-    # recommendation is to split into two mutations
-    # one for organic and one for mechanical
-
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         chance_talk = (self.object.MSTR + self.object.Level) * 3
-        return f"Talk with machines {chance_talk}% of the time. Also 2nd level mechanic"
-
+        description = f'{chance_talk}% chance to talk with a specific machine. Also 2nd level mechanic.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MentalBlast(Mutation):
     def __init__(self, object):
@@ -775,11 +841,13 @@ class MentalBlast(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_mental_blast"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Psionic blast for 2d4+{self.object.Level} HPS damage."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Psionic blast for 2d4+{self.object.Level} HPS damage.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MentalControl(Mutation):
     def __init__(self, object):
@@ -795,12 +863,13 @@ class MentalControl(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_mental_control"
-        self.add_mutation()
 
-    def build_desc(self):
-        return (
-            f"Control the minds of targets. Total INT of targets is {self.object.INT}."
-        )
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Control the minds of biological targets. Combined INT of all targets is {self.object.INT + self.object.Level}.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class MentalPhysiostasis(Mutation):
@@ -818,11 +887,13 @@ class MentalPhysiostasis(Mutation):
         self.table_name = None
         self.link = "#_mental_physiostasis"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Optimized physiology 1/4 damage, 4 times benefit."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Optimized physiology 1/4 damage, 4 times benefit.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MentalDefenselessness(Mutation):
     def __init__(self, object):
@@ -839,10 +910,13 @@ class MentalDefenselessness(Mutation):
         self.table_name = None
         self.link = "#_mental_defenselessness"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "MSTR vs mental attacks reduced to zero."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'MSTR is 0 vs mental attacks.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class MolecularDisruption(Mutation):
@@ -859,14 +933,14 @@ class MolecularDisruption(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_molecular_disruption"
-        self.add_mutation()
 
-    def build_desc(self):
-        disruptonnage = math.ceil(self.object.Wate / 2)
-        return (
-            f"Convert {disruptonnage} kgs matter in to cold gas. 1d20 per kg disrupted."
-        )
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        disruptonnage = math.ceil(self.object.Wate / 2) + self.object.Level       
+        description = f'Convert {disruptonnage} kgs matter in to cold gas. 1d20 HPS damage per kg.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MolecularExamination(Mutation):
     def __init__(self, object):
@@ -882,12 +956,14 @@ class MolecularExamination(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_molecular_examination"
-        self.add_mutation()
 
-    def build_desc(self):
-        aware = self.object.AWE
-        return f"Find weaknesses. MSTR save or {aware*10} attack roll and +{aware} on task rolls."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        aware = self.object.AWE + self.object.Level
+        description = f'Find weaknesses. +{aware*10} on attack rolls. +{aware} on task rolls.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MolecularPhaseTransformation(Mutation):
     def __init__(self, object):
@@ -904,11 +980,14 @@ class MolecularPhaseTransformation(Mutation):
         self.table_name = None
         self.link = "#_molecular_phase_transformation"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Transform oneself between solid, liquid or gas."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Transform self between solid, liquid or gas.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MolecularPhaseTransmutation(Mutation):
     def __init__(self, object):
@@ -925,12 +1004,14 @@ class MolecularPhaseTransmutation(Mutation):
         self.table_name = None
         self.link = "#_molecular_phase_transmutation"
 
-        self.add_mutation()
 
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         transmutograms = math.ceil(self.object.Wate / 2)
-        return f"Transform {transmutograms} kgs of a target into gas, liquid or solid. 1d8 HPS per kg.\nDamage = change total transmutation."
-
+        description = f'Transform {transmutograms} kgs of a target into gas, liquid or solid. 1d8 HPS per kg. HPS = % disintegrate.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class MuscleManipulation(Mutation):
     def __init__(self, object):
@@ -947,11 +1028,12 @@ class MuscleManipulation(Mutation):
         self.table_name = None
         self.link = "#_muscle_manipulation"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Manipulate the muscles of organic targets."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Manipulate the muscles of organic targets.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Neuronegation(Mutation):
     def __init__(self, object):
@@ -968,10 +1050,12 @@ class Neuronegation(Mutation):
         self.table_name = None
         self.link = "#_neuronegation"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Target's consciousness loses contact to all senses and collapses."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Disconnect organic target from all senses.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Phase(Mutation):
@@ -989,13 +1073,14 @@ class Phase(Mutation):
         self.table_name = None
         self.link = "#_phase"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        carry = math.floor(self.object.WA / 4)
-        furtherness = math.ceil(self.object.Move * 2)
-        return f"Phase into hyperspace carrying {carry} kgs and moving {furtherness} hexes."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        carry = math.floor(self.object.WA / 4) + self.object.Level
+        furtherness = math.ceil(self.object.Move * 2) + self.object.Level
+        description = f'Phase into hyperspace carrying {carry} kgs and moving {furtherness} hexes.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class PlanalHideAway(Mutation):
     def __init__(self, object):
@@ -1012,10 +1097,12 @@ class PlanalHideAway(Mutation):
         self.table_name = None
         self.link = "#_planal_hide_away"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Hide from physical space in your own temporal aberration."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Hide from physical space in your own temporal aberration.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class PlanalHoldAway(Mutation):
@@ -1032,22 +1119,17 @@ class PlanalHoldAway(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_planal_hold_away"
-        self.add_mutation()
 
-    # this does no work for robots!!
-    def build_desc(self):
-
-        if self.object.FAMILY == "Anthro":
-            pstrallowance = self.object.WA
-            mstrallowance = table.wate_allowance_and_PSTR[self.object.MSTR]
-            storage = math.ceil(
-                (pstrallowance if pstrallowance > mstrallowance else mstrallowance) / 2
-            )
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        if self.object.FAMILY in ["Anthro", "Alien"]:
+            storage = table.wate_allowance_and_PSTR[self.object.MSTR] + self.object.Level
         else:
             storage = math.ceil(self.object.WA / 2)
-
-        return f"Carry {storage} kgs in your own space time aberration backpack."
-
+        description = f'Carry {storage} kgs in your own space time aberration backpack.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class PolarDisruption(Mutation):
     def __init__(self, object):
@@ -1064,12 +1146,13 @@ class PolarDisruption(Mutation):
         self.table_name = None
         self.link = "#_polar_disruption"
 
-        self.add_mutation()
-
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         draw = math.floor(self.object.WA / 2)
-        return f"Unexpectedly attract metallic objects <{draw} kgs toward mutant."
-
+        description = f'Unexpectedly attract metallic objects <{draw} kgs toward mutant.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class PowerDrain(Mutation):
     def __init__(self, object):
@@ -1085,10 +1168,13 @@ class PowerDrain(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_power_drain"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Drain batteries to heal 1d10 HPS. Recharge batteries for 1d12 HPS."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Drain battery get 1d10 HPS. Recharge battery take 1d12 HPS.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Precognition(Mutation):
@@ -1106,11 +1192,12 @@ class Precognition(Mutation):
         self.table_name = None
         self.link = "#_precognition"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Psionic pre-alert system prevents injury."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Psionic pre-alert system to reduce injury.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class ProjectedSense(Mutation):
     def __init__(self, object):
@@ -1127,10 +1214,12 @@ class ProjectedSense(Mutation):
         self.table_name = None
         self.link = "#_projected_sense"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Project a selected sense out of the body."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Project a selected sense out of the body.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class ProtectionShell(Mutation):
@@ -1147,12 +1236,13 @@ class ProtectionShell(Mutation):
         self.attribute_bonus = None
         self.table_name = table.protection_shell_options
         self.link = "#_protection_shell"
-        self.add_mutation()
 
-    def build_desc(self):
-        self.perm = self.object.Mutations[self.name]
-        return f"{self.perm} cannot come within {self.object.Level} hexes."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'{perm} cannot come within {self.object.Level} hexes.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class PsionicDefence(Mutation):
     def __init__(self, object):
@@ -1169,11 +1259,12 @@ class PsionicDefence(Mutation):
         self.table_name = None
         self.link = "#_psionic_defence"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"MSTR is {self.object.MSTR * 2} for defensive MSTR rolls."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'MSTR is {self.object.MSTR * 2 + self.object.Level} for defensive MSTR rolls.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Purify(Mutation):
     def __init__(self, object):
@@ -1189,11 +1280,13 @@ class Purify(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_purify"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Purify up to {math.ceil(self.object.WA / 10)} kgs of stuff ."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Purify up to {math.ceil(self.object.WA / 10) + self.object.Level} kgs of stuff.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Pyrokinesis(Mutation):
     def __init__(self, object):
@@ -1210,11 +1303,13 @@ class Pyrokinesis(Mutation):
         self.table_name = None
         self.link = "#_pyrokinesis"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Heat target for 1d4, 2d4, 3d4, etc HPS damage each unit."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Worsening brain cooking per unit. Increasing damage 1d4, 2d4, 3d4, etc per unit.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class RepulsionFieldGeneration(Mutation):
     def __init__(self, object):
@@ -1231,12 +1326,13 @@ class RepulsionFieldGeneration(Mutation):
         self.table_name = None
         self.link = "#_repulsion_field_generation"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        spares = math.floor(self.object.Level / 2)
-        return f"Fell organics with nauseous incapacitation spare {spares} personas."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Incapacitate organics with nauseous. Spare {math.floor(self.object.Level / 2)} personas.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Restoration(Mutation):
     def __init__(self, object):
@@ -1252,11 +1348,13 @@ class Restoration(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_restoration"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Heal organic targets for {self.object.HPM} HPS with a touch."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Heal organic targets with a touch.  Heal amount equals HPS Total (not HPM).'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class SensoryDeprivation(Mutation):
     def __init__(self, object):
@@ -1273,11 +1371,13 @@ class SensoryDeprivation(Mutation):
         self.table_name = None
         self.link = "#_sensory_deprivation"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Deny the target of a specific sense."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Deny the target a specific sense (blinding, deafening, etc).'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class SociabilityFieldGeneration(Mutation):
     def __init__(self, object):
@@ -1294,11 +1394,15 @@ class SociabilityFieldGeneration(Mutation):
         self.table_name = None
         self.link = "#_sociability_field_generation"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "People really really like you."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'People really really like you. They really, really like you.'
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            self.object.SOC = 900 if self.object.SOC < 900 else self.object.SOC
+        return description
 
 class Sonar(Mutation):
     def __init__(self, object):
@@ -1315,11 +1419,13 @@ class Sonar(Mutation):
         self.table_name = None
         self.link = "#_sonar"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Can replace normal vision with 360 degree sonar."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Replace boring vision with 360 degree sonar.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class SonicAttack(Mutation):
     def __init__(self, object):
@@ -1336,12 +1442,13 @@ class SonicAttack(Mutation):
         self.table_name = None
         self.link = "#_sonic_attack"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        distance = math.ceil(self.object.MSTR / 2)
-        return f"Sound blast: 1h 4d8, {math.ceil(distance/2)}h 3d8, {distance}h 2d8"
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        distance = math.ceil(self.object.MSTR / 2) + self.object.Level
+        description = f'Sound blast range and damage: 1h 4d8 HPS, {math.ceil(distance/2)}h 3d8 HPS, {distance}h 2d8 HPS.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class SonicReproduction(Mutation):
     def __init__(self, object):
@@ -1358,11 +1465,14 @@ class SonicReproduction(Mutation):
         self.table_name = None
         self.link = "#_sonic_reproduction"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        number = math.ceil(self.object.INT + self.object.Level)
-        return f"Reproduce audio clips {number * 2} units long and a total of {number}"
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        number = self.object.INT + self.object.Level
+        description = f'Perfect audio copies. Store {number} copies up to {number * 2} units duration.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Suggestion(Mutation):
@@ -1380,10 +1490,13 @@ class Suggestion(Mutation):
         self.table_name = None
         self.link = "#_suggestion"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "The more reasonable the more likely."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'The more reasonable the more likely to succeed.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Telekinesis(Mutation):
@@ -1401,12 +1514,14 @@ class Telekinesis(Mutation):
         self.table_name = None
         self.link = "#_telekinesis"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        speed = table.anthro_movement_rate_and_DEX[self.object.MSTR]
-        amount = math.ceil(self.object.Wate / 2)
-        return f"Move up to {amount} kgs at {speed} h/u with your mind."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        speed = table.anthro_movement_rate_and_DEX[self.object.MSTR] + self.object.Level
+        amount = table.wate_allowance_and_PSTR[self.object.MSTR] + self.object.Level
+        description = f'Move up to {amount} kgs at {speed} h/u with your mind.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class TelekineticArm(Mutation):
@@ -1424,12 +1539,14 @@ class TelekineticArm(Mutation):
         self.table_name = None
         self.link = "#_telekinetic_arm"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        arm_wate = table.wate_allowance_and_PSTR[self.object.MSTR]
-        return f"Invisible hand with {math.ceil(self.object.HPM/2)} HPS that can lift {arm_wate} kgs."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        arm_wate = table.wate_allowance_and_PSTR[self.object.MSTR] + self.object.Level
+        arm_hps = math.ceil(self.object.HPM/2)  + self.object.Level
+        description = f'Invisible extra hand with {arm_hps} HPS that can lift {arm_wate} kgs.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class TelekineticFlight(Mutation):
     def __init__(self, object):
@@ -1446,12 +1563,13 @@ class TelekineticFlight(Mutation):
         self.table_name = None
         self.link = "#_telekinetic_flight"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        speed = table.anthro_movement_rate_and_DEX[self.object.MSTR] * 3
-        return f"Fly around at {speed} h/u."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        speed = table.anthro_movement_rate_and_DEX[self.object.MSTR] * 2 + self.object.Level
+        description = f'Fly around at {speed} h/u.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Telempathy(Mutation):
     def __init__(self, object):
@@ -1468,11 +1586,13 @@ class Telempathy(Mutation):
         self.table_name = None
         self.link = "#_telempathy"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Push emotions into the target's mind."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Push emotions into the mind of an organic target.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class Teleport(Mutation):
     def __init__(self, object):
@@ -1489,10 +1609,12 @@ class Teleport(Mutation):
         self.table_name = None
         self.link = "#_teleport"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Instantly pop to familiar places."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Instantly pop to familiar places.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class ThoughtImitation(Mutation):
@@ -1510,10 +1632,12 @@ class ThoughtImitation(Mutation):
         self.table_name = None
         self.link = "#_thought_imitation"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Flawlessly copy actions and mutations."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Flawlessly copy actions and mutations.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class TimeStop(Mutation):
@@ -1530,11 +1654,14 @@ class TimeStop(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_time_stop"
-        self.add_mutation()
 
-    def build_desc(self):
-        lift = table.wate_allowance_and_PSTR[self.object.MSTR] * 10
-        return f"Arrest the movement of time. Move freely and lift {lift} kgs."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        lift = table.wate_allowance_and_PSTR[self.object.MSTR] * 10 + self.object.Level
+        description = f'Arrest the movement of time. Move freely and lift {lift} kgs.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class TimeTell(Mutation):
@@ -1552,10 +1679,12 @@ class TimeTell(Mutation):
         self.table_name = None
         self.link = "#_time_tell"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Atomic clock precision time telling."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Atomic clock precision time telling.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class TotalRecuperation(Mutation):
@@ -1573,10 +1702,12 @@ class TotalRecuperation(Mutation):
         self.table_name = None
         self.link = "#_total_recuperation"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"Instantly restore back to {self.object.HPM} HPS."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Instantly restore back to full ({self.object.HPM}) HPS.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Ventriloquism(Mutation):
@@ -1594,10 +1725,12 @@ class Ventriloquism(Mutation):
         self.table_name = None
         self.link = "#_ventriloquism"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Make the voice appear to come from elsewhere."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Make the voice appear to come from elsewhere.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class WeaponDischarging(Mutation):
@@ -1615,16 +1748,16 @@ class WeaponDischarging(Mutation):
         self.table_name = None
         self.link = "#_weapon_discharging"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        boom_boom = (
-            (self.object.MSTR - self.object.Level)
-            if (self.object.MSTR - self.object.Level) > 0
-            else 1
-        )
-        boom_boom = math.ceil(boom_boom / 2)
-        return f"A {boom_boom}% chance of accidental activation"
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        boom = math.ceil((self.object.MSTR - self.object.Level) / 2)
+        boom_boom = boom if boom > 0 else 2
+
+        description = f'A {boom_boom}% chance of accidental activation'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class WeatherTell(Mutation):
@@ -1642,16 +1775,19 @@ class WeatherTell(Mutation):
         self.table_name = None
         self.link = "#_weather_tell"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Less accurate the further out."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Less accurate the further out.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 #######################################
 # PHYSICAL MUTATIONS
 #######################################
-
 
 class AcidicEnzymes(Mutation):
     def __init__(self, object):
@@ -1667,11 +1803,13 @@ class AcidicEnzymes(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_acidic_enzymes"
-        self.add_mutation()
 
-    def build_desc(self):
-        self.spit_damage = f"2d8+{self.object.Level}"
-        return f"Spit acid (type B) every other unit {self.spit_damage} HPS damage."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Spit acid (fling) every other unit 2d8+{self.object.Level} HPS damage.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Adaptation(Mutation):
@@ -1688,13 +1826,16 @@ class Adaptation(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_adaptation"
-        self.add_mutation()
 
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         chancey_pants = self.object.CON + self.object.INT + self.object.Level
         perma_nerma = self.object.Level
-        return f"A {chancey_pants}% of temporary immunity. {perma_nerma}% permanent. Max {perma_nerma} permanents."
-
+        description = f'A {chancey_pants}% chance of temporary immunity. {perma_nerma}% chance becomes permanent. Max {perma_nerma} permanents.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
+    
 
 class AttractionOdor(Mutation):
     def __init__(self, object):
@@ -1710,19 +1851,19 @@ class AttractionOdor(Mutation):
         self.attribute_bonus = ("CHA", 2)
         self.table_name = table.list_of_life_forms
         self.link = "#_attraction_odor"
-        # self.add_mutation() removed for complex perm
 
-        self.perm = please.get_table_result(self.table_name)
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm
-            # apply attribute changes
-            if please.say_yes_to("Attraction Odor has a +2 CHA bonus APPLY it? "):
-                self.object.CHA += 2
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Constantly attracts {perm}.'
+        # add attribute bonus check
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            self.object.CHA += 2
 
-    def build_desc(self):
-        return f"Constantly attracts {self.object.Mutations[self.name]}."
-
+        return description
 
 class Arms(Mutation):
     def __init__(self, object):
@@ -1735,32 +1876,32 @@ class Arms(Mutation):
         self.frequency = "Constant"
         self.CR = "0"
         self.roll_bonus = None
+        self.table_name = None
         self.attribute_bonus = ("DEX", -1)
         self.link = "#_arms"
-        # self.add_mutation() removed for complex perm
+   
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        arm_table = table.family_hit_location_pivot_table[self.object.FAMILY]
+        arms_number = please.roll_this("1d4")
 
-        self.family_type = self.object.FAMILY
-        self.table_name = table.family_hit_location_pivot_table[self.family_type]
-        arm_carry = "Arm location(s):"
-        dex_penalty = please.roll_this("1d4")
-
-        for army in range(dex_penalty):
-            arm_carry += f"{army+1}) {please.get_table_result(self.table_name)} "
-
-        self.perm = arm_carry
         if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm
-            # apply attribute changes
-            if please.say_yes_to(f"Arms has a -{dex_penalty} DEX penalty. APPLY it? "):
-                self.object.DEX = self.object.DEX - dex_penalty
+            arm_table = table.family_hit_location_pivot_table[self.object.FAMILY]
+            arms_number = please.roll_this("1d4")
+            perm = ""
+            for army in range(arms_number):
+                perm += f" {army+1}) {please.get_table_result(arm_table)}"
 
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
+        description = f'Extra arm(s) located:{perm}'
 
-    def build_desc(self):
-        return self.object.Mutations[self.name]
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add and self.object.RP: # DEX penalty if RP
+            self.object.DEX -= arms_number
 
-
+        return description
+   
 class BodyStructureChange(Mutation):
     def __init__(self, object):
         self.is_mental = False
@@ -1775,10 +1916,13 @@ class BodyStructureChange(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_body_structure_change"
-        self.add_mutation()
 
-    def build_desc(self):
-        return "Change shape at will. "
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Change shape at will.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Carapace(Mutation):
@@ -1793,38 +1937,39 @@ class Carapace(Mutation):
         self.CR = "+1"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.carapace_thickness
+        self.table_name = None
         self.link = "#_carapace"
-        # self.add_mutation() removed for complex perm
 
-        thickness = please.get_table_result(self.table_name)
-        damage_reduction = (
-            f'Reduce damage by {thickness["DA"]}'
-            if thickness["DA"] != "1.0"
-            else "No damage reduction."
-        )
-        self.perm = f'{thickness["covering"]} covering. {damage_reduction}'
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
 
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm
-            # apply attribute changes
-            if please.say_yes_to(
-                f'Carapace has an AR Bonus of +{str(thickness["AR"])}. APPLY it?'
-            ):
-                self.object.AR += thickness["AR"]
-            if please.say_yes_to(
-                f'Carapace has a DEX penalty of {str(thickness["dex_penalty"])}. APPLY it?'
-            ):
-                self.object.DEX += thickness["dex_penalty"]
-            if please.say_yes_to(
-                f'Carapace has a CHA penalty of {str(thickness["cha_penalty"])}. APPLY it?'
-            ):
-                self.object.CHA += thickness["cha_penalty"]
+        if self.name not in self.object.Mutations: #create the perm thickness
+            carapaline = please.get_table_result(table.carapace_thickness)
+            perm = next(iter(carapaline))
+            
+        for _, carapacity in table.carapace_thickness.items():
+            if perm in carapacity:
+                break
+        
+        # create elements for description and penalties 
+        AR_adjust = carapacity[perm]['AR']
+        damage_reduction = carapacity[perm]['DA']
+        CHA_adjust = carapacity[perm]['cha_penalty']
+        DEX_adjust = carapacity[perm]['dex_penalty']
+    
+        description = f'A protective, but uglifying, {perm.lower()} carapace: damage reduction (damage x {damage_reduction})'
 
-    def build_desc(self):
-        desc = self.object.Mutations[self.name]
-        return desc
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add: # add bonuses
+            self.object.AR += AR_adjust
+
+        if len(self.object.Mutations) > pre_add and self.object.RP:
+            self.object.DEX += DEX_adjust
+            self.object.CHA += CHA_adjust
+
+        return description
 
 
 class Chameleon(Mutation):
@@ -1842,10 +1987,13 @@ class Chameleon(Mutation):
         self.table_name = None
         self.link = "#_chameleon"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return "When naked and motionless blend into background."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Blend into background when naked and motionless.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Decoy(Mutation):
@@ -1863,12 +2011,13 @@ class Decoy(Mutation):
         self.table_name = None
         self.link = "#_decoy"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        intensity = math.ceil(self.object.PSTR / 2)
-        return f"Drop a fleshy decoy that attracts low INT targets. Poison intensity {intensity}."
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        intensity = math.ceil(self.object.PSTR / 2) + self.object.Level
+        description = f'Drop a fleshy decoy that attracts low INT targets. Poison intensity {intensity}.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class DensityManipulation(Mutation):
     def __init__(self, object):
@@ -1885,10 +2034,12 @@ class DensityManipulation(Mutation):
         self.table_name = None
         self.link = "#_density_manipulation"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Change density to walk on a liquid or gas. "
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Change density to walk on a liquid or gas.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class DiminishedSense(Mutation):
@@ -1905,10 +2056,13 @@ class DiminishedSense(Mutation):
         self.attribute_bonus = None
         self.table_name = table.diminished_sense
         self.link = "#_diminished_sense"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Mutant has no {self.object.Mutations[self.name]}. Consult rule set for effects."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Mutant has diminished {perm.lower()} '
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class DoublePhysicalPain(Mutation):
@@ -1926,10 +2080,12 @@ class DoublePhysicalPain(Mutation):
         self.table_name = None
         self.link = "#_double_physical_pain"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Pain is doubled, add 2d8 HPS damage. Heal twice as fast."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'PAIN is doubled, add 2d8 HPS to any damage, HEAL twice as fast.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class EdibleTissue(Mutation):
@@ -1947,10 +2103,12 @@ class EdibleTissue(Mutation):
         self.table_name = None
         self.link = "#_edible_tissue"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return "Thick fleshy strips feed the mutant for a day."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Thick fleshy strips feed the mutant for a day.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class ElectricShock(Mutation):
@@ -1967,13 +2125,14 @@ class ElectricShock(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_electric_shock"
-        self.add_mutation()
 
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         electro_bump = self.object.Level
-        return (
-            f"Touch for 1d10+{6 + electro_bump} or shoot bolt for 3d4+{electro_bump}."
-        )
+        description = f'Touch for 1d10+{6 + electro_bump} or shoot bolt for 3d4+{electro_bump}.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class EnthalpyAttack(Mutation):
@@ -1991,10 +2150,12 @@ class EnthalpyAttack(Mutation):
         self.table_name = None
         self.link = "#_enthalpy_attack"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"Shoot a blast of cold and ice for 2d8+{self.object.Level}."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Shoot a blast of cold and ice for 2d8+{self.object.Level}.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class FatCellAccumulation(Mutation):
@@ -2009,20 +2170,17 @@ class FatCellAccumulation(Mutation):
         self.CR = "*.9"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.family_hit_location_pivot_table
+        self.table_name = None
         self.link = "#_fat_cell_accumulation"
 
-        self.family_type = self.object.FAMILY
-        self.table_name = table.family_hit_location_pivot_table[self.family_type]
-        blobcation = please.get_table_result(self.table_name)
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         if self.name not in self.object.Mutations:
-            self.object.Mutations[
-                self.name
-            ] = blobcation  # equivalent of add_mutation()
-
-    def build_desc(self):
-        return f"Big obvious blob of fat located on {self.object.Mutations[self.name]}"
+            perm = please.get_table_result(table.family_hit_location_pivot_table[self.object.FAMILY])
+        description = f'Big obvious fat blob on the {perm} of the persona.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class GasGeneration(Mutation):
@@ -2032,24 +2190,20 @@ class GasGeneration(Mutation):
         self.name = "Gas Generation"
         self.kind = "combat"
         self.distance = "5 hex radius"
-        self.duration = "1d4-1"
+        self.duration = "1d4-1 units"
         self.frequency = ("CON", "per day", 5.0)
-        self.CR = "0"
+        self.CR = "10"
         self.roll_bonus = None
         self.attribute_bonus = None
         self.table_name = table.poison_gas_type
         self.link = "#_gas_generation"
-        # self.add_mutation() removed for complex perm
 
-        gas_belch = please.get_table_result(self.table_name)
-
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = gas_belch  # equivalent of add_mutation()
-
-    def build_desc(self):
-        belcher = self.object.Mutations[self.name]
-        return f"Intensity {math.ceil(self.object.CON/2) + self.object.Level} {belcher}"
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'{perm} Intensity {math.ceil(self.object.CON/2) + self.object.Level}.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Haste(Mutation):
@@ -2066,10 +2220,13 @@ class Haste(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_haste"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Double speed of everything. Move at {self.object.Move * 2} h/u."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Double speed of everything. Double MOVE and half task time.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class HeatGeneration(Mutation):
@@ -2087,10 +2244,13 @@ class HeatGeneration(Mutation):
         self.table_name = None
         self.link = "#_heat_generation"
 
-        self.add_mutation()
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Searing flame attack (shoot) for 3d6+{self.object.Level} HPS damage.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
-    def build_desc(self):
-        return f"Shoot searing flame attack (C) for 3d6+{self.object.Level} HPS damage."
 
 # todo reassess persona DEX -> move, PSTR -> WA, CON -> HPM
 class HeightenedAttribute(Mutation):
@@ -2107,40 +2267,21 @@ class HeightenedAttribute(Mutation):
         self.attribute_bonus = None
         self.table_name = table.heightened_attribute
         self.link = "#_heightened_attribute"
-        # self.add_mutation() removed for complex perm
 
-        self.perm = please.get_table_result(self.table_name)
-        hattribute, __ = self.perm.split(":")
-        old_attribute = getattr(self.object, hattribute)
-        hattribute_bump = please.roll_this("2d8")
-
-        # final heightened attribute cannot be less than 15 or 60 for HPM
-        if hattribute in ["AWE", "CHA", "CON", "DEX", "INT", "PSTR"]:
-            hattribute_bump = (
-                hattribute_bump
-                if (hattribute_bump + old_attribute) > 15
-                else (15 - old_attribute)
-            )
-
-        elif hattribute == "HPM":
-            hattribute_bump = math.ceil(old_attribute * (hattribute_bump / 10))
-            hattribute_bump = (
-                hattribute_bump
-                if (hattribute_bump + old_attribute) > 60
-                else (60 - old_attribute)
-            )
-
-        # Check to avoid repeats
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
-            if please.say_yes_to(
-                f"Increase {hattribute} from {old_attribute} to {old_attribute + hattribute_bump}. APPLY it? "
-            ):
-                setattr(self.object, hattribute, old_attribute + hattribute_bump)
-
-    def build_desc(self):
-        return f"{self.object.Mutations[self.name]}"
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'{perm}'
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            hattribute, _ = perm.split(":")
+            old_attribute = getattr(self.object, hattribute)
+            new_attribute = (old_attribute + please.roll_this("2d8")) if (old_attribute + please.roll_this("2d8")) > 15 else 15
+            if hattribute == "HPM": # HPM is a special case and not 2d8
+                new_attribute =  math.ceil(old_attribute * 1.5)         
+            setattr(self.object, hattribute, new_attribute)
+        return description
 
 
 class HeightenedVision(Mutation):
@@ -2157,34 +2298,23 @@ class HeightenedVision(Mutation):
         self.attribute_bonus = None
         self.table_name = table.heightened_vision
         self.link = "#_heightened_vision"
-        # self.add_mutation() removed for complex perm
 
-        self.perm = please.get_table_result(self.table_name)
-
-        # Check to avoid repeats
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
-
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        some_thing_else = 42
-        if some_thing == "Infravision: Thermal based see in the dark.":
-            some_thing_else = f"Up to {self.object.AWE * 2} hexes."
-        elif some_thing == "Semi Circular: 270 degree field of vision.":
-            some_thing_else = f"AWE is {self.object.AWE * 2} vs ambush."
-        elif some_thing == "Telescopic: Zoom in 10x. +100 on sniping attack rolls.":
-            some_thing_else = (
-                f"Up to {(self.object.AWE + self.object.Level)* 10} hexes."
-            )
-        elif some_thing == "X Ray: Penetrating and dangerous. +30 on x-ray rolls.":
-            some_thing_else = (
-                f"Up to {math.ceil((self.object.AWE + self.object.Level)/8)} hexes. "
-            )
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        myopic, _ = perm.split(":")
+        if myopic in ['Infravision','Semi Circular']:
+            perm_plus = f'Up to {self.object.AWE * 2 + self.object.Level} hexes.'
+        elif myopic == "X-Ray":
+            perm_plus = f"Up to {math.ceil((self.object.AWE + self.object.Level)/8)} hexes."
+        elif myopic == "Telescopic":
+            perm_plus = f"Up to {(self.object.AWE + self.object.Level)* 10} hexes."
         else:
-            some_thing_else = ""
+            perm_plus = ""
 
-        return f"{some_thing} {some_thing_else}"
+        description = f'{perm} {perm_plus}'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class IncreasedMetabolism(Mutation):
@@ -2192,7 +2322,7 @@ class IncreasedMetabolism(Mutation):
         self.is_mental = False
         self.object = object
         self.name = "Increased Metabolism"
-        self.kind = "non-combat"
+        self.kind = "defect"
         self.distance = "Persona Only"
         self.duration = "Until Dead"
         self.frequency = "Constant"
@@ -2202,10 +2332,12 @@ class IncreasedMetabolism(Mutation):
         self.table_name = None
         self.link = "#_increased_metabolism"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"Burns twice the energy needs twice the food."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Burn twice the energy and need twice the food.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class LaunchableQuills(Mutation):
@@ -2222,28 +2354,26 @@ class LaunchableQuills(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_launchable_quills"
-        # self.add_mutation() removed for complex perm
 
-        quill_number = please.roll_this("2d8")
-        poison = True if please.do_1d100_check(self.object.CON) else False
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm check
 
-        if poison:
-            self.perm = f"{quill_number} launchable (B) poisonous quills."
-        else:
-            self.perm = f"{quill_number} launchable (B) quills. 1d8 HPS per quill."
+        # todo consider a random poison effect
+        if self.name not in self.object.Mutations: # perm build
+            quill_number = please.roll_this("2d6")
+            poisonous = 'poisonous stabby' if please.do_1d100_check(self.object.CON) else 'stabby'
+            perm = f'{str(quill_number)}: {poisonous}'
 
-        # Check to avoid repeats
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
+        ### build description
+        amount,poison = perm.split(":")
+        amount = int(amount)
+        intensity = "" if "poison" not in poison else f'Poison intensity {self.object.CON + self.object.Level}.'
+        hold_back = "all" if amount - self.object.Level < 1 else self.object.Level
+        description = f'{amount} launchable {poisonous} quills. Hold back {hold_back} quill(s). 1d8 HPS damage, fling attack. {intensity}'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        some_thing_else = " "
-        if "poisonous" in some_thing:
-            some_thing_else = f"Intensity {self.object.CON}."
-
-        return f"{some_thing} Hold back {self.object.Level} quill(s). {some_thing_else}"
 
 
 class LightGeneration(Mutation):
@@ -2260,11 +2390,14 @@ class LightGeneration(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_light_generation"
-        self.add_mutation()
 
-    def build_desc(self):
-        some_thing = self.object.CHA
-        return f"Glow 1 hex. Flashlight {some_thing} hexes. Blinding flash intensity {some_thing}."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        some_thing = self.object.CHA + self.object.Level
+        description = f'Glow 1 hex. Flashlight {some_thing} hexes. Blinding flash intensity {some_thing}.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class MechanicalInsertion(Mutation):
@@ -2279,26 +2412,24 @@ class MechanicalInsertion(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.family_hit_location_pivot_table
+        self.table_name = None
         self.link = "#_mechanical_insertion"
-        # self.add_mutation() removed for complex perm
 
-        self.family_type = self.object.FAMILY
-        self.table_name = table.family_hit_location_pivot_table[self.family_type]
-        toycation = please.get_table_result(self.table_name)
+    ### todo roll the actual toy type
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
 
-        cat_toy = please.get_table_result(table.mechanical_insertions)
-
-        self.perm = f"{cat_toy} located in/on {toycation}."
-
-        # Check to avoid repeats
         if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
+            insertion_location = please.get_table_result(table.family_hit_location_pivot_table[self.object.FAMILY])
+            insertion_type = please.get_table_result(table.toy_categories)
+            perm = f'{insertion_location}:{insertion_type}'
 
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        return f"{some_thing}"
+        ### build description
+        insertion_location, insertion_type = perm.split(":")
+        description = f'The artifact {insertion_type} is built into the {insertion_location} of the persona'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Mitosis(Mutation):
@@ -2316,10 +2447,12 @@ class Mitosis(Mutation):
         self.table_name = None
         self.link = "#_mitosis"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"Organs grow back. No aging. No ongoing damage."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Organs grow back. No aging. No ongoing damage.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class MechanicalProsthesis(Mutation):
@@ -2334,24 +2467,17 @@ class MechanicalProsthesis(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.family_hit_location_pivot_table
+        self.table_name = None
         self.link = "#_mechanical_prosthesis"
-        # self.add_mutation() removed for complex perm
 
-        self.family_type = self.object.FAMILY
-        self.table_name = table.family_hit_location_pivot_table[self.family_type]
-        prosthesis = please.get_table_result(self.table_name)
-
-        self.perm = f"{prosthesis} is replaced with a prosthesis."
-
-        # Check to avoid repeats
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
-
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        return f"{some_thing}"
+            perm = please.get_table_result(table.family_hit_location_pivot_table[self.object.FAMILY])
+        description = f'A noisy prosthesis has replaced the {perm} of this persona.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class MultipleBodyParts(Mutation):
@@ -2366,142 +2492,52 @@ class MultipleBodyParts(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.multiple_body_parts
+        self.table_name = None
         self.link = "#_multiple_body_parts"
-        # self.add_mutation() removed for complex perm
 
-        multi_part = please.get_table_result(self.table_name)
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
 
-        if multi_part == "Arms":
-            army = please.roll_this("1d4")
-            self.perm = f"Mutant has {army} additional fully functional {multi_part}(s)"
-
-        elif multi_part == "Ears":
-            eary = please.roll_this("1d6")
-            # ears 1, 3 , 5 work and increase AWE per ear and penalize CHA by 2
-            # ears 2, 4, 6 are cosmetic
-            if eary % 2 == 0:
-                cha_bump = 0
-                # only 2, 4 or 6 ears
-                if eary == 2:
-                    self.perm = f"Mutant has 2 extra ears. 1 functional and 1 cosmetic."
-                    awe_bump = 1
-                elif eary == 4:
-                    self.perm = f"Mutant has 4 extra ears. 2 functional and 2 cosmetic."
-                    awe_bump = 2
-                elif eary == 6:
-                    self.perm = f"Mutant has 6 extra ears. 3 functional and 3 cosmetic."
-                    awe_bump = 3
-
-            else:
-                # only 1, 3, or 5 ears
-                cha_bump = -2
-                if eary == 1:
-                    self.perm = f"Mutant has 1 extra functional ear."
-                    awe_bump = 1
-                elif eary == 3:
-                    self.perm = f"Mutant has 3 extra ears. 2 functional and 1 cosmetic."
-                    awe_bump = 2
-                elif eary == 5:
-                    self.perm = f"Mutant has 5 extra ears. 3 functional and 2 cosmetic."
-                    awe_bump = 3
-
-            if self.name not in self.object.Mutations:
-                # check on attribute bumps
-                if please.say_yes_to(
-                    f"Multiple body parts {multi_part} has an AWE bump of {awe_bump}. APPLY it?"
-                ):
-                    self.object.AWE += awe_bump
-                if please.say_yes_to(
-                    f"Multiple body parts {multi_part} has a CHA penalty of {cha_bump}. APPLY it?"
-                ):
-                    self.object.CHA += cha_bump
-
-        elif multi_part == "Eyes":
-            eye_eye_captain = please.roll_this("1d6")
-            # eyes 1, 3 , 5 work and increase AWE per eye and penalize CHA by 2
-            # eyes 2, 4, 6 are cosmetic
-            if eye_eye_captain % 2 == 0:
-                # only 2, 4 or 6 eyes
-                if eye_eye_captain == 2:
-                    self.perm = f"Mutant has 2 extra eyes. 1 functional and 1 blind."
-                    awe_bump = 1
-                elif eye_eye_captain == 4:
-                    self.perm = f"Mutant has 4 extra eyes. 2 functional and 2 blind."
-                    awe_bump = 2
-                elif eye_eye_captain == 6:
-                    self.perm = f"Mutant has 6 extra eyes. 3 functional and 3 blind."
-                    awe_bump = 3
-
-            else:
-                # only 1, 3, or 5 eyes
-                cha_bump = -2
-                if eye_eye_captain == 1:
-                    self.perm = f"Mutant has 1 extra eye."
-                    awe_bump = 1
-                elif eye_eye_captain == 3:
-                    self.perm = f"Mutant has 3 extra eyes. 2 functional and 1 blind."
-                    awe_bump = 2
-                elif eye_eye_captain == 5:
-                    self.perm = f"Mutant has 5 extra eyes. 3 functional and 2 blind."
-                    awe_bump = 3
-
-            if self.name not in self.object.Mutations:
-                # check on attribute bumps
-                if please.say_yes_to(
-                    f"Multiple body parts {multi_part} has an AWE bump of {awe_bump}. APPLY it?"
-                ):
-                    self.object.AWE += awe_bump
-
-        elif multi_part == "Feet":
-            best_feet_forward = please.roll_this("1d2+1")
-            self.perm = f"Each leg has {best_feet_forward} feet. No impairments."
-
-        elif multi_part == "Fingers":
-            fisties = please.roll_this("1d3+5")
-            self.perm = f"Each hand has {fisties} fingers. No impairments."
-
-        elif multi_part == "Head":
-            cha_bump = -4
-            self.perm = f"Mutant has a semi-autonomous, unhidable extra head."
-            if please.say_yes_to(
-                f"Multiple body parts {multi_part} has a CHA penalty of {cha_bump}. APPLY it?"
-            ):
-                self.object.CHA += cha_bump
-
-        elif multi_part == "Legs":
-            move = self.object.Move
-            leg_ups = please.roll_this("1d6")
-            move_bump = math.ceil((1 + leg_ups / 10) * move)
-            self.perm = f"Mutant has {leg_ups + 2} legs. No impairments."
-            if please.say_yes_to(
-                f"Multiple {multi_part} has a Move bump of {move} -> {move_bump}. APPLY it?"
-            ):
-                self.object.Move = move_bump
-
-        elif multi_part == "Mouthes":
-            mouthy = please.roll_this("1d4")
-            self.perm = f"Mutant has {mouthy} extra semi-autonomous, drooling, speechless mouth(es)"
-            if please.say_yes_to(
-                f"Multiple body parts {multi_part} has a CHA penalty of {mouthy}. APPLY it?"
-            ):
-                self.object.CHA -= mouthy
-
-        elif multi_part == "Noses":
-            nosey_nellie = please.roll_this("1d8")
-            self.perm = f"Mutant has {nosey_nellie} additional nose(s), and all associated hassles."
-
+        if self.name not in self.object.Mutations: # complex perm generation
+            perm = f'{please.get_table_result(table.multiple_body_parts)}:{please.roll_this("1d4")}'
         else:
-            print("Something went wrong with the multiple body part table")
+            perm = super().return_perm(self.name, self.table_name) # perm part
 
-        # Check to avoid repeats
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
+        ### Build description
+        body_part,number = perm.split(":")
+        number = int(number)
+        CHA_bump = 0
+        AWE_bump = 0
+        Move_bump = 0
 
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        return f"{some_thing}"
+        print(f'{body_part = }')
+
+        if body_part == "Arms":
+            description = f'{number} additional fully functional arms.'
+
+        elif body_part in ["Ears", "Eyes", "Feet", "Fingers"]:
+            description = f'{number} additional cosmetic and functional {body_part.lower()}.'
+            CHA_bump += number if body_part in ["Ears", "Eyes"] else 0
+            AWE_bump += number if body_part in ["Ears", "Eyes"] else 0
+
+        elif body_part in ["Heads","Mouths","Noses"]:
+            description = f'{number} additional semi-autonomous unappealing {body_part.lower()}'
+            CHA_bump += number*2 if body_part == "Heads" else number
+            AWE_bump += number if body_part == "Noses" else 0
+
+        elif body_part == "Legs":
+            description = f'{number} additional fully functional {body_part.lower()}.'
+            Move_bump = 3 + number
+
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            self.object.AWE += AWE_bump
+            self.object.Move += Move_bump
+            if self.object.RP:
+                self.object.CHA -= CHA_bump
+
+        return description
 
 
 class NewOrgan(Mutation):
@@ -2518,43 +2554,37 @@ class NewOrgan(Mutation):
         self.attribute_bonus = None
         self.table_name = table.new_organ_type
         self.link = "#_new_organ"
-        # self.add_mutation() removed for complex perm
 
-        new_organ = please.get_table_result(self.table_name)
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        ## irritation perm swaps for light and plastics 
+        if perm == "Light Emitting Flesh: Creates a radiant glow.":
+            perm = "Light Absorbing Flesh: Creates a shadow." if please.do_1d100_check(20) else perm
+        if perm == "Plastics Producing Gland: Plastic oozing organ.":
+            perm = "Plastics Destroying Gland: Melt away, and eat plastics." if please.do_1d100_check(30) else perm
 
-        if new_organ == "Light Tissue:" and please.do_1d100_check(20):
-            new_organ = "Dark Tissue:"
+        title, _ = perm.split(":")
+        bonus_info = ""
 
-        self.perm = new_organ
+        if title in ["Light Emitting Flesh", "Light Absorbing Flesh"]:
+            bonus_info = f'Radius is {self.object.Level} hexes.'
 
-        # Check to avoid repeats
-        if self.name not in self.object.Mutations:
-            # replaces add_mutation() above
-            self.object.Mutations[self.name] = self.perm  # equivalent of add_mutation()
+        elif title == "Blood Draining Proboscis":
+            bonus_info = f'Slurp up {math.ceil(self.object.Level/2)}d6 per unit.'
 
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        some_thing_else = ""
+        elif title == "Electricity Storing Organ":
+            bonus_info = f'Recharge {self.object.CON} cells. Zap for {math.ceil(self.object.Level/2)}d8 HPS, 1 hex range.'
 
-        if some_thing == "Blood Draining Proboscis:":
-            some_thing_else = f"Drains {self.object.Level}d6 HPS per unit."
+        elif title == "Ink Producing Gland":
+            bonus_info = f'Cloud water as needed. Squirt to blind {math.ceil(self.object.CON/2) + self.object.Level} intensity, {math.ceil(self.object.Level)} hex range, alternating units.' 
 
-        elif some_thing == "Electricity Storing Organ:":
-            some_thing_else = f"Store {self.object.CON} cells. Zap for {self.object.Level}d8 HPS, 1 hex range."
+        elif title == "Kirlian Energy Reflective Skull":
+            bonus_info = f'MSTR is {self.object.MSTR * 2 + self.object.Level} vs mental attacks.'
 
-        elif some_thing == "Ink Producing Gland: Endless writing.":
-            some_thing_else = f"Squirting a cloud in water. \nBlinding ink for {math.ceil(self.object.CON/2)} intensity, 6 hex range, {math.ceil(self.object.CON/4)} per day."
-
-        elif some_thing == "Light Tissue:":
-            some_thing_else = f"{self.object.Level} hex radius of light."
-
-        elif some_thing == "Dark Tissue:":
-            some_thing_else = f"Absorbs light. {self.object.Level} hex radius of darkness. +20 sneaky rolls in dark."
-
-        elif some_thing == "Kirlian Energy Absorptive Skull:":
-            some_thing_else = f"MSTR = {(self.object.MSTR + self.object.Level) * 2} vs mental attacks."
-
-        return f"{some_thing} {some_thing_else}"
+        description = f'{perm} {bonus_info}'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class NonBreathing(Mutation):
@@ -2572,10 +2602,14 @@ class NonBreathing(Mutation):
         self.table_name = None
         self.link = "#_non_breathing"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Respiration without air or light."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Respiration without air or light.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class NoResistanceToDisease(Mutation):
@@ -2593,10 +2627,13 @@ class NoResistanceToDisease(Mutation):
         self.table_name = None
         self.link = "#_no_resistance_to_disease"
 
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"CON is 1d4-1 versus disease rolls."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'CON is {math.ceil(self.object.Level/2)}  vs infectious diseases.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class NoResistanceToPoison(Mutation):
@@ -2614,10 +2651,12 @@ class NoResistanceToPoison(Mutation):
         self.table_name = None
         self.link = "#_no_resistance_to_poison"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"CON is 1d4-1 versus poison attacks."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'CON is {math.ceil(self.object.Level/2)}  vs toxins.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class OversizedBodyPart(Mutation):
@@ -2635,65 +2674,44 @@ class OversizedBodyPart(Mutation):
         self.table_name = table.oversized_body_part
         self.link = "#_oversized_body_part"
 
-        big_booty = please.get_table_result(table.oversized_body_part)
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
 
-        self.perm = big_booty
-        if self.name not in self.object.Mutations:
-            self.object.Mutations[self.name] = self.perm
+        ### build description
+        bonus_info = ""
+        if perm in ["Ears","Nose: Super taster", "Nose. Super taster"]:
+             bonus_info = f"AWE = {self.object.AWE * 2 + self.object.Level} vs ambush."
+        elif perm == "Lungs":
+            bonus_info = f"Hold breath for {self.object.CON + self.object.Level} minutes."
+        description = f'Obviously oversized {perm}. {bonus_info}'
 
-            # oversize_body_part has attribute bumps!
-            if big_booty == "Arms":
-                if please.say_yes_to("Oversized arms gives +2 PSTR. APPLY? "):
-                    self.object.PSTR += 2
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            if perm == "Arms":
+                self.object.PSTR += 2
+            
+            elif perm == "Brain":
+                self.object.INT += 2
+                self.object.MSTR += 2
 
-            elif big_booty == "Brain":
-                if please.say_yes_to("Oversized brain gives +2 INT. APPLY? "):
-                    self.object.INT += 2
-                if please.say_yes_to("Oversized brain gives +2 MSTR. APPLY? "):
-                    self.object.MSTR += 2
+            elif perm in ["Ears","Eyes. See in darkness", "Nose. Super taster"]:
+                self.object.AWE += 2
 
-            elif big_booty == "Ears":
-                if please.say_yes_to("Oversized ears gives +2 AWE. APPLY? "):
-                    self.object.AWE += 2
-
-            elif big_booty == "Eyes. See in darkness":
-                if please.say_yes_to("Oversized eyes gives +1 AWE. APPLY? "):
-                    self.object.AWE += 1
-
-            elif big_booty == "Loins":
-                if please.say_yes_to("Oversized loins gives +1 CON. APPLY? "):
+            elif perm == "Loins":
                     self.object.CON += 1
-                if please.say_yes_to("Oversized loins gives +1 CHA. APPLY? "):
                     self.object.CHA += 1
+                    self.object.HPM += please.roll_this("1d8+1")
 
-            elif big_booty == "Lungs":
-                if please.say_yes_to("Oversized lungs gives +1 CON. APPLY? "):
-                    self.object.CON += 1
+            elif perm in ["Heart","Lungs"]:
+                self.object.CON += 2
 
-            elif big_booty == "Heart":
-                if please.say_yes_to("Oversized heart gives +2 CON. APPLY? "):
-                    self.object.CON += 2
+            elif perm == "Legs":
+                self.object.PSTR += 2
+                self.object.Move = math.ceil(self.object.Move * 1.5)
 
-            elif big_booty == "Legs":
-                if please.say_yes_to("Oversized legs gives +2 PSTR. APPLY? "):
-                    self.object.PSTR += 2
-                if please.say_yes_to("Oversized legs gives Move bonus. APPLY? "):
-                    self.object.Move = math.ceil(self.object.Move * 1.5)
-
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        some_thing_else = ""
-
-        if some_thing == "Ears":
-            some_thing_else = f"AWE = {self.object.AWE * 2} for ambush."
-
-        elif some_thing == "Lungs":
-            some_thing_else = f"Hold breath for {self.object.CON} minutes."
-
-        elif some_thing == "Nose: Super taster":
-            some_thing_else = f"AWE = {self.object.AWE * 2} for ambush."
-
-        return f"Obviously oversized {some_thing}. {some_thing_else}"
+        return description
 
 
 class PhotosyntheticSkin(Mutation):
@@ -2711,18 +2729,13 @@ class PhotosyntheticSkin(Mutation):
         self.table_name = None
         self.link = "#_photosynthetic_skin"
 
-        if self.object.FAMILY == "Anthro" and self.object.FAMILY_TYPE== "Florian":
-            self.perm = "Double healing rate for florian with photosynthetic skin"
-        else:
-            self.perm = "Respiration via photosynthesis. Hold breath indefinitely."
-
-        if self.name not in self.object.Mutations:
-            self.object.Mutations[self.name] = self.perm
-
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        return f"{some_thing}"
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        bonus_info = "" if self.object.FAMILY_TYPE != "Florian" else "Double healing rate (florian)."
+        description = f'Respiration via photosynthesis. Hold breath indefinitely. {bonus_info}'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class PhosphorescentSkin(Mutation):
     def __init__(self, object):
@@ -2738,10 +2751,13 @@ class PhosphorescentSkin(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_phosphorescent_skin"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Glows continuously. Can't hide in the dark."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Continuous infuriating glow.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Pockets(Mutation):
@@ -2758,11 +2774,13 @@ class Pockets(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_pockets"
-        self.add_mutation()
 
-    def build_desc(self):
-        some_thing = math.ceil(self.object.Wate * 0.05)
-        return f"Create body pockets. Total storage wate is {some_thing} kgs."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Create up to {self.object.Level} pocket(s) hiding up to {math.ceil(self.object.Wate * 0.05) + self.object.Level} kgs.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class PressurizedBody(Mutation):
@@ -2779,11 +2797,13 @@ class PressurizedBody(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_pressurized_body"
-        self.add_mutation()
 
-    def build_desc(self):
-        some_thing = self.object.Level + self.object.PSTR
-        return f"Protect self from crushing attacks. Fall {some_thing} hexes no damage."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Negate crushing attacks. Fall {self.object.Level + self.object.PSTR} hexes no damage.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class RadiatingEyes(Mutation):
@@ -2800,10 +2820,13 @@ class RadiatingEyes(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_radiating_eyes"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Obvious radiation beams attack at intensity 2d6+{self.object.Level}."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Bright beams of radiation shoot from the eyes. Intensity 2d6+{self.object.Level}.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Regeneration(Mutation):
@@ -2820,11 +2843,14 @@ class Regeneration(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_regeneration"
-        self.add_mutation()
 
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         base_heal = self.object.CON + self.object.Level
-        return f"Heal {math.ceil(base_heal/5)} HPS per unit. Massive regen {math.ceil(base_heal/2)} HPS once a day"
+        description = f"Heal {math.ceil(base_heal/5)} HPS per unit. Massive regen {math.ceil(base_heal/2)} HPS once a day"
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class RubberySkin(Mutation):
@@ -2841,10 +2867,14 @@ class RubberySkin(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_rubbery_skin"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Inorganic rubbery exterior layer. "
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Inorganic rubbery exterior layer. '
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Rust(Mutation):
@@ -2861,10 +2891,13 @@ class Rust(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_rust"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Instantaneous metallic oxidation. 10d10 vs robots."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Instantaneous metallic oxidation. 10d10 vs robots with strike attack.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class SelfDestruction(Mutation):
@@ -2881,10 +2914,13 @@ class SelfDestruction(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_self_destruction"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Spontaneous violent combustion possible. {self.object.Level}d20 HPS damage."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Spontaneous violent combustion possible. {self.object.CON}d20 HPS damage, {self.object.Level} hex radius.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class ShapeChange(Mutation):
@@ -2901,10 +2937,13 @@ class ShapeChange(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_shape_change"
-        self.add_mutation()
 
-    def build_desc(self):
-        return f"Cosmetically change into any organic shape."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Cosmetically change into any organic shape.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class SizeManipulation(Mutation):
@@ -2921,14 +2960,16 @@ class SizeManipulation(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_size_manipulation"
-        self.add_mutation()
 
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         two_sizes = self.object.Hite
         one_pstr = self.object.PSTR
         da_a = math.ceil((one_pstr / 2) * 1.5)
-        da_b = math.ceil((one_pstr / 4) * 1.5)
-        return f"Shrink to {math.floor(two_sizes * .25)} cms -> AR {self.object.AR + 75}. \nEnlarge to {math.ceil(two_sizes * 1.5)} cms -> DA-A {da_a} and DA-B {da_b}."
+        description = f"Shrink to {math.floor(two_sizes * .25)} cms (AR {self.object.AR + 75}). Enlarge to {math.ceil(two_sizes * 1.5)} cms (Strike attack force {da_a} HPS)."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class SkinStructureChange(Mutation):
@@ -2947,20 +2988,17 @@ class SkinStructureChange(Mutation):
         self.link = "#_skin_structure_change"
         # self.add_mutation() removed for complex perm
 
-        skinny_dip = please.get_table_result(self.table_name)
-        self.perm, ar_bump = skinny_dip[0], skinny_dip[1]
-
-        if self.name not in self.object.Mutations:
-            self.object.Mutations[self.name] = self.perm  # replaces self.add_mutation()
-
-            if please.say_yes_to(
-                f"{skinny_dip[0]} has an AR bump of {skinny_dip[1]} APPLY it?"
-            ):
-                self.object.AR += ar_bump
-
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        return f"{some_thing}"
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        skin_change, AR_bump = perm.split(":")
+        AR_bump = int(AR_bump)
+        description = f'{skin_change}.'
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            self.object.AR += AR_bump
+        return description
 
 
 class SmokeScreen(Mutation):
@@ -2978,12 +3016,14 @@ class SmokeScreen(Mutation):
         self.table_name = None
         self.link = "#_smoke_screen"
 
-        self.add_mutation()
-
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         diameter = math.ceil((self.object.PSTR + self.object.Level) / 3)
-        length = diameter * self.object.Move
-        return f"Smoke cloud {diameter} hexes or smoke fence {length} hexes."
+        length = diameter * self.object.Move 
+        description =  f"Smoke cloud {diameter} hexes or smoke fence {length} hexes."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class SonarAttack(Mutation):
@@ -3001,12 +3041,13 @@ class SonarAttack(Mutation):
         self.table_name = None
         self.link = "#_sonar_attack"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        distance = math.ceil(self.object.MSTR / 2)
-        return f"Sound blast: 1h 4d8, {math.ceil(distance/2)}h 3d8, {distance}h 2d8"
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        distance = math.ceil(self.object.MSTR / 2) + self.object.Level
+        description = f'Sound blast: 1h 4d8, {math.ceil(distance/2)}h 3d8, {distance}h 2d8'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class SpitPoison(Mutation):
     def __init__(self, object):
@@ -3022,12 +3063,14 @@ class SpitPoison(Mutation):
         self.attribute_bonus = None
         self.table_name = table.poison_spittle_type
         self.link = "#_spit_poison"
-        self.add_mutation()
 
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        return f"{some_thing} Intensity 1d8+{self.object.Level}"
-
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        intensity = f'intensity 1d8+{self.object.Level}. Incapacitated 1 unit per intensity' if perm != "Killing poison" else  f'intensity 1d8+{self.object.Level}. 1d4 HPS per intensity.'
+        description = f'{perm}, {intensity}'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 class StaticQuills(Mutation):
     def __init__(self, object):
@@ -3043,16 +3086,16 @@ class StaticQuills(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_static_quills"
-        self.add_mutation()
 
-        if self.name not in self.object.Mutations:
-            if please.say_yes_to(f"Static quills boosts AR by 101. APPLY it?"):
-                self.object.AR += 101
-
-    def build_desc(self):
-        return (
-            f"Spines and quills hurt attackers. 1d6+{self.object.Level} HPS to punches."
-        )
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Spines and quills hurt attackers. 1d6+{self.object.Level} HPS vs punches.'
+        pre_add = len(self.object.Mutations)
+        super().add_mutation(self.name, perm, description) # check to add
+        if len(self.object.Mutations) > pre_add:
+            self.object.AR += 101 
+        return description
 
 
 class StrangeNewBodyPart(Mutation):
@@ -3070,56 +3113,29 @@ class StrangeNewBodyPart(Mutation):
         self.table_name = table.strange_new_body_part
         self.link = "#_strange_new_body_part"
 
-        stranger_things = please.get_table_result(self.table_name)
-        self.perm = stranger_things
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
 
-        if stranger_things == "Horns on head.":
-            self.perm = f"{self.perm}  {please.roll_this('1d4')} pairs."
-
-        # this does not reflect the random nature of EXP, should be random by random
-        if stranger_things == "Fully articulate tentacles!":
-            tenties = please.roll_this("1d4")
-            if tenties == 1:
-                self.perm = f"{self.perm} Left arm is a tentacle."
-            elif tenties == 2:
-                self.perm = f"{self.perm} Both arms are tentacles."
-            elif tenties == 3:
-                self.perm = f"{self.perm}  Both arms, left leg are tentacles."
-            elif tenties == 4:
-                self.perm = f"{self.perm}  Both arms, both legs are tentacles."
-            else:
-                print("ERROR: Strange New Body Part")
-
-        if (
-            stranger_things
-            in ["Fins attached to arms, and legs.", "Gills for breathing underwater."]
-            and self.object.FAMILY_TYPE== "Aquarian"
-        ):
-            if please.say_yes_to("Do you an aquarian to have fishy things REALLY? "):
-                pass
-            else:
-                return
-
-        if self.name not in self.object.Mutations:
-            self.object.Mutations[self.name] = self.perm
-
-            if stranger_things == "Turtle Shell that mutant can retract into.":
-                if please.say_yes_to("Turtle shell increases AR to 777. APPLY this? "):
-                    self.object.AR = 777
-
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        some_thing_else = ""
-
-        if some_thing in [
-            "Ears fold up and down accordion like.",
+        bonus_info = ""
+        if perm in [
+            "Antennae replace ears. Listen around corners.",
+            "Ears fold up and down like an accordion.",
             "Eyes are concave reflectors.",
-        ]:
-            some_thing_else = f"AWE {2* self.object.AWE} vs ambush."
-        elif some_thing == "Fins attached to arms, and legs.":
-            some_thing_else = f"Swim at {self.object.Move} h/u."
-
-        return f"{some_thing} {some_thing_else}"
+            "Eye Stalks (30cms) replace eye sockets. Look around corners.",
+            "Nose is a long flexible tube. Smell around corners.",
+            ]:
+            bonus_info = f"AWE = {2* self.object.AWE} vs ambush."
+            
+        elif perm in [
+            "Fins attached to arms, and legs. Swim like an aquarian.",
+            "Gills for breathing underwater. Swim like an aquarian.",]:
+            bonus_info = f"Swim at {self.object.Move} h/u."
+            if self.object.FAMILY_TYPE == "Aquarian":
+                bonus_info = f"Swim at {self.object.Move * 2} h/u. (Aquarian)"
+        description = f'{perm} {bonus_info}'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class SymbioticAttachment(Mutation):
@@ -3137,10 +3153,12 @@ class SymbioticAttachment(Mutation):
         self.table_name = None
         self.link = "#_symbiotic_attachment"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"Control target via nerve tentacle."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Control organic target via nerve tentacle.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class TearAwayBodyPart(Mutation):
@@ -3158,10 +3176,12 @@ class TearAwayBodyPart(Mutation):
         self.table_name = None
         self.link = "#_tear_away_body_part"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"Tear off {self.object.Level} parts per day. Each has {math.ceil(self.object.HPM / 10)} HPS."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Tear off {self.object.Level} parts per day. Each part has {math.ceil(self.object.HPM / 10) + self.object.Level} HPS.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class UndersizedBodyPart(Mutation):
@@ -3179,11 +3199,13 @@ class UndersizedBodyPart(Mutation):
         self.table_name = table.undersized_body_part
         self.link = "#_undersized_body_part"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        some_thing = self.object.Mutations[self.name]
-        return f"Obviously small {some_thing}. No deficits."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        # level part here
+        description = f'Obviously undersized {perm}. Cannot hide it. No deficits.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Vibrations(Mutation):
@@ -3201,10 +3223,12 @@ class Vibrations(Mutation):
         self.table_name = None
         self.link = "#_vibrations"
 
-        self.add_mutation()
-
-    def build_desc(self):
-        return f"Soothing massage to Type A attack. 3d4+{self.object.Level} HPS damage. +97 on attack roll."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        description = f'Ranges from a nice massage to damaging strike attack. 3d4+{self.object.Level} HPS damage. +97 on strike attack roll.'
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class WateManipulation(Mutation):
@@ -3222,13 +3246,15 @@ class WateManipulation(Mutation):
         self.table_name = None
         self.link = "#_wate_manipulation"
 
-        self.add_mutation()
-
-    def build_desc(self):
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
         wait = self.object.Wate
         da_a = math.ceil(self.object.PSTR * 0.75)  # mix of 1/2 times 1.5
         movit = math.ceil(self.object.Move * 1.25)
-        return f"Drop to {math.ceil(wait * .666)} kgs -> move {movit} h/u. Increase to {wait * 3} kgs -> DA type A = {da_a} HPS."
+        description =  f"Shrink to {math.ceil(wait * .666)} kgs, and Move = {movit} h/u. Enlarge to {wait * 3} kgs, and Strike Force = {da_a} HPS."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
 
 
 class Wings(Mutation):
@@ -3245,37 +3271,175 @@ class Wings(Mutation):
         self.attribute_bonus = None
         self.table_name = None
         self.link = "#_wings"
-        self.add_mutation()
 
-    def build_desc(self):
-        some_thing = self.object.Move if self.object.Move > 8 else 8
-        return f"Big beautiful wings for flying at {some_thing} h/u."
+    def build_desc(self) -> str:
+        '''returns mutation description and side effect via add_mutation()'''
+        perm = super().return_perm(self.name, self.table_name) # perm part
+        move_rate = self.object.Move if self.object.Move > 8 else 8
+        if self.object.FAMILY_TYPE == "Avarian":
+            move_rate *= 2
 
-def list_all_mutations():
-    mental_comprehension = {
-        name[0]: name[1]
-        for (lose, name) in mental_mutation_random.items() # changed from table
-        if lose != "name" and lose != "die_roll"
+        description =  f"Big wings for flying at {move_rate} h/u."
+        super().add_mutation(self.name, perm, description) # check to add
+        return description
+
+
+#######################################
+#
+# mutation support functions
+#
+#######################################
+
+def biologic_mutations_number(mutation_number: table.PersonaRecord) -> int:
+    '''returns the number of mental and physical mutations for anthros and aliens'''
+
+    ## anthros get mutations 
+    if mutation_number.FAMILY == "Anthro":
+
+        ## determine chances of mental and physical mutations
+        anthro_type = mutation_number.FAMILY_TYPE
+        mentchance = table.anthro_type_mutation_chance[anthro_type]["mentchance"]
+        physchance = table.anthro_type_mutation_chance[anthro_type]["physchance"]
+
+        if not mutation_number.Fallthrough:
+            if please.say_yes_to("Do you want to mutate? "):
+                mentchance = mentchance * 2 if anthro_type != "Humanoid" else 100
+                physchance = physchance * 2 if anthro_type != "Humanoid" else 100
+
+        ## assign amount of mutations then zero if not change
+        mental_amount = please.roll_this(table.anthro_type_mutation_chance[anthro_type]["mentnumber"])
+        physical_amount = please.roll_this(table.anthro_type_mutation_chance[anthro_type]["physnumber"])       
+
+        if not please.do_1d100_check(mentchance):
+            mental_amount = 0
+        if not please.do_1d100_check(physchance):
+            physical_amount =  0 
+
+    ## aliens get powers 
+    if mutation_number.FAMILY == "Alien":
+        mental_amount = 0
+        while please.do_1d100_check(mutation_number.MSTR):
+            mental_amount += 1
+
+        physical_amount = 0
+        while please.do_1d100_check(mutation_number.CON):
+            physical_amount += 1
+
+    return mental_amount, physical_amount
+
+def mutation_assignment(mutating_persona: table.PersonaRecord, mental_amount: int = 0, physical_amount: int = 0, allowed:str = "any") -> table.PersonaRecord:
+    """
+    adjust PersonaRecord.Mutations to add mutations
+    """
+    mutation_tables = [mental_mutation_random, physical_mutation_random]
+    amount_tuple = (mental_amount, physical_amount)
+    directions_to_allowed = {
+        "any": ['combat','non-combat','defect'],
+        "combat":['combat'],
+        "non-combat":['non-combat'],
+        "no-defect":['combat','non-combat'],
+        "defect":["defect"]
     }
-    physical_comprehension = {
-        name[0]: name[1]
-        for (lose, name) in physical_mutation_random.items()
-        if lose != "name" and lose != "die_roll"
-    }
-    return {**mental_comprehension, **physical_comprehension}
 
+    ##### all  Mutation generation
+    counter_number_added = 1
+    counter_total_amount = mental_amount + physical_amount
+    
+    for table_to_use in mutation_tables:
+        number_added = 0
+        while number_added < amount_tuple[mutation_tables.index(table_to_use)]: 
+            kind_allowed = directions_to_allowed[allowed]
+            mutation_tuple = please.get_table_result(table_to_use)
+            working_mutation = mutation_tuple[1](mutating_persona) # todo this SHOULD  activate record changes the mutation subclass
+            working_name = working_mutation.__dict__["name"]
+            working_kind = working_mutation.__dict__["kind"]
+
+            if working_kind not in kind_allowed:
+                print("this kind not allowed")
+                continue
+
+            if working_name in mutating_persona.Mutations:
+                print("repeats not allowed")
+                continue
+
+            pre_add_length = len(mutating_persona.Mutations.keys()) # length pre possible add
+
+            print(f'\nMUTATION {counter_number_added}/{counter_total_amount}:', end="")
+            working_mutation.build_desc()
+        
+            if pre_add_length < len(mutating_persona.Mutations.keys()) and working_kind != "defect":
+                number_added +=1
+                counter_number_added += 1
+
+    return mutating_persona # modified by side effect in mutations method add_mutation
+
+
+def mutation_list_builder(directions:list = ['any']) -> list:
+    '''returns a bespoke list of tuples  *val cannot have a default value'''
+    ALLOWED_LIST = ['any', 'mental', 'physical','combat','non-combat','defect', 'no-defect']
+    fake_record = table.PersonaRecord
+    build_mutations = []
+
+    ## input safety checking
+    if not directions:
+        directions = ['any']
+    elif len(directions) == 1 or not any(item in directions for item in ['any','mental','physical']):
+        directions.append('any') 
+    else:
+        for element in directions:
+            if element not in ALLOWED_LIST:
+                print(f'{element} is not allowed. Please select from:\n{ALLOWED_LIST}.')
+                input('wft bro')
+                return []
+    
+
+    mental_list = [val for val in mental_mutation_random.values() if isinstance(val,tuple)]
+    physical_list = [val for val in physical_mutation_random.values() if isinstance(val,tuple)]
+
+    ### build_mutations is a list of desired mutations mental, physical or both
+    if 'mental' in directions:
+        build_mutations = sorted(mental_list)
+    elif 'physical' in directions:
+        build_mutations = sorted(physical_list)
+    elif 'any' in directions:
+        build_mutations = sorted(mental_list + physical_list)
+
+    ## if only containing any, mental or physical and not effects return all as is
+    if len(directions) == 1:
+        return build_mutations
+    
+    ## if only defects of any, mental, physical ready to return
+    if 'defect' in directions:
+        return [mutuple for mutuple in build_mutations if mutuple[1](fake_record).__dict__["kind"] == 'defect']
+
+    ### if no-defect then strips build of but not ready for return
+    if 'no-defect' in directions:
+        build_mutations = [mutuple for mutuple in build_mutations if mutuple[1](fake_record).__dict__["kind"] != 'defect']
+
+    elif 'combat' in directions:
+        build_mutations = [mutuple for mutuple in build_mutations if mutuple[1](fake_record).__dict__["kind"] == 'combat']
+
+    elif 'non-combat' in directions:
+        build_mutations = [mutuple for mutuple in build_mutations if mutuple[1](fake_record).__dict__["kind"] == 'non-combat']
+
+    if not build_mutations:
+        print('you eliminated all mutations')
+        return ["you eliminated all mutations"]
+
+    return build_mutations
 
 def single_random_mutation(object):
     """
     return a mutation of either type.
     """
+    # todo change to the new mutation paradigm 
 
     if hasattr(object, "Mutations"):
         pass
     else:
         object.Mutations = {}
 
-    all_mutations = list_all_mutations()
+    all_mutations = mutation_list_builder()
     choice_list = list(all_mutations)
     mutation_chosen = secrets.choice(choice_list)
 
@@ -3296,30 +3460,42 @@ def single_random_mutation(object):
     return
 
 
-def pick_bespoke_mutation(object):
+def pick_bespoke_mutation(bespoke_mutating:table.PersonaRecord) -> table.PersonaRecord:
+    '''choose specific mutations from chosen list and add to persona'''
+    
+    ALLOWED_LIST = ['any', 'mental', 'physical','combat','non-combat','defect', 'no-defect']
 
-    if hasattr(object, "Mutations"):
-        pass
-    else:
-        object.Mutations = {}
+    build_directions = []
+    choice = ""
+    ALLOWED_LIST.insert(0, "EXIT")
+    while choice != "EXIT":
+        choice = please.choose_this(ALLOWED_LIST, "Choose mutation kinds. ")
+        if choice == "EXIT":
+            break
+        build_directions.append(choice)
 
-    all_mutations = list_all_mutations()
+    if not build_directions:
+        build_directions = "any"
 
-    choice_list = sorted(list(all_mutations))
-    choice_comment = "Here is a list of all mutations?"
-    mutation_chosen = please.choose_this(choice_list, choice_comment)
 
-    if please.say_yes_to(f"Do you want to add {mutation_chosen}? "):
-        working_mutation = all_mutations[mutation_chosen](object)
-        print(working_mutation)
+    mutuples_list = mutation_list_builder(build_directions)
+    mutation_choices = [name[0] for name in mutuples_list]
 
-    else:
-        print("Ok. Mutation skipped.")
+    mutation_name = ""
+    mutation_choices.insert(0, "EXIT")
+    while mutation_name != "EXIT":
+        mutation_name = please.choose_this(mutation_choices, "Pick the mutation.")
+        if mutation_name == "EXIT":
+            break
+        mutuple = next((t for t in mutuples_list if t[0] == mutation_name), None)
+        working_mutation = mutuple[1](bespoke_mutating)
+        working_mutation.build_desc()
 
-    if please.say_yes_to("Do you want to add another mutation? "):
-        pick_bespoke_mutation(object)
-    else:
-        return
+    return bespoke_mutating # altered by side effects in .build_desc func
+
+
+
+
 
 mental_mutation_random = {
     (1, 3):('Absorption', Absorption),

@@ -478,19 +478,19 @@ def convert_exps_to_levels(object: dict, new_exps = 0) -> int:
     return new_level
 
 
-def update_gifts(object: dict) -> str:
+def update_gifts(returning_gifts: table.PersonaRecord) -> list:
     """
     returns a list of gifts based on the persona level
     """
     gift_table = []
     raw_gift_table = [
-        value for key, value in table.vocations_gifts_pivot[object.Vocation].items()
+        value for _, value in table.vocations_gifts_pivot[returning_gifts.Vocation].items()
     ]
 
     gift_table.append(raw_gift_table[0])
-    if object.Level > 3:
+    if returning_gifts.Level > 3:
         gift_table.append(raw_gift_table[1])
-    if object.Level > 6:
+    if returning_gifts.Level > 6:
         gift_table.append(raw_gift_table[2])
 
     return gift_table

@@ -654,14 +654,14 @@ anthro_type_mutation_chance = {
 
 # SNAP hit location tables
 anthro_snap_hit_location = {
-    (1, 1): "Leg-Left",
-    (2, 2): "Leg-Right",
-    (3, 3): "Groin/Butt",
-    (4, 5): "Stomach/Back",
-    (6, 6): "Arm-Left",
-    (7, 7): "Arm-Right",
-    (8, 9): "Chest/Back",
-    (10, 10): "Face/Head",
+    (1, 1): "Left Leg",
+    (2, 2): "Right Leg",
+    (3, 3): "Groin or Butt",
+    (4, 5): "Stomach or Back",
+    (6, 6): "Left Arm",
+    (7, 7): "Right Arm",
+    (8, 9): "Chest or Back",
+    (10, 10): "Face or Head",
     "type": "Anthro Snap Hit Location",
     "die_roll": "1d10",
 }
@@ -669,8 +669,8 @@ anthro_snap_hit_location = {
 alien_snap_hit_location = {
     (1, 1): "Legs-Left",
     (2, 2): "Legs-Right",
-    (3, 4): "Torso-Back",
-    (5, 7): "Torso-Front",
+    (3, 4): "Body-Back",
+    (5, 7): "Body-Front",
     (8, 8): "Arms-Left",
     (9, 9): "Arms-Right",
     (10, 10): "Head",
@@ -710,10 +710,10 @@ biologist_gifts = {
 
 biologist_interests = {
     (1, 20):"Culture",
-    (22, 55):"Research",
-    (57, 89):"Taxonomy",
+    (21, 55):"Research",
+    (56, 90):"Taxonomy",
     (91, 95):"Choose",
-    (97, 100):"Extra Roll",
+    (96, 100):"Extra Roll",
     "name":"Biologist Interests",
     "die_roll":"1d100",
 } 
@@ -1976,14 +1976,14 @@ role_play_RP_politics = {
 } 
 
 role_play_RP_belief_complexity = {
-    (1, 13):"[True, False, False]",
-    (14, 25):"[True, True, False]",
-    (26, 37):"[True, False, True]",
-    (38, 49):"[True, True, True]",
-    (50, 61):"[False, True, False]",
-    (61, 73):"[False, True, True]",
-    (74, 85):"[False, False, True]",
-    (86, 100):"[False, False, False]",
+    (1, 13):[True, False, False],
+    (14, 25):[True, True, False],
+    (26, 37):[True, False, True],
+    (38, 49):[True, True, True],
+    (50, 61):[False, True, False],
+    (61, 73):[False, True, True],
+    (74, 85):[False, False, True],
+    (86, 100):[False, False, False],
     "name":"Belief Complexity",
     "die_roll":"1d100",
 } 
@@ -3474,27 +3474,27 @@ robot_size_to_wate = {
 }
 
 robot_wate_to_hite = {
-    range(1, 2): "2d8",
-    range(2, 10): "3d6",
-    range(10, 50): "1d20+20",
-    range(50, 105): "1d20+40",
-    range(105, 600): "4d10+80",
-    range(601, 1000): "4d10+90",
-    range(1000, 2000): "5d10+100",
-    range(2000, 4000): "5d20+200",
-    range(4000, 6000): "12d10+300",
-    range(6000, 9999): "4d20+500",
+    (1, 2): "2d8",
+    (3, 10): "3d6",
+    (11, 50): "1d20+20",
+    (51, 105): "1d20+40",
+    (106, 600): "4d10+80",
+    (601, 1000): "4d10+90",
+    (1001, 2000): "5d10+100",
+    (2001, 4000): "5d20+200",
+    (4001, 6000): "12d10+300",
+    (6001, 9999): "4d20+500",
     "name": "Robot Dimensions",
 }
 
 combot_heavy_weapons = {
-    range(1, 27): "Popcorn Machine",
-    range(27, 60): "Bomb",
-    range(60, 90): "Missile",
-    range(90, 110): "Artillery",
-    range(110, 120): "Artillery and bomb",
-    range(120 - 150): "Artillery and missile",
-    range(129, 666): "Naval artillery",
+    (1, 27): "Popcorn Machine",
+    (28, 60): "Bomb",
+    (61, 90): "Missile",
+    (91, 110): "Artillery",
+    (111, 120): "Artillery and bomb",
+    (121, 150): "Artillery and missile",
+    (151, 666): "Naval artillery",
     "name": "Combot Heavy Weapons",
 }
 
@@ -3515,34 +3515,25 @@ datalyzer_mental_chance = {
 }
 
 
-##############################################
-#
-# TOY tables
-#
-##############################################
+
+mutation_absorbs = {
+    (1, 10): "Concussion",
+    (11, 20): "Fast Crushing (B, C)",
+    (21, 30): "Slow Crushing (A)",
+    (31, 40): "Electricity",
+    (41, 50): "Energy",
+    (51, 60): "Fire",
+    (61, 75): "Lazer",
+    (76, 80): "Psionic",
+    (81, 98): "Radiation",
+    (99, 100): "Insult",
+    "name": "Absorption Type",
+    "die_roll": "1d100",
+}
 
 
-toy_categories = {
-    (1, 5):"Aerosol",
-    (6, 11):"Armour",
-    (12, 12):"Powered Armour",
-    (13, 16):"Grenade",
-    (17, 17):"Bomb",
-    (18, 29):"Gun",
-    (30, 30):"Artillery",
-    (31, 42):"Miscellaneous Equipment",
-    (43, 43):"Robot",
-    (44, 53):"Miscellaneous Weapon",
-    (54, 65):"Pharmaceutical",
-    (66, 75):"Random Junque",
-    (76, 85):"Treasure",
-    (86, 89):"Vehicle",
-    (90, 90):"Space Vehicle",
-    (91, 100):"Vet Equipment",
-    "die_roll":"1d100",
-} 
 
- 
+
 detection_types = {
     (1, 9):"Chemical",
     (10, 17):"Pharma",
@@ -3588,18 +3579,18 @@ poison_gas_type = {
 } 
  
 poison_spittle_type = {
-    (1, 61):"Killing: Inflict 1d4 HPS damage per intensity.",
-    (62, 81):"Nausea: Incapacitated 1 unit per intensity.",
-    (82, 91):"Paralysis: Incapacitated 1 unit per intensity.",
-    (92, 100):"Unconsciousness: Unconscious 1 min per intensity.",
+    (1, 61):"Killing poison",
+    (62, 81):"Nausea poison",
+    (82, 91):"Paralysis poison",
+    (92, 100):"Unconsciousness",
     "die_roll":"1d100",
 } 
  
 carapace_thickness = {
-    (1, 21):"{'covering': 'Slight', 'AR': 49, 'DA': '1.0', 'cha_penalty': -1, 'dex_penalty': 0, 'new_CR': '+1'}",
-    (22, 61):"{'covering': 'Partial', 'AR': 99, 'DA': '0.75', 'cha_penalty': -2, 'dex_penalty': 0, 'new_CR': '+3'}",
-    (62, 91):"{'covering': 'Total', 'AR': 199, 'DA': '0.50', 'cha_penalty': -3, 'dex_penalty': -1, 'new_CR': '+5'}",
-    (92, 100):"{'covering': 'Mondo', 'AR': 249, 'DA': '0.25', 'cha_penalty': -4, 'dex_penalty': -2, 'new_CR': '*2'}",
+    (1, 21):{'Slight': {'AR': 49, 'DA': '1.0', 'cha_penalty': -1, 'dex_penalty': 0, 'new_CR': '+1'}},
+    (22, 61):{'Partial': {'AR': 99, 'DA': '0.75', 'cha_penalty': -2, 'dex_penalty': 0, 'new_CR': '+3'}},
+    (62, 91):{'Total': {'AR': 199, 'DA': '0.50', 'cha_penalty': -3, 'dex_penalty': -1, 'new_CR': '+5'}},
+    (92, 100):{'Mondo': {'AR': 249, 'DA': '0.25', 'cha_penalty': -4, 'dex_penalty': -2, 'new_CR': '*2'}},
     "type":"Carapace Thickness",
     "die_roll":"1d100",
 } 
@@ -3633,7 +3624,7 @@ heightened_vision = {
     (42, 51):"Semi Circular: 270 degree field of vision.",
     (52, 81):"Telescopic: Zoom in 10x. +100 on sniping attack rolls.",
     (82, 91):"Ultravision: UV based see in the dark. +15 on electronics rolls.",
-    (92, 100):"X Ray: Penetrating and dangerous. +30 on x-ray rolls.",
+    (92, 100):"X-Ray: Penetrating and dangerous. +30 on x-ray rolls.",
     "die_roll":"1d100",
 } 
  
@@ -3663,7 +3654,7 @@ multiple_body_parts = {
     (26, 30):"Eyes",
     (31, 45):"Feet",
     (46, 59):"Fingers",
-    (60, 74):"Head",
+    (60, 74):"Heads",
     (75, 83):"Legs",
     (84, 95):"Mouths",
     (96, 100):"Noses",
@@ -3672,14 +3663,14 @@ multiple_body_parts = {
  
 new_organ_type = {
     (1, 11):"Air Producing Gland: Personal air supply.",
-    (12, 14):"Blood Draining Proboscis:",
+    (12, 14):"Blood Draining Proboscis: Attach and drain.",
     (12, 24):"Blood Producing Organ: Cannot bleed out. +15 to be resuscitated.",
-    (25, 36):"Electricity Storing Organ:",
+    (25, 36):"Electricity Storing Organ: Point and zap.",
     (37, 50):"Gas Absorbing Tissue: Purifies air intake. +5 on gas related rolls.",
     (51, 63):"Ink Producing Gland: Endless writing.",
     (64, 66):"Iron Stomach: Can eat and digest anything.",
-    (67, 76):"Light Tissue:",
-    (77, 77):"Kirlian Energy Reflective Skull:",
+    (67, 76):"Light Emitting Flesh: Creates a radiant glow.",
+    (77, 77):"Kirlian Energy Reflective Skull: Protect against mental attacks.",
     (78, 86):"Plastics Producing Gland: Plastic oozing organ.",
     (87, 91):"Poisonous Skin Tissue: 3d4 intensity poison coats skin.",
     (92, 100):"Pus Producing Gland: Yucky yuck.",
@@ -3700,23 +3691,23 @@ oversized_body_part = {
 } 
  
 skin_structure_change = {
-    (1, 11):"['Thicker and flakier', 30]",
-    (12, 51):"['Stronger thicker and tanned', 60]",
-    (52, 71):"['Thatched cartilaginous strips', 90]",
-    (72, 81):"['Scaled ceramic overlays', 120]",
-    (82, 91):"['Plated organometallic', 150]",
-    (92, 96):"['Metallic uniform skin', 180]",
-    (97, 100):"['Plastix uniform skin', 210]",
+    (1, 11):"Thicker and flakier skin:30",
+    (12, 51):"Stronger, thicker and tanned skin:60",
+    (52, 71):"Thatched cartilaginous strips cover skin:90",
+    (72, 81):"Scaled ceramic overlays on skin:120",
+    (82, 91):"Plated organometallic skin replacement:150",
+    (92, 96):"Metallic skin replacement:180",
+    (97, 100):"Plastix skin replacement:210",
     "die_roll":"1d100",
 } 
  
 strange_new_body_part = {
     (1, 8):"Antennae replace ears. Listen around corners.",
-    (9, 17):"Ears fold up and down accordion like.",
+    (9, 17):"Ears fold up and down like an accordion.",
     (18, 26):"Eyes are concave reflectors.",
     (27, 35):"Eye Stalks (30cms) replace eye sockets. Look around corners.",
-    (36, 46):"Fins attached to arms, and legs.",
-    (47, 51):"Gills for breathing underwater.",
+    (36, 46):"Fins attached to arms, and legs. Swim like an aquarian.",
+    (47, 51):"Gills for breathing underwater. Swim like an aquarian.",
     (52, 61):"Horns on head.",
     (62, 67):"Mouth drawer and food grinder.",
     (68, 86):"Nose is a long flexible tube. Smell around corners.",
@@ -3724,8 +3715,8 @@ strange_new_body_part = {
     (88, 91):"Pincers replace hands. 1d8 HPS. Type A attack. No drawbacks.",
     (92, 93):"Spike from forehead. 1d12 HPS. Type A attack. No hats.",
     (94, 96):"Fully articulated tail. Equal to an extra limb.",
-    (97, 99):"Fully articulate tentacles!",
-    (100, 100):"Turtle Shell that mutant can retract into.",
+    (97, 99):"Fully articulated tentacles replace arms.",
+    (100, 100):"Turtle Shell that mutant can retract into (AR 777).",
     "die_roll":"1d100",
 } 
  
@@ -3742,6 +3733,13 @@ undersized_body_part = {
     "die_roll":"1d100",
 } 
  
+
+##############################################
+#
+# TOY tables
+#
+##############################################
+
 
 toy_categories = {
     (1, 5):"Aerosol",
@@ -3763,6 +3761,4 @@ toy_categories = {
     "die_roll":"1d100",
 } 
 
-
-
-['mutation_absorbs', 'anthro_snap_hit_location', 'alien_snap_hit_location', 'robot_snap_hit_location', 'biologist_gifts', 'taxonomy_skills', 'research_skills', 'culture_skills', 'knite_gifts', 'mechanic_gifts', 'mercenary_gifts', 'nomad_gifts', 'nothing_gifts', 'spie_gifts', 'veterinarian_gifts', 'attacks_per_unit', 'alien_attack_damage', 'alien_biology_energy_source', 'alien_biology_energy_procurement', 'alien_biology_reproduction', 'alien_biology_domicile', 'colour_bomb', 'robot_wate_to_hite', 'combot_heavy_weapons', 'toy_categories']
+['biologist_gifts', 'research_skills', 'culture_skills', 'knite_gifts', 'mechanic_gifts', 'mercenary_gifts', 'nomad_gifts', 'nothing_gifts', 'spie_gifts', 'veterinarian_gifts', 'attacks_per_unit', 'alien_attack_damage', 'alien_biology_energy_source', 'alien_biology_energy_procurement', 'alien_biology_reproduction', 'alien_biology_domicile', '', '', '', '']
