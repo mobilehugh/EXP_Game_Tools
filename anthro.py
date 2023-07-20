@@ -76,13 +76,14 @@ def anthro_type_fresh(choosing_anthro_type: table.PersonaRecord) -> table.Person
 
     return choosing_anthro_type # altered by side effect
 
+# todo there is some sloppy stuff here 
 def anthro_sub_type_selection(selecting_sub_type: table.PersonaRecord) -> table.PersonaRecord:
     """
     select the sub_type for the anthro type
     """
 
     choices = ["Generalis (none)", "Choose", "Bespoke", "Random"]
-    choice_comment = f"How would you like to pick your {selecting_sub_type.FAMILY_TYPE} subtype? "
+    choice_comment = f"How would you like to pick your {selecting_sub_type.FAMILY_TYPE.upper()} SUBTYPE? "
     method_of_selection = please.choose_this(choices, choice_comment)
 
     if method_of_selection == "Choose":
@@ -91,12 +92,10 @@ def anthro_sub_type_selection(selecting_sub_type: table.PersonaRecord) -> table.
         sub_type = please.choose_this(choices, list_comment)
 
     elif method_of_selection == "Bespoke":
-        sub_type = input(f"Carefully input subtype for the {selecting_sub_type.FAMILY_TYPE}: ")
+        sub_type = please.input_this(f"Carefully input subtype for the {selecting_sub_type.FAMILY_TYPE}: ")
 
     elif method_of_selection == "Random":
-        die_type = len(table.anthro_sub_types[selecting_sub_type.FAMILY_TYPE])
-        rando = secrets.randbelow(die_type)
-        sub_type = table.anthro_sub_types[selecting_sub_type.FAMILY_TYPE][rando]
+        sub_type = secrets.choice(table.anthro_sub_types[selecting_sub_type.FAMILY_TYPE])
 
     elif method_of_selection == "Generalis (none)":
         sub_type = "Generalis"
@@ -234,7 +233,7 @@ def anthro_mutations_rando(randomly_mutating: table.PersonaRecord) -> table.Pers
 
 
 def anthro_vocations_fresh(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
-    choices = vocation.list_eligible_vocations(get_a_job)
+    choices = vocation.attribute_determined(get_a_job)
     choice_comment = "Choose a VOCATION: "
     type_choice = please.choose_this(choices, choice_comment)
     get_a_job.Vocation = type_choice
@@ -326,7 +325,7 @@ def anthro_attributes_bespoke(attribute_adjusting: table.PersonaRecord) -> table
         core.manual_persona_update(attribute_adjusting)
 
     elif choice == "Random":
-        pass
+        pass # because already chosen
 
     elif choice == "Descriptive":
         core.descriptive_attributes(attribute_adjusting)
@@ -386,29 +385,29 @@ def anthro_type_bespoke(object):
     return
 
 
-def anthro_vocation_bespoke(object: dict) -> None:
+def anthro_vocation_bespoke(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     determine bespoke vocation type
     """
 
     ### choose RP anthro vocation
     choices = ["Attribute Determined", "Bespoke", "Random"]
-    choice_comment = "Choose a method for VOCATION ?"
+    choice_comment = f'Choose a method te select VOCATION for a level {get_a_job.Level} persona.'
     method_type_selection = please.choose_this(choices, choice_comment)
 
     # create list of all vocations
     all_vocations = [key for key in table.attributes_improve_by_vocation.keys()]
 
     if method_type_selection == "Attribute Determined":
-        anthro_vocations_fresh(object)
+        anthro_vocations_fresh(get_a_job)
 
     elif method_type_selection == "Bespoke":
         choices = all_vocations
-        choice_comment = "Please choose a VOCATION"
-        object.Vocation = please.choose_this(choices, choice_comment)
+        choice_comment = f'Please choose a VOCATION for a level {get_a_job.Level} persona.'
+        get_a_job.Vocation = please.choose_this(choices, choice_comment)
 
     elif method_type_selection == "Random":
-        object.Vocation = secrets.choice(all_vocations)
+        get_a_job.Vocation = secrets.choice(all_vocations)
 
     else:
         print("\nYou have not selected a valid anthro vocation type selection method")
@@ -523,14 +522,8 @@ def fresh_anthro() -> table.PersonaRecord:
     ### set up the object for Anthro persona
     fresh = table.PersonaRecord()
 
-
-    ### get mundane terran name of the player
-    # fix still not screening input and choice properly
-    #name_safe = please.input_this(f'\nPlease input your MUNDANE TERRAN NAME: ')
-    #fresh.Player_Name = please.choose_this(name_safe,"Are you happy with your name? ")
+    # todo proper  input_this with cyclic 
     fresh.Player_Name = please.input_this(f'\nPlease input your MUNDANE TERRAN NAME: ')
-
-
     core.initial_attributes(fresh)
     core.hit_points_max(fresh)
     adjust_mstr_by_int(fresh)
@@ -544,7 +537,6 @@ def fresh_anthro() -> table.PersonaRecord:
     anthro_age_calc(fresh, "Adolescent")
     mental_amount, physical_amount = mutations.biologic_mutations_number(fresh)
     mutations.mutation_assignment(fresh, mental_amount, physical_amount,"any")
-    #anthro_mutations_fresh(fresh)
     anthro_vocations_fresh(fresh)
     vocation.set_up_first_time(fresh)
     outputs.anthro_screen(fresh)
@@ -581,66 +573,48 @@ def bespoke_anthro():
     anthro_type_bespoke(bespoke)
     anthro_sub_type_selection(bespoke)
     anthro_size_chooser(bespoke)
+    core.movement_rate(bespoke)
+    core.base_armour_rating(bespoke)
+    core.wate_allowance(bespoke)
+
     vocation.exps_level_picker(bespoke)
     core.mutations_bespoke(bespoke)
     anthro_vocation_bespoke(bespoke)
     vocation.set_up_first_time(bespoke)
-    bespoke.EXPS = (
-        42 if bespoke.Level == 1 else vocation.convert_levels_to_exps(bespoke)
-    )
-
-    ### add additional interests and skills (gifts are dynamic )
+    # adjust RP attributes by vocation
+    if please.say_yes_to("Do you want ADJUST RP attributes by VOCATION? (recommended)"):
+        vocation.attributes_to_vocation(bespoke)
+    # add additional interests and skills (gifts are dynamic )
     if bespoke.Level > 1:
-        print(f"You have {bespoke.Level - 1} extra interest(s) and skill(s) to add.")
+        print(f"You have {bespoke.Level - 1} additional INTEREST(s) and SKILL(s).")
         bespoke.Interests.extend(
             vocation.update_interests(bespoke, (bespoke.Level - 1))
         )
         bespoke.Skills.extend(vocation.update_skills(bespoke, (bespoke.Level - 1)))
 
-    ### adjust RP attributes by vocation
-    if please.say_yes_to("Do you want ADJUST RP attributes by VOCATION? (recommended)"):
-        vocation.bespoke_anthro_attributes_by_vocation(bespoke)
-
     ### generate RP EXPS points
-    bespoke.EXPS = (
-        42 if bespoke.Level == 1 else vocation.convert_levels_to_exps(bespoke)
-    )
+    bespoke.EXPS = 42 if bespoke.Level == 1 else vocation.convert_levels_to_exps(bespoke)
 
     ### determine RP Age
     option_list = ["Bespoke", "Random"]
-    list_comment = "Choose how to determine persona age."
-    Method_Age_Method = please.choose_this(option_list, list_comment)
+    list_comment = "Choose how to determine persona AGE."
+    determine_ate_method = please.choose_this(option_list, list_comment)
 
-    if Method_Age_Method == "Bespoke":
+    if determine_ate_method == "Bespoke":
         anthro_choose_age_cat(bespoke)
     else:
         random_anthro_age_category(bespoke)
 
-    ### anthro AR if not already there
-    hack = 42 if hasattr(bespoke, "AR") else core.base_armour_rating(bespoke)
-
-    ### anthro  Move if not already there
-    hack = 42 if hasattr(bespoke, "Move") else core.base_armour_rating(bespoke)
-
-    ###
-    core.wate_allowance(bespoke)
-
-    ### impact of level on:
-    # attributes
-    # mutations
-    # vocation gifts, interests, and skills
-    # combat table
-    # EXPS amount
+    # todo RP level impact  on: attributes mutations vocation gifts, interests, and skills combat table EXPS amount
 
     ### generate RP Fun
     build_RP_role_play(bespoke)
 
     ### generate RP storage data including temporary name
-    core.assign_persona_name    
+    outputs.anthro_screen(bespoke)
+    core.assign_persona_name(bespoke)   
     please.assign_id_and_file_name(bespoke)
     outputs.anthro_screen(bespoke)
-
-    ### ultimate RP disposition
     please.record_storage(bespoke)
     return
 
@@ -664,7 +638,7 @@ def random_anthro():
     rando.Fallthrough = True
 
     ### get mundane terran name of the player
-    rando.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
+    rando.Player_Name = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
     ### build list of functions
     core.initial_attributes(rando)
@@ -683,7 +657,7 @@ def random_anthro():
     anthro_mutations_rando(rando)
     rando.Vocation = secrets.choice([x for x in table.vocations_gifts_pivot])
     vocation.set_up_first_time(rando)
-    vocation.random_exps_level(rando)
+    rando.Level = please.get_table_result(table.random_EXPS_levels_list)
     rando.EXPS = vocation.convert_levels_to_exps(rando)
 
     ### add additional interests and skills
@@ -691,7 +665,7 @@ def random_anthro():
         rando.Interests.extend(vocation.update_interests(rando, (rando.Level - 1)))
         rando.Skills.extend(vocation.update_skills(rando, (rando.Level - 1)))
 
-    vocation.bespoke_anthro_attributes_by_vocation(rando)
+    vocation.attributes_to_vocation(rando)
     random_anthro_age_category(rando)
     core.wate_allowance(rando)
 
@@ -699,7 +673,7 @@ def random_anthro():
         build_RP_role_play(rando)
 
     ### generate RP storage data including temporary name
-    rando.Persona_Name = f"{rando.Player_Name} Mac{rando.Player_Name}"
+    rando.Persona_Name = f"{rando.Player_Name}y Mac Thunder{rando.Player_Name}"
     please.assign_id_and_file_name(rando)
     outputs.anthro_screen(rando)
 

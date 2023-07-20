@@ -9,133 +9,92 @@ import table
 #                                                       
 #########################################################
 
-def biologist(object: dict) -> None:
+'''
+the vocation functions are for start up for assignments at first level
+the persona record is adjusted by side effect 
+
+"Biologist": biologist,
+"Knite": knite,
+"Mechanic": mechanic,
+"Mercenary": mercenary,
+"Nomad": nomad,
+"Nothing": nothing,
+"Spie": spie,
+"Veterinarian": veterinarian,
+
+GIFTS are level dependent and calculation on the fly when output is needed
+INTERESTS are added to the Interests [] as strings
+SKILLS are added to the Skills [] as strings
+
+'''
+
+def biologist(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     Set up the biologist vocation.
     """
-    # collect data
-    intel = object.INT
-    awe = object.AWE
-    interest_rolls = math.ceil(awe / 4)
-    skill_rolls = math.ceil(intel / 4)
+    interest_rolls = math.ceil(get_a_job.AWE / 4)
+    skill_rolls = math.ceil(get_a_job.INT / 4)
+    get_a_job.Interests = fresh_interests(get_a_job, interest_rolls)
+    get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
-
-    # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
-
-    return
+    return get_a_job # modified by side effects
 
 
-def knite(object: dict) -> None:
+def knite(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     Set up the knite vocation.
     """
-    # collect data
-    intel = object.INT
-    mstr = object.MSTR
-    interest_rolls = math.ceil(mstr / 4)
-    skill_rolls = math.ceil(intel / 3)
+    interest_rolls = math.ceil(get_a_job.MSTR / 4)
+    skill_rolls = math.ceil(get_a_job.INT / 3)
+    get_a_job.Interests = fresh_interests(get_a_job, interest_rolls)
+    get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
-
-    # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
-
-    return
+    return get_a_job # modified by side effects
 
 
-def mechanic(object: dict) -> None:
+def mechanic(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     Set up the mechanic vocation.
     """
-    # collect Data
-    intel = object.INT
-    interest_rolls = math.ceil(intel / 4)
-    skill_rolls = math.ceil(intel / 3)
+    interest_rolls = math.ceil(get_a_job.INT / 4)
+    skill_rolls = math.ceil(get_a_job.INT / 3)
+    get_a_job.Interests = fresh_interests(get_a_job, interest_rolls)
+    get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
-
-    # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
-
-    return
+    return get_a_job # modified by side effects
 
 
-def mercenary(object: dict) -> None:
+def mercenary(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     Set up the mercenary vocation.
     """
-    
-    # collect Data
-    intel = object.INT
-    dex = object.DEX
-    interest_rolls = math.ceil(intel / 4)
-    skill_rolls = math.ceil(dex / 3)
+    interest_rolls = math.ceil(get_a_job.INT / 4)
+    skill_rolls = math.ceil(get_a_job.DEX / 3)
+    get_a_job.Interests = fresh_interests(get_a_job, interest_rolls)
+    get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
-
-    # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
-
-    return
+    return get_a_job # modified by side effects
 
 
-def nomad(object: dict) -> None:
+def nomad(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """ 
     set up the nomad vocation.
     """
-    # collect Data
-    awe = object.AWE
-    intel = object.INT
-    interest_rolls = math.ceil(intel / 4)
-    skill_rolls = math.ceil(awe / 3)
+    interest_rolls = math.ceil(get_a_job.INT / 4)
+    skill_rolls = math.ceil(get_a_job.AWE / 3)
+    get_a_job.Interests = fresh_interests(get_a_job, interest_rolls)
+    get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
-
-    # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
-
-    return
+    return get_a_job # modified by side effects
 
 
 def nothing(nothing_happening: table.PersonaRecord) -> table.PersonaRecord:
     """
     set up the nothing vocation.
     """
-    # collect Data
-    soc = nothing_happening.SOC
-    intel = nothing_happening.INT
-    interest_rolls = math.ceil(soc / 200)
-    skill_rolls = math.ceil(intel / 3)
-
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
+    interest_rolls = math.ceil(nothing_happening.SOC / 200)
+    skill_rolls = math.ceil(nothing_happening.INT / 3)
     nothing_happening.Interests = fresh_interests(nothing_happening, interest_rolls)
-
-    # assign  SKILLS
     nothing_happening.Skills = fresh_skills(nothing_happening, skill_rolls)
 
     ### Vocation aspiration is specific to the nothing vocation
@@ -144,145 +103,70 @@ def nothing(nothing_happening: table.PersonaRecord) -> table.PersonaRecord:
 
     else:
         choices = list(table.vocation_aspiration_exps.keys())
-        comment = "Please choose a vocation aspiration. "
+        comment = "A nomad needs a VOCATIONAL ASPIRATION. Please pick one. "
         vocation_desired = please.choose_this(choices, comment)
 
-    ### initiate the nothing aspiration goal. managed in outputs.py
     nothing_happening.Vocay_Aspiration = vocation_desired
     nothing_happening.Vocay_Aspiration_EXPS = table.vocation_aspiration_exps[vocation_desired]
 
-    return
+    return nothing_happening # modified by side effects
 
 
-def spie(object):
-    # collect data
-    intel = object.INT
-    dex = object.DEX
-
-    interest_rolls = math.ceil(intel / 4)
-    skill_rolls = math.ceil(dex / 3)
-
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
-
-    # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
-
-    # assign MARTIAL ARTS
-    object.Spie_Fu = spie_martial_arts(object)
-
-
-    return
-
-
-def spie_martial_arts(object: dict) -> str:
+def spie(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
-    Update the object's martial arts data.
+    set up the Spie vocation
+    """
+    interest_rolls = math.ceil(get_a_job.INT / 4)
+    skill_rolls = math.ceil(get_a_job.DEX / 3)
+    get_a_job.Interests = fresh_interests(get_a_job, interest_rolls)
+    get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
+
+    return get_a_job # modified by side effects
+
+
+def spie_martial_arts(spie_fu_record: table.PersonaRecord) -> str:
+    """
+    return the spie fu string based on level 
     """
 
     # collect data from martial arts table
-    martial_arts_data = table.spie_martial_arts[
-        object.Level if object.Level < 10 else 10
+    spied_fu = table.spie_martial_arts[
+        spie_fu_record.Level if spie_fu_record.Level < 10 else 10
     ]
 
     # martial armour rating
-    martial_ar = object.AR + martial_arts_data["AR"]
+    martial_ar = spie_fu_record.AR + spied_fu["AR"]
 
-    freq = martial_arts_data["freq"]
-    damage = martial_arts_data["Damage"]
-    sequence = martial_arts_data["order"]
-    martial_desc = f"AR: {martial_ar} DMG: {damage} Attacks: {int(freq)} Order: {sequence}"
-
-    ### removes old Spie Fu from interests. Only works on one element
-    for x, interest in enumerate(object.Interests):
-        if "Spie Fu" in interest:
-            object.Interests.pop(x)
-
-    return martial_desc
+    return  f'AR: {martial_ar} DMG: {spied_fu["Damage"]} Attacks: {spied_fu["freq"]} Order: {spied_fu["order"]}.'
 
 
-def veterinarian(object):
-    # collect data
-    intel = object.INT
-    interest_rolls = math.ceil(intel / 4)
-    skill_rolls = math.ceil(intel / 3)
 
-    # assign GIFTS
-    # done in real time
-
-    # assign  INTERESTS
-    object.Interests = fresh_interests(object, interest_rolls)
-
-    # assign  SKILLS
-    object.Skills = fresh_skills(object, skill_rolls)
-
-    # # assign veterinarian interests
-    # interest_list = []
-
-    # while len(interest_list) < interest_rolls:
-    #     interest = please.get_table_result(table.veterinarian_interests)
-    #     interest_list.append(interest)
-    #     if interest == "Extra Roll":
-    #         interest_rolls += 1
-    #         interest_list.pop()
-
-    #     if interest == "Choose":
-    #         interest_list.pop()
-    #         choices = please.list_table_choices(table.veterinarian_interests)
-    #         choice_comment = "Choose a veterinarian interest."
-    #         choice = please.choose_this(choices, choice_comment)
-    #         interest_list.append(choice)
-
-    # interest_list.sort()
-    # object.Interests = interest_list
-
-    # # assign spie skills
-    # skill_list = []
-
-    # while len(skill_list) < skill_rolls:
-    #     # select a random interest table
-    #     interest_type_list = interest_list[secrets.randbelow(len(interest_list))]
-    #     skill = please.get_table_result(
-    #         table.vet_interest_skill_pivot[interest_type_list]
-    #     )
-    #     skill_list.append(skill)
-
-    #     if skill == "Extra Roll":
-    #         skill_rolls += 1
-    #         skill_list.pop()
-
-    #     if skill == "Choose":
-    #         skill_list.pop()
-    #         choices = please.list_table_choices(
-    #             table.vet_interest_skill_pivot[interest_type_list]
-    #         )
-    #         choice_comment = "Choose a veterinarian skill."
-    #         choice = please.choose_this(choices, choice_comment)
-    #         skill_list.append(choice)
-
-    # skill_list.sort()
-    # object.Skills = skill_list
-
-    return
-
-
-def list_eligible_vocations(object: dict) -> list:
+def veterinarian(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
-    returns a list of eligible vocations to choose one
+    set up the Veterinarian vocation
+    """
+    interest_rolls = math.ceil(get_a_job.INT / 4)
+    skill_rolls = math.ceil(get_a_job.INT / 3)
+    get_a_job.Interests = fresh_interests(get_a_job, interest_rolls)
+    get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
+
+    return get_a_job # modified by side effects
+
+
+def attribute_determined(get_a_job: table.PersonaRecord) -> list:
+    """
+    returns a list of eligible vocations determined by attribute
     """
 
     # find eligible vocations for any attribute set
-    awe = object.AWE
-    cha = object.CHA
-    con = object.CON
-    dex = object.DEX
-    intel = object.INT
-    mstr = object.MSTR
-    pstr = object.PSTR
-    hpm = object.HPM
+    awe = get_a_job.AWE
+    cha = get_a_job.CHA
+    con = get_a_job.CON
+    dex = get_a_job.DEX
+    intel = get_a_job.INT
+    mstr = get_a_job.MSTR
+    pstr = get_a_job.PSTR
+    hpm = get_a_job.HPM
 
     vocation_list = []
 
@@ -315,47 +199,38 @@ def list_eligible_vocations(object: dict) -> list:
     return vocation_list
 
 
-def bespoke_anthro_attributes_by_vocation(object: dict) -> None:
+def attributes_to_vocation(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
-    bestow improved attributes based on vocation type
+    bestow improved attributes by vocation type
     """
-    vocation = object.Vocation
-    adjustments = table.attributes_improve_by_vocation[vocation]
+    vocation = get_a_job.Vocation
 
-    ### create Level if not already there
-    hack = 42 if hasattr(object, "Level") else exps_level_picker(object)
-
-    for attribute, die_roll in adjustments.items():
+    for attribute, die_roll in table.attributes_improve_by_vocation[vocation].items():
 
         if die_roll == "mercshift":
-            old_attribute = getattr(object, attribute)
-            die_roll = str(object.Level) + "d6"
+            old_attribute = getattr(get_a_job, attribute)
+            die_roll = str(get_a_job.Level) + "d6"
             new_attribute = 40 + please.roll_this(die_roll)
-            new_attribute = (
-                old_attribute if new_attribute < old_attribute else new_attribute
-            )
+            new_attribute = old_attribute if new_attribute < old_attribute else new_attribute
+            
 
         elif die_roll == "nothingshift":
-            old_attribute = getattr(object, attribute)
-            die_roll = str(object.Level) + "d50"
+            old_attribute = getattr(get_a_job, attribute)
+            die_roll = str(get_a_job.Level) + "d50"
             new_attribute = 700 + please.roll_this(die_roll)
-            new_attribute = (
-                old_attribute if new_attribute < old_attribute else new_attribute
-            )
+            new_attribute = old_attribute if new_attribute < old_attribute else new_attribute
 
         else:
-            old_attribute = getattr(object, attribute)
+            old_attribute = getattr(get_a_job, attribute)
             new_attribute = please.roll_this(die_roll)
-            new_attribute = (
-                old_attribute if new_attribute < old_attribute else new_attribute
-            )
+            new_attribute = old_attribute if new_attribute < old_attribute else new_attribute
 
-        print(f"{vocation} alters {attribute}: {old_attribute} -> {new_attribute}")
-        setattr(object, attribute, new_attribute)
-    return
+        setattr(get_a_job, attribute, new_attribute)
+
+    return get_a_job # is adjusted by side effect
 
 
-def set_up_first_time(object):
+def set_up_first_time(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     activates the vocation function to update vocation record
     """
@@ -370,9 +245,9 @@ def set_up_first_time(object):
         "Veterinarian": veterinarian,
     }
 
-    vocations_function_pivot[object.Vocation](object)
+    vocations_function_pivot[get_a_job.Vocation](get_a_job)
 
-    return
+    return get_a_job # is adjusted by side effect
 
 #########################################################
 #                                                       #
@@ -380,34 +255,9 @@ def set_up_first_time(object):
 #                                                       #
 #########################################################
 
-def exps_level_bespoke(object: dict) -> None:
+def exps_level_picker(level_persona: table.PersonaRecord) -> table.PersonaRecord:
     """
-    User assigns an EXPS level from 1 to 15
-    """
-    chosen_EXPS_level = int(input("What is the Bespoke Level? (1 to 15) "))
-    chosen_EXPS_level = (
-        1 if chosen_EXPS_level < 2 else chosen_EXPS_level
-    )  # minimum of 1
-    chosen_EXPS_level = (
-        15 if chosen_EXPS_level > 15 else chosen_EXPS_level
-    )  # maximum of 15
-    object.Level = chosen_EXPS_level
-    return
-
-
-def random_exps_level(object: dict) -> None:
-    """
-    computer assigns a random weighted EXPS level from 1 to 10 and rarely 13
-    """
-
-    level = please.get_table_result(table.random_EXPS_levels_list)
-    object.Level = level
-    return
-
-
-def exps_level_picker(object: dict) -> None:
-    """
-    only assigns a Level to the object.
+    only assigns a Level to the get_a_job.
     level adjustments elsewhere
     """
 
@@ -416,92 +266,100 @@ def exps_level_picker(object: dict) -> None:
     Bespoke_Level = please.choose_this(option_list, list_comment)
 
     if Bespoke_Level == "Bespoke":
-        exps_level_bespoke(object)
+        level = int(please.input_this("What is the Bespoke Level? [1 to 15] "))
+        level = 1 if level < 1 else level
+
     elif Bespoke_Level == "Random":
-        random_exps_level(object)
-    else:
-        print("Error: exps_level_picker")
+        level = please.get_table_result(table.random_EXPS_levels_list)
 
-    return
+    level_persona.Level = level
+
+    return level_persona # is adjusted by side effect
 
 
-def convert_levels_to_exps(object: dict, new_level:int = 0) -> int:
+def convert_levels_to_exps(get_a_job: dict, new_level:int = 0) -> int:
     """
-    Returns an EXPS total based on the experience Level of the object
-    does not alter object.
+    Returns an EXPS total based on the experience Level of the get_a_job
+    does not alter get_a_job.
     """
 
-    vocation = object.Vocation
-    level = new_level if new_level > object.Level else object.Level
-    top_level = table.vocation_exps_levels[vocation]["top_level"]
+    vocation = get_a_job.Vocation
+    exps_table = table.vocation_exps_levels[vocation]
+
+    exp_ranger = {l:x for x, l in exps_table.items() if isinstance(x, tuple)} # reverse the dictionary
+    level = new_level if new_level > get_a_job.Level else get_a_job.Level
+    top_level = exps_table["top_level"]
 
     if level > top_level:
-        exps_bottom = table.vocation_exps_levels[vocation]["top_amount"]
-        full_levels = level - (table.vocation_exps_levels[vocation]["top_level"] + 1)
+        exps_bottom = exps_table["top_amount"]
+        full_levels = level - (exps_table["top_level"] + 1)
         exps_amount = int(
             exps_bottom
-            + (full_levels * table.vocation_exps_levels[vocation]["rate"])
-            + table.vocation_exps_levels[vocation]["rate"] / 2
+            + (full_levels * exps_table["rate"])
+            + exps_table["rate"] / 2
         )
 
     else:
-        for exps_range, level_number in table.vocation_exps_levels[vocation].items():
-            if level == level_number:
-                exps_amount = int(
-                    (exps_range[1] - exps_range[0]) / 2 + exps_range[0]
-                )
-                break
+        bottom, top = exp_ranger[level]
+        exps_amount = round(bottom + (top-bottom)/2)
 
     return exps_amount
 
 
-def convert_exps_to_levels(object: dict, new_exps = 0) -> int:
+# todo double check that exps in is related to get_a_job.EXPS
+def convert_exps_to_levels(get_a_job: dict, new_exps = 0) -> int:
     """
-    Generates an experience Level based on the EXPS of the object
-    Does not alter object.
+    Generates an experience Level based on the EXPS of the get_a_job
+    Does not alter get_a_job.
     """
-
-    exps_table = table.vocation_exps_levels[object.Vocation]
-    exps_amount = object.EXPS + new_exps
+    exps_table = table.vocation_exps_levels[get_a_job.Vocation]
+    exps_amount = new_exps if new_exps > get_a_job.Level else get_a_job.Level
     top = exps_table["top_amount"]
     top_level = exps_table["top_level"]
     rate = exps_table["rate"]
 
+    level_ranger = {x:l for x, l in exps_table.items() if isinstance(x, tuple)} # reverse the dictionary
+
     if exps_amount > top:
-        new_level = top_level + round((exps_amount - top) / rate)
+        new_level = top_level + math.ceil((exps_amount - top) / rate)
     else:
-        for key in exps_table:
-            if exps_amount in key:
-                new_level = exps_table[key]
+        for extuple, level in level_ranger.items():
+            if exps_amount >= extuple[0] and exps_amount <= extuple[1]:
+                new_level = level
                 break
 
     return new_level
 
+#########################################################
+#                                                       
+#        gifts, interests, skills management                
+#                                                       
+#########################################################
 
+
+# fix beware of builtins.list()
 def update_gifts(returning_gifts: table.PersonaRecord) -> list:
     """
     returns a list of gifts based on the persona level
     """
-    gift_table = []
-    raw_gift_table = [
-        value for _, value in table.vocations_gifts_pivot[returning_gifts.Vocation].items()
-    ]
-
-    gift_table.append(raw_gift_table[0])
+    gift_list = []
+    gift_table = list(table.vocations_gifts_pivot[returning_gifts.Vocation].values())
+    
+    gift_list.append(gift_table[0])
     if returning_gifts.Level > 3:
-        gift_table.append(raw_gift_table[1])
+        gift_list.append(gift_table[1])
     if returning_gifts.Level > 6:
-        gift_table.append(raw_gift_table[2])
+        gift_list.append(gift_table[2])
 
-    return gift_table
+    return gift_list
 
 
-def fresh_interests(object: dict, interest_rolls: int) -> list:
+def fresh_interests(get_a_job: dict, interest_rolls: int) -> list:
     """
     generates a fresh list of interests on first level
     """
 
-    interest_table = table.vocations_interests_pivot[object.Vocation]
+    interest_table = table.vocations_interests_pivot[get_a_job.Vocation]
     interest_list = []
     while len(interest_list) < interest_rolls:
         interest = please.get_table_result(interest_table)
@@ -511,26 +369,27 @@ def fresh_interests(object: dict, interest_rolls: int) -> list:
             interest_rolls += 1
             interest_list.pop()
 
-        if interest == "Choose" and not object.Fallthrough:
+        if interest == "Choose" and not get_a_job.Fallthrough:
             interest_list.pop()
             choices = please.list_table_choices(interest_table)
-            choice_comment = f"Choose a {object.Vocation} interest."
+            choice_comment = f"Choose a {get_a_job.Vocation.upper()} INTEREST."
             choice = please.choose_this(choices, choice_comment)
             interest_list.append(choice)
-        elif interest == "Choose" and object.Fallthrough:
+
+        elif interest == "Choose" and get_a_job.Fallthrough:
             interest_list.pop()
 
     return interest_list
 
 
-def fresh_skills(object: dict, skill_rolls: int) -> list:
+def fresh_skills(get_a_job: dict, skill_rolls: int) -> list:
     """
     generates a fresh list of skills on first level
     """
-
+    
+    ### vocation skills can be combined from multiple tables
     skills_table = []
-
-    for skillist in table.vocations_skills_mashup[object.Vocation]:
+    for skillist in table.vocation_skills_tables[get_a_job.Vocation]:
         for key, value in skillist.items():
             if key != "die_roll" and key != "name":
                 skills_table.append(value)
@@ -544,144 +403,74 @@ def fresh_skills(object: dict, skill_rolls: int) -> list:
             skill_rolls += 1
             skill_list.pop()
 
-        if skill == "Choose" and not object.Fallthrough:
+        if skill == "Choose" and not get_a_job.Fallthrough:
             skill_list.pop()
             choices = please.list_table_choices(skills_table)
-            choice_comment = f"Choose a {object.Vocation} skill."
+            choice_comment = f"Choose a {get_a_job.Vocation} skill."
             choice = please.choose_this(choices, choice_comment)
             skill_list.append(choice)
-        elif skill == "Choose" and object.Fallthrough:
+
+        elif skill == "Choose" and get_a_job.Fallthrough:
             skill_list.pop()
 
     return skill_list
 
 
-def update_interests(object: dict, interest_rolls: int) -> list:
+def update_interests(get_a_job: dict, interest_rolls: int) -> list:
     """
-    returns a list to EXTEND object.Interests using object.Vocation and increase in level
+    returns a list to EXTEND get_a_job.Interests using get_a_job.Vocation and increase in level
     """
 
     ### create a list of all interests
-    all_interests = [
-        val
-        for lose, val in table.vocations_interests_pivot[object.Vocation].items()
-        if lose != "die_roll"
-        and lose != "name"
-        and val != "Extra Roll"
-        and val != "Choose"
-    ]
+    do_not_include = ["Choose", "name", "die_roll"]
 
+    all_interests = [
+            val
+            for lose, val in table.vocations_interests_pivot[get_a_job.Vocation].items()
+            if lose not in do_not_include and  val not in do_not_include
+        ]
+    
     ### check to see if any extra rolls
     initial_number_of_rolls = interest_rolls
-    for __ in range(initial_number_of_rolls):
+    for _ in range(initial_number_of_rolls):
         if (
-            please.get_table_result(table.vocations_interests_pivot[object.Vocation])
+            please.get_table_result(table.vocations_interests_pivot[get_a_job.Vocation])
             == "Extra Roll"
         ):
             interest_rolls += 1
 
+        ### strip Extra Roll from all_skills
+    all_interests = [x for x in all_interests if x != "Extra Roll"]
+
     ### create interest list to return
     interest_list = []
 
-    if object.Fallthrough:
-        for __ in range(interest_rolls):
+    if get_a_job.Fallthrough:
+        for _ in range(interest_rolls):
             interest_list.append(secrets.choice(all_interests))
         return interest_list
 
-    if please.say_yes_to(f"Would you like to pick each ({interest_rolls}) interests?"):
-        for __ in range(interest_rolls):
+    if please.say_yes_to(f"Would you like to pick the ({interest_rolls}) INTEREST(s)? "):
+        for _ in range(interest_rolls):
             interest = please.choose_this(
-                sorted(all_interests), "Choose an interest to add."
+                sorted(all_interests), "Choose an INTEREST to add. "
             )
             interest_list.append(interest)
 
     else:
-        for __ in range(interest_rolls):
+        for _ in range(interest_rolls):
             interest_list.append(secrets.choice(all_interests))
 
     return interest_list
 
 
-def update_persona_exps(record_to_update: dict) -> None:
+def update_skills(get_a_job: dict, skill_rolls: int) -> list:
     """
-    increases EXPS or Level and adjust record_to_update accordingly
-    """
-    initial_exps = record_to_update.EXPS
-    initial_level = record_to_update.Level
-    vocation = record_to_update.Vocation
-
-    comment_list = [
-        "Change EXPS",
-        "Change LEVEL",
-        "Reset EXPS",
-    ]
-    experience = please.choose_this(comment_list, f"Presently {vocation} level {initial_level} with {initial_exps} EXPS.")
-
-    if experience == "Change EXPS":
-        session_exps = int(
-            input(f"Present EXPS is {initial_exps}. How much EXPS do you want to add? ")
-        )
-        session_exps = 42 if session_exps < 1 else session_exps #protects from negative EXPS
-        new_level = convert_exps_to_levels(record_to_update, session_exps)
-        new_exps = initial_exps + session_exps
-
-    elif experience == "Change LEVEL":
-        new_level = int(
-            input(
-                f"Present Level is {vocation} {initial_level}. What is the NEW LEVEL? "
-            )
-        )
-        new_level = initial_level if new_level < 1 else new_level #protects from negative LVL
-        new_exps = convert_levels_to_exps(record_to_update, new_level)
-
-        # record_to_update.Level = new_level
-
-
-    elif experience == "Reset EXPS":
-        new_exps = int(
-            input(f"Present EXPS Total is {initial_exps}. What is the new EXPS TOTAL? ")
-        )
-        new_exps = 42 if new_exps < 42 else new_exps # protects from negative EXPS
-        new_level = convert_exps_to_levels(record_to_update)
-
-        if not please.say_yes_to(f"{vocation} Level: {initial_level} -> {new_level} and EXPS: {initial_exps} -> {new_exps}"):
-            update_persona_exps(record_to_update)
-
-    ### change the values or start again
-    if  please.say_yes_to(
-        f"{vocation} Level: {initial_level} -> {new_level} and EXPS: {initial_exps} -> {new_exps}"
-    ):
-        record_to_update.EXPS = new_exps
-        record_to_update.Level = new_level
-        please.store_this(record_to_update)
-    else:
-        update_persona_exps(record_to_update)
-
-    ### check for adding abilities via vocation
-    level_increase = record_to_update.Level - initial_level
-
-    ### only makes changes for vocations, not aliens or robots
-    if (
-        record_to_update.Vocation in [key for key in table.attributes_improve_by_vocation.keys()]
-        and level_increase > 0
-    ):
-        # gifts are updated on the fly as the results are fixed
-        new_interests = update_interests(record_to_update, level_increase)
-        record_to_update.Interests.extend(new_interests)
-        new_skills = update_skills(record_to_update, level_increase)
-        record_to_update.Skills.extend(new_skills)
-        please.store_this(record_to_update)
-
-    return
-
-
-def update_skills(object: dict, skill_rolls: int) -> list:
-    """
-    returns a list to EXTEND object.Skills using object.Vocation and object.Level
+    returns a list to EXTEND get_a_job.Skills using get_a_job.Vocation and get_a_job.Level
     """
     ### create a list of all skills (3 tables) without Choose
     all_skills = []
-    for sub_list in table.vocations_skills_mashup[object.Vocation]:
+    for sub_list in table.vocation_skills_tables[get_a_job.Vocation]:
         for key, value in sub_list.items():
             if value != "1d100" and key != "Name" and value != "Choose":
                 all_skills.append(value)
@@ -698,10 +487,10 @@ def update_skills(object: dict, skill_rolls: int) -> list:
     ### create skills_list to return
     skills_list = []
 
-    if object.Vocation == "Spie":
-        object.Spie_Fu = spie_martial_arts(object)
+    if get_a_job.Vocation == "Spie":
+        get_a_job.Spie_Fu = spie_martial_arts(get_a_job)
 
-    if object.Fallthrough:
+    if get_a_job.Fallthrough:
         for _ in range(skill_rolls):
             skills_list.append(secrets.choice(all_skills))
         return skills_list
@@ -718,3 +507,83 @@ def update_skills(object: dict, skill_rolls: int) -> list:
             skills_list.append(secrets.choice(all_skills))
 
     return skills_list
+
+
+def update_persona_exps(record_to_update: table.PersonaRecord) -> table.PersonaRecord:
+    """
+    increases EXPS or Level and adjust record_to_update accordingly
+    also updates interest and skills if appropriate
+    """
+    initial_exps = record_to_update.EXPS
+    initial_level = record_to_update.Level
+    vocation = record_to_update.Vocation
+
+    comment_list = [
+        "Change EXPS",
+        "Change LEVEL",
+        "Reset EXPS",
+    ]
+    experience = please.choose_this(comment_list, f"Presently {vocation} level {initial_level} with {initial_exps} EXPS.")
+
+    if experience == "Change EXPS":
+        session_exps = int(
+            please.input_this(f"Present EXPS is {initial_exps}. How much EXPS do you want to add? ")
+        )
+        session_exps = 42 if initial_exps - session_exps < 42 else session_exps #protects from negative EXPS
+
+        new_level = convert_exps_to_levels(record_to_update, session_exps)
+        new_exps = initial_exps + session_exps
+
+    elif experience == "Change LEVEL":
+        new_level = int(
+            please.input_this(
+                f"Present Level is {vocation} level {initial_level}. What is the NEW LEVEL? "
+            )
+        )
+        new_level = initial_level if new_level < 1 else new_level #protects from negative LVL
+        new_exps = convert_levels_to_exps(record_to_update, new_level)
+
+        # record_to_update.Level = new_level
+
+    elif experience == "Reset EXPS":
+        new_exps = int(
+            please.input_this(f"Present EXPS Total is {initial_exps}. What is the new EXPS TOTAL? ")
+        )
+        new_exps = 42 if new_exps < 42 else new_exps # protects from negative EXPS
+        new_level = convert_exps_to_levels(record_to_update)
+
+        if not please.say_yes_to(f"{vocation} Level: {initial_level} -> {new_level} and EXPS: {initial_exps} -> {new_exps}"):
+            update_persona_exps(record_to_update)
+
+
+
+
+    ### approve or negate the changes. if negated return to update EXPS
+
+    if  please.say_yes_to(
+        f"{vocation} Level: {initial_level} -> {new_level} and EXPS: {initial_exps} -> {new_exps}"
+    ):
+        record_to_update.EXPS = new_exps
+        record_to_update.Level = new_level
+        please.store_this(record_to_update)
+    else:
+        update_persona_exps(record_to_update) # return to top
+
+    ### check for adding abilities via vocation
+    level_increase = record_to_update.Level - initial_level
+
+    ### updates interests and skills if level increase and NOT alien or robot
+    if (
+        record_to_update.Vocation in [key for key in table.attributes_improve_by_vocation.keys()]
+        and level_increase > 0
+    ):
+        # gifts are updated on the fly as the results are fixed
+        new_interests = update_interests(record_to_update, level_increase)
+        record_to_update.Interests.extend(new_interests)
+        new_skills = update_skills(record_to_update, level_increase)
+        record_to_update.Skills.extend(new_skills)
+        please.store_this(record_to_update)
+
+    return record_to_update # altered by side effect in this function and others
+
+

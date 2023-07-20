@@ -149,8 +149,7 @@ def assign_persona_name(avatar_name: table.PersonaRecord) -> table.PersonaRecord
     I know it is only only one line, but I want to make build_show work
     """
     ### get mundane terran name of the player
-    name_safe = please.input_this(f'\nPlease input your PERSONA NAME: ')
-    avatar_name.Persona_Name = please.choose_this(name_safe,"Are you happy with this name? ")
+    avatar_name.Persona_Name = please.input_this(f'\nPlease input your PERSONA NAME: ')
 
     return avatar_name # is modified by side effect
 

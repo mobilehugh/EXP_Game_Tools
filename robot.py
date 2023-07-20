@@ -590,7 +590,7 @@ def android(object: dict) -> None:
     object.Wate = round(object.Wate * 1.3)
 
     ### vocation EXCEPTION for android
-    type_options = vocation.list_eligible_vocations(object)
+    type_options = vocation.attribute_determined(object)
     comment = "Choose your vocation."
     type_choice = please.choose_this(type_options, comment)
     object.Vocation = type_choice

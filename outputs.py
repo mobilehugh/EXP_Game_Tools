@@ -576,7 +576,7 @@ class PDF(FPDF):
         y+=3 
         blob = f'**Gifts:** Auto success. **Interests:** General knowledge (+1) **Skills:** Specific knowledge (+2)'
         if persona.Vocation == "Spie":
-            blob = f"{persona.Spie_Fu}"
+            blob = vocation.spie_martial_arts(persona)
 
         if persona.Vocation == "Nothing":
             if persona.EXPS > persona.Vocay_Aspiration_EXPS:
@@ -1442,7 +1442,7 @@ def anthro_screen(persona) -> None:
     # special cases for nothing and spie
 
     if persona.Vocation == "Spie":
-        print(f"{persona.Spie_Fu}")
+        print(f"{vocation.spie_martial_arts(persona)}")
 
     if persona.Vocation == "Nothing":
         if persona.EXPS > persona.Vocay_Aspiration_EXPS:

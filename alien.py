@@ -559,7 +559,7 @@ def alien_vocation_check(object):
 
     if please.say_yes_to("Would your alien like to pursue a VOCATION?"):
         ### choose vocation type
-        choices = vocation.list_eligible_vocations(object)
+        choices = vocation.attribute_determined(object)
         choice_comment = "Which VOCATION do you want?"
         type_choice = please.choose_this(choices, choice_comment)
         object.Vocation = type_choice
