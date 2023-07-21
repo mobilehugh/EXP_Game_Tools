@@ -375,7 +375,7 @@ def store_this(record_to_store: table.PersonaRecord) -> None:
         "Toy":"./Records/Toys/",
         "Player":"./Records/Players/",
         "Referee":"./Records/Referee/",
-        "Bin":"./Records/Bin",
+        "Bin":"./Records/Bin/",
     }
     directory_to_use = where_to_store[store_here]
 
@@ -383,7 +383,7 @@ def store_this(record_to_store: table.PersonaRecord) -> None:
     with open(f"{directory_to_use}{file_name_to_use}", "a") as file:
         file.write(f"{json_to_add}\n")
 
-    print(f"\n*** Record stored at {directory_to_use}{file_name_to_use}")
+    input(f"\n*** Record stored at {directory_to_use}{file_name_to_use}. Continue? ")
 
 def record_storage(record_to_store: table.PersonaRecord) -> None:
     """
@@ -391,7 +391,7 @@ def record_storage(record_to_store: table.PersonaRecord) -> None:
     """
     option_list = [
         "Save",
-        "Transfer",
+        "Copy Out",
         "Bin",
     ]
 
@@ -408,11 +408,9 @@ def record_storage(record_to_store: table.PersonaRecord) -> None:
     }
     review_screen = function_map_reviews[record_to_store.FAMILY]
 
-    if storage_chosen == "Transfer":
+    if storage_chosen == "Copy Out":
         store_this(record_to_store)
-
         review_screen(record_to_store) #prints out on screen
-
         print("\n\nCOPY JSON BELOW for TRANSFER include curly brackets {}")
         print(json.dumps(record_to_store.__dict__))
         print("\n\n")

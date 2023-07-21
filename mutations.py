@@ -10,23 +10,34 @@ import table
 # todo allow Fallthrough to skip mutation choices
 # fix defects get worse as level increases!
 
-def mutation_workflow():
+def mutation_workflow() -> None:
     """
     Mutate now avoid the post bomb rush
     """
     # clearance for Clarence
     please.clear_console()
 
-    option_list = ["Fresh Mutation", "Bespoke Mutation", "Back"]
-    list_comment = "Please Choose:"
+    option_list = ["Random Mutations", "Bespoke Mutations"]
+    list_comment = "Cruise through mutations :"
     plan_desired = please.choose_this(option_list, list_comment)
 
-    if plan_desired == "Fresh Mutation":
-        pass # todo fresh mutation
-    elif plan_desired == "Bespoke Mutation":
-        pass # todo bespoke mutation
-    elif plan_desired == "Maintenance":
-        pass # todo Maintenance mutations
+    fake_record = table.PersonaRecord
+    fake_record.Mutations ={}
+
+    if plan_desired == "Random Mutations":
+        more_random = True
+        while more_random:
+            single_random_mutation(fake_record, ['any'])
+            if not please.say_yes_to("Give me another mutation! "):
+                break
+
+    elif plan_desired == "Bespoke Mutations":
+        more_random = True
+        while more_random:
+            pick_bespoke_mutation(fake_record)
+            if not please.say_yes_to("Give me another mutation! "):
+                break
+
     return
 
 class Mutation:
@@ -3389,9 +3400,8 @@ def mutation_list_builder(directions:list = ['any']) -> list:
     else:
         for element in directions:
             if element not in ALLOWED_LIST:
-                print(f'{element} is not allowed. Please select from:\n{ALLOWED_LIST}.')
-                input('wft bro')
-                return []
+                input(f'{element} is not allowed. Please select from:\n{ALLOWED_LIST}. [Ret -> continue]')
+                mutation_list_builder(['any'])
     
 
     mental_list = [val for val in mental_mutation_random.values() if isinstance(val,tuple)]
