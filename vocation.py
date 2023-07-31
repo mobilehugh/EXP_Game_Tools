@@ -373,8 +373,8 @@ def fresh_interests(get_a_job: dict, interest_rolls: int) -> list:
             interest_list.pop()
             choices = please.list_table_choices(interest_table)
             choice_comment = f"Choose a {get_a_job.Vocation.upper()} INTEREST."
-            choice = please.choose_this(choices, choice_comment)
-            interest_list.append(choice)
+            chosen = please.choose_this(choices, choice_comment)
+            interest_list.append(chosen)
 
         elif interest == "Choose" and get_a_job.Fallthrough:
             interest_list.pop()
@@ -407,8 +407,8 @@ def fresh_skills(get_a_job: dict, skill_rolls: int) -> list:
             skill_list.pop()
             choices = please.list_table_choices(skills_table)
             choice_comment = f"Choose a {get_a_job.Vocation} skill."
-            choice = please.choose_this(choices, choice_comment)
-            skill_list.append(choice)
+            chosen = please.choose_this(choices, choice_comment)
+            skill_list.append(chosen)
 
         elif skill == "Choose" and get_a_job.Fallthrough:
             skill_list.pop()

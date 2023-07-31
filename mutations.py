@@ -3457,13 +3457,13 @@ def pick_bespoke_mutation(bespoke_mutating:table.PersonaRecord) -> table.Persona
     ALLOWED_LIST = ['any', 'mental', 'physical','combat','non-combat','defect', 'no-defect']
 
     build_directions = []
-    choice = ""
+    chosen = ""
     ALLOWED_LIST.insert(0, "EXIT")
-    while choice != "EXIT":
-        choice = please.choose_this(ALLOWED_LIST, "Choose mutation kinds. ")
-        if choice == "EXIT":
+    while chosen!= "EXIT":
+        chosen = please.choose_this(ALLOWED_LIST, "Choose mutation kinds. ")
+        if chosen == "EXIT":
             break
-        build_directions.append(choice)
+        build_directions.append(chosen)
 
     if not build_directions:
         build_directions = "any"

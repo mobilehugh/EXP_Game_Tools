@@ -63,11 +63,11 @@ def hit_points_max(hit_points_creating:table.PersonaRecord) -> table.PersonaReco
 
     # alien HPM based on CON an SIZE
     elif hit_points_creating.FAMILY == "Alien":
-        size = hit_points_creating.Size
+        size = hit_points_creating.Size_Cat
         con = str(hit_points_creating.CON)
         hpm = please.roll_this(con + table.alien_HPM_size_and_dice[size])
 
-        if hit_points_creating.Size == "Minute":
+        if hit_points_creating.Size_Cat == "Minute":
             hpm = math.ceil(hit_points_creating.HPM * ((hit_points_creating.Wate / 1000)))
             
    
@@ -95,14 +95,14 @@ def wate_allowance(wate_allowance:table.PersonaRecord) -> table.PersonaRecord:
     
     # alien modifies wate allowance by alien size
     if wate_allowance.FAMILY == "Alien":
-        size_mod = table.alien_size_and_WA[object.Size]
+        size_mod = table.alien_size_and_WA[wate_allowance.Size_Cat]
         wate_allowed = round(float(wate_allowed * size_mod),1)
     
     # robot modifies wate allowance by PSTR prime
     elif wate_allowance.FAMILY == "Robot": 
         wate_allowed = wate_allowed * wate_allowance.PSTR_Prime
 
-    setattr(wate_allowance, "WA", wate_allowed)
+    wate_allowance.WA = wate_allowed
 
     return wate_allowance # is modified by side effect
 
@@ -120,7 +120,7 @@ def movement_rate(moving_time: table.PersonaRecord) -> table.PersonaRecord:
 
     elif moving_time.FAMILY == "Alien":
         moving_rate = moving_time.DEX
-        alien.assign_terrain_movements(moving_rate)
+        alien.assign_terrain_movements(moving_time)
 
     setattr(moving_time, "Move", moving_rate)
 
@@ -162,7 +162,7 @@ def descriptive_attributes(describing_changes: table.PersonaRecord) -> table.Per
     # todo descriptive knock on effects of PSTR -> WA, DEX -> Move, CON -> HPS
     # builds a combined table 
     if describing_changes.FAMILY == "Alien":
-        upwards_table = table.descriptive_attributes_higher.update(table.alien_descriptive_attributes)
+        upwards_table = {**table.descriptive_attributes_higher, **table.alien_descriptive_attributes}
     else:
         upwards_table = table.descriptive_attributes_higher
 

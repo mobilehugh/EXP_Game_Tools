@@ -32,13 +32,18 @@ class PersonaRecord:
     PSTR: int = 1
     SOC: int = 42
     HPM: int = 1
+    WA: int = 1
     AR: int = 500
     Move: int = 1
-    Age_Cat: str = "None"
+    Age_Spans: list[str] = field(default_factory=list) 
+    Age_Cat: str = "Adolescent"
     Age: int = 1
+    Age_Suffix: str = "years"
     Size_Cat: str = "Medium"
     Hite: int = 1
     Wate: int = 1
+    Wate_Suffix: int = "kgs"
+
     Vocation: str = "None"
     Level: int = 1
     EXPS: int = 42
@@ -462,12 +467,12 @@ anthro_ages_by_category_and_type = {
     "Ursidae": ["1d8", "1d6+8", "1d50+14", "1d20+64", "84+1d8"],
 }
 
-
+# change Older from Elder
 anthro_random_age_category = {
     (1, 5): "Child",
     (5, 15): "Adolescent",
     (15, 65): "Adult",
-    (65, 90): "Elder",
+    (65, 90): "Older",
     (90, 101): "Aged",
     "die_roll": "1d100",
 }
@@ -2081,24 +2086,28 @@ alien_descriptive_attributes_list = {
     "Exit": ["Exit", "Exit"],
 }
 
-alien_sizes = {
-    (1, 6):"('Tiny', '1d10')",
-    (7, 26):"('Small', '1d50')",
-    (27, 76):"('Medium', '1d50+50')",
-    (77, 97):"('Large', '5d100+100')",
-    (98, 100):"('Gigantic', '6d1000+600')",
+alien_size_fresh = {
+    (1, 6):"Tiny",
+    (7, 26):"Small",
+    (27, 76):"Medium",
+    (77, 97):"Large",
+    (98, 100):"Gigantic",
+    "name":"Alien Size",
+    "die_roll":"1d100",
+} 
+
+alien_size_wate = {
+    'Minute':'"1d1000"',
+    'Tiny':'1d10',
+    'Small':'1d50',
+    'Medium':'1d50+50',
+    'Large':'5d100+100',
+    'Gigantic':'6d1000+600',
+    'Humongous':'"1d50"',
     "name":"Alien Size",
     "die_roll":"1d100",
 } 
  
-alien_attack_type = {
-    (1, 75):"Striking",
-    (76, 95):"Flinging",
-    (96, 100):"Shooting",
-    "name":"Alien Attack Type",
-    "die_roll":"1d100",
-} 
-
 alien_HPM_size_and_dice = {
     "Minute": "d4",
     "Tiny": "d4",
@@ -2119,19 +2128,8 @@ alien_size_and_WA = {
     "Humongous": 10,
 }
 
-attacks_per_unit = {
-    (1, 11): 0,
-    (12, 81): 1,
-    (82, 91): 2,
-    (92, 97): 3,
-    (97, 99): 4,
-    (100, 100): 5,
-    "name": "Attacks per Unit",
-    "die_roll": "1d100",
-}
-
 alien_attack_damage = {
-    range(1, 6): {
+    (1, 5): {
         "Minute": "1d4",
         "Tiny": "1d4",
         "Small": "1d6",
@@ -2140,7 +2138,7 @@ alien_attack_damage = {
         "Gigantic": "1d20",
         "Humongous": "1d20",
     },
-    range(6, 11): {
+    (6, 10): {
         "Minute": "1d6",
         "Tiny": "1d6",
         "Small": "1d8",
@@ -2149,7 +2147,7 @@ alien_attack_damage = {
         "Gigantic": "3d10",
         "Humongous": "3d10",
     },
-    range(11, 16): {
+    (11, 15): {
         "Minute": "1d8",
         "Tiny": "1d8",
         "Small": "1d10",
@@ -2158,7 +2156,7 @@ alien_attack_damage = {
         "Gigantic": "3d12",
         "Humongous": "3d12",
     },
-    range(16, 21): {
+    (16, 20): {
         "Minute": "1d10",
         "Tiny": "1d10",
         "Small": "1d12",
@@ -2167,7 +2165,7 @@ alien_attack_damage = {
         "Gigantic": "4d10",
         "Humongous": "4d10",
     },
-    range(21, 26): {
+    (21, 25): {
         "Minute": "1d12",
         "Tiny": "1d12",
         "Small": "1d20",
@@ -2176,7 +2174,7 @@ alien_attack_damage = {
         "Gigantic": "4d12",
         "Humongous": "4d12",
     },
-    range(26, 32): {
+    (26, 99): {
         "Minute": "1d20",
         "Tiny": "1d20",
         "Small": "3d10",
@@ -2189,7 +2187,24 @@ alien_attack_damage = {
 }
 
 
+attacks_per_unit = {
+    (1, 11): 0,
+    (12, 81): 1,
+    (82, 91): 2,
+    (92, 97): 3,
+    (97, 99): 4,
+    (100, 100): 5,
+    "name": "Attacks per Unit",
+    "die_roll": "1d100",
+}
 
+alien_attack_type = {
+    (1, 75):"Strike",
+    (76, 95):"Fling",
+    (96, 100):"Shoot",
+    "name":"Alien Attack Type",
+    "die_roll":"1d100",
+} 
 
 
 alien_quarter_shapes = [
@@ -2344,74 +2359,32 @@ alien_quarter_shapes = [
     "Nil (s)",
 ]
 
-alien_head_adornments = {
-    (1, 2):"Antenna",
-    (3, 3):"Antler",
-    (4, 4):"Ear",
-    (5, 5):"Horn",
-    (6, 6):"Knob",
-    (7, 7):"Peak",
-    (8, 8):"Plume",
-    (9, 9):"Quill",
-    (10, 10):"Spine",
-    (11, 11):"Tuft",
-    (12, 13):"String",
-    "name":"Head Adornment",
-    "die_roll":"1d12",
-} 
- 
-alien_body_adornments = {
-    (1, 2):"Arms Adornment",
-    (3, 3):"Bump",
-    (4, 4):"Crest",
-    (5, 5):"Head Adornment",
-    (6, 6):"Hole",
-    (7, 7):"Knob",
-    (8, 8):"Knurl",
-    (9, 9):"Lump",
-    (10, 10):"Lump",
-    (11, 11):"Ridge",
-    (12, 12):"Ruff",
-    (13, 13):"Scale",
-    (14, 14):"Slime",
-    (15, 15):"Spine",
-    (16, 16):"Spout",
-    (17, 17):"Tree",
-    (18, 18):"Vine",
-    (19, 19):"Wing",
-    (20, 21):"String",
-    "name":"Torso Adornments",
-    "die_roll":"1d20",
-} 
- 
-alien_arm_adornments = {
-    (1, 2):"Adhesive",
-    (3, 3):"Claw",
-    (4, 4):"Hand",
-    (5, 5):"Hoof",
-    (6, 6):"Magnet",
-    (7, 7):"Paw",
-    (8, 8):"Pincer",
-    (9, 9):"Talon",
-    (10, 11):"Tentacle",
-    "name":"Arm Adornments",
-    "die_roll":"1d10",
-} 
+alien_head_adornments = ['Antenna', 'Antler', 'Ear', 'Horn', 'Knob', 'Peak', 'Plume', 'Quill', 'Spine', 'Tuft', 'String']
 
+alien_body_adornments = ['Bump', 'Crest', 'Antenna', 'Antler', 'Ear', 'Horn', 'Knob', 'Peak', 'Plume', 'Quill', 'Spine', 'Tuft', 'String', 'Hole', 'Knob', 'Knurl', 'Lump', 'Lump', 'Ridge', 'Ruff', 'Scale', 'Slime', 'Spine', 'Spout', 'Tree', 'Vine', 'Wing', 'String']
+ 
+alien_arm_adornments = ['Adhesive', 'Claw', 'Hand', 'Hoof', 'Magnet', 'Paw', 'Pincer', 'Talon', 'Tentacle']
 
 alien_life_span_data = {
-    (1, 11):"{'base': 0, 'die_roll': '1d6', 'multiplier': 1}",
-    (12, 26):"{'base': 0, 'die_roll': '1d6', 'multiplier': 10}",
-    (27, 76):"{'base': 50, 'die_roll': '1d6', 'multiplier': 10}",
-    (77, 86):"{'base': 100, 'die_roll': '1d6', 'multiplier': 10}",
-    (87, 94):"{'base': 150, 'die_roll': '1d10', 'multiplier': 10}",
-    (95, 96):"{'base': 0, 'die_roll': '1d6', 'multiplier': 100}",
-    (97, 99):"{'base': 0, 'die_roll': '1d12', 'multiplier': 100}",
-    (100, 100):"{'base': 0, 'die_roll': '1d1000', 'multiplier': 100}",
-    "name":"Alien Life Span",
+    (1, 11):('1d6', 1), 
+    (12, 26):('1d6', 10),
+    (27, 76):('1d6+50', 10),
+    (77, 86):('1d6+100', 10),
+    (87, 94):('1d10+150', 10),
+    (95, 96):('1d6', 100),
+    (97, 99):('1d12', 100),
+    (100, 100):('1d1000', 100),
+    "name":"Alien Life Span (die_roll, multiple)",
     "die_roll":"1d100",
 } 
 
+alien_life_span_descriptors = {
+    "Progeny - Short": ('1d12', 1),
+    "Progeny": ('1d6', 10),
+    "Prodigal": ('1d6', 100),
+    "Prodigal - Long": ('1d12', 100),
+    "Celestial":('1d10000', 100),
+}
 
 alien_life_stages = {
     "Child": "1d10",
@@ -2419,14 +2392,6 @@ alien_life_stages = {
     "Adult": "10d8",
     "Older": "Older",
     "Aged": "1d4",
-}
-
-alien_life_span_descriptors = {
-    "Progeny - Short": {"base": 0, "die_roll": "1d6", "multiplier": 1},
-    "Progeny": {"base": 0, "die_roll": "1d6", "multiplier": 10},
-    "Prodigal": {"base": 0, "die_roll": "1d6", "multiplier": 100},
-    "Prodigal - Long": {"base": 0, "die_roll": "1d12", "multiplier": 100},
-    "Celestial": {"base": 0, "die_roll": "1d1000", "multiplier": 100},
 }
 
 
@@ -2438,7 +2403,7 @@ alien_biology_energy_source = {
     (5, 5): "Photosynthetic",
     (6, 6): "Detritovore",
     (7, 7): "Psionovore",
-    (8, 8): "Omnivore",
+    (8, 8): "Magnetovore",
     "name": "Energy Source",
     "die_roll": "1d8",
 }
@@ -2543,7 +2508,7 @@ alien_sounds = {
     (14, 14):"Chatter",
     (15, 15):"Cheep",
     (16, 16):"Chirp",
-    (17, 17):"Chortle ",
+    (17, 17):"Chortle",
     (18, 18):"Chirrup",
     (19, 19):"Chitter",
     (20, 20):"Chuck",
@@ -2641,6 +2606,30 @@ alien_biology_group_size = {
     "die_roll":"1d100",
 } 
 
+alien_tool_score = ["None", "Simple", "Tech", "Computer", "Creator"]
+society_options = ["Yes", "None"]
+
+core_biology = {
+    "Biome": biome_base_list,
+    "Biome Characteristic": biome_sub_list,
+    "Energy Source": alien_biology_energy_source,
+    "Energy Procurement": alien_biology_energy_procurement,
+    "Reproduction": alien_biology_reproduction,
+    "Domicile": alien_biology_domicile,
+    "Aroma": alien_biology_aroma,
+    "Group Size":alien_biology_group_size,}
+
+core_society = {
+    "Tools": alien_tool_score,
+    "Language": society_options,
+    "Culture": society_options,
+    "Religion": role_play_RP_religion,
+    "Education": society_options,
+    "Politics": role_play_RP_politics,
+    "Vocation":society_options,
+    "Philosophy": role_play_RP_philosophy,
+}
+
 
 vocation_non_proficient = {
     "Biologist": {"A": 10, "B": 10, "C": 25},
@@ -2664,7 +2653,6 @@ vocation_level_bonus = {
     "Veterinarian": {"A": 20, "B": 20, "C": 20},
 }
 
-
 numbers_2_words = [
     "zero",
     "one",
@@ -2684,7 +2672,6 @@ attack_type_words = {
     "BPROF": "non-powered projectile",
     "CPROF": "powered projectile",
 }
-
 
 vocation_proficiencies = {
     "Biologist": {

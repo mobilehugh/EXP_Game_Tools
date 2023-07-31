@@ -319,15 +319,15 @@ def anthro_attributes_bespoke(attribute_adjusting: table.PersonaRecord) -> table
 
     methods = ["Random", "Manual", "Descriptive"]
     choice_comment = "Choose a method for ATTRIBUTES? "
-    choice = please.choose_this(methods, choice_comment)
+    chosen = please.choose_this(methods, choice_comment)
 
-    if choice == "Manual":
+    if chosen == "Manual":
         core.manual_persona_update(attribute_adjusting)
 
-    elif choice == "Random":
+    elif chosen == "Random":
         pass # because already chosen
 
-    elif choice == "Descriptive":
+    elif chosen == "Descriptive":
         core.descriptive_attributes(attribute_adjusting)
 
     return attribute_adjusting # is modified by side effect in other functions
@@ -361,20 +361,20 @@ def anthro_type_bespoke(object):
     if method_type_selection == "Attribute Determined":
         type_options = list_eligible_anthro_types(object)
         comment = "Which ANTHRO TYPE do you want?"
-        type_choice = please.choose_this(type_options, comment)
-        object.FAMILY_TYPE= type_choice
+        type_chosen = please.choose_this(type_options, comment)
+        object.FAMILY_TYPE= type_chosen
 
     elif method_type_selection == "Bespoke":
         type_options = all_anthro_types
         comment = "Which anthro type do you want?"
-        type_choice = please.choose_this(type_options, comment)
-        object.FAMILY_TYPE= type_choice
+        type_chosen = please.choose_this(type_options, comment)
+        object.FAMILY_TYPE= type_chosen
 
     elif method_type_selection == "Random":
-        type_choice = all_anthro_types[
+        type_chosen = all_anthro_types[
             (please.roll_this("1d" + str(len(all_anthro_types))) - 1)
         ]  ### -1 to avoid indexing error
-        object.FAMILY_TYPE= type_choice
+        object.FAMILY_TYPE= type_chosen
 
     else:
         print("\nYou have not selected a valid anthro type selection method")

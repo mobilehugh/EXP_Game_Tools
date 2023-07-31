@@ -14,8 +14,6 @@ import  robot
 import  toy 
 import  please
 
-# todo conduct a .keys() search to ensure list(.keys())
-
 def record_chooser()->None:
     """
     Interactively prompt the user to choose a record type, then generate the

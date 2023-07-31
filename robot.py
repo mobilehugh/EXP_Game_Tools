@@ -121,7 +121,7 @@ def fresh_robot_type(object):
     """
     choices = list_eligible_robot_types(object)
     comment = "Please choose a robot type:"
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
     object.Bot_Type = choice
     robot_type_function_pivot[object.Bot_Type](object)
     return  # return for robot typing
@@ -170,8 +170,8 @@ def robotic_peripherals(object: dict, number: int) -> list:
         if peripheral == "Choose":
             peripheral_list.pop()
             choices = please.list_table_choices(table.primary_robotic_peripheral)
-            choice = please.choose_this(choices, "Choose a primary peripheral")
-            peripheral_list.append(choice)
+            chosen = please.choose_this(choices, "Choose a primary peripheral")
+            peripheral_list.append(chosen)
 
         if peripheral == "Secondary":
             peripheral_list.pop()
@@ -193,7 +193,7 @@ def robotic_peripherals(object: dict, number: int) -> list:
         if peripheral == "Choose":
             peripheral_list.pop()
             choices = please.list_table_choices(table.secondary_robotic_peripheral)
-            choice = please.choose_this(choices, "Choose a secondary peripheral")
+            chosen = please.choose_this(choices, "Choose a secondary peripheral")
             peripheral_list.append(choice)
 
     ### fix peripheral list for secondary effects
@@ -796,9 +796,9 @@ def explorations(object):
     if intel >= 24:
         choices.append("Extra-planetary")
     comment = "Please choose your Explorations bot type."
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
 
-    if choice == "Planetary":
+    if chosen == "Planetary":
         object.FAMILY_SUB = "Planetary"
         specs.append("Created to explore their own planet.")
         object.Adapt = 0
@@ -822,7 +822,7 @@ def explorations(object):
 
         object.Spec_Sheet = specs
 
-    elif choice == "Extra-planetary":
+    elif chosen == "Extra-planetary":
         object.FAMILY_SUB = "Extra-planetary"
         specs.append("Created to explore unknown planets.")
         object.Adapt = 0
@@ -900,9 +900,9 @@ def industrial(object):
     if dex >= pstr and dex >= intel:
         choices.append("Moving")
     comment = "Please choose your Indutrial bot type."
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
 
-    if choice == "Construction":
+    if chosen == "Construction":
         object.FAMILY_SUB = "Construction"
         specs.append("Fabricator Mechanichus.")
         object.Adapt = 5
@@ -927,7 +927,7 @@ def industrial(object):
         specs.append(f"Raw materials for {con} months.")
         object.Spec_Sheet = specs
 
-    elif choice == "Lifting":
+    elif chosen == "Lifting":
         object.FAMILY_SUB = "Lifting"
         specs.append("Putting everything in it's place.")
         object.Adapt = 5
@@ -956,7 +956,7 @@ def industrial(object):
         specs.append(f"Must roll vs CF ({cf}%) to drop things.")
         object.Spec_Sheet = specs
 
-    elif choice == "Moving":
+    elif chosen == "Moving":
         object.FAMILY_SUB = "Moving"
         specs.append("Sentient delivery bots.")
         object.Adapt = 5
@@ -1001,9 +1001,9 @@ def janitorial(object):
     if intel >= 12:
         choices.append("Domestic")
     comment = "Please choose your type of Janitorial bot."
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
 
-    if choice == "Industrial":
+    if chosen == "Industrial":
         object.FAMILY_SUB = "Industrial"
         object.Adapt = 30
         object.Value = 20000
@@ -1025,7 +1025,7 @@ def janitorial(object):
         specs.append("Combating entropy in the workplace.")
         object.Spec_Sheet = specs
 
-    elif choice == "Domestic":
+    elif chosen == "Domestic":
         object.FAMILY_SUB = "Domestic"
         object.Adapt = 10
         object.Value = 35000
@@ -1110,9 +1110,9 @@ def police(object):
         choices.append("Special")
 
     comment = "Please choose your policing bot type. "
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
 
-    if choice == "Civil":
+    if chosen == "Civil":
         object.FAMILY_SUB = "Civil"
         specs.append("Mechanical street cop.")
         object.Adapt = 10
@@ -1130,7 +1130,7 @@ def police(object):
         specs.append("Grapple and disarm with a successful to hit roll.")
         object.Spec_Sheet = specs
 
-    elif choice == "Riot":
+    elif chosen == "Riot":
         object.FAMILY_SUB = "Riot"
         specs.append("Less lethal mob control. AKA riobot.")
         object.Adapt = 10
@@ -1185,7 +1185,7 @@ def police(object):
 
         object.Spec_Sheet = specs
 
-    elif choice == "Special":
+    elif chosen == "Special":
         object.FAMILY_SUB = "Special"
         specs.append("Detective, sleuth, criminologist.")
         object.Adapt = 10
@@ -1204,10 +1204,10 @@ def police(object):
         print("May swap highest attribute to INT.")
         print("Without penalty or benefit.")
         comment = "Would you like to swap your highest attribute? "
-        choice = please.choose_this(["Yes", "No"], comment)
-        if choice == "No":
+        chosen = please.choose_this(["Yes", "No"], comment)
+        if chosen == "No":
             return
-        elif choice == "Yes":
+        elif chosen == "Yes":
             dirty_list = []
             dirty_list.append(("AWE", awe))
             dirty_list.append(("CHA", cha))
@@ -1239,9 +1239,9 @@ def rescue(object):
     if dex >= 22:
         choices.append("Retrieval")
     comment = "Please choose your type of rescue bot. "
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
 
-    if choice == "Retrieval":
+    if chosen == "Retrieval":
         object.FAMILY_SUB = "Retrieval"
         specs.append("Built to retrieve entities and equipment from danger.")
         object.Adapt = 10
@@ -1260,10 +1260,10 @@ def rescue(object):
 
         object.Spec_Sheet = specs
 
-        choice = please.choose_this(
+        chosen = please.choose_this(
             ["Hell yeah!", "Um, no."], "Was your retrieval bot made by the JIBC? "
         )
-        if choice == "Hell yeah!":
+        if chosen == "Hell yeah!":
             object.AWE = 3
             object.CHA = 1
             object.CON = 3
@@ -1281,7 +1281,7 @@ def rescue(object):
             object.FAMILY_SUB = "JIBC"
             object.Spec_Sheet = ["Pretends to be a veterinarian, but has no specs."]
 
-    elif choice == "Spillage":
+    elif chosen == "Spillage":
         object.FAMILY_SUB = "Spillage"
         specs.append("Built to contain spillage of toxins, including fire.")
         object.Adapt = 10
@@ -1364,9 +1364,9 @@ def transport(object):
     if dex >= 22 and intel >= 22:
         choices.append("Extra-Planetary")
     comment = "Please choose your type of Transport bot. "
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
 
-    if choice == "Planetary":
+    if chosen == "Planetary":
         object.FAMILY_SUB = "Planetary"
         specs.append("Planet side chauffer.")
         object.Adapt = 22
@@ -1396,7 +1396,7 @@ def transport(object):
 
         object.Spec_Sheet = specs
 
-    elif choice == "Extra-Planetary":
+    elif chosen == "Extra-Planetary":
         object.FAMILY_SUB = "Extra-Planetary"
         specs.append("Space vehicle pilot.")
         object.Adapt = 22
@@ -1446,9 +1446,9 @@ def veterinarian(object):
     if dex >= 23 and intel >= 21:
         choices.append("Interventional")
     comment = "Please choose your type of veterinarian bot. "
-    choice = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment)
 
-    if choice == "Diagnostic":
+    if chosen == "Diagnostic":
         object.FAMILY_SUB = "Diagnostic"
         specs.append("Prefers to figure out rather than fix.")
         object.Adapt = 10
@@ -1474,7 +1474,7 @@ def veterinarian(object):
 
         object.Spec_Sheet = specs
 
-    elif choice == "Interventional":
+    elif chosen == "Interventional":
         object.FAMILY_SUB = "Interventional"
         specs.append("Prefers to fix rather than figure out.")
         object.Adapt = 10

@@ -175,49 +175,49 @@ def choose_this(choices: list, message: str) -> str:
             for idx, option in enumerate(choices, start=1):
                 print(f"{idx}) {option}")
 
-        choice = input(f"Please choose from above [R-reset][Q-quit] [Ret->{choices[0]}]: ")
+        chosen = input(f"Please choose from above [R-reset][Q-quit] [Ret->{choices[0]}]: ")
 
-        if not choice:
-            choice = "1"
+        if not chosen:
+            chosen = "1"
 
-        if choice.isdigit():
-            choice = int(choice)
-            if 0 < choice <= len(choices):
-                choice = choices[choice - 1] 
+        if chosen.isdigit():
+            chosen = int(chosen)
+            if 0 < chosen<= len(choices):
+                chosen = choices[chosen- 1] 
             else:
                 print("\nPlease select a valid number.", end="")
                 continue
 
-        if choice == "Q":
+        if chosen == "Q":
             say_goodnight_marsha()
             break
 
-        if choice == "R":
+        if chosen == "R":
             a_persona_record.record_chooser()
             break
 
-        if choice in choices:
+        if chosen in choices:
             break
 
-        if choice not in choices:
+        if chosen not in choices:
             print("\nPlease select a valid choice.", end="")
             continue
 
-    return choice
+    return chosen
 
 def say_yes_to(question: str) -> bool:
     """
     question string with boolean return
     """
-    choice = choose_this(["Yes", "No"], question)
-    return True if choice == "Yes" else False
+    chosen = choose_this(["Yes", "No"], question)
+    return True if chosen == "Yes" else False
 
 def say_no_to(question: str) -> bool:
     """
     question string with boolean return
     """
-    choice = choose_this(["No", "Yes"], question)
-    return True if choice == "No" else False    
+    chosen = choose_this(["No", "Yes"], question)
+    return True if chosen == "No" else False    
 
 def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
     """
@@ -233,14 +233,14 @@ def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
         table_name = "this list"
 
     option_list = ["Random", "Bespoke", "Create New"]
-    choice = choose_this(option_list, f"What do you want to do with {table_name}?")
-    table_choice = "something malfed up here"
+    chosen = choose_this(option_list, f"What do you want to do with {table_name}?")
+    table_chosen = "something malfed up here"
 
-    if choice == "Random":
-        table_choice = secrets.choice(table_choices_list)
-    elif choice == "Bespoke":
-        table_choice = choose_this(table_choices_list, "Choose from the table below:")
-    elif choice == "Create New":
+    if chosen == "Random":
+        table_chosen = secrets.choice(table_choices_list)
+    elif chosen == "Bespoke":
+        table_chosen = choose_this(table_choices_list, "Choose from the table below:")
+    elif chosen == "Create New":
         print(f"Please carefully input a new element for {table_name}.")
         table_choice = input("New Element: ")
 
@@ -296,18 +296,6 @@ def get_table_result(table: dict) -> str:
     return result
 
 
-'''
-def get_table_result(table: dict) -> str:
-    """
-    THIS WILL BE DEPRECATED ONCE DERANGED Tables are ACTIVATED
-    return a single result from a random table
-    """
-    random = roll_this(table["die_roll"])
-    for key in table:
-        if random in key:
-            result = table[key]
-            break
-    return result'''
 
 def list_table_choices(table_chosen:dict) -> list:
     """

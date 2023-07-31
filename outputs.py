@@ -5,6 +5,7 @@ import webbrowser
 
 from fpdf import FPDF
 
+import alien
 import please
 import mutations
 import vocation
@@ -13,26 +14,27 @@ import table
 # todo RP combat block: weak strong cannon fodder, canon fodder and canonical
 # todo proficiency slot with actual weapons
 
-def outputs_workflow(persona, out_type: str) -> None:
+def outputs_workflow(outputter:table.PersonaRecord, out_type: str) -> None:
     '''
     divides outputs between screen and pdf
     pdf has been rationalized for all families
     screen has not 
     '''
-    family_type = persona.FAMILY
+    family_type = outputter.FAMILY
 
     if out_type == "pdf":
-        pdf_output_chooser(persona)
+        pdf_output_chooser(outputter)
     elif family_type == 'Toy':
         input("this doesn't exist yet!")
         please.say_goodnight_marsha
     elif family_type == "Anthro" and out_type == "screen":
-        anthro_screen(persona)  
+        anthro_screen(outputter)  
     elif family_type == "Alien" and out_type == "screen":
-        alien_screen(persona)
+        alien_screen(outputter)
     elif family_type == "Robot" and out_type == "screen":
-        robot_screen(persona)
-    return
+        robot_screen(outputter)
+
+    return None
 
 ################################################
 #
@@ -697,7 +699,7 @@ class PDF(FPDF):
 
         ### right column
         right_column = ["**Life Cycle**"]
-        right_column.extend(persona.Life_Cycle)
+        right_column.extend(persona.Life_Stages)
         right_column.append("**Society**")
         right_column.extend(persona.Society)
 
@@ -822,20 +824,20 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def attack_table_composer(persona)->dict:
+def attack_table_composer(attack_tabler:table.PersonaRecord)-> dict:
     '''
     creates an attack table dictionary based on FAMILY 
     '''
     # collect core needed data
-    awe = persona.AWE
-    dex = persona.DEX
-    intel = persona.INT
-    pstr = persona.PSTR
-    family = persona.FAMILY
-    vocation = persona.Vocation
-    level = persona.Level
+    awe = attack_tabler.AWE
+    dex = attack_tabler.DEX
+    intel = attack_tabler.INT
+    pstr = attack_tabler.PSTR
+    family = attack_tabler.FAMILY
+    vocation = attack_tabler.Vocation
+    level = attack_tabler.Level
     table_level = (
-        persona.Level - 1 if persona.Level < 11 else 9
+        attack_tabler.Level - 1 if attack_tabler.Level < 11 else 9
     )  # no level bonus for level one
 
     ### define the empty combat dictionary
@@ -875,7 +877,7 @@ def attack_table_composer(persona)->dict:
 
         # Vocation PROF assignment
         if APROF == 42 and vocation == "Mercenary":
-            APROF = BPROF = CPROF = "All personal weapons."
+            APROF = BPROF = CPROF = "All weapons."
 
         elif APROF == 42 and vocation == "Nothing":
             APROF = BPROF = CPROF = "There can be only one."
@@ -883,13 +885,10 @@ def attack_table_composer(persona)->dict:
     # todo calculate alien movement on the fly
     elif vocation == "Alien":
         # specific alien attributes
-        attacks = persona.Attacks
-        per_unit = persona.Attack_Desc
-        damage = f"{persona.Damage}"
-        type = persona.Attack_Type
+        attacks = attack_tabler.Attacks
 
         # Alien STRIKE row (Type A)
-        if type == "Striking":
+        if "Strike" in attacks:
             ABP = ABNP = 10 * (pstr + level)
             AMR = 700 + ABP
             ADB = level
@@ -897,7 +896,7 @@ def attack_table_composer(persona)->dict:
             ABP = ABNP = AMR = ADB = 0
 
         # Alien FLING row (Type B)
-        if type == "Flinging":
+        if "Fling" in attacks:
             BBP = BBNP = 10 * (dex + level)
             BMR = 700 + BBP
             BDB = level
@@ -905,21 +904,21 @@ def attack_table_composer(persona)->dict:
             BBP = BBNP = BMR = BDB = 0
 
         # Alien SHOOT row (Type C)
-        if type == "Shooting":
+        if "Shoot" in attacks:
             CBP = CBNP = 10 * (intel + level)
             CMR = 700 + CBP
-            CDB = 0
+            CDB = level
         else:
             CBP = CBNP = CMR = CDB = 0
         
         # populate the PROF column
-        APROF = BPROF = CPROF = f"Natural - {attacks} {per_unit} for {damage} HPS."
+        APROF = BPROF = CPROF = f"Natural."
 
     elif family == "Robot":
         # specific robot attributes
-        pstr_prime = persona.PSTR_Prime
-        dex_prime = persona.DEX_Prime
-        intel_prime = persona.INT_Prime
+        pstr_prime = attack_tabler.PSTR_Prime
+        dex_prime = attack_tabler.DEX_Prime
+        intel_prime = attack_tabler.INT_Prime
 
         # Robot STRIKE row (Type A)
         ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
@@ -1231,88 +1230,93 @@ def equip_notes_one_shot(pdf, persona)->None:
 # ALIEN output to screen
 #####################################
 
-def alien_screen(alien):
+def alien_screen(screenery:table.PersonaRecord) -> None:
     """
     screen prints alien persona
     """
 
     # clearance for Clarence
     please.clear_console()
+
+
     print(
         f"ALIEN PERSONA RECORD\n"
-        f"Persona: {alien.Persona_Name} \t\tPlayer Name: {alien.Player_Name} \tCreated: {alien.Date_Created}\n"
-        f"AWE: {alien.AWE} CHA: {alien.CHA} CON: {alien.CON} DEX: {alien.DEX} "
-        f"INT: {alien.INT} MSTR: {alien.MSTR} PSTR: {alien.PSTR} HPS: {alien.HPM} SOC: {alien.SOC} WA: {alien.WA}\n"
-        f"Family: {alien.FAMILY} Species: {alien.FAMILY_TYPE}\n"
-        f"Age: {alien.Age} {alien.Alien_Age_Suffix} Size: {alien.Size} Wate: {alien.Wate} {alien.Wate_Suffix}"
+        f"Persona: {screenery.Persona_Name} \t\tPlayer Name: {screenery.Player_Name} \tCreated: {screenery.Date_Created}\n"
+        f"AWE: {screenery.AWE} CHA: {screenery.CHA} CON: {screenery.CON} DEX: {screenery.DEX} "
+        f"INT: {screenery.INT} MSTR: {screenery.MSTR} PSTR: {screenery.PSTR} HPS: {screenery.HPM} SOC: {screenery.SOC} WA: {screenery.WA}\n"
+        f"Family: {screenery.FAMILY} Species: {screenery.FAMILY_TYPE}\n"
+        f"Age: {screenery.Age} {screenery.Age_Suffix} Size: {screenery.Size_Cat} Wate: {screenery.Wate} {screenery.Wate_Suffix}"
     )
 
-    if alien.Vocation != "Alien":
-        print(f"Vocation: {alien.Vocation} Level: {alien.Level} EXPS: {alien.EXPS}")
 
-    print("\nDESCRIPTION: " + alien.Quick_Description)
+    if screenery.Vocation != "Alien":
+        print(f"Vocation: {screenery.Vocation} Level: {screenery.Level} EXPS: {screenery.EXPS}")
+
+    print("\nDESCRIPTION: " + screenery.Quick_Description)
 
     # four part description
     # the split removes the (l,a,w) movement info
-    print(f"{alien.Head.split(' (')[0]} head{alien.Head_Adorn}")
-    print(f"{alien.Body.split(' (')[0]} body{alien.Body_Adorn}")
-    print(f"{alien.Arms.split(' (')[0]} arms{alien.Arms_Adorn}")
-    print(f"{alien.Legs.split(' (')[0]} legs")
+    print(f"{screenery.Head.split(' (')[0]} head {screenery.Head_Adorn}")
+    print(f"{screenery.Body.split(' (')[0]} body {screenery.Body_Adorn}")
+    print(f"{screenery.Arms.split(' (')[0]} arms {screenery.Arms_Adorn}")
+    print(f"{screenery.Legs.split(' (')[0]} legs")
 
     # show the combat table
-    screen_attack_table(alien)
+    screen_attack_table(screenery)
+    print(f'{screenery.Attack_Desc}')
 
-    if alien.Vocation != "Alien":
+    if screenery.Vocation != "Alien":
         # alien  Interest list
-        screen_attack_table(alien)
-        print(f"\n{alien.Vocation} GIFTS: ")
-        gift_list = vocation.update_gifts(alien)
+        screen_attack_table(screenery)
+        print(f"\n{screenery.Vocation} GIFTS: ")
+        gift_list = vocation.update_gifts(screenery)
         for x, gift in enumerate(gift_list):
             print(f"{x + 1}) {gift}")
 
-        print(f"\n{alien.Vocation} INTERESTS: ")
-        collated_interests = please.collate_this(alien.Interests)
+        print(f"\n{screenery.Vocation} INTERESTS: ")
+        collated_interests = please.collate_this(screenery.Interests)
 
         for x, interest in enumerate(collated_interests):
             print(f"{x + 1}) {interest}")
 
         # alien  Skills
-        print(f"\n{alien.Vocation} SKILLS: ")
-        collated_skills = please.collate_this(alien.Skills)
+        print(f"\n{screenery.Vocation} SKILLS: ")
+        collated_skills = please.collate_this(screenery.Skills)
         for x, skill in enumerate(collated_skills):
             print(f"{x + 1}) {skill}")
 
     # print out the Alien powers aka mutations
-    print(f"\nNATURAL POWERS of {alien.FAMILY_TYPE}")
+    print(f"\nNATURAL POWERS of {screenery.FAMILY_TYPE}")
 
-    if len(alien.Mutations) == 0:
+    if len(screenery.Mutations) == 0:
         print("None")
+
 
     else:
         all_mutations = mutations.mutation_list_builder()
-
-        for name, _ in sorted(alien.Mutations.items()):
-            working_mutation = all_mutations[name](alien)
+        for mutation_name in screenery.Mutations.keys():
+            mutuple = next((t for t in all_mutations if t[0] == mutation_name), None)
+            working_mutation = mutuple[1](screenery)
             working_mutation.post_details(working_mutation.__class__)
 
-    print(f"\nBIOLOGY of {alien.FAMILY_TYPE}")
-    for bio_line in alien.Biology:
+    print(f"\nBIOLOGY of {screenery.FAMILY_TYPE}")
+    for bio_line in screenery.Biology:
         print(f"{bio_line}")
     print("")
-    for bio_line in alien.Life_Cycle:
-        print(f"{bio_line}")
+    for stage,tuple_ in screenery.Life_Stages.items():
+        print(f"{stage} {tuple_[0]} to {tuple_[1]} {screenery.Age_Suffix}")
 
-    print(f"\nSOCIETY of {alien.FAMILY_TYPE}")
-    for soc_line in alien.Society:
+    print(f"\nSOCIETY of {screenery.FAMILY_TYPE}")
+    for soc_line in alien.society_output(screenery):
         print(f"{soc_line}")
 
-    return
+    return None
 
 #####################################
 # ROBOT output to screen
 #####################################
 
-def robot_screen(robot) -> None:
+def robot_screen(bot_screen) -> None:
     """
     print the robot to screen
     """
@@ -1322,78 +1326,78 @@ def robot_screen(robot) -> None:
 
     print("\n\n\nROBOT PERSONA RECORD")
     print(
-        f"{robot.Persona_Name} \t\tPlayer_Name: {robot.Player_Name} \tDate: {robot.Date_Created}\n"
-        f"AWE: {robot.AWE} CHA: {robot.CHA} CON: {robot.CON}({robot.CON_Prime}) "
-        f"DEX: {robot.DEX}({robot.DEX_Prime}) INT: {robot.INT}({robot.INT_Prime}) "
-        f"MSTR: {robot.MSTR} PSTR: {robot.PSTR}({robot.PSTR_Prime}) HPS: {robot.HPM}\n"
-        f"Adaptability: {robot.Adapt}  Control Factor: {robot.CF}  Fabricator: {robot.Base_Family}\n"
-        f"Family: {robot.FAMILY} Type: {robot.Bot_Type} Sub-Type: {robot.Sub_Type} Model: {robot.Robot_Model}\n"
+        f"{bot_screen.Persona_Name} \t\tPlayer_Name: {bot_screen.Player_Name} \tDate: {bot_screen.Date_Created}\n"
+        f"AWE: {bot_screen.AWE} CHA: {bot_screen.CHA} CON: {bot_screen.CON}({bot_screen.CON_Prime}) "
+        f"DEX: {bot_screen.DEX}({bot_screen.DEX_Prime}) INT: {bot_screen.INT}({bot_screen.INT_Prime}) "
+        f"MSTR: {bot_screen.MSTR} PSTR: {bot_screen.PSTR}({bot_screen.PSTR_Prime}) HPS: {bot_screen.HPM}\n"
+        f"Adaptability: {bot_screen.Adapt}  Control Factor: {bot_screen.CF}  Fabricator: {bot_screen.Base_Family}\n"
+        f"Family: {bot_screen.FAMILY} Type: {bot_screen.Bot_Type} Sub-Type: {bot_screen.Sub_Type} Model: {bot_screen.Robot_Model}\n"
     )
 
     print("APPEARANCE")
-    print(f"{robot.Description} \nWate: {robot.Wate} kgs Hite: {robot.Hite} cms")
+    print(f"{bot_screen.Description} \nWate: {bot_screen.Wate} kgs Hite: {bot_screen.Hite} cms")
 
     print("\nMECHANICS")
     print(
-        f"Power Plant: {robot.Power_Plant} Power Reserve: {robot.Power_Reserve} months\n"
+        f"Power Plant: {bot_screen.Power_Plant} Power Reserve: {bot_screen.Power_Reserve} months\n"
     )
-    print(f"Sensors: {robot.Sensors}")
-    print(f"Locomotion: {robot.Locomotion}")
+    print(f"Sensors: {bot_screen.Sensors}")
+    print(f"Locomotion: {bot_screen.Locomotion}")
 
     print("\nATTACK Functions: ", end="")
-    if len(robot.Attacks) == 0:
+    if len(bot_screen.Attacks) == 0:
         print("None")
     else:
         print("")
-        for x, attack in enumerate(robot.Attacks):
+        for x, attack in enumerate(bot_screen.Attacks):
             print(f"{x + 1}) {attack}")
 
     print("\nDEFENCE Functions: ", end="")
-    if len(robot.Defences) == 0:
+    if len(bot_screen.Defences) == 0:
         print("None")
     else:
         print("")
-        for x, defence in enumerate(robot.Defences):
+        for x, defence in enumerate(bot_screen.Defences):
             print(f"{x + 1}) {defence}")
 
     print("\nPERIPHERAL Functions: ", end="")
-    if len(robot.Peripherals) == 0:
+    if len(bot_screen.Peripherals) == 0:
         print("None")
     else:
         print("")
-        for x, periph in enumerate(robot.Peripherals):
+        for x, periph in enumerate(bot_screen.Peripherals):
             print(f"{x + 1}) {periph}")
 
-    print(f"\n{robot.Bot_Type.upper()} ROBOT Spec Sheet: ", end="")
-    if len(robot.Spec_Sheet) == 0:
+    print(f"\n{bot_screen.Bot_Type.upper()} ROBOT Spec Sheet: ", end="")
+    if len(bot_screen.Spec_Sheet) == 0:
         print("None")
     else:
         print("")
-        for x, periph in enumerate(robot.Spec_Sheet):
+        for x, periph in enumerate(bot_screen.Spec_Sheet):
             print(f"{x + 1}) {periph}")
 
     # show the combat table
     screen_attack_table(robot)
 
-    if robot.Vocation != "Robot":
+    if bot_screen.Vocation != "Robot":
         print("\nRobots do not get a VOCATION COMBAT TABLE. Sorry.\n")
         # robot vocation Gifts
         gift_list = vocation.update_gifts(robot)
-        print(f"\n{robot.Vocation} GIFTS: ")
+        print(f"\n{bot_screen.Vocation} GIFTS: ")
         for x, gift in enumerate(gift_list):
             print(f"{x + 1}) {gift}")
 
         # robot vocation  Interest list
 
-        print(f"\n{robot.Vocation} INTERESTS: ")
-        collated_interests = please.collate_this(robot.Interests)
+        print(f"\n{bot_screen.Vocation} INTERESTS: ")
+        collated_interests = please.collate_this(bot_screen.Interests)
 
         for x, interest in enumerate(collated_interests):
             print(f"{x + 1}) {interest}")
 
         # robot vocation  Skills
-        print(f"\n{robot.Vocation} SKILLS: ")
-        collated_skills = please.collate_this(robot.Skills)
+        print(f"\n{bot_screen.Vocation} SKILLS: ")
+        collated_skills = please.collate_this(bot_screen.Skills)
         for x, skill in enumerate(collated_skills):
             print(f"{x + 1}) {skill}")
 
