@@ -122,7 +122,12 @@ class Mutation:
         '''side effect on record to add mutation or returns doing nothing'''
         if name in self.object.Mutations:
             return 
-        if please.say_yes_to(f'{name.upper()} : {sentence} Add mutations? '):
+        
+        if self.object.Fallthrough:
+            self.object.Mutations[name] = perm
+            return
+
+        if please.say_yes_to(f'{name.upper()} : {sentence} Add mutation? '):
             self.object.Mutations[name] = perm
         return
 

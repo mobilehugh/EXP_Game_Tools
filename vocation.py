@@ -260,6 +260,9 @@ def exps_level_picker(level_persona: table.PersonaRecord) -> table.PersonaRecord
     only assigns a Level to the get_a_job.
     level adjustments elsewhere
     """
+    if level_persona.Fallthrough:
+        level = please.get_table_result(table.random_EXPS_levels_list)
+        return
 
     option_list = ["Random", "Bespoke"]
     list_comment = "Choose a method for EXPS LEVEL?"

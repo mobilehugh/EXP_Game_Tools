@@ -46,7 +46,6 @@ def alien_attacks(type_casting: table.PersonaRecord) -> table.PersonaRecord:
        
     return type_casting # filled by side effects
 
-
 # todo apply this to PROFs as damage + level 
 def alien_damage_list(damaging: table.PersonaRecord) -> list:
     """
@@ -167,7 +166,6 @@ def alien_shape_adornments(adornable:table.PersonaRecord) -> table.PersonaRecord
         
     return adornable # is altered by side effect
 
-
 # todo move terrain movements to calculated in outputs, and not stored
 def assign_terrain_movements(moving_time: table.PersonaRecord) -> table.PersonaRecord:
     '''assigns alien movements (head, body, arms, legs) -> land, air, water (l,a,w)'''
@@ -188,7 +186,6 @@ def assign_terrain_movements(moving_time: table.PersonaRecord) -> table.PersonaR
     moving_time.Move_Water = math.ceil(moving_time.DEX * (movements.count("w") / 4))
 
     return moving_time # is altered by side effect
-
 
 def alien_quick_description_builder(describing: table.PersonaRecord) -> table.PersonaRecord:
     ''' make a little ditty describing the alien '''
@@ -223,7 +220,6 @@ def alien_quick_description_builder(describing: table.PersonaRecord) -> table.Pe
     describing.Quick_Description = description
 
     return description
-
 
 def alien_life_stages(staging:table.PersonaRecord, life_span:int = 42) -> dict:
     ''' creates a dict of the life stages for alien'''
@@ -268,7 +264,7 @@ def alien_life_span() -> int:
 
     return life_span # also aging modified by side effect
 
-def alien_age(aging:table.PersonaRecord, stage:int = "Adol") -> int:
+def alien_age(aging:table.PersonaRecord, stage:str = "Adol") -> int:
     ''' alien age based on age category'''
     tuple_ = aging.Life_Stages[stage]
     age = choice(range(tuple_[0],tuple_[1]+1))
@@ -408,6 +404,8 @@ def alien_society_bespoke(bespoken: table.PersonaRecord) -> table.PersonaRecord:
     """
     alien_society(bespoken)
 
+    if bespoken.Fallthrough: return
+
     methods = ["Random", "Bespoke"]
     chosen = please.choose_this(methods, "Choose a method for alien SOCIETY? ")
 
@@ -461,6 +459,24 @@ def alien_vocation_check(get_a_job:table.PersonaRecord) -> table.PersonaRecord:
 
 def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
     ''' get persona name and species name'''
+
+    # body part "Head": "Gorilla (l)", "Body": "Pterosaur (a)", "Arms": "Tick (l)", "Legs": "Manta Ray (w)", "Head_Adorn": "supporting many large Antlers", "Body_Adorn": "sporting several Plumes", "Arms_Adorn": "with tiny Paws", 
+
+    # mutations  "Mutations": {"Wings": null}
+    # terrain types   "Move_Land": 8, "Move_Air": 4, "Move_Water": 4, 
+
+    # size "Size_Cat": "Medium",
+    # BIOLOGY "Life_Stages": {"Life Span": [0, 10],
+    # SOCIETY
+    # attacks "Attacks": ["Strike", "Strike", "Shoot"]
+
+
+    # "Biology": ["Biome: Tropic Grassland", "Biome Characteristic: Normal", "Energy Source: Carnivore", "Energy Procurement: Infesting", "Reproduction: Parasitic", "Domicile: Hollow", "Aroma: Lemons", "Group Size: Pack", "Sounds: Blubs and Clangs."],
+    #  "Society": {"Tools": "None", "Language": "Blubs and Clangs", "Culture": "Yes", "Religion": "None", "Education": "None", "Politics": "None", "Vocation": "None", "Philosophy": "None"}, 
+    # "Head": "Gorilla (l)", "Body": "Pterosaur (a)", "Arms": "Tick (l)", "Legs": "Manta Ray (w)", "Head_Adorn": "supporting many large Antlers", "Body_Adorn": "sporting several Plumes", "Arms_Adorn": "with tiny Paws", 
+    # "Quick_Description": "A medium sized gorilla headed pterosaur that flies, swims, and runs.", "Sounds": "Blubs and Clangs"}
+
+
 
     alien_species = please.input_this("What is the name of your entire ALIEN SPECIES? ")
     naming.FAMILY_TYPE = alien_species
@@ -559,6 +575,7 @@ def alien_attacks_bespoke(attacking: table.PersonaRecord) -> table.PersonaRecord
 
     if attacking.Fallthrough:
         alien_attacks(attacking)
+        return
         
     methods = ["Random", "Bespoke"]
     choice_comment = "Choose a method for alien ATTACKS?"
@@ -641,12 +658,7 @@ def alien_biology_bespoke(biological: table.PersonaRecord) -> table.PersonaRecor
 
     return biological # is altered by side effect here
 
-
-
-#####################################
-# build a FRESH alien persona
-#####################################
-
+### build a FRESH alien persona
 def fresh_alien():
     """
     builds a fresh alien object as per EXP persona creation
@@ -700,10 +712,7 @@ def fresh_alien():
     please.record_storage(fresh)
     return
 
-#####################################
-# build a BESPOKE alien persona
-#####################################
-
+### build a BESPOKE alien persona
 def bespoke_alien():
     """
     Build a bespoke alien persona usually a referee persona
@@ -762,9 +771,64 @@ def bespoke_alien():
     please.record_storage(bespoke)
     return
 
-#####################################
-# build a RANDO alien persona
-#####################################
-
+### build a RANDO alien persona
 def rando_alien():
-    pass
+    '''create an instant random alien'''
+    # clearance for Clarence
+    please.clear_console()
+    print("\nYou are generating a random ANTHRO PERSONA.")
+
+    rando = table.PersonaRecord()
+    rando.FAMILY = "Alien"
+    rando.Vocation = "Alien"
+    rando.FAMILY_TYPE = "undiscovered"
+    rando.FAMILY_SUB = "undiscovered"
+    rando.Date_Created = "Unevolved"
+    rando.RP = True
+    rando.Fallthrough = True
+    rando.Attacks = []
+    rando.Alternating = False
+    rando.Attack_Desc = ""
+    rando.Life_Stages = {}
+    rando.Biology = []
+    rando.Society = {}
+
+    ### get mundane terran name of the player
+    rando.Player_Name = str(please.input_this("\nPlease input your MUNDANE TERRAN NAME: "))
+
+    core.initial_attributes(rando)
+    alien_attacks_bespoke(rando)
+    alien_size_bespoke(rando)
+    core.wate_allowance(rando)
+    core.hit_points_max(rando)
+    alien_hite_wate_calc(rando)
+    alien_attacks_bespoke(rando)
+    alien_attack_description(rando)
+    core.base_armour_rating(rando)
+    alien_base_shape(rando)
+    alien_shape_adornments(rando)
+    core.movement_rate(rando)
+    alien_quick_description_builder(rando)
+
+    mental_amount, physical_amount = mutations.biologic_mutations_number(rando)
+    mutations.mutation_assignment(rando, mental_amount, physical_amount,"any")
+    
+    
+    alien_life_span_bespoke(rando)
+    rando.Age = alien_age(rando)
+    vocation.exps_level_picker(rando)
+    rando.EXPS = vocation.convert_levels_to_exps(rando)
+    alien_biology_bespoke(rando)
+    alien_society_bespoke(rando)
+
+
+    if rando.Vocation != "Alien":
+        vocation.set_up_first_time(rando)
+        if rando.Level > 1:
+            vocation.update_interests(rando, (rando.Level - 1))
+            vocation.update_skills(rando, (rando.Level - 1))
+    outputs.outputs_workflow(rando, "screen")
+    alien_nomenclature(rando)
+    please.assign_id_and_file_name(rando)
+    outputs.outputs_workflow(rando, "screen")
+    please.record_storage(rando)
