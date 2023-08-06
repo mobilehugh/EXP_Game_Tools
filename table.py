@@ -2377,24 +2377,28 @@ alien_quarter_shapes = [
     "Zooplankton (s-w)"
 ]
 
+'''
+/* cSpell:disable */
+'''
+
 latinicize = {
-    "Alligator": ["Alligatoridae", "Crocodylia", "Caimanis"],
-    "Amoeba": ["Amoebida", "Tubulinea", "Amoebozoa"],
-    "Amphioxus": ["Branchiostomidae", "Leptocardii", "Chordata"],
-    "Anemone": ["Actiniidae", "Actiniaria", "Anthozoa"],
-    "Ant": ["Formicidae", "Hymenoptera", "Insecta"],
-    "Anteater": ["Myrmecophagidae", "Pilosa", "Aunteria"],
-    "Antelope": ["Bovidae", "Artiodactyla", "Boingus"],
-    "Ape": ["Silveria", "Primatis", "Bananimus"],
-    "Armadillo": ["Dasypodidae", "Cingulata", "Curlupius"],
-    "Barnacle": ["Balanidae", "Sessilia", "Maxillopoda"],
-    "Bat": ["Chiroptera", "Microchiroptera", "Vampirius"],
-    "Bear": ["Rahrorius", "Russius", "Furrbodia"],
-    "Beaver": ["Castoridae", "Canadia", "Damakerus"],
-    "Beetle": ["Coleoptera", "Polyphaga", "Insecta"],
-    "Blimp": ["Dirigiblidae", "Aeronautica", "Vehicula"],
-    "Blue Whale": ["Balaenopteridae", "Cetacea", "Depressia"],
-    "Brontosaur": ["Diplodocidae", "Sauropodomorpha", "Longnecius"],
+    "Alligator": ["Alligatoridae", "Crocodylia", "Caimanis", "Dentitudo", "Chompeus", "Dentatus"],
+    "Amoeba": ["Amoebida", "Tubulinea", "Amoebozoa","Gooiae", "Flaccidia", "Blobaceus", "Amoprphia", "Ambiguosa", "Blobbus"],
+    "Amphioxus": ["Filteria", "Leptocardii", "Lanceletia", "Ostrichiae"],
+    "Anemone": ["Mollicuddlium ", "Gelatinix ", "Anthozoa", "Blobbus", "Squishynia"],
+    "Ant": ["Formicidae", "Picnickia", "Myrmicion", "Laboriosus "],
+    "Anteater": ["Myrmecophagius ", "Rostralia ", "Aunteria", "Formicivorus"],
+    "Antelope": ["Antilopinae", "Saltatorae", "Boingus", "Reboundus", "Saliens"],
+    "Ape": ["Silveria", "Pongidae ", "Bananimus", "Opposablethumbi", "Simititan"],
+    "Armadillo": ["Dasypodidae", "Cingulata", "Curlupius", "Scutatus", "Armatus", "Carapax", "Loratus"],
+    "Barnacle": ["Balanidae", "Cementosa", "Maxillopoda", "Tenacitor", "Immobilis", "Agglutinata"],
+    "Bat": ["Chiroptera", "Microchiroptera", "Vampirius", "Noctivolans", "Ultrasonicus", "Desmodontinae"],
+    "Bear": ["Rahrorius", "Russius", "Furrbodia", "Euarctos", "Helarctos", "Talonius", "Garbophagia","Honyphilia"],
+    "Beaver": ["Castoridae", "Damakerus", "Castor", "Lignivorus", "Industriosa", "Canadiensis", "Canadia", "Politius", "Borealia", "Syrupia", "Multicultura"],
+    "Beetle": ["Coleoptera", "Polyphaga", "Scarabaeus", "Jonius", "Ringus", "Palus", "Georgia"],
+    "Blimp": ["Dirigiblidae", "Aeronautica", "Aerocopernicus", "Dirigens", "Altumi", "Bloatus", "Hindbergia"],
+    "Blue Whale": ["Balaenopteridae", "Cetacea", "Depressia", "Cyanus", "Caelumbalaena", "Cobaltacetus", "Glaucopiscis"],
+    "Brontosaur": ["Diplodocidae", "Sauropodomorpha", "Longicollum", "Altithorax", "Corpulentus", "Altisauropodus", ""],
     "Budgie": ["Psittaculidae", "Psittaciformes", "Aves"],
     "Butterfly": ["Lepidoptera", "Papilionoidea", "Insecta"],
     "Cactus": ["Cactaceae", "Caryophyllales", "Plantae"],
@@ -2411,7 +2415,7 @@ latinicize = {
     "Coral": ["Anthozoa", "Cnidaria", "Invertebrata"],
     "Cow": ["Bovidae", "Artiodactyla", "Lactosia"],
     "Crab": ["Brachyura", "Decapoda", "Crustacea"],
-    "Crocodile": ["Crocodylidae", "Crocodylia", "Snapperius"],
+    "Crocodile": ["Alligatoridae", "Crocodylia", "Caimanis", "Dentitudo", "Chompeus", "Dentatus"],
     "Dog": ["Canidae", "Carnivora", "Extinctus"],
     "Do do Bird": ["Raphidae", "Columbiformes", "Aves"],
     "Dolphin": ["Delphinidae", "Cetacea", "Flipperia"],
@@ -2532,11 +2536,14 @@ latinicize = {
     "Zooplankton": ["Zooplanktida", "Planktivoria", "Miniminimus"]
 }
 
+'''
+/* cSpell:enable */
+'''
 
 
 
 
-alien_head_adornments = ['Antenna', 'Antler', 'Ear', 'Horn', 'Knob', 'Peak', 'Plume', 'Quill', 'Spine', 'Tuft', 'String']
+alien_head_adornments = ['Antennae', 'Antler', 'Ear', 'Horn', 'Knob', 'Peak', 'Plume', 'Quill', 'Spine', 'Tuft', 'String']
 
 alien_body_adornments = ['Bump', 'Crest', 'Antenna', 'Antler', 'Ear', 'Horn', 'Knob', 'Peak', 'Plume', 'Quill', 'Spine', 'Tuft', 'String', 'Hole', 'Knob', 'Knurl', 'Lump', 'Lump', 'Ridge', 'Ruff', 'Scale', 'Slime', 'Spine', 'Spout', 'Tree', 'Vine', 'Wing', 'String']
  

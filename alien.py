@@ -456,30 +456,48 @@ def alien_vocation_check(get_a_job:table.PersonaRecord) -> table.PersonaRecord:
 
     return get_a_job # altered by side effect
 
+def alien_speciesizer(naming: table.PersonaRecord) -> list:
+    ''' generate a faux latin list'''
+
+    # todo mutations  "Mutations": {"Wings": null}
+    # todo terrain types   "Move_Land": 8, "Move_Air": 4, "Move_Water": 4, 
+    # todo size "Size_Cat": "Medium",
+    # todo BIOLOGY "Life_Stages": {"Life Span": [0, 10],
+    # todo SOCIETY
+    # todo attacks "Attacks": ["Strike", "Strike", "Shoot"]
+    # todo "Biology": ["Biome: Tropic Grassland", "Biome Characteristic: Normal", "Energy Source: Carnivore", "Energy Procurement: Infesting", "Reproduction: Parasitic", "Domicile: Hollow", "Aroma: Lemons", "Group Size: Pack", "Sounds: Blubs and Clangs."],
+    # todo  "Society": {"Tools": "None", "Language": "Blubs and Clangs", "Culture": "Yes", "Religion": "None", "Education": "None", "Politics": "None", "Vocation": "None", "Philosophy": "None"}, 
+
+    latini = []
+    for part in ["Head", "Body", "Arms", "Legs"]:
+        faux = getattr(naming, part).split(" (")[0]
+        tableau = table.latinicize[faux]
+        # input(f'{faux = } {tableau = } wtfbro')
+        latini.append(choice(tableau))
+
+    return latini
+
+def alien_culturizer(naming: table.PersonaRecord) -> list:
+    if naming.Society["Language"] == "None":
+        return
+    # todo alien culture names 
+    return ["weedameeples"]
+
+
 
 def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
-    ''' get persona name and species name'''
+    '''FAMILY = Alien, FAMILY_TYPE = species name, FAMILY_SUB = cultural name, persona name'''
 
-    # body part "Head": "Gorilla (l)", "Body": "Pterosaur (a)", "Arms": "Tick (l)", "Legs": "Manta Ray (w)", "Head_Adorn": "supporting many large Antlers", "Body_Adorn": "sporting several Plumes", "Arms_Adorn": "with tiny Paws", 
+    # todo alien culture names 
+    ### species name FAMILY_TYPE
+    latini = alien_speciesizer(naming)
+    family_type = f'{choice(latini)} {choice(latini)}'
+    
+    if please.say_yes_to(f'Species Name is {family_type}'):
+        naming.FAMILY_TYPE = family_type
 
-    # mutations  "Mutations": {"Wings": null}
-    # terrain types   "Move_Land": 8, "Move_Air": 4, "Move_Water": 4, 
-
-    # size "Size_Cat": "Medium",
-    # BIOLOGY "Life_Stages": {"Life Span": [0, 10],
-    # SOCIETY
-    # attacks "Attacks": ["Strike", "Strike", "Shoot"]
-
-
-    # "Biology": ["Biome: Tropic Grassland", "Biome Characteristic: Normal", "Energy Source: Carnivore", "Energy Procurement: Infesting", "Reproduction: Parasitic", "Domicile: Hollow", "Aroma: Lemons", "Group Size: Pack", "Sounds: Blubs and Clangs."],
-    #  "Society": {"Tools": "None", "Language": "Blubs and Clangs", "Culture": "Yes", "Religion": "None", "Education": "None", "Politics": "None", "Vocation": "None", "Philosophy": "None"}, 
-    # "Head": "Gorilla (l)", "Body": "Pterosaur (a)", "Arms": "Tick (l)", "Legs": "Manta Ray (w)", "Head_Adorn": "supporting many large Antlers", "Body_Adorn": "sporting several Plumes", "Arms_Adorn": "with tiny Paws", 
-    # "Quick_Description": "A medium sized gorilla headed pterosaur that flies, swims, and runs.", "Sounds": "Blubs and Clangs"}
-
-
-
-    alien_species = please.input_this("What is the name of your entire ALIEN SPECIES? ")
-    naming.FAMILY_TYPE = alien_species
+    else:
+        alien_nomenclature(naming)
 
     core.assign_persona_name
 
