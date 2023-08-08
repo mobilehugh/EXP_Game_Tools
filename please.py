@@ -449,7 +449,7 @@ def assign_id_and_file_name(persona_record: table.PersonaRecord) -> None:
         persona_record.ID = id_name
         persona_record.File_Name = id_name + ".jsonl"
 
-        if not persona_record.Date_Created or persona_record.Date_Created == "Soon":
+        if persona_record.Date_Created in ["Unevolved", "Soon", "Unborn", "Unmade"]:
             persona_record.Date_Created = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
 
         persona_record.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
@@ -515,7 +515,7 @@ def do_referee_maintenance():
     "Level": vocation.update_persona_exps,
     "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
     "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"),
-    "Attributes": lambda persona: core.manual_persona_update(),
+    "Attributes": lambda persona: core.manual_persona_update(persona),
     "Change Record": lambda persona: do_referee_maintenance(),}
     
     operation_list = [key for key in operations]

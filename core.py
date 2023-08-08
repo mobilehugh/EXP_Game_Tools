@@ -232,11 +232,11 @@ def manual_persona_update(updating: table.PersonaRecord) -> table.PersonaRecord:
 def mutations_bespoke(mutate_RP: table.PersonaRecord) -> table.PersonaRecord:
 
     ### determine RP anthro mutations
-    choices = ["Anthro Type Determined", "Bespoke", "Random"]
+    choices = ["Family Type Determined", "Bespoke", "Random"]
     choice_comment = "What selection method do you want for MUTATIONS?"
     method_type_selection = please.choose_this(choices, choice_comment)
 
-    if method_type_selection == "Anthro Type Determined":
+    if method_type_selection == "Family Type Determined":
         mental_amount, physical_amount = mutations.biologic_mutations_number(mutate_RP)
         mutations.mutation_assignment(mutate_RP,mental_amount, physical_amount,"any")
 

@@ -483,10 +483,14 @@ def alien_culturizer(naming: table.PersonaRecord) -> list:
     # todo alien culture names 
     return ["weedameeples"]
 
-
-
 def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
     '''FAMILY = Alien, FAMILY_TYPE = species name, FAMILY_SUB = cultural name, persona name'''
+
+    if naming.RP:
+        latini = alien_speciesizer(naming)
+        naming.FAMILY_TYPE = f'{choice(latini)} {choice(latini)}'
+        core.assign_persona_name(naming)
+        return naming # modified by side effect
 
     # todo alien culture names 
     ### species name FAMILY_TYPE
@@ -499,9 +503,9 @@ def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
     else:
         alien_nomenclature(naming)
 
-    core.assign_persona_name
+    core.assign_persona_name(naming)
 
-    return
+    return naming # modified by side effect
 
 ####################################
 # BESPOKE ALIEN FUNCTIONS
@@ -524,7 +528,6 @@ def alien_hite_wate_calc(picking_sizes: table.PersonaRecord) -> table.PersonaRec
         picking_sizes.Wate_Suffix = "Tonnes"   
 
     return picking_sizes # modified by side effects
-
 
 def alien_size_bespoke(choosing_sizes: table.PersonaRecord) -> table.PersonaRecord:
     """
@@ -558,7 +561,6 @@ def alien_size_bespoke(choosing_sizes: table.PersonaRecord) -> table.PersonaReco
 
     return choosing_sizes # adjusted by side effects
 
-
 def alien_attributes_bespoke(attributions: table.PersonaRecord) -> table.PersonaRecord:
     """
     determine attributes
@@ -585,7 +587,6 @@ def alien_attributes_bespoke(attributions: table.PersonaRecord) -> table.Persona
 
     return attributions # altered by side effect
 
-
 def alien_attacks_bespoke(attacking: table.PersonaRecord) -> table.PersonaRecord:
     """
     alien attack type and frequency
@@ -608,7 +609,6 @@ def alien_attacks_bespoke(attacking: table.PersonaRecord) -> table.PersonaRecord
             attacking.Attacks.append(f'{please.get_table_result(table.alien_attack_type)}')
 
     return attacking # is modified by side effect
-
 
 def alien_life_span_bespoke(lifer: table.PersonaRecord) -> table.PersonaRecord:
     """
@@ -641,7 +641,6 @@ def alien_life_span_bespoke(lifer: table.PersonaRecord) -> table.PersonaRecord:
             lifer.Age_Suffix = choice(["Days","Weeks","Months"])
 
         return
-
 
 def alien_biology_bespoke(biological: table.PersonaRecord) -> table.PersonaRecord:
     """
@@ -831,14 +830,12 @@ def rando_alien():
     mental_amount, physical_amount = mutations.biologic_mutations_number(rando)
     mutations.mutation_assignment(rando, mental_amount, physical_amount,"any")
     
-    
     alien_life_span_bespoke(rando)
     rando.Age = alien_age(rando)
     vocation.exps_level_picker(rando)
     rando.EXPS = vocation.convert_levels_to_exps(rando)
     alien_biology_bespoke(rando)
     alien_society_bespoke(rando)
-
 
     if rando.Vocation != "Alien":
         vocation.set_up_first_time(rando)
