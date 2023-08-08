@@ -29,24 +29,36 @@ These are helper functions that are used by all record types
 #
 ###########################################
 
+def explode_this(all_dice:list, die_type:int) -> int:
+    ''' takes a list of dice and explodes 'em'''
+    result = sum(all_dice)
+    while die_type in all_dice:
+        explodes = all_dice.count(die_type)
+        all_dice = []
+        for _ in range(explodes):
+            new_die = f'1d{str(die_type)}'
+            all_dice.append(please.roll_this(new_die))
+        result += sum(all_dice)
+        
+    return result
+
 def roll_this(die_roll_string: str) -> int:
     """
     die roll must be in the format of "xdy+z", returns integer result
     if die roll request does not compute a str is returned
     """
     # in a type violation returns a string instead of an integer when there  is a dice error
-    dice_error = f"Oops! {die_roll_string} Does not compute. Examples: 2d6+2, 1d1000, 4d6D1 (drop lowest)"
+    dice_error = f"Oops! {die_roll_string} Does not compute. \nparams = [1-99]d[1-1000][+|-|*|D][0-9999] \nExamples: 2d6+2, 1d1000, 6d6E (explode on 6), 4d6D1 (drop lowest)"
 
 
     # pulling die parts 1 d 6 + 1 ect from the die_roll_string string
-    die_parts = re.compile(r"(\d{1,4})d(\d{1,5})(\+|\-|D)*(\d{1,5})*").search(
+    die_parts = re.compile(r"(\d{1,4})d(\d{1,5})(\+|\-|\*|D|E)*(\d{1,5})*").search(
         die_roll_string
     )
 
     # if string not a die roll bail
     if not die_parts:
         return dice_error
-
 
     # assign values to the die roll parts 
     die_amount, die_type, die_mod, mod_amount = die_parts.group(1, 2, 3, 4)
@@ -76,6 +88,12 @@ def roll_this(die_roll_string: str) -> int:
             return dice_error
         result = sum(all_dice[:-mod_amount])
 
+    elif die_mod == "E":
+        if die_type not in all_dice:
+            return sum(all_dice)
+        else:
+           return explode_this(all_dice, die_type)
+
     elif die_mod is None:
         result = sum(all_dice)
 
@@ -84,6 +102,9 @@ def roll_this(die_roll_string: str) -> int:
 
     elif die_mod == "-":
         result = sum(all_dice) - mod_amount
+
+    elif die_mod == "*":
+        result = sum(all_dice) * mod_amount
     else:
         print("this error should never happen")
         return dice_error

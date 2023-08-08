@@ -46,7 +46,6 @@ def alien_attacks(type_casting: table.PersonaRecord) -> table.PersonaRecord:
        
     return type_casting # filled by side effects
 
-# todo apply this to PROFs as damage + level 
 def alien_damage_list(damaging: table.PersonaRecord) -> list:
     """
     damage per attack depends on Size and PSTR
@@ -432,7 +431,6 @@ def alien_vocation_check(get_a_job:table.PersonaRecord) -> table.PersonaRecord:
 
     if get_a_job.Vocation == "Alien": return
 
-    # todo vocation random could be a function
     if get_a_job.Fallthrough:    
         get_a_job.Vocation = choice([x for x in table.vocations_gifts_pivot])
         vocation.set_up_first_time(get_a_job)
@@ -441,8 +439,6 @@ def alien_vocation_check(get_a_job:table.PersonaRecord) -> table.PersonaRecord:
         if get_a_job.Level > 1:
             get_a_job.Interests.extend(vocation.update_interests(get_a_job, (get_a_job.Level - 1)))
             get_a_job.Skills.extend(vocation.update_skills(get_a_job, (get_a_job.Level - 1)))
-
-
 
     if please.say_yes_to("Would your alien like to pursue a VOCATION?"):
         ### choose vocation type
@@ -459,14 +455,12 @@ def alien_vocation_check(get_a_job:table.PersonaRecord) -> table.PersonaRecord:
 def alien_speciesizer(naming: table.PersonaRecord) -> list:
     ''' generate a faux latin list'''
 
-    # todo mutations  "Mutations": {"Wings": null}
-    # todo terrain types   "Move_Land": 8, "Move_Air": 4, "Move_Water": 4, 
-    # todo size "Size_Cat": "Medium",
-    # todo BIOLOGY "Life_Stages": {"Life Span": [0, 10],
-    # todo SOCIETY
-    # todo attacks "Attacks": ["Strike", "Strike", "Shoot"]
-    # todo "Biology": ["Biome: Tropic Grassland", "Biome Characteristic: Normal", "Energy Source: Carnivore", "Energy Procurement: Infesting", "Reproduction: Parasitic", "Domicile: Hollow", "Aroma: Lemons", "Group Size: Pack", "Sounds: Blubs and Clangs."],
-    # todo  "Society": {"Tools": "None", "Language": "Blubs and Clangs", "Culture": "Yes", "Religion": "None", "Education": "None", "Politics": "None", "Vocation": "None", "Philosophy": "None"}, 
+    # todo nomenclature mutations  "Mutations": {"Wings": null}
+    # todo nomenclature terrain types   "Move_Land": 8, "Move_Air": 4, "Move_Water": 4, 
+    # todo nomenclature size "Size_Cat": "Medium",
+    # todo nomenclature BIOLOGY "Life_Stages": {"Life Span": [0, 10],
+    # todo nomenclature attacks "Attacks": ["Strike", "Strike", "Shoot"]
+    # todo nomenclature "Biology": ["Biome: Tropic Grassland", "Biome Characteristic: Normal", "Energy Source: Carnivore", "Energy Procurement: Infesting", "Reproduction: Parasitic", "Domicile: Hollow", "Aroma: Lemons", "Group Size: Pack", "Sounds: Blubs and Clangs."],
 
     latini = []
     for part in ["Head", "Body", "Arms", "Legs"]:
@@ -480,7 +474,10 @@ def alien_speciesizer(naming: table.PersonaRecord) -> list:
 def alien_culturizer(naming: table.PersonaRecord) -> list:
     if naming.Society["Language"] == "None":
         return
-    # todo alien culture names 
+    # todo nomenclature alien culture names 
+    # todo nomenclature SOCIETY
+    # todo nomenclature  "Society": {"Tools": "None", "Language": "Blubs and Clangs", "Culture": "Yes", "Religion": "None", "Education": "None", "Politics": "None", "Vocation": "None", "Philosophy": "None"}, 
+
     return ["weedameeples"]
 
 def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
@@ -492,7 +489,7 @@ def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
         core.assign_persona_name(naming)
         return naming # modified by side effect
 
-    # todo alien culture names 
+
     ### species name FAMILY_TYPE
     latini = alien_speciesizer(naming)
     family_type = f'{choice(latini)} {choice(latini)}'
@@ -504,6 +501,8 @@ def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
         alien_nomenclature(naming)
 
     core.assign_persona_name(naming)
+
+    # todo use alien_culturizer()
 
     return naming # modified by side effect
 
@@ -522,9 +521,7 @@ def alien_hite_wate_calc(picking_sizes: table.PersonaRecord) -> table.PersonaRec
         picking_sizes.PSTR = math.ceil(picking_sizes.PSTR * (picking_sizes.Wate / 1000))
         picking_sizes.HPM = math.ceil(picking_sizes.HPM * (picking_sizes.Wate / 1000))
 
-    # todo humongous needs  * to dice suffix
     if picking_sizes.Size_Cat == "Humongous":
-        picking_sizes.Wate *= 6 # 6d50 is different from 1d50*6
         picking_sizes.Wate_Suffix = "Tonnes"   
 
     return picking_sizes # modified by side effects

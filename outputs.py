@@ -1025,13 +1025,13 @@ def screen_attack_table(persona) -> None:
 
     # print out the combat table
     print(f'\nATTACK TABLE -- {persona.Vocation}')
-    print(f'{" ":>6} {"BP":>5} {"BNP":>5} {"MR":>5} {"DB":>5} {"PROF":>5}')
+    print(f'{" ":>6} {"Skill":>6} {"Raw":>6} {"Max":>6} {"Force":>6} {"PROF":>5}')
     if ABP > 0:
-        print(f"Type A {ABP:>5} {ABNP:>5} {AMR:>5} {ADB:>5}  {APROF}")
+        print(f"Strike {ABP:>6} {ABNP:>6} {AMR:>6} {ADB:>6}  {APROF}")
     if BBP > 0:
-        print(f"Type B {BBP:>5} {BBNP:>5} {BMR:>5} {BDB:>5}  {BPROF}")
+        print(f"Fling  {BBP:>6} {BBNP:>6} {BMR:>6} {BDB:>6}  {BPROF}")
     if CBP > 0:
-        print(f"Type C {CBP:>5} {CBNP:>5} {CMR:>5} {CDB:>5}  {CPROF}")
+        print(f"Shoot  {CBP:>6} {CBNP:>6} {CMR:>6} {CDB:>6}  {CPROF}")
 
     if persona.FAMILY == 'Alien':
         blob = f'MOVE:  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u. ARMOUR RATING: {persona.AR}'      
@@ -1377,12 +1377,12 @@ def robot_screen(bot_screen) -> None:
             print(f"{x + 1}) {periph}")
 
     # show the combat table
-    screen_attack_table(robot)
+    screen_attack_table(bot_screen)
 
     if bot_screen.Vocation != "Robot":
         print("\nRobots do not get a VOCATION COMBAT TABLE. Sorry.\n")
         # robot vocation Gifts
-        gift_list = vocation.update_gifts(robot)
+        gift_list = vocation.update_gifts(bot_screen)
         print(f"\n{bot_screen.Vocation} GIFTS: ")
         for x, gift in enumerate(gift_list):
             print(f"{x + 1}) {gift}")

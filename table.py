@@ -2103,7 +2103,7 @@ alien_size_wate = {
     'Medium':'1d50+50',
     'Large':'5d100+100',
     'Gigantic':'6d1000+600',
-    'Humongous':'"1d50"',
+    'Humongous':'"1d50*6"',
     "name":"Alien Size",
     "die_roll":"1d100",
 } 
