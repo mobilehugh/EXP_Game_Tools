@@ -1,5 +1,6 @@
 import math
-import secrets
+from secrets import choice
+
 
 import anthro
 import outputs
@@ -35,51 +36,20 @@ def robot_workflow():
 
 
 
-def robot_fabricator_family(object: dict) -> None:
+
+def control_factor(controlling: table.PersonaRecord) -> int:
     """
-    generates the family type that fabricated the robot
+    returns a int value control factor
     """
-    object.Base_Family = please.get_table_result(table.robot_fabricator_list)
-    return
+    return  controlling.INT + (controlling.INT_Prime * controlling.Level)
 
 
-def control_factor(object: dict) -> None:
-    """
-    generates the control factor for the robot
-    updates the CF for an existing robot
-    """
-    expected_CF = object.INT + (object.INT_Prime * object.Level)
-    if "CF" not in object.__dict__:  # make a fresh CF
-        object.CF = expected_CF
-
-    else:  # update the CF normally, or just by increasing be base (usually bumped up)
-        object.CF = (
-            expected_CF
-            if expected_CF > object.CF
-            else (object.CF + object.Level * object.INT_Prime)
-        )
-
-    return
-
-
-
-
-def robotic_power_source(object):
-    object.Power_Plant = please.get_table_result(table.robotic_power_plant)
-    object.Power_Reserve = object.CON
-    return
-
-
-def robotic_sensors(object):
+def robotic_sensors(eye_eye:table.PersonaRecord) -> table.PersonaRecord:
     sensor_list = []
-    rolls = math.ceil(object.AWE / 4)
-
-    for i in range(rolls):
+    for _ in range(math.ceil(eye_eye.AWE / 4)):
         sensor_list.append(please.get_table_result(table.robotic_sensor_types))
-
-    object.Sensors = sensor_list
-
-    return
+    eye_eye.Sensors = sensor_list
+    return eye_eye # changed by side effect
 
 
 def robotic_locomotion(object):
@@ -104,27 +74,18 @@ def robotic_locomotion(object):
     return
 
 
-def list_eligible_robot_types(object: dict) -> list:
+def list_eligible_robot_types(choosing: table.PersonaRecord) -> list:
     """
     makes a 4 character string from primes to list of robots type options
     """
     auto_picker = (
-        f"{object.CON_Prime}{object.DEX_Prime}{object.INT_Prime}{object.PSTR_Prime}"
+        f"{choosing.CON_Prime}{choosing.DEX_Prime}{choosing.INT_Prime}{choosing.PSTR_Prime}"
     )
 
     return table.auto_prime_select_robot_type[auto_picker]
 
 
-def fresh_robot_type(object):
-    """
-    Choose robot type from list of eligible robot types
-    """
-    choices = list_eligible_robot_types(object)
-    comment = "Please choose a robot type:"
-    chosen = please.choose_this(choices, comment)
-    object.Bot_Type = choice
-    robot_type_function_pivot[object.Bot_Type](object)
-    return  # return for robot typing
+
 
 
 def robot_size_wate_hite(object: dict) -> None:
@@ -304,7 +265,7 @@ def robot_offensive_systems(object: dict, attack_table: int, rolls: int) -> list
                 )
 
                 if "Table" in attack_thing:
-                    __, add_table_number, add_roll_number = attack_thing.split(" ")
+                    _, add_table_number, add_roll_number = attack_thing.split(" ")
                     add_roll_number = int(add_roll_number)
                     add_table_number = int(add_table_number) - 1
                     attack_table_counter[add_table_number] += add_roll_number
@@ -558,146 +519,136 @@ def robot_persona_name(object):
 ####################################################
 
 
-def android(object: dict) -> None:
+def android(andy: table.PersonaRecord) -> table.PersonaRecord:
     """
-    inject the android attributes into the object
+    inject the android attributes into the andy
     """
 
     ### androids are odd in that they skip most of the robot attributes
 
-    ### robot nomenclature
-    object.FAMILY = "Robot"
-    object.FAMILY_TYPE =  "Android"
-    object.FAMILY_SUB = object.Base_Family
+    ### set family type to use ANTHRO calcs
+    andy.FAMILY = "Anthro"
+    andy.FAMILY_TYPE = andy.Base_Family
+
+    anthro.anthro_hite_wate_calc(andy, "Larger")
+    andy.Wate = round(andy.Wate * 1.3)
+    core.hit_points_max(andy)
+
+    ### reset to robot 
+    andy.FAMILY = "Robot"
+    andy.FAMILY_TYPE = "Android"
+    andy.FAMILY_SUB = andy.Base_Family
+
+    andy.FAMILY_TYPE = "Android"
 
     ### core values
-    object.Adapt = 1
-    object.Value = 100000000
-    object.Size = "Medium"
-    anthro.anthro_hit_points_fresh(object)
+    andy.Adapt = 1
+    andy.Value = 100000000
 
-    object.Attacks = []
-    object.Defences = []
-    object.Peripherals = []
-
-    ### hite and wate EXCEPTION for android
-    #object.Anthro_Type = object.Base_Family
-    # this is wrong Anthro_Type is now FAMILY_TYPE == Android
-    # must now get wate with Base_Family
-    # points out error of using objects and side effects 
-
-    anthro.anthro_size_fresh(object)
-    object.Wate = round(object.Wate * 1.3)
 
     ### vocation EXCEPTION for android
-    type_options = vocation.attribute_determined(object)
+    type_options = vocation.attribute_determined(andy)
     comment = "Choose your vocation."
     type_choice = please.choose_this(type_options, comment)
-    object.Vocation = type_choice
-    vocation.set_up_first_time(object)
+    andy.Vocation = type_choice
+    vocation.set_up_first_time(andy)
 
     ### building the spec sheet
-    specs = [f"Built in the image of their maker ({object.FAMILY_SUB})."]
+    specs = [f"Built in the image of their maker ({andy.FAMILY_SUB})."]
     specs.append(f"Has no biologic life force.")
-    specs.append(f"Works as a {object.Vocation}.")
-    object.Spec_Sheet = specs
-    return
+    specs.append(f"Works as a {andy.Vocation}.")
+    andy.Spec_Sheet = specs
+
+    return andy # modified by side effect
 
 
-def combot(object: dict) -> None:
+def combot(comboy: table.PersonaRecord) -> table.PersonaRecord:
     """
-    inject the combot attributes into the object
+    determine combot sub type and adjust persona record
     """
     ### robot nomenclature
-    object.FAMILY = "Robot"
-    object.FAMILY_TYPE =  "Combot"
+    comboy.FAMILY_TYPE =  "Combot"
 
-    ### subtype determination
-    sub_types = ["Expendable"]
-    if object.CON >= 20:
-        sub_types.append("Defensive")
-    if object.CON >= 19 and object.DEX >= 15:
-        sub_types.append("Light Offensive")
-    if object.CON >= 23 and object.PSTR >= 27:
-        sub_types.append("Heavy Offensive")
-    comment = "Please choose combot sub-type,"
-    object.FAMILY_SUB = please.choose_this(sub_types, comment)
+    ### determine SUB_TYPE
+    # build the attribute determined list
+    sub_type_choices = ["Expendable"]
+    if comboy.CON >= 20:
+        sub_type_choices.append("Defensive")
+    if comboy.CON >= 19 and comboy.DEX >= 15:
+        sub_type_choices.append("Offensive-Light")
+    if comboy.CON >= 23 and comboy.PSTR >= 27:
+        sub_type_choices.append("Offensive-Heavy")
 
-    ### core values may be overridden
-    object.Adapt = 0
-    object.Value = 500000
-    object.Size = "Medium"
-    object.HPM = object.CON * 5
+    if comboy.Bespoke or comboy.Fallthrough:
+        sub_type_choices = ["Expendable", "Defensive", "Offensive-Light", "Offensive-Heavy" ]
 
-    object.Attacks = []
-    object.Defences = []
-    object.Peripherals = []
+    if comboy.Fallthrough:
+        comboy.FAMILY_SUB = choice(sub_type_choices)
+    else:
+        comboy.FAMILY_SUB = please.choose_this(sub_type_choices, "Please choose COMBOT sub-type.")
 
     ### generic spec sheet
-    specs = [f"Not too concerned about base family ({object.Base_Family})."]
+    specs = [f"Unconcerned about base family ({comboy.Base_Family})."]
 
-    if object.FAMILY_SUB == "Expendable":
-
-        ### expendable nomenclature
-        object.FAMILY_SUB = "Expendable"
+    if comboy.FAMILY_SUB == "Expendable":
 
         ### expendable core values
-        object.Attacks = robot_offensive_systems(object, 1, 1)
-        object.Defences = robot_defensive_systems(object, 1)
-        object.Peripherals = robotic_peripherals(object, 1)
+        comboy.Adapt = 0
+        comboy.Value = 500000
+        comboy.Size_Cat =  "Small"
+        comboy.HPM = comboy.CON * 5
+
+        comboy.Attacks = robot_offensive_systems(comboy, 1, 1)
+        comboy.Defences = robot_defensive_systems(comboy, 1)
+        comboy.Peripherals = robotic_peripherals(comboy, 1)
 
         ### expendable spec sheet
         specs.append("Robotic general infantry.")
         specs.append("Somewhat nihilistic outlook.")
         specs.append("Can drive military vehicles.")
-        object.Spec_Sheet = specs
-        return
+        comboy.Spec_Sheet = specs
 
-    elif object.FAMILY_SUB == "Defensive":
+        return comboy # modified by side effects
 
-        ### defensive nomenclature
-        object.FAMILY_SUB = "Defensive"
+    elif comboy.FAMILY_SUB == "Defensive":
 
         ### defensive core values
-        object.Adapt = 1
-        object.Value = 10000000
-        object.Size = "Large"
-        object.HPM = object.CON * please.roll_this("1d10+20")
+        comboy.Adapt = 1
+        comboy.Value = 10000000
+        comboy.Size_Cat =  "Large"
+        comboy.HPM = comboy.CON * please.roll_this("1d10+20")
 
-        object.Attacks = robot_offensive_systems(object, 1, 1)
-        object.Defences = robot_defensive_systems(object, math.ceil(object.CON / 4))
-        object.Peripherals = robotic_peripherals(object, 1)
+        comboy.Attacks = robot_offensive_systems(comboy, 1, 1)
+        comboy.Defences = robot_defensive_systems(comboy, math.ceil(comboy.CON / 4))
+        comboy.Peripherals = robotic_peripherals(comboy, 1)
 
         ### defensive spec sheet
-        specs.pop()
+        specs.pop() # removes disregard for base_family
         specs.append("Prefers a non-violent path")
         specs.append("Demoralize with pithy comments.")
-        specs.append(f"Fortify against an attack {object.INT * 4}%.")
-        specs.append(f"Intruder detection {object.AWE * 10} hex radius.")
-        specs.append(f"Anti-detection detection {object.AWE + object.INT}%")
-        specs.append(f"Identify weapon that inflicts damage {object.INT * 2}%")
-        object.Spec_Sheet = specs
+        specs.append(f"Fortify against an attack {comboy.INT * 4}%.")
+        specs.append(f"Intruder detection {comboy.AWE * 10} hex radius.")
+        specs.append(f"Anti-detection detection {comboy.AWE + comboy.INT}%")
+        specs.append(f"Identify weapon that inflicts damage {comboy.INT * 2}%")
+        comboy.Spec_Sheet = specs
 
-        return
+        return comboy # modified by side effects
 
-    elif object.FAMILY_SUB == "Light Offensive":
+    elif object.FAMILY_SUB == "Offensive-Light":
 
-        ### light offensive nomenclature
-        object.FAMILY_SUB = "Light Offensive"
-
-        ### light offensive core values
+        ### Offensive-Light core values
         object.Adapt = -50
         object.Value = 100000000
-        object.Size = "Large"
+        object.Size_Cat =  "Medium"
         object.HPM = object.CON * please.roll_this("1d10+15")
 
-        object.Attacks = robot_offensive_systems(object, 2, 2)
-        more_attacks = robot_offensive_systems(object, 3, 1)
+        object.Attacks = robot_offensive_systems(comboy, 2, 2)
+        more_attacks = robot_offensive_systems(comboy, 3, 1)
         object.Attacks = object.Attacks + more_attacks
-        object.Defences = robot_defensive_systems(object, 2)
+        object.Defences = robot_defensive_systems(comboy, 2)
         object.Peripherals = []
 
-        ### light offensive spec sheet
+        ### Offensive-Light spec sheet
         specs.append("Violent solutions are preferable.")
         lesser_bots = please.roll_this("1d4-1")
         if lesser_bots > 0:
@@ -706,36 +657,36 @@ def combot(object: dict) -> None:
         object.Spec_Sheet = specs
         return
 
-    elif object.FAMILY_SUB == "Heavy Offensive":
+    elif object.FAMILY_SUB == "Offensive-Heavy":
 
-        ### heavy offensive nomenclature
-        object.FAMILY_SUB = "Heavy Offensive"
+        ### Offensive-Heavy nomenclature
+        object.FAMILY_SUB = "Offensive-Heavy"
 
-        ### heavy offensive core values
+        ### Offensive-Heavy core values
         object.Adapt = -100
         object.Value = 1000000042
-        object.Size = "Gigantic"
+        object.Size_Cat =  "Gigantic"
         object.HPM = object.CON * please.roll_this("1d10+15")
 
-        level_two_attacks = robot_offensive_systems(object, 2, 1)
-        level_three_attacks = robot_offensive_systems(object, 3, 1)
-        level_four_attacks = robot_offensive_systems(object, 4, 1)
+        level_two_attacks = robot_offensive_systems(comboy, 2, 1)
+        level_three_attacks = robot_offensive_systems(comboy, 3, 1)
+        level_four_attacks = robot_offensive_systems(comboy, 4, 1)
 
         object.Attacks = level_two_attacks + level_three_attacks + level_four_attacks
-        object.Defences = robot_defensive_systems(object, 3)
+        object.Defences = robot_defensive_systems(comboy, 3)
         object.Peripherals = []
 
-        ### armour rating EXCEPTION  for heavy offensive combot
+        ### armour rating EXCEPTION  for Offensive-Heavy combot
         object.AR = 775 if object.AR < 775 else object.AR
 
-        ### integrated heavy weapon EXCEPTION  for heavy offensive combot
+        ### integrated heavy weapon EXCEPTION  for Offensive-Heavy combot
         roll = please.roll_this("1d100") + object.PSTR
         for range, weapon in table.combot_heavy_weapons.items():
             if roll in range:
                 object.Attacks.append(weapon)
                 break
 
-        ### heavy offensive spec sheet
+        ### Offensive-Heavy spec sheet
         specs.append("Mass destruction is preferred solution")
         object.Spec_Sheet = specs
         return
@@ -756,7 +707,7 @@ def datalyzer(object: dict) -> None:
     ### core values
     object.Adapt = 15
     object.Value = 10000 * object.INT
-    object.Size = "Small"
+    object.Size_Cat =  "Small"
     object.HPM = please.roll_this("1d2+2") * object.CON
 
     object.Attacks = (
@@ -804,7 +755,7 @@ def explorations(object):
         object.Adapt = 0
         object.Value = 250000
         object.HPM = please.roll_this("1d6+10") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         # RoboticAttack check
         if please.do_1d100_check(25):
@@ -829,7 +780,7 @@ def explorations(object):
         object.AR = 800
         object.Value = 1900000
         object.HPM = please.roll_this("1d6+10") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         robot_offensive_systems(object, 1)
         robot_defensive_systems(object, 3)
@@ -854,7 +805,7 @@ def hobbot(object):
     object.Adapt = 84
     # value moved due to calculations
     object.HPM = please.roll_this("2d4") * con
-    object.Size = "Indoor"
+    object.Size_Cat =  "Indoor"
     robot_size_wate_hite(object)
     # robot_offensive_systems chance
     if please.do_1d100_check(10):
@@ -908,7 +859,7 @@ def industrial(object):
         object.Adapt = 5
         object.Value = 50000
         object.HPM = please.roll_this("1d4+8") * con
-        object.Size = "Indoor"
+        object.Size_Cat =  "Indoor"
         robot_size_wate_hite(object)
         robot_offensive_systems(object, 2)
         # robot_defensive_systems check
@@ -933,7 +884,7 @@ def industrial(object):
         object.Adapt = 5
         object.Value = 30000
         object.HPM = please.roll_this("1d4+8") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         # robot_offensive_systems check
         if please.do_1d100_check(35):
@@ -962,7 +913,7 @@ def industrial(object):
         object.Adapt = 5
         object.Value = 20000
         object.HPM = please.roll_this("1d4+8") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         # robot_offensive_systems check
         if please.do_1d100_check(35):
@@ -1008,7 +959,7 @@ def janitorial(object):
         object.Adapt = 30
         object.Value = 20000
         object.HPM = please.roll_this("1d6") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         # robot_offensive_systems check
         if please.do_1d100_check(25):
@@ -1030,7 +981,7 @@ def janitorial(object):
         object.Adapt = 10
         object.Value = 35000
         object.HPM = please.roll_this("1d6") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         # robot_offensive_systems
         if please.do_1d100_check(10):
@@ -1059,7 +1010,7 @@ def maintenance(object):
     object.Adapt = 37
     object.Value = 1050000
     object.HPM = please.roll_this("1d4") * con
-    object.Size = "Indoor"
+    object.Size_Cat =  "Indoor"
     robot_size_wate_hite(object)
     # RoboticAttack check
     if please.do_1d100_check(40):
@@ -1118,7 +1069,7 @@ def police(object):
         object.Adapt = 10
         object.Value = 600000
         object.HPM = please.roll_this("3d4") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         robot_offensive_systems(object, 1)
         # special stun attack
@@ -1136,7 +1087,7 @@ def police(object):
         object.Adapt = 10
         object.Value = 300000
         object.HPM = please.roll_this("1d4+9") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         object.Robot_Attacks = []
         robot_defensive_systems(object, 1)
@@ -1191,7 +1142,7 @@ def police(object):
         object.Adapt = 10
         object.Value = 900000
         object.HPM = please.roll_this("1d3+1") * con
-        object.Size = "Indoor"
+        object.Size_Cat =  "Indoor"
         robot_size_wate_hite(object)
         robot_offensive_systems(object, 1)
         robot_defensive_systems(object, 1)
@@ -1247,7 +1198,7 @@ def rescue(object):
         object.Adapt = 10
         object.Value = 950000
         object.HPM = please.roll_this("2d10+5") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         robot_offensive_systems(object, 1)
         robot_defensive_systems(object, 3)
@@ -1287,7 +1238,7 @@ def rescue(object):
         object.Adapt = 10
         object.Value = 750000
         object.HPM = please.roll_this("2d10+5") * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         # robot_offensive_systems chance
         if please.do_1d100_check(25):
@@ -1372,7 +1323,7 @@ def transport(object):
         object.Adapt = 22
         object.Value = 450000
         object.HPM = please.roll_this("1d4+8") * con
-        object.Size = "Indoor"
+        object.Size_Cat =  "Indoor"
         robot_size_wate_hite(object)
         # RobotAttacks chance
         if please.do_1d100_check(50):
@@ -1402,7 +1353,7 @@ def transport(object):
         object.Adapt = 22
         object.Value = 450000
         object.HPM = please.roll_this("1d4+8") * con
-        object.Size = "Indoor"
+        object.Size_Cat =  "Indoor"
         robot_size_wate_hite(object)
         # RobotAttacks chance
         if please.do_1d100_check(50):
@@ -1454,7 +1405,7 @@ def veterinarian(object):
         object.Adapt = 10
         object.Value = 2250000
         object.HPM = 2 * con
-        object.Size = "Indoor"
+        object.Size_Cat =  "Indoor"
         robot_size_wate_hite(object)
         object.Robot_Attacks = []
         # RobotDefences chance
@@ -1480,7 +1431,7 @@ def veterinarian(object):
         object.Adapt = 10
         object.Value = 5000000
         object.HPM = 2 * con
-        object.Size = "Outdoor"
+        object.Size_Cat =  "Outdoor"
         robot_size_wate_hite(object)
         object.Robot_Attacks = []
         # RobotDefences chance
@@ -1513,6 +1464,7 @@ def veterinarian(object):
 # build a FRESH robot persona
 #####################################
 
+### build a fresh robot persona
 def fresh_robot():
     """
     builds A FRESH robot persona using EXP persona creation
@@ -1525,28 +1477,49 @@ def fresh_robot():
 
     fresh = table.PersonaRecord()
     fresh.FAMILY = "Robot"
-    fresh.FAMILY_TYPE = "Unknown_Type"
-    fresh.FAMILY_SUB = "Unknown_Sub"
+    fresh.FAMILY_TYPE = "Unmade"
+    fresh.FAMILY_SUB = "Unmade"
     fresh.Vocation = "Robot"
-    fresh.Robot_Model = "Robot"
+    fresh.Date_Created = "Unmade"
+    fresh.RP = False
 
 
-    ### get mundane terran name of the player
-    fresh.Player_Name = input("\nPlease input your MUNDANE TERRAN NAME: ")
+    fresh.Adapt = 0
+    fresh.Value = 42
+
+    fresh.Base_Family = "Debased"
+    fresh.CF: int = 0
+    fresh.Ramming = 0
+    fresh.Attacks = []
+    fresh.Defences = []
+    fresh.Peripherals = []
+    fresh.Spec_Sheet = []
+
+    fresh.Player_Name = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
     core.initial_attributes(fresh)
-    robot_fabricator_family(fresh)
-    control_factor(fresh)
+    fresh.Base_Family = please.get_table_result(table.robot_fabricator_list)
+    fresh.CF = control_factor(fresh)
     core.movement_rate(fresh)
     core.wate_allowance(fresh)
-    robotic_power_source(fresh)
+    fresh.Power_Plant = please.get_table_result(table.robotic_power_plant)
+    fresh.Power_Reserve = fresh.CON
     robotic_sensors(fresh)
     core.base_armour_rating(fresh)
 
-    # temporary until we have a proper robot persona
-    fresh.Bot_Type = secrets.choice(["Android", "Combot", "Datalyzer"])
-    robot_type_function_pivot[fresh.Bot_Type](fresh)
-    # fresh_robot_type(fresh)
+    ### choose the FAMILY_TYPE
+    bot_type = please.choose_this(list_eligible_robot_types(fresh), "Please choose a robot type.")
+    fresh.FAMILY_TYPE = bot_type
+    robot_type_function_pivot[bot_type](fresh)
+
+    ### android check
+    if fresh.FAMILY_TYPE == "Android":
+        input("stopping for droid")
+
+    please.say_goodnight_marsha()
+
+
+
 
 
     # robot HPM based on CON and type
@@ -1589,8 +1562,6 @@ def bespoke_robot():
 def rando_robot():
     pass
 
-
-
 robot_type_function_pivot = {
     "Android": android,
     "Combot": combot,
@@ -1606,3 +1577,4 @@ robot_type_function_pivot = {
     "Transport": transport,
     "Veterinarian": veterinarian,
 }
+

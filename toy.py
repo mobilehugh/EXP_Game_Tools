@@ -27,6 +27,16 @@ def toy_workflow() -> None:
 def toy_category():
     return please.get_table_result(table.toy_categories)
 
+
+
+def gimme_one(toy_type: str) -> str:
+    ''' return str place holders for toys'''
+    if "Any" in toy_type:
+        toy_type = please.get_table_result(table.toy_categories)
+
+    if toy
+
+
 def fresh_toy():
     toy_cat = toy_category()
     print(f"{toy_cat}")

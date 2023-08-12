@@ -684,9 +684,9 @@ def fresh_alien():
 
     fresh = table.PersonaRecord()
     fresh.FAMILY = "Alien"
-    fresh.Vocation = "Alien"
     fresh.FAMILY_TYPE = "undiscovered"
     fresh.FAMILY_SUB = "undiscovered"
+    fresh.Vocation = "Alien"
     fresh.Date_Created = "Unevolved"
     fresh.RP = False
     fresh.Attacks = []

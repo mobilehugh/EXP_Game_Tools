@@ -1,7 +1,6 @@
 import math
 from dataclasses import asdict
 
-
 import table
 import please
 import alien
@@ -33,10 +32,10 @@ def initial_attributes(attributes_creating:table.PersonaRecord) -> table.Persona
         attributes_creating.PSTR_Prime = please.roll_this("1d4")
 
         # reassign die rolls based on primes
-        attribute_die_rolls["CON"] = table.robot_attributes[object.CON_Prime]["CON"]
-        attribute_die_rolls["DEX"] = table.robot_attributes[object.DEX_Prime]["DEX"]
-        attribute_die_rolls["INT"] = table.robot_attributes[object.INT_Prime]["INT"] 
-        attribute_die_rolls["PSTR"] = table.robot_attributes[object.PSTR_Prime]["PSTR"]
+        attribute_die_rolls["CON"] = table.robot_attributes[attributes_creating.CON_Prime]["CON"]
+        attribute_die_rolls["DEX"] = table.robot_attributes[attributes_creating.DEX_Prime]["DEX"]
+        attribute_die_rolls["INT"] = table.robot_attributes[attributes_creating.INT_Prime]["INT"] 
+        attribute_die_rolls["PSTR"] = table.robot_attributes[attributes_creating.PSTR_Prime]["PSTR"]
 
     # use die roll list to generate new attributes
     for attribute in attribute_die_rolls:
@@ -72,7 +71,6 @@ def hit_points_max(hit_points_creating:table.PersonaRecord) -> table.PersonaReco
             
    
     # todo robot hit points max
-    
     # robot HPM based on CON and type
     elif hit_points_creating.FAMILY == "Robot":
         # if hit_points_creating.FAMILY == "Robot":

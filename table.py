@@ -1,5 +1,5 @@
 """
-table.py stores tables that are reused in various functions in various modules. 
+table.py stores tables are reused in various functions in various modules. 
 ideally table.py will be regenerable as exp.sciency.fiction.com changes. 
 by converting .adoc tables to python dictionaries. 
 smart people required
@@ -9,6 +9,7 @@ smart people required
 
 from dataclasses import dataclass, field
 
+# fix inherit alien and robot field as one dataclass
 @dataclass
 class PersonaRecord:
     """
@@ -20,6 +21,7 @@ class PersonaRecord:
     FAMILY_TYPE: str = "Humanoid"
     FAMILY_SUB: str = "Generalis"
     Fallthrough: bool = False
+    Bespoke: bool = False
     RP: bool = False
     Show: bool = False
     Bin: bool = False
@@ -2402,7 +2404,7 @@ latinicize = {
     "Budgie": ["Psittaculidae", "Psittaciformes", "Aves", "Parvapsittacus","Pullarius", "Aviuncellus"],
     "Butterfly": ["Lepidoptera", "Papilionoidea", "Farfalla", "Papilio", "Diurnivola"],
     "Cactus": ["Cactaceae", "Caryophyllales", "Xerosuccus", "Succulentus", "Aridiflorus"],
-    "Camel": ["Camelidae", "Artiodactyla", "Humpalia", "Camelus", "Bihumpus", "Bijobus"],
+    "Camel": ["Camelidae", "Humpalia", "Camelus", "Bihumpus", "Bijobus", "Tobarassium"],
     "Capybara": ["Hydrochoeridae", "Cuteus", "Snoutis", "Capibarinus", "Capysocius", "Huggabilius", "Maxicuniculus"],
     "Cat": ["Felidae", "Purrifia", "Clawilius", "Grumpilius", "Nalaphylus", "Cattamia","Felia", "Purris", "Catruminator","Feligattus", "Scratchius","Felinia"],
     "Caterpillar": ["Lepidoptera", "Processio", "Felocorinthias", "Larvunculus", "Polypedia","Crawlingus","Kraftuscinia"],
@@ -2413,7 +2415,7 @@ latinicize = {
     "Cockroach": ["Blattodea", "Scuttlius", "Cucarachus", "Kafkia", "Blattiscarabs"],
     "Conifer": ["Pinophyta", "Pinales", "Coneville", "Piceatallus", "Evergreenus", "Falsiferrous","Conisap", "Fjordpinius"],
     "Coral": ["Anthozoa", "Cnidaria", "Coralliomin", "Shipwreckius", "Coralliopolypus", "Durex", "Lagooniform"],
-    "Cow": ["Bovidae", "Artiodactyla", "Lactosia", "Bellius", "Udderlicious", "Vaccabellus", "Bovis", "Prebeefia"],
+    "Cow": ["Bovidae", "Lactosia", "Bellius", "Udderlicious", "Vaccabellus", "Bovis", "Prebeefia"],
     "Crab": ["Brachyura", "Decapoda", "Crustacea", "Krustii", "Cancerati", "Scuttleus","Pincerius"],
     "Crocodile": ["Alligatoridae", "Crocodylia", "Caimanis", "Dentitudo", "Chompeus", "Dentatus"],
     "Dog": ["Dogopus", "Cuddlius", "Dogii", "Loyalis", "Dogus", "Canem"],
@@ -2444,29 +2446,29 @@ latinicize = {
     "Kangaroo": ["Kangarooped", "Abdopokitis", "Macropodidae", "Diprotodontia", "Hoppiticus"],
     "Kelp": ["Laminariaceae", "Laminariales", "Plantae", "Kelposea","Tanglaria","Kelpkombu"],
     "Koala": ["Phascolarctidae", "Eukalypti", "Pauschbabi", "Diprotodontia", "Chlamidius"],
-    "Ladybug": ["Coccinellidae", "Coleoptera", "Insecta"],
-    "Lamprey": ["Petromyzontidae", "Petromyzontiformes", "Vertebrata"],
-    "Lemur": ["Lemuridae", "Primates", "Leemia"],
-    "Leopard": ["Felidae", "Carnivora", "Spottilia"],
-    "Lion": ["Felidae", "Carnivora", "Roaridae"],
-    "Lizard": ["Lacertilia", "Squamata", "Lizaridis"],
-    "Lobster": ["Nephropidae", "Decapoda", "Crustacea"],
-    "Lynx": ["Felidae", "Carnivora", "Browseria"],
-    "Mammoth": ["Elephantidae", "Proboscidea", "Trunkiloidus"],
-    "Manta Ray": ["Mobulidae", "Myliobatiformes", "Chondrichthyes"],
-    "Marmot": ["Sciuridae", "Standupis", "Marmotia"],
-    "Mite": ["Acari", "Arachnida", "Arthropoda"],
-    "Mockingbird": ["Mimidae", "Passeriformes", "Aves"],
-    "Mole": ["Talpidae", "Eulipotyphla", "Myopia"],
-    "Moose": ["Cervidae", "Artiodactyla", "Canadiana"],
-    "Morel": ["Morchellaceae", "Pezizales", "Fungi"],
-    "Mosquito": ["Culicidae", "Diptera", "Insecta"],
-    "Moth": ["Lepidoptera", "Heterocera", "Insecta"],
-    "Mouse": ["Muridae", "Mickilia", "Silencia"],
-    "Mule": ["Equidae", "Perissodactyla", "Assaninia"],
-    "Mushroom": ["Agaricomycetes", "Basidiomycota", "Moisturia"],
-    "Nil": ["Danadia", "Evaporus", "Oblivia"],
-    "Nototherium": ["Vombatidae", "Diprotodontia", "Probiscua"],
+    "Ladybug": ["Coccinellidae", "Polkidotius", "Punctatus", "Madamia"],
+    "Lamprey": ["Petromyzontidae", "Petromyzontiformes", "Petrohag", "Parasytus"],
+    "Lemur": ["Lemuridae", "Zubamafuia", "Leemia", "Prosimistripae"],
+    "Leopard": ["Spottyfelis", "Dottia", "Spottilia", "Pardus"],
+    "Lion": ["Lionvelde", "Mainius", "Roaridae", "Pantherapouncia", "Fulvushairia"],
+    "Lizard": ["Lacertilia", "Scincoea", "Laziridis", "Caulashia", "Squamitextae"],
+    "Lobster": ["Nephropidae", "Lobsterixis", "Astacus", "Pinchfurius", "Rubsteriae"],
+    "Lynx": ["Aurilongus", "Chaininia", "Browseria"],
+    "Mammoth": ["Shagnificantis", "Tuskanumi", "Trunkiloidus", "Mammothicus"],
+    "Manta Ray": ["Mobulidae", "Myliobatiformes", "Flappius", "Glideus", "Wingfishii"],
+    "Marmot": ["Fluffium", "Standupis", "Marmotia", "Burrowium", "Whistlicus", "Fodina"],
+    "Mite": ["Acari", "Biticia", "Cutiphilia", "Infestus", "Indicisivus"],
+    "Mockingbird": ["Mimidae", "Sarcasticus", "Kakavia", "Kleptovia", "Imitatio"],
+    "Mole": ["Talpidae", "Eulipotyphla", "Myopia", "Molexis", "Molificus", "Mikros", "Moles"],
+    "Moose": ["Cervidae", "Alces", "Keras", "Moosemus", "Nuckulus", "Multikulturia", "Canadiana"],
+    "Morel": ["Morchellaceae", "Pezizales", "Fungi", "Moralii", "Myecium", "Sporos"],
+    "Mosquito": ["Culicidae", "Diptera", "Anopheles", "Haimatia", "Nuisencia"],
+    "Moth": ["Nocteronis", "Heterocera", "Phosnixia", "Nuxia"],
+    "Mouse": ["Musia", "Mickilia", "Silencia", "Ouriae", "Mysus", "Mausistalia"],
+    "Mule": ["Hybridae", "Carrialotus", "Assaninia", "Donkea", "Muleridae"],
+    "Mushroom": ["Agaricomycetes", "Basidiomycota", "Moisturia", "Mykas", "Hyphae","Thallophyta"],
+    "Nil": ["Danadia", "Evaporus", "Oblivia", "Obliviata", "Nullus", "Vacuus", "Nillia", "Oudenia"],
+    "Nototherium": ["Notobeastus", "Paleopouchus", "Probiscua", "Nototheria"],
     "Opossum": ["Didelphidae", "Didelphimorphia", "Necrofakia"],
     "Orangutan": ["Hominidae", "Primates", "Baldinia"],
     "Orca": ["Delphinidae", "Cetacea", "Splashisius"],
@@ -2488,9 +2490,9 @@ latinicize = {
     "Pterosaur": ["Pterosauria", "Archosauria", "Beakinius"],
     "Puffer fish":["Bloati", "Puffi", "Expandis"],
     "Rabbit": ["Hassnepfeffia", "Rogeria", "Cosmeticus" ],
-    "Rabbit": ["Emptilia"],
-    "Rat": ["Emptilia"],
-    "Raven": ["Emptilia"],
+    "Rabbit": ["Lepus", "Cuniculii", "Hoppitia", "Auriculomagus", "Skirtia"],
+    "Rat": ["Rattus", "Bobonicus", "Muriniae", "Mickii", "Ratticus"],
+    "Raven": ["Corvus", "Koraxii", "Nigeria", "Omenus", "Kleptocritus"],
     "Rhinoceros": ["Rhinocerotidae", "Perissodactyla", "Probiscus"],
     "Scorpion": ["Scorpionida", "Arachnida", "Arthropoda"],
     "Sea Star": ["Asteriidae", "Asteroidea", "Echinodermata"],
@@ -2503,13 +2505,13 @@ latinicize = {
     "Sheep": ["Ovidae", "Artiodactyla", "Followerius"],
     "Shrimp": ["Decapoda", "Malacostraca", "Crustacea"],
     "Skunk": ["Mephitidae", "Carnivora", "Smellosia"],
-    "Sloth": ["Emptilia"],
-    "Slug": ["Emptilia"],
+    "Sloth": ["Slothilia"],
+    "Slug": ["Sluggomia"],
     "Snail": ["Gastropoda", "Mollusca", "Invertebrata"],
     "Snake": ["Serpentes", "Squamata", "Slitherius"],
     "Sparrow": ["Passeridae", "Passeriformes", "Aves"],
     "Sperm Whale":["Spermatis", "Wigglia", "Seedium"],
-    "Spider": ["Emptilia"],
+    "Spider": ["Octoterronicus"],
     "Sponge": ["Porifera", "Demospongiae", "Soakupia"],
     "Squid": ["Teuthida", "Cephalopoda", "Mollusca"],
     "Squirrel": ["Sciuridae", "Rodentia", "Squirellia"],
@@ -2520,21 +2522,21 @@ latinicize = {
     "Tapeworm": ["Cestoda", "Platyhelminthes", "Invertebrata"],
     "Tarantula": ["Theraphosidae", "Araneae", "Arthropoda"],
     "Tardigrade": ["Tardigrada", "Ecdysozoa", "Latanimus"],
-    "Tarsier": ["Emptilia"],
-    "Tasmanian Devil": ["Emptilia"],
+    "Tarsier": ["Tarpaulinia"],
+    "Tasmanian Devil": ["Tasmis"],
     "Termite": ["Isoptera", "Blattodea", "Insecta"],
-    "Tick": ["Emptilia"],
+    "Tick": ["Tockia"],
     "Tiger": ["Tiggeria", "Carnivora", "Stripacious"],
     "Toad": ["Bufonidae", "Anura", "Amphibia"],
     "Triceratops": ["Ceratopsidae", "Ornithischia", "Tripointius"],
-    "Trilobite": ["Emptilia"],
+    "Trilobite": ["Tritobitae"],
     "Turtle": ["Testudines", "Cryptodira", "Shellina"],
     "Tylosaur": ["Mosasauridae", "Squamata", "Nocarpetis"],
     "Tyrannosaurus": ["Tyrannosauridae", "Theropoda", "Tyropian"],
     "Unicorn": ["Unicornis", "Mythica", "Imaginata"],
     "Velociraptor": ["Dromaeosauridae", "Theropoda", "Speedometria"],
-    "Vole": ["Emptilia"],
-    "Vulture": ["Emptilia"],
+    "Vole": ["Nuxia"],
+    "Vulture": ["Detritovoria"],
     "Walrus": ["Odobenidae", "Fatitious", "Toothaxia"],
     "Wasp": ["Vespidae", "Hymenoptera", "Insecta"],
     "Weasel": ["Mustelidae", "Narrowia", "Sifnfilis"],
@@ -3401,39 +3403,39 @@ secondary_robotic_peripheral = {
 } 
 
 
-attack_type_A = {
-    (1, 8):"BattleAxe 1d12",
-    (9, 15):"Flail 1d8",
-    (16, 22):"Halberd 2d6",
-    (23, 29):"Fork 2d4",
-    (30, 36):"Hammer 2d6",
-    (37, 43):"Lance 1d6",
-    (44, 50):"Mace 1d6",
-    (51, 57):"MorningStar 1d8",
-    (58, 64):"Pick 1d10",
-    (65, 71):"Pike 2d6",
-    (72, 78):"Scimitar 1d8",
-    (79, 85):"Spear 1d8",
-    (86, 92):"Staff 1d6",
-    (93, 100):"Sword 1d12",
-    "name":"Attack Type A",
+strike_attacks = {
+    (1, 8):"Battle Axe (1d12)",
+    (9, 15):"Flail (1d8)",
+    (16, 22):"Halberd (2d6)",
+    (23, 29):"Fork (2d4)",
+    (30, 36):"Hammer (2d6)",
+    (37, 43):"Lance (1d6)",
+    (44, 50):"Mace (1d6)",
+    (51, 57):"MorningStar (1d8)",
+    (58, 64):"Pick (1d10)",
+    (65, 71):"Pike (2d6)",
+    (72, 78):"Scimitar (1d8)",
+    (79, 85):"Spear (1d8)",
+    (86, 92):"Staff (1d6)",
+    (93, 100):"Sword (1d12)",
+    "name":"Attack Type Strike",
     "die_roll":"1d100",
 } 
 
 
-attack_type_B = {
-    (1, 11):"Arrow 1d6",
-    (12, 21):"Axe 1d8",
-    (22, 30):"Bolt 1d12",
-    (31, 39):"Boomerang 1d6",
-    (40, 48):"Sling 1d8",
-    (49, 57):"Dagger 1d3",
-    (58, 66):"Dart 1d4",
-    (67, 75):"Javelin 1d8",
-    (76, 84):"Spear 1d8",
-    (85, 93):"Shuriken 1d4",
-    (94, 100):"Whip 1d6",
-    "name":"Attack Type B",
+fling_attacks = {
+    (1, 11):"Arrow (1d6)",
+    (12, 21):"Axe (1d8)",
+    (22, 30):"Bolt (1d12)",
+    (31, 39):"Boomerang (1d6)",
+    (40, 48):"Sling (1d8)",
+    (49, 57):"Dagger (1d3)",
+    (58, 66):"Dart (1d4)",
+    (67, 75):"Javelin (1d8)",
+    (76, 84):"Spear (1d8)",
+    (85, 93):"Shuriken (1d4)",
+    (94, 100):"Whip (1d6)",
+    "name":"Attack Type Fling",
     "die_roll":"1d100",
 } 
 
@@ -3447,65 +3449,62 @@ robot_ram_dam = {
 } 
 
 
+### the following four tables are stretched to remove the other table rolls 
+### other table rolls are calculated recursively first, and then these tables are called directly
+
+# stretched table
 attack_table_one = {
-    (1, 10):"Defensive System",
-    (11, 25):"Type A Striking",
-    (26, 75):"Ramming Freedom",
-    (76, 100):"Table 2 1",
+    (1, 13): 'Defensive', 
+    (14, 46): 'Strike', 
+    (47, 100): 'Ram',
     "name":"Robotic Attack One",
     "number":"5.11",
     "die_roll":"1d100",
 } 
 
-
+# stretched table
 attack_table_two = {
-    (1, 21):"Table 2 1",
-    (22, 41):"Type B Striking",
-    (42, 46):"Nausea Jet",
-    (47, 51):"Paralysis Jet",
-    (52, 61):"Type A Electro",
-    (62, 71):"Type A Vibro",
-    (72, 81):"Type A Stun",
-    (82, 91):"Type A Inertia",
-    (92, 100):"Table 3 1",
+    (1, 21): 'Ram',
+    (22, 52): 'Fling',
+    (53, 56): 'Nausea Attack',
+    (57, 60): 'Paralysis Attack',
+    (61, 72): 'Strike Electro',
+    (73, 84): 'Strike Inertia',
+    (85, 96): 'Strike Stun',
+    (97, 100): 'Strike Vibro',
     "name":"Robotic Attack Two",
     "number":"5.14",
     "die_roll":"1d100",
 } 
 
+# stretched table
 attack_table_three = {
-    (1, 16):"Table 1 3",
-    (17, 31):"Table 2 2",
-    (32, 41):"Nausea Cloud",
-    (42, 51):"Paralysis Cloud",
-    (52, 61):"Type B Electro",
-    (62, 66):"Type B Vibro",
-    (67, 71):"Type B Stun",
-    (72, 76):"Type B Inertia",
-    (77, 81):"Thermal Jet",
-    (82, 86):"Corrosive Cloud",
-    (87, 91):"Gun",
-    (92, 96):"Aerosol",
-    (97, 100):"Table 4 1",
+    (1, 20): 'Nausea Attack',
+    (21, 40): 'Paralysis Attack',
+    (41, 59): 'Fling Electro',
+    (60, 65): 'Fling Inertia',
+    (66, 71): 'Fling Stun',
+    (72, 77): 'Fling Vibro ',
+    (78, 83): 'Thermal Blast',
+    (84, 89): 'Corrosive Mist',
+    (90, 94): 'Gun',
+    (95, 100): 'Aerosol',
     "name":"Robotic Attack Three",
     "die_roll":"1d100",
 } 
 
+# stretched table
 attack_table_four = {
-    (1, 16):"Table 2 4",
-    (17, 31):"Table 3 3",
-    (32, 41):"Lethal Jet",
-    (42, 51):"Gun",
-    (52, 61):"Aerosol",
-    (62, 71):"Bomb",
-    (72, 81):"Grenade",
-    (82, 91):"Combat Mutation",
-    (92, 100):"Fabricator Freedom",
+    (1, 6): 'Lethal Jet',
+    (7, 56): 'Gun',
+    (57, 72): 'Aerosol',
+    (73, 88): 'Bomb',
+    (89, 95): 'Grenade',
+    (96, 98): 'Mutation',
+    (99, 100): 'Weapon user',
     "name":"Robotic Attack Four",
     "die_roll":"1d100",
 } 
-
-
 
 robotic_defenses = {
     (1, 7):"Aunty Missile",
@@ -3916,7 +3915,6 @@ undersized_body_part = {
 #
 ##############################################
 
-
 toy_categories = {
     (1, 5):"Aerosol",
     (6, 11):"Armour",
@@ -3936,5 +3934,195 @@ toy_categories = {
     (91, 100):"Vet Equipment",
     "die_roll":"1d100",
 } 
+
+aerosol_list = {
+    range(1, 5): "Anti Lazer",
+    range(6, 10): "Attraction",
+    range(11, 15): "Blinding",
+    range(16, 16): "Catabolic Dismodulator",
+    range(17, 21): "Demagnetizing",
+    range(22, 23): "Disintegrator",
+    range(24, 28): "Exploding",
+    range(29, 33): "Foam",
+    range(34, 38): "Freezing",
+    range(39, 43): "Gas",
+    range(44, 48): "Invisibility",
+    range(49, 53): "Matter Detector",
+    range(54, 58): "Mistor",
+    range(59, 63): "Molecular Diffusion",
+    range(64, 68): "Napalm",
+    range(69, 73): "Paint",
+    range(74, 78): "Pharmaceutical",
+    range(79, 83): "Poison",
+    range(84, 87): "Repellent",
+    range(88, 91): "Siren",
+    range(92, 95): "Smoke",
+    range(96, 99): "Web",
+    range(100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+armour_list = {
+    range(1, 9): "Ablative",
+    range(10, 18): "Ballistic",
+    range(19, 27): "Combat",
+    range(28, 36): "Compucrafted",
+    range(37, 45): "Concussion",
+    range(46, 54): "Flexion",
+    range(55, 58): "Force Field",
+    range(59, 67): "Helmet",
+    range(68, 77): "Plastix",
+    range(78, 79): "Powered ",
+    range(80, 86): "Protex",
+    range(87, 95): "Shield",
+    range(96, 99): "Vac Suit",
+    range(100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+bomb_list = {
+    range(1, 4): "Air Raid Siren",
+    range(4, 7): "Black Out Bomb",
+    range(7, 14): "Bomb",
+    range(14, 18): "Bug Bomb",
+    range(18, 21): "Cover Bomb",
+    range(21, 24): "Cremator",
+    range(24, 27): "Diffusion Bomb",
+    range(27, 30): "Dissolver",
+    range(30, 35): "Diversionizer",
+    range(35, 38): "Emperor",
+    range(38, 41): "Foam Bomb",
+    range(41, 46): "Grand Slam",
+    range(46, 49): "Gravitas",
+    range(49, 52): "Jumping Jack Blast",
+    range(52, 55): "Junk Yard",
+    range(55, 58): "Land Scraper",
+    range(58, 62): "Lazer Cover",
+    range(62, 65): "Nerve Bomb",
+    range(65, 68): "Neutron Bomb",
+    range(68, 71): "Nuclear Device",
+    range(71, 75): "Paint Bomb",
+    range(75, 78): "Polarizer",
+    range(78, 79): "Robot Bomb",
+    range(79, 83): "Sky Breaker",
+    range(83, 87): "Smog Machine",
+    range(87, 88): "Space Modulator",
+    range(88, 91): "Torc Bomb",
+    range(91, 94): "Toxin Bomb",
+    range(94, 98): "Tracker Bomb",
+    range(98, 100): "World Wide Web",
+    range(100, 101): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+grenade_list = {
+    range(1, 5): "Big Bertha",
+    range(6, 10): "Chemical Explosive",
+    range(11, 15): "Corrosive",
+    range(16, 20): "Cryoblast",
+    range(21, 25): "Energy Drain",
+    range(26, 30): "Energy ",
+    range(31, 35): "Exploding Pin",
+    range(36, 40): "Fragmentation",
+    range(41, 45): " Fusion",
+    range(46, 50): "Gas",
+    range(51, 55): "Gravruptor",
+    range(56, 60): "Magnetic Disrupter",
+    range(61, 65): "Mini",
+    range(66, 70): "Molecular Disruptor",
+    range(71, 75): "Multiple Explosive",
+    range(76, 80): "Napalm",
+    range(81, 85): "Pin",
+    range(86, 90): "Pyrotechnic",
+    range(91, 94): "Radiation",
+    range(95, 97): "Sky Lighter",
+    range(98, 99): "Torc ",
+    range(100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+gun_list = {
+    range(1, 2): "Aerosol Pistol",
+    range(3, 4): "Aerosol Rifle",
+    range(5, 5): "Antimat Pistol",
+    range(6, 6): "Antimat Rifle",
+    range(7, 8): "Bee Gun",
+    range(9, 11): "Bolt Action Rifle",
+    range(12, 13): "Cryogun",
+    range(14, 15): "Death Ray Pistol",
+    range(16, 18): "Derringer",
+    range(19, 19): "Disintegration Gun",
+    range(20, 21): "Electron Pistol",
+    range(22, 23): "Electron Rifle",
+    range(24, 25): "Fission Pistol",
+    range(26, 27): "Fission Rifle",
+    range(28, 28): "Full Auto Lazer Pistol",
+    range(29, 29): "Full Auto Lazer Rifle",
+    range(30, 30): "Full Auto Pistol",
+    range(31, 31): "Full Auto Rifle",
+    range(32, 32): "Fusion Pistol",
+    range(33, 33): "Fusion Rifle",
+    range(34, 36): "Gauss Pistol",
+    range(37, 39): "Gauss Rifle",
+    range(40, 41): "Glass Gun",
+    range(42, 43): "Grapple Gun",
+    range(44, 45): "Gravruptor Gun",
+    range(46, 47): "Job Pistol",
+    range(48, 49): "Job Rifle",
+    range(50, 52): "Lazer Pistol",
+    range(53, 55): "Lazer Rifle",
+    range(56, 56): "Napalm Gun",
+    range(57, 59): "Needler",
+    range(60, 61): "Plasma Pistol",
+    range(62, 63): "Plasma Rifle",
+    range(64, 65): "Plastix Pistol",
+    range(66, 67): "Plastix Rifle",
+    range(68, 69): "Protein Disrupter",
+    range(70, 71): "Radiation Gun",
+    range(72, 74): "Revolver",
+    range(75, 76): "Semi Auto Lazer Pistol",
+    range(77, 78): "Semi Auto Lazer Rifle",
+    range(79, 80): "Semi Auto Pistol",
+    range(81, 82): "Semi Auto Rifle",
+    range(83, 86): "Slug Thrower",
+    range(87, 87): "Sonic Pistol",
+    range(88, 88): "Sonic Rifle",
+    range(89, 91): "Stun Pistol",
+    range(92, 94): "Stun Rifle",
+    range(95, 96): "Variable Lazer Pistol",
+    range(97, 98): "Variable Lazer Rifle",
+    range(99, 99): "Water Gun",
+    range(100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+
+toy_pivot = {
+    "Aerosol": aerosol_list,
+    "Armour": armour_list,
+    "Powered Armour": armour_list,
+    "Grenade": grenade_list,
+    "Bomb": bomb_list,
+    "Gun": gun_list,
+    "Artillery": artillery_list,
+    "Miscellaneous Equipment": misc_eq_list,
+    "Robot": robot_list,
+    "Miscellaneous Weapon": misc_wep_list,
+    "Pharma": pharma_list,
+    "Random Junque": le_equisite_junque_list,
+    "Treasure": treasure_list,
+    "Vehicle": vehicle_list,
+    "Space Vehicle": rocketeer_list,
+    "Vet Equipment": vet_eq_list,
+}
+
+
+
+
+##############################################
+#
+# errata (not erotica)
+#
+##############################################
 
 ['biologist_gifts', 'research_skills', 'culture_skills', 'knite_gifts', 'mechanic_gifts', 'mercenary_gifts', 'nomad_gifts', 'nothing_gifts', 'spie_gifts', 'veterinarian_gifts', 'attacks_per_unit', 'alien_attack_damage', 'alien_biology_energy_source', 'alien_biology_energy_procurement', 'alien_biology_reproduction', 'alien_biology_domicile', '', '', '', '']
