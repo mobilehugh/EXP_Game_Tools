@@ -340,7 +340,6 @@ def convert_exps_to_levels(get_a_job: dict, new_exps = 0) -> int:
 #########################################################
 
 
-# fix beware of builtins.list()
 def update_gifts(returning_gifts: table.PersonaRecord) -> list:
     """
     returns a list of gifts based on the persona level

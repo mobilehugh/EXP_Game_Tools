@@ -4,7 +4,7 @@ import os
 import sys
 import re
 import subprocess
-import secrets
+from secrets import choice, randbelow
 import time
 from typing import Union, List
 from itertools import islice
@@ -16,6 +16,7 @@ import table
 import vocation
 import outputs
 import mutations
+import toy
 
 
 """ 
@@ -37,7 +38,7 @@ def explode_this(all_dice:list, die_type:int) -> int:
         all_dice = []
         for _ in range(explodes):
             new_die = f'1d{str(die_type)}'
-            all_dice.append(please.roll_this(new_die))
+            all_dice.append(roll_this(new_die))
         result += sum(all_dice)
         
     return result
@@ -80,7 +81,7 @@ def roll_this(die_roll_string: str) -> int:
         return dice_error
 
     # create a list of the die rolls
-    all_dice = sorted([secrets.randbelow(die_type) + 1 for _ in range(die_amount)], reverse=True)
+    all_dice = sorted([randbelow(die_type) + 1 for _ in range(die_amount)], reverse=True)
 
     # die_mod processing and error checks
     if die_mod == "D":
@@ -171,12 +172,20 @@ def input_this(message: str, for_a_list: bool = False) ->  Union[str, List[str]]
 
 # todo connect choose this with clean this input
 # todo what should R reset  do?
-def choose_this(choices: list, message: str) -> str:
+def choose_this(choices: list, comment: str, choosy: table.PersonaRecord = None) -> str:
     """
     Choose from a list of choices and return the chosen item
     [default] element for list choices[0]
     quit or restart or chastise the user
+    also auto return if Fallthrough is true
     """
+
+    input(f'{comment = }, {choosy = } \n{choices =}')
+
+    # if fallthrough skip choosing part
+    if choosy:
+        if choosy.Fallthrough:
+            return choice(choices)
 
     # [0] is default, sort, reinsert default and add directions
     default = choices.pop(0)
@@ -187,8 +196,8 @@ def choose_this(choices: list, message: str) -> str:
         # if only one choice on list return that choice automatically
         # the option to reset or quit is no given 
 
-        # present the message and options
-        print(f"\n{message}")
+        # present the comment and options
+        print(f"\n{comment}")
 
         if len(choices) == 2: # keeps say what ever to to one line list
             print (f'1) {choices[0]} 2) {choices[1]}')
@@ -240,32 +249,6 @@ def say_no_to(question: str) -> bool:
     chosen = choose_this(["No", "Yes"], question)
     return True if chosen == "No" else False    
 
-def bespokify_this_table(table_chosen: Union[dict, list]) -> str:
-    """
-    return a string either chosen, randomized or created
-    """
-    # create the list to work from (can be dict or list)
-    table_choices_list = list_table_choices(table_chosen)
-
-    # get table name from dict or  call it this list
-    if isinstance(table_chosen, dict):
-        table_name = 'the ' + table_chosen.get('name', 'this list') + ' Table'
-    elif isinstance(table_chosen, list):
-        table_name = "this list"
-
-    option_list = ["Random", "Bespoke", "Create New"]
-    chosen = choose_this(option_list, f"What do you want to do with {table_name}?")
-    table_chosen = "something malfed up here"
-
-    if chosen == "Random":
-        table_chosen = secrets.choice(table_choices_list)
-    elif chosen == "Bespoke":
-        table_chosen = choose_this(table_choices_list, "Choose from the table below:")
-    elif chosen == "Create New":
-        print(f"Please carefully input a new element for {table_name}.")
-        table_choice = input("New Element: ")
-
-    return table_choice
 
 ###########################################
 #

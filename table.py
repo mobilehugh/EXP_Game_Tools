@@ -9,7 +9,7 @@ smart people required
 
 from dataclasses import dataclass, field
 
-# fix inherit alien and robot field as one dataclass
+# fix create combined dataclasses as AnthroRecord, AlienRecord, and RobotRecord 
 @dataclass
 class PersonaRecord:
     """
@@ -45,7 +45,6 @@ class PersonaRecord:
     Hite: int = 1
     Wate: int = 1
     Wate_Suffix: int = "kgs"
-
     Vocation: str = "None"
     Level: int = 1
     EXPS: int = 42
@@ -710,9 +709,9 @@ family_hit_location_pivot_table = {
 # BIOLOGIST Gifts, Interests and Skills
 
 biologist_gifts = {
-    range(1, 4): "Danger",
-    range(4, 7): "Disvenomation",
-    range(7, 99): "Symbolism",
+    (1, 4): "Danger",
+    (4, 7): "Disvenomation",
+    (7, 99): "Symbolism",
 }
 
 biologist_interests = {
@@ -816,9 +815,9 @@ bio_interest_skills_pivot = {
 # KNITE Gifts, Interests and Skills
 
 knite_gifts = {
-    range(1, 4): "Kirlian Sight",
-    range(4, 7): "Energy Sword",
-    range(7, 99): "Telekinesis",
+    (1, 4): "Kirlian Sight",
+    (4, 7): "Energy Sword",
+    (7, 99): "Telekinesis",
 }
 
 knite_interests = {
@@ -866,9 +865,9 @@ knite_interest_skills_pivot = {
 # MECHANIC Gifts, Interests and Skills
 
 mechanic_gifts = {
-    range(1, 4): "Quick Repair",
-    range(4, 7): "Memorization",
-    range(7, 99): "Replacement",
+    (1, 4): "Quick Repair",
+    (4, 7): "Memorization",
+    (7, 99): "Replacement",
 }
 
 mechanic_interests = {
@@ -939,9 +938,9 @@ mech_interest_skills_pivot = {
 # MERCENARY Gifts, Interests and Skills
 
 mercenary_gifts = {
-    range(1, 4): "Proficiency",
-    range(4, 7): "Defence",
-    range(7, 99): "Multiple",
+    (1, 4): "Proficiency",
+    (4, 7): "Defence",
+    (7, 99): "Multiple",
 }
 
 mercenary_interests = {
@@ -1000,9 +999,9 @@ merc_interest_skills_pivot = {
 # NOMAD Gifts, Interests and Skills
 
 nomad_gifts = {
-    range(1, 4): "Sustenance",
-    range(4, 7): "Passage",
-    range(7, 99): "Tracking",
+    (1, 4): "Sustenance",
+    (4, 7): "Passage",
+    (7, 99): "Tracking",
 }
 
 
@@ -1079,9 +1078,9 @@ nomad_interest_skills_pivot = {
 # NOTHING Gifts, Interests, and Skills
 
 nothing_gifts = {
-    range(1, 4): "Dress",
-    range(4, 7): "Attention",
-    range(7, 99): "Privilege",
+    (1, 4): "Dress",
+    (4, 7): "Attention",
+    (7, 99): "Privilege",
 }
 
 
@@ -1186,9 +1185,9 @@ nothing_interest_skills_pivot = {
 # SPIE Gifts, Interests, and Skills
 
 spie_gifts = {
-    range(1, 4): "Deceive",
-    range(4, 7): "Escape",
-    range(7, 99): "Stun",
+    (1, 4): "Deceive",
+    (4, 7): "Escape",
+    (7, 99): "Stun",
 }
 
 spie_interests = {
@@ -1249,9 +1248,9 @@ spie_interest_skill_pivot = {
 # VETERINARIAN Gifts, Interests, and Skills
 
 veterinarian_gifts = {
-    range(1, 4): "Quick Fix",
-    range(4, 7): "Resuscitation",
-    range(7, 99): "Suggestion",
+    (1, 4): "Quick Fix",
+    (4, 7): "Resuscitation",
+    (7, 99): "Suggestion",
 }
 
 
@@ -1494,16 +1493,16 @@ vocation_exps_levels = {
         "rate": 310000,
     },
     "Robot": {
-        range(0, 2000): 1,
-        range(2001, 4000): 2,
-        range(4001, 8000): 3,
-        range(8001, 18000): 4,
-        range(18001, 35000): 5,
-        range(35001, 70000): 6,
-        range(70001, 125000): 7,
-        range(125001, 250000): 8,
-        range(250001, 500000): 9,
-        range(500001, 800000): 10,
+        (0, 2000): 1,
+        (2001, 4000): 2,
+        (4001, 8000): 3,
+        (8001, 18000): 4,
+        (18001, 35000): 5,
+        (35001, 70000): 6,
+        (70001, 125000): 7,
+        (125001, 250000): 8,
+        (250001, 500000): 9,
+        (500001, 800000): 10,
         "name": "Robot Experience",
         "top_amount": 800000,
         "top_level": 10,
@@ -1512,7 +1511,7 @@ vocation_exps_levels = {
 }
 
 
-suggested_anthro_attribute_ranges = {
+suggested_anthro_attribute_s = {
     "AWE": {
         "long_name": "Awareness",
         "minimum": 1,
@@ -2025,7 +2024,7 @@ role_play_RP_arc_goal = {
 ################################################################
 
 
-alien_attribute_ranges = {
+alien_attribute_s = {
     "CON": {
         "long_name": "Constitution",
         "minimum": 1,
@@ -2677,7 +2676,7 @@ alien_biology_aroma = {
     (62, 64):"Lemons",
     (65, 67):"Methane",
     (68, 70):"Oats",
-    (71, 73):"Oranges",
+    (71, 73):"Os",
     (74, 76):"Pork",
     (77, 79):"Rubber",
     (80, 82):"Salmon",
@@ -3506,7 +3505,7 @@ attack_table_four = {
     "die_roll":"1d100",
 } 
 
-robotic_defenses = {
+robotic_defences = {
     (1, 7):"Aunty Missile",
     (8, 13):"Aunty Personnel",
     (14, 30):"Increase AR",
@@ -3587,7 +3586,7 @@ adornage = {
     (92, 95):"liquid filled tubes",
     (96, 99):"pulsing tubes",
     (100, 100):"solid tubes",
-    "name":"Bomb Strange",
+    "name":"Bomb St",
     "die_roll":"1d100",
 } 
 
@@ -3597,7 +3596,7 @@ colour_bomb = {
     (3, 3): "brown",
     (4, 4): "green",
     (5, 5): "grey",
-    (6, 6): "orange",
+    (6, 6): "o",
     (7, 7): "pink",
     (8, 8): "purple",
     (9, 9): "red",
@@ -3667,9 +3666,9 @@ combot_heavy_weapons = {
     (28, 60): "Bomb",
     (61, 90): "Missile",
     (91, 110): "Artillery",
-    (111, 120): "Artillery and bomb",
-    (121, 150): "Artillery and missile",
-    (151, 666): "Naval artillery",
+    (111, 120): "Artillery Bomb",
+    (121, 150): "Artillery Missile",
+    (151, 666): "Naval",
     "name": "Combot Heavy Weapons",
 }
 
@@ -3886,7 +3885,7 @@ strange_new_body_part = {
     (52, 61):"Horns on head.",
     (62, 67):"Mouth drawer and food grinder.",
     (68, 86):"Nose is a long flexible tube. Smell around corners.",
-    (87, 87):"Oral Grapple shoots from mouth. 2h range. 1d4 HPS. Type B attack.",
+    (87, 87):"Oral Grapple shoots from mouth. 2h . 1d4 HPS. Type B attack.",
     (88, 91):"Pincers replace hands. 1d8 HPS. Type A attack. No drawbacks.",
     (92, 93):"Spike from forehead. 1d12 HPS. Type A attack. No hats.",
     (94, 96):"Fully articulated tail. Equal to an extra limb.",
@@ -3936,163 +3935,399 @@ toy_categories = {
 } 
 
 aerosol_list = {
-    range(1, 5): "Anti Lazer",
-    range(6, 10): "Attraction",
-    range(11, 15): "Blinding",
-    range(16, 16): "Catabolic Dismodulator",
-    range(17, 21): "Demagnetizing",
-    range(22, 23): "Disintegrator",
-    range(24, 28): "Exploding",
-    range(29, 33): "Foam",
-    range(34, 38): "Freezing",
-    range(39, 43): "Gas",
-    range(44, 48): "Invisibility",
-    range(49, 53): "Matter Detector",
-    range(54, 58): "Mistor",
-    range(59, 63): "Molecular Diffusion",
-    range(64, 68): "Napalm",
-    range(69, 73): "Paint",
-    range(74, 78): "Pharmaceutical",
-    range(79, 83): "Poison",
-    range(84, 87): "Repellent",
-    range(88, 91): "Siren",
-    range(92, 95): "Smoke",
-    range(96, 99): "Web",
-    range(100, 100): "Ref's Own Table",
+    (1, 5): "Anti Lazer",
+    (6, 10): "Attraction",
+    (11, 15): "Blinding",
+    (16, 16): "Catabolic Dismodulator",
+    (17, 21): "Demagnetizing",
+    (22, 23): "Disintegrator",
+    (24, 28): "Exploding",
+    (29, 33): "Foam",
+    (34, 38): "Freezing",
+    (39, 43): "Gas",
+    (44, 48): "Invisibility",
+    (49, 53): "Matter Detector",
+    (54, 58): "Mistor",
+    (59, 63): "Molecular Diffusion",
+    (64, 68): "Napalm",
+    (69, 73): "Paint",
+    (74, 78): "Pharmaceutical",
+    (79, 83): "Poison",
+    (84, 87): "Repellent",
+    (88, 91): "Siren",
+    (92, 95): "Smoke",
+    (96, 99): "Web",
+    (100, 100): "Ref's Own Table",
     "die_roll":"1d100"
 }
 
 armour_list = {
-    range(1, 9): "Ablative",
-    range(10, 18): "Ballistic",
-    range(19, 27): "Combat",
-    range(28, 36): "Compucrafted",
-    range(37, 45): "Concussion",
-    range(46, 54): "Flexion",
-    range(55, 58): "Force Field",
-    range(59, 67): "Helmet",
-    range(68, 77): "Plastix",
-    range(78, 79): "Powered ",
-    range(80, 86): "Protex",
-    range(87, 95): "Shield",
-    range(96, 99): "Vac Suit",
-    range(100, 100): "Ref's Own Table",
+    (1, 9): "Ablative",
+    (10, 18): "Ballistic",
+    (19, 27): "Combat",
+    (28, 36): "Compucrafted",
+    (37, 45): "Concussion",
+    (46, 54): "Flexion",
+    (55, 58): "Force Field",
+    (59, 67): "Helmet",
+    (68, 77): "Plastix",
+    (78, 79): "Powered ",
+    (80, 86): "Protex",
+    (87, 95): "Shield",
+    (96, 99): "Vac Suit",
+    (100, 100): "Ref's Own Table",
     "die_roll":"1d100"
 }
 
 bomb_list = {
-    range(1, 4): "Air Raid Siren",
-    range(4, 7): "Black Out Bomb",
-    range(7, 14): "Bomb",
-    range(14, 18): "Bug Bomb",
-    range(18, 21): "Cover Bomb",
-    range(21, 24): "Cremator",
-    range(24, 27): "Diffusion Bomb",
-    range(27, 30): "Dissolver",
-    range(30, 35): "Diversionizer",
-    range(35, 38): "Emperor",
-    range(38, 41): "Foam Bomb",
-    range(41, 46): "Grand Slam",
-    range(46, 49): "Gravitas",
-    range(49, 52): "Jumping Jack Blast",
-    range(52, 55): "Junk Yard",
-    range(55, 58): "Land Scraper",
-    range(58, 62): "Lazer Cover",
-    range(62, 65): "Nerve Bomb",
-    range(65, 68): "Neutron Bomb",
-    range(68, 71): "Nuclear Device",
-    range(71, 75): "Paint Bomb",
-    range(75, 78): "Polarizer",
-    range(78, 79): "Robot Bomb",
-    range(79, 83): "Sky Breaker",
-    range(83, 87): "Smog Machine",
-    range(87, 88): "Space Modulator",
-    range(88, 91): "Torc Bomb",
-    range(91, 94): "Toxin Bomb",
-    range(94, 98): "Tracker Bomb",
-    range(98, 100): "World Wide Web",
-    range(100, 101): "Ref's Own Table",
+    (1, 3): "Air Raid Siren",
+    (4, 6): "Black Out Bomb",
+    (7, 13): "Bomb",
+    (14, 17): "Bug Bomb",
+    (18, 20): "Cover Bomb",
+    (21, 23): "Cremator",
+    (24, 26): "Diffusion Bomb",
+    (27, 29): "Dissolver",
+    (30, 34): "Diversionizer",
+    (35, 37): "Emperor",
+    (38, 40): "Foam Bomb",
+    (41, 45): "Grand Slam",
+    (46, 48): "Gravitas",
+    (49, 51): "Jumping Jack Blast",
+    (52, 54): "Junk Yard",
+    (55, 57): "Land Scraper",
+    (58, 61): "Lazer Cover",
+    (62, 64): "Nerve Bomb",
+    (65, 67): "Neutron Bomb",
+    (68, 70): "Nuclear Device",
+    (71, 74): "Paint Bomb",
+    (75, 77): "Polarizer",
+    (78, 78): "Robot Bomb",
+    (79, 82): "Sky Breaker",
+    (83, 86): "Smog Machine",
+    (87, 87): "Space Modulator",
+    (88, 90): "Torc Bomb",
+    (91, 93): "Toxin Bomb",
+    (94, 97): "Tracker Bomb",
+    (98, 99): "World Wide Web",
+    (100, 100): "Ref's Own Table",
     "die_roll":"1d100"
 }
-
 grenade_list = {
-    range(1, 5): "Big Bertha",
-    range(6, 10): "Chemical Explosive",
-    range(11, 15): "Corrosive",
-    range(16, 20): "Cryoblast",
-    range(21, 25): "Energy Drain",
-    range(26, 30): "Energy ",
-    range(31, 35): "Exploding Pin",
-    range(36, 40): "Fragmentation",
-    range(41, 45): " Fusion",
-    range(46, 50): "Gas",
-    range(51, 55): "Gravruptor",
-    range(56, 60): "Magnetic Disrupter",
-    range(61, 65): "Mini",
-    range(66, 70): "Molecular Disruptor",
-    range(71, 75): "Multiple Explosive",
-    range(76, 80): "Napalm",
-    range(81, 85): "Pin",
-    range(86, 90): "Pyrotechnic",
-    range(91, 94): "Radiation",
-    range(95, 97): "Sky Lighter",
-    range(98, 99): "Torc ",
-    range(100, 100): "Ref's Own Table",
+    (1, 5): "Big Bertha",
+    (6, 10): "Chemical Explosive",
+    (11, 15): "Corrosive",
+    (16, 20): "Cryoblast",
+    (21, 25): "Energy Drain",
+    (26, 30): "Energy ",
+    (31, 35): "Exploding Pin",
+    (36, 40): "Fragmentation",
+    (41, 45): " Fusion",
+    (46, 50): "Gas",
+    (51, 55): "Gravruptor",
+    (56, 60): "Magnetic Disrupter",
+    (61, 65): "Mini",
+    (66, 70): "Molecular Disruptor",
+    (71, 75): "Multiple Explosive",
+    (76, 80): "Napalm",
+    (81, 85): "Pin",
+    (86, 90): "Pyrotechnic",
+    (91, 94): "Radiation",
+    (95, 97): "Sky Lighter",
+    (98, 99): "Torc ",
+    (100, 100): "Ref's Own Table",
     "die_roll":"1d100"
 }
 
 gun_list = {
-    range(1, 2): "Aerosol Pistol",
-    range(3, 4): "Aerosol Rifle",
-    range(5, 5): "Antimat Pistol",
-    range(6, 6): "Antimat Rifle",
-    range(7, 8): "Bee Gun",
-    range(9, 11): "Bolt Action Rifle",
-    range(12, 13): "Cryogun",
-    range(14, 15): "Death Ray Pistol",
-    range(16, 18): "Derringer",
-    range(19, 19): "Disintegration Gun",
-    range(20, 21): "Electron Pistol",
-    range(22, 23): "Electron Rifle",
-    range(24, 25): "Fission Pistol",
-    range(26, 27): "Fission Rifle",
-    range(28, 28): "Full Auto Lazer Pistol",
-    range(29, 29): "Full Auto Lazer Rifle",
-    range(30, 30): "Full Auto Pistol",
-    range(31, 31): "Full Auto Rifle",
-    range(32, 32): "Fusion Pistol",
-    range(33, 33): "Fusion Rifle",
-    range(34, 36): "Gauss Pistol",
-    range(37, 39): "Gauss Rifle",
-    range(40, 41): "Glass Gun",
-    range(42, 43): "Grapple Gun",
-    range(44, 45): "Gravruptor Gun",
-    range(46, 47): "Job Pistol",
-    range(48, 49): "Job Rifle",
-    range(50, 52): "Lazer Pistol",
-    range(53, 55): "Lazer Rifle",
-    range(56, 56): "Napalm Gun",
-    range(57, 59): "Needler",
-    range(60, 61): "Plasma Pistol",
-    range(62, 63): "Plasma Rifle",
-    range(64, 65): "Plastix Pistol",
-    range(66, 67): "Plastix Rifle",
-    range(68, 69): "Protein Disrupter",
-    range(70, 71): "Radiation Gun",
-    range(72, 74): "Revolver",
-    range(75, 76): "Semi Auto Lazer Pistol",
-    range(77, 78): "Semi Auto Lazer Rifle",
-    range(79, 80): "Semi Auto Pistol",
-    range(81, 82): "Semi Auto Rifle",
-    range(83, 86): "Slug Thrower",
-    range(87, 87): "Sonic Pistol",
-    range(88, 88): "Sonic Rifle",
-    range(89, 91): "Stun Pistol",
-    range(92, 94): "Stun Rifle",
-    range(95, 96): "Variable Lazer Pistol",
-    range(97, 98): "Variable Lazer Rifle",
-    range(99, 99): "Water Gun",
-    range(100, 100): "Ref's Own Table",
+    (1, 2): "Aerosol Pistol",
+    (3, 4): "Aerosol Rifle",
+    (5, 5): "Antimat Pistol",
+    (6, 6): "Antimat Rifle",
+    (7, 8): "Bee Gun",
+    (9, 11): "Bolt Action Rifle",
+    (12, 13): "Cryogun",
+    (14, 15): "Death Ray Pistol",
+    (16, 18): "Derringer",
+    (19, 19): "Disintegration Gun",
+    (20, 21): "Electron Pistol",
+    (22, 23): "Electron Rifle",
+    (24, 25): "Fission Pistol",
+    (26, 27): "Fission Rifle",
+    (28, 28): "Full Auto Lazer Pistol",
+    (29, 29): "Full Auto Lazer Rifle",
+    (30, 30): "Full Auto Pistol",
+    (31, 31): "Full Auto Rifle",
+    (32, 32): "Fusion Pistol",
+    (33, 33): "Fusion Rifle",
+    (34, 36): "Gauss Pistol",
+    (37, 39): "Gauss Rifle",
+    (40, 41): "Glass Gun",
+    (42, 43): "Grapple Gun",
+    (44, 45): "Gravruptor Gun",
+    (46, 47): "Job Pistol",
+    (48, 49): "Job Rifle",
+    (50, 52): "Lazer Pistol",
+    (53, 55): "Lazer Rifle",
+    (56, 56): "Napalm Gun",
+    (57, 59): "Needler",
+    (60, 61): "Plasma Pistol",
+    (62, 63): "Plasma Rifle",
+    (64, 65): "Plastix Pistol",
+    (66, 67): "Plastix Rifle",
+    (68, 69): "Protein Disrupter",
+    (70, 71): "Radiation Gun",
+    (72, 74): "Revolver",
+    (75, 76): "Semi Auto Lazer Pistol",
+    (77, 78): "Semi Auto Lazer Rifle",
+    (79, 80): "Semi Auto Pistol",
+    (81, 82): "Semi Auto Rifle",
+    (83, 86): "Slug Thrower",
+    (87, 87): "Sonic Pistol",
+    (88, 88): "Sonic Rifle",
+    (89, 91): "Stun Pistol",
+    (92, 94): "Stun Rifle",
+    (95, 96): "Variable Lazer Pistol",
+    (97, 98): "Variable Lazer Rifle",
+    (99, 99): "Water Gun",
+    (100, 100): "Ref's Own Table",
+    "die_roll":"1d100",
+}
+
+artillery_list = {
+    (1, 1): "Annihilator",
+    (2, 2): "Beehive",
+    (3, 3): "Disintegrator",
+    (4, 7): "Electron Cannon",
+    (8, 11): "Fission Artillery",
+    (12, 12): "Fusion Cannon",
+    (13, 16): "Garbage Cannon",
+    (17, 19): "Glacier Gun",
+    (20, 23): "Grav Cannon",
+    (24, 27): "Howblitzer",
+    (28, 31): "Howglizter",
+    (32, 39): "Howitzer",
+    (40, 44): "Immolator",
+    (45, 55): "Lazer Cannon",
+    (56, 59): "Mag Cannon",
+    (60, 60): "Miscellaneator",
+    (61, 64): "Mod Cannon",
+    (65, 65): "Muck Maker",
+    (66, 69): "Plasma Cannon",
+    (70, 73): "Plastifier",
+    (74, 77): "Radiator",
+    (78, 81): "Rock On Cannon",
+    (82, 85): "Slotto Cannon",
+    (86, 89): "Sotto Cannon",
+    (90, 92): "Water Cannon",
+    (93, 96): "Whale Gun",
+    (97, 99): "Whale Stunner",
+    (100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+misc_eq_list = {
+    (1, 1): "Absorber",
+    (2, 2): "Aerosol Regulator",
+    (3, 4): "Ammunition",
+    (5, 5): "Anti Grav Backpack",
+    (6, 6): "Anti Grav Beam",
+    (7, 7): "Anti Grav Belt",
+    (8, 8): "Anti Grav Boots",
+    (9, 9): "Anti Anti Grav",
+    (10, 10): "Anti Grav Pushcart",
+    (11, 11): "Attractors",
+    (12, 12): "Auto Lock Pick",
+    (13, 13): "Auto Holster",
+    (14, 14): "Auto Brush",
+    (15, 15): "Auto Card",
+    (16, 17): "Battery Power Plug",
+    (18, 19): "Battery Slot",
+    (20, 21): "Battery Recharger",
+    (22, 22): "Bot Neutralizer",
+    (23, 23): "Canceller",
+    (24, 25): "Climate Band",
+    (26, 27): "Climate Portent",
+    (28, 29): "Clothing",
+    (30, 32): "Communicators",
+    (33, 33): "Compass",
+    (34, 34): "Compu Kit",
+    (35, 36): "Computers",
+    (37, 37): "Control Baton",
+    (38, 39): "Cords",
+    (40, 40): "Cutters",
+    (41, 41): "Dehydrator",
+    (42, 43): "Detectors",
+    (44, 44): "Detonator Box",
+    (45, 45): "Filters",
+    (46, 47): "Fire Logs",
+    (48, 50): "Food Culture",
+    (51, 51): "Generator",
+    (52, 52): "Hooks",
+    (53, 53): "Instant Stuff",
+    (54, 54): "Jet Boots",
+    (55, 55): "Jet Back Pack",
+    (56, 56): "Joiners",
+    (57, 57): "Kirlian Talisman",
+    (58, 58): "Lazer Pen",
+    (59, 61): "Lights",
+    (62, 62): "Locks",
+    (63, 63): "Mapper",
+    (64, 64): "Mindlink",
+    (65, 66): "Money Counter",
+    (67, 67): "Plastix Explosive",
+    (68, 68): "Psionic Headband",
+    (69, 71): "Recorders",
+    (72, 72): "Robot",
+    (73, 73): "Robotic Override",
+    (74, 74): "Rocket Roller Skates",
+    (75, 75): "Scopes",
+    (76, 76): "Sincerity Machine",
+    (77, 77): "Super Conductor Suit",
+    (78, 85): "Support Equipment",
+    (86, 86): "Targeting Equipment",
+    (87, 87): "Tesseract Box",
+    (88, 93): "Time Pieces",
+    (94, 98): "Visual Aids",
+    (99, 99): "Waste Disposer",
+    (100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+robot_list = {(1,100): "No robots yet buddy"}
+
+misc_wep_list = {
+    (1, 4): "Arm of Ephro",
+    (5, 5): "Black Hole",
+    (6, 9): "Bullet Pen",
+    (10, 15): "Compucrafted Weapon",
+    (16, 19): "Comm Blaster",
+    (20, 21): "Cutting Lazer",
+    (22, 25): "Displacement Gloves",
+    (36, 31): "Electro Weapon",
+    (32, 35): "Expando Dagger",
+    (36, 39): "Flare Gun",
+    (40, 43): "Geo Drop Disk",
+    (44, 46): "Grapple Whip",
+    (47, 50): "Grenade Launcher",
+    (51, 53): "Inertia Weapon",
+    (54, 57): "Lazer Bolo",
+    (58, 60): "Lite Sabre",
+    (61, 63): "Mash Net",
+    (64, 67): "POV Canon",
+    (68, 71): "Rocket Assisted",
+    (72, 75): "Rocket Launcher",
+    (76, 76): "Spinning Wheel of Death",
+    (77, 85): "Stun Weapons",
+    (86, 86): "Transmogrifier",
+    (87, 87): "Temporal Disruptor",
+    (88, 89): "Toss Garotte",
+    (90, 95): "Vibro Weapon",
+    (96, 98): "Web Gun",
+    (99, 99): "Whammer",
+    (100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+pharma_list = {
+    (1, 10): "Cures",
+    (11, 20): "DNA",
+    (21, 40): "Narcotic",
+    (41, 50): "Heal",
+    (51, 60): "Inoculation",
+    (61, 65): "Mutation",
+    (66, 75): "Mutation Effect",
+    (76, 85): "Transient Intumescence",
+    (86, 95): "Permanent Intumescence",
+    (96, 99): "Poison",
+    (100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+le_exquisite_junque_list = {
+    (1, 7): "Appliances",
+    (8, 14): "Armour",
+    (15, 21): "Books",
+    (22, 28): "Clothing",
+    (29, 35): "Fiddle Junque",
+    (36, 42): "Foodstuff",
+    (43, 49): "Furniture",
+    (50, 56): "Livestock",
+    (57, 63): "Materials",
+    (64, 70): "Musical Instruments",
+    (71, 77): "Personal",
+    (78, 84): "Sports Equipment",
+    (85, 91): "Stationery",
+    (92, 95): "Weapons",
+    (96, 99): "Miscellaneous",
+    (100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+treasure_list = {
+    (1, 10): "Substance",
+    (11, 20): "Crystal",
+    (21, 30): "Ornament",
+    (31, 40): "Info",
+    (41, 50): "Relic",
+    (51, 85): "Cash",
+    (86, 99): "Mixed",
+    (100, 100): "Ref's Own Table",
+    "die_roll":"1d100"
+}
+
+vehicle_list = {(1,100): "No vehicles yet buddy"}
+
+rocketeer_list = {(1,100): "No space vehicles yet buddy"}
+
+vet_eq_list = {
+    (1, 3): "Age Determiner",
+    (4, 7): "Anesthetics Mask",
+    (8, 9): "Anti Mutation Beam",
+    (10, 11): "Anti Virus Beam",
+    (12, 13): "Automatic Tourniquet",
+    (14, 15): "Bandage Box",
+    (16, 16): "Biorganic Attachment",
+    (17, 17): "Biorganic Replacement",
+    (19, 20): "Blood Clot Disruptor",
+    (21, 22): "Blood Congealer",
+    (23, 24): "Bone Setter",
+    (25, 27): "Breath Ball",
+    (28, 29): "Cardio Vest",
+    (30, 30): "Cerebro Converter",
+    (31, 31): "Cloning Equipment",
+    (32, 33): "Coma Control Box",
+    (34, 35): "Comfy Couch",
+    (36, 38): "Consciousness Headband",
+    (39, 40): "Cauterizing Ray",
+    (41, 41): "Hearing Headphones",
+    (42, 42): "Drug Analyzer",
+    (43, 43): "Drug Box",
+    (44, 45): "Eye Cleanser",
+    (46, 47): "Fever Control Blanket",
+    (48, 48): "Incubator",
+    (49, 50): "Injury Detector",
+    (51, 52): "Internal Viewer",
+    (53, 53): "Life Ray",
+    (54, 56): "Limb Capper",
+    (57, 62): "Vedi Kit",
+    (63, 65): "Vedi Wrap",
+    (66, 70): "Vedical Kit",
+    (71, 73): "Metab Counter",
+    (74, 75): "Mood Ball",
+    (76, 78): "Mutation Detector",
+    (79, 79): "Neuro Cap",
+    (80, 82): "Poison Detector",
+    (83, 83): "Poison Box",
+    (84, 84): "Psionic Box",
+    (85, 87): "Phenotype Detector",
+    (88, 88): "Rejuv Chamber",
+    (89, 90): "Respirator",
+    (91, 92): "Scalpel",
+    (93, 96): "Stasis Bag",
+    (97, 97): "Touch Gloves",
+    (98, 99): "Translinker",
+    (100, 100): "Ref's Own Table",
     "die_roll":"1d100"
 }
 
@@ -4109,7 +4344,7 @@ toy_pivot = {
     "Robot": robot_list,
     "Miscellaneous Weapon": misc_wep_list,
     "Pharma": pharma_list,
-    "Random Junque": le_equisite_junque_list,
+    "Random Junque": le_exquisite_junque_list,
     "Treasure": treasure_list,
     "Vehicle": vehicle_list,
     "Space Vehicle": rocketeer_list,

@@ -3446,7 +3446,7 @@ def mutation_list_builder(directions:list = ['any']) -> list:
 
 def single_random_mutation(random_mutating:table.PersonaRecord, directions:list =['any']) -> table.PersonaRecord:
     """
-    return or add a mutation of 
+    return or add a mutation ['any', 'mental', 'physical','combat','non-combat','defect', 'no-defect']
     """
     mutuple_list = mutation_list_builder(directions)
     mutuple = secrets.choice(mutuple_list)

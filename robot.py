@@ -9,6 +9,7 @@ import table
 import vocation
 import core
 import mutations
+import toy
 
 
 def robot_workflow():
@@ -33,16 +34,11 @@ def robot_workflow():
     if workflow_desired in workflow_function_map:
         workflow_function_map[workflow_desired]()
 
-
-
-
-
 def control_factor(controlling: table.PersonaRecord) -> int:
     """
     returns a int value control factor
     """
     return  controlling.INT + (controlling.INT_Prime * controlling.Level)
-
 
 def robotic_sensors(eye_eye:table.PersonaRecord) -> table.PersonaRecord:
     sensor_list = []
@@ -50,7 +46,6 @@ def robotic_sensors(eye_eye:table.PersonaRecord) -> table.PersonaRecord:
         sensor_list.append(please.get_table_result(table.robotic_sensor_types))
     eye_eye.Sensors = sensor_list
     return eye_eye # changed by side effect
-
 
 def robotic_locomotion(object):
     primary, secondary = please.get_table_result(table.primary_robotic_locomotion)
@@ -73,7 +68,6 @@ def robotic_locomotion(object):
 
     return
 
-
 def list_eligible_robot_types(choosing: table.PersonaRecord) -> list:
     """
     makes a 4 character string from primes to list of robots type options
@@ -83,10 +77,6 @@ def list_eligible_robot_types(choosing: table.PersonaRecord) -> list:
     )
 
     return table.auto_prime_select_robot_type[auto_picker]
-
-
-
-
 
 def robot_size_wate_hite(object: dict) -> None:
     """
@@ -115,7 +105,9 @@ def robot_size_wate_hite(object: dict) -> None:
     return
 
 
-def robotic_peripherals(object: dict, number: int) -> list:
+def robotic_peripherals(perry: table.PersonaRecord, number: int) -> list:
+    '''generates a list of robotic peripherals'''
+    
     peripheral_list = []
     secondary_number = 0
 
@@ -128,13 +120,13 @@ def robotic_peripherals(object: dict, number: int) -> list:
             number += 1
             peripheral_list.pop()
 
-        if peripheral == "Choose":
+        elif peripheral == "Choose":
             peripheral_list.pop()
             choices = please.list_table_choices(table.primary_robotic_peripheral)
             chosen = please.choose_this(choices, "Choose a primary peripheral")
             peripheral_list.append(chosen)
 
-        if peripheral == "Secondary":
+        elif peripheral == "Secondary":
             peripheral_list.pop()
             secondary_number += 1
 
@@ -151,7 +143,7 @@ def robotic_peripherals(object: dict, number: int) -> list:
             secondary_number += 2  # always unsure about +1 or +2
             peripheral_list.pop()
 
-        if peripheral == "Choose":
+        elif peripheral == "Choose":
             peripheral_list.pop()
             choices = please.list_table_choices(table.secondary_robotic_peripheral)
             chosen = please.choose_this(choices, "Choose a secondary peripheral")
@@ -162,11 +154,11 @@ def robotic_peripherals(object: dict, number: int) -> list:
 
         if peripheral == "Vocation Computer":
             all_vocations = [key for key in table.attributes_improve_by_vocation.keys()]
-            new_peripheral = f"{secrets.choice(all_vocations)} vocation computer"
+            new_peripheral = f"{choice(all_vocations)} vocation computer"
             peripheral_list[position] = new_peripheral
 
         elif peripheral == "Cybernetic Part":
-            toy_type = please.get_table_result(table.toy_categories)
+            toy_type = toy.gimme_one("Any")
             new_peripheral = f"A hard wired toy - {toy_type}"
             peripheral_list[position] = new_peripheral
 
@@ -176,223 +168,200 @@ def robotic_peripherals(object: dict, number: int) -> list:
                 for key in table.attributes_improve_by_vocation.keys()
                 if key != "Knite"
             ]
-            object.Vocation = secrets.choice(all_vocations)
-            peripheral_list[position] = f"Robot has the vocation {object.Vocation}"
+            perry.Vocation = choice(all_vocations)
+            peripheral_list[position] = f"Robot has the vocation {perry.Vocation}"
 
         elif peripheral.split(" ")[0] == "Detect":
-            peripheral_list[position] = f"{peripheral} {object.AWE} km range"
+            peripheral_list[position] = f"{peripheral} {perry.AWE} km range"
 
         elif peripheral.split(" ")[0] == "Identify":
             peripheral_list[
                 position
-            ] = f"{peripheral} {2*object.INT * object.INT_Prime}%"
+            ] = f"{peripheral} {2*perry.INT * perry.INT_Prime}%"
 
         elif peripheral == "Heightened CF":
-            object.CF = object.CF * 2
+            perry.CF = perry.CF * 2
 
         elif peripheral == "Increase Speed":
-            object.Move = object.Move * please.roll_this("1d4+1")
+            perry.Move = perry.Move * please.roll_this("1d4+1")
 
         elif peripheral == "Increase WA":
-            object.WA = object.WA * please.roll_this("1d6+1")
+            perry.WA = perry.WA * please.roll_this("1d6+1")
 
         elif peripheral == "Mental Mutation":
-            add_mutation = True
-            while add_mutation:
-                working_mutation = please.get_table_result(
-                    mutations.mental_mutation_random
-                )[1](object)
-                if working_mutation.kind != "defect":
-                    peripheral_list[
-                        position
-                    ] = f"Mutation effect {working_mutation.name}"
-                    add_mutation = False
-
-                else:
-                    object.Mutations.pop(working_mutation.name)
+            mutations.single_random_mutation(perry, ['mental', 'no-defect'])
 
         elif peripheral == "Physical Mutation":
-            add_mutation = True
-            while add_mutation:
-                working_mutation = please.get_table_result(
-                    mutations.physical_mutation_random
-                )[1](object)
-                if working_mutation.kind != "defect":
-                    peripheral_list[
-                        position
-                    ] = f"Mutation effect {working_mutation.name}"
-                    add_mutation = False
-
-                else:
-                    object.Mutations.pop(working_mutation.name)
-
-    return peripheral_list
+            mutations.single_random_mutation(perry, ['physical', 'no-defect'])
 
 
-def robot_offensive_systems(object: dict, attack_table: int, rolls: int) -> list:
+    return peripheral_list # also side effects on perry
+
+
+### robot offensive systems
+
+# todo should these 4 functions be inside of robot_offensive_rolls?
+def attack_one_rolls(rolls_list:list) -> list:
+    '''adjusts attack_rolls_list (# of rolls) via recursion'''
+    
+    if please.do_1d100_check(25):
+        rolls_list = attack_two_rolls(rolls_list)
+    else:
+        rolls_list[1] += 1
+ 
+    return rolls_list
+
+def attack_two_rolls(rolls_list:list) -> list:
+    '''adjusts attack_rolls_list (# of rolls) via recursion'''
+
+    die_roll = please.roll_this("1d100")
+
+    if die_roll in range(1,11):
+        for _ in range(2):
+            rolls_list = attack_one_rolls(rolls_list)
+
+    elif die_roll in range(90,101):
+        rolls_list = attack_three_rolls(rolls_list)
+
+    else:
+        rolls_list[2] += 1
+
+    return rolls_list
+
+def attack_three_rolls(rolls_list: list) -> list:
+    '''adjusts attack_rolls_list (# of rolls) via recursion'''
+
+    die_roll = please.roll_this("1d100")
+
+    if die_roll in range(1,16):
+        for _ in range(3):
+            rolls_list = attack_one_rolls(rolls_list)
+
+    elif die_roll in range(16,31):
+        for _ in range(2):
+            rolls_list = attack_two_rolls(rolls_list)
+
+    elif die_roll in range(95,101):
+        rolls_list = attack_four_rolls(rolls_list)
+
+    else:
+        rolls_list[3] += 1
+
+    return rolls_list
+
+def attack_four_rolls(rolls_list: list) -> list:
+    '''adjusts attack_rolls_list (# of rolls) via recursion'''
+    die_roll = please.roll_this("1d100")
+
+    if die_roll in range(1,11):
+        for _ in range(4):
+            rolls_list = attack_two_rolls(rolls_list)
+
+    elif die_roll in range(11, 21):
+        for _ in range(3):
+            rolls_list = attack_three_rolls(rolls_list)
+    
+    else:
+        rolls_list[4] += 1
+
+    return rolls_list
+
+def robot_offensive_rolls(offenses: list) -> list:
     """
-    returns a list of offensive systems based on table level and number of rolls
+    takes a list of tuples (attack_table,attack#) and returns list[]
     """
+    attack_rolls_list = [0,0,0,0,0]  # list of the robot attacks
 
-    attack_list = []  # list of the robot attacks
-    attack_table_counter = [0, 0, 0, 0]  # empty list counter for attack tables
-    attack_table_counter[
-        attack_table - 1
-    ] += rolls  # set initial list counter for attack tables
+    for table,rolls in offenses:
+        for _ in range(rolls):
+            attack_rolls_list = table(attack_rolls_list)
 
-    number_to_table_pivot = {
-        0: table.attack_table_one,
-        1: table.attack_table_two,
-        2: table.attack_table_three,
-        3: table.attack_table_four,
-    }
+    return attack_rolls_list
 
-    ### all robots can ram
-    attack_list.append("Ram with " + please.get_table_result(table.robot_ram_dam))
+def robot_offensive_systems(offender: table.PersonaRecord, rolls_list: list) -> table.PersonaRecord:
+    '''takes list of rolls for attack tables and adds to robot persona Attacks'''
 
-    while sum(attack_table_counter) > 0:  # keep adding attacks until no rolls are left
+    attack_tables_pivot = [table.robot_ram_dam, table.attack_table_one, table.attack_table_two, table.attack_table_three, table.attack_table_four]
+    fancy_attacks = {"Electro":"+2d8 DMG, +100 attack vs robots","Inertia":"*3 DMG +10","Stun":"DMG = Intensity","Vibro":"+20 DMG, +100 attack"}
 
-        for table_number, roll_number in enumerate(
-            attack_table_counter
-        ):  # loop through each attack table counter
+    offender.Attacks.append(f'Ram: {please.get_table_result(attack_tables_pivot[0])}') # every robot can ram
 
-            if roll_number == 0:  # jump this table if zero rolls
-                continue
+    for index, attack_table in enumerate(attack_tables_pivot):
+        for _ in range(rolls_list[index]):
+            new_attack = please.get_table_result(attack_table)
 
-            for v in range(roll_number):
-                attack_thing = please.get_table_result(
-                    number_to_table_pivot[table_number]
-                )
+            if new_attack == "Ram":
+                offender.Ramming += 1
+                offender.Attacks.append(f'Ram: {please.get_table_result(attack_tables_pivot[0])}')
 
-                if "Table" in attack_thing:
-                    _, add_table_number, add_roll_number = attack_thing.split(" ")
-                    add_roll_number = int(add_roll_number)
-                    add_table_number = int(add_table_number) - 1
-                    attack_table_counter[add_table_number] += add_roll_number
-                    attack_table_counter[table_number] -= 1
-
+            elif "Strike" in new_attack:
+                strike_break = new_attack.split(" ")
+                if len(strike_break) == 1:
+                    offender.Attacks.append(f'Strike: {please.get_table_result(table.strike_attacks)}')
                 else:
-                    attack_list.append(attack_thing)
-                    attack_table_counter[table_number] -= 1
+                    fancy_strike = strike_break[1]
+                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(table.strike_attacks)}, {fancy_attacks[fancy_strike]}')
+                    
+            elif "Fling" in new_attack:
+                strike_break = new_attack.split(" ")
+                if len(strike_break) == 1:
+                    offender.Attacks.append(f'Fling: {please.get_table_result(table.fling_attacks)}')
+                else:
+                    fancy_strike = strike_break[1]
+                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(table.fling_attacks)}, {fancy_attacks[fancy_strike]}')
+          
+            elif "Defensive" in new_attack:
+                offender.Defences.append(please.get_table_result(table.robotic_defences))
 
-    ### Modify attack_list based on the rolls
-    for attack in attack_list:
-        attack_location = attack_list.index(
-            attack
-        )  # find the location of the attack in the list
+            elif new_attack in ["Gun", "Aerosol", "Bomb", "Grenade"]:
+                offender.Attacks.append(f'{new_attack}: {toy.gimme_one(new_attack)}')
 
-        if "Type A" in attack or "Type B" in attack:
+            elif "Mutation" in new_attack:
+                mutations.single_random_mutation(offender, ['any', 'combat'])
+            else:
+                offender.Attacks.append(new_attack)
 
-            weapon_desc = "Type A" if "Type A" in attack else "Type B"
-            weapon_type = (
-                please.get_table_result(table.attack_type_A)
-                if "Type A" in attack
-                else please.get_table_result(table.attack_type_B)
-            )
-            weapon_name, weapon_damage = weapon_type.split(" ")
-
-            if "Striking" in attack:
-                attack_list[
-                    attack_location
-                ] = f"{weapon_name} standard {weapon_desc} attack ({weapon_damage})"
-            elif "Electro" in attack:
-                attack_list[
-                    attack_location
-                ] = f"{weapon_name} electrified {weapon_desc} attack ({weapon_damage}+2d8)"
-            elif "Vibro" in attack:
-                attack_list[
-                    attack_location
-                ] = f"{weapon_name} vibrating {weapon_desc} attack ({weapon_damage}+20)"
-            elif "Stun" in attack:
-                attack_list[
-                    attack_location
-                ] = f"{weapon_name} stunning {weapon_desc} attack ({weapon_damage} + stun)"
-            elif "Inertia" in attack:
-                attack_list[
-                    attack_location
-                ] = f"{weapon_name} inertial {weapon_desc} attack ({weapon_damage}*3+10)"
-
-        elif attack == "Defensive System":
-            pass  # we will add a defence once that system is created
-
-    return attack_list
+    offender.Attacks.sort()
+    return offender # is altered by side effect
 
 
-def robot_defensive_systems(object: dict, number: int) -> list:
+def robot_defensive_systems(defender: table.PersonaRecord, number: int) -> list:
     """
     returns a list of defenses for the robot
     """
     defence_list = []
 
     ### defensive systems does not have extra roll or choose.
-    for __ in range(number):
-        defence_list.append(please.get_table_result(table.robotic_defenses))
+    for _ in range(number):
+        defense = please.get_table_result(table.robotic_defences)
 
-    ### make defensive system calculations
-
-    for defense in defence_list:
-        defence_location = defence_list.index(
-            defense
-        )  # find location of defense in defence list
         if defense == "Aunty Missile":
-            defence_list[
-                defence_location
-            ] = f"Aunty Missile: AR +{please.roll_this('1d6')*50} vs missiles"
+            defence_list.append(f"Aunty Missile: AR +{please.roll_this('1d6')*50} vs missiles")
         elif defense == "Aunty Personnel":
-            defence_list[
-                defence_location
-            ] = f"Aunty Personnel: Lethal 3d6 HPS, Non-Lethal 4d6 intensity"
+            defence_list.append(f"Aunty Personnel: Lethal 3d6 HPS, Non-Lethal 4d6 intensity")
         elif defense == "Increase AR":
-            bump = please.roll_this("1d6") * 50
-            object.AR += bump
-            defence_list[
-                defence_location
-            ] = f"Armour rating +{bump} now {object.AR} (added)"
+            defender.AR += please.roll_this("1d6*50")
+            defence_list.append(f"Hardened AR: new AR is {defender.AR}")
         elif defense == "Artifact Armour":
-            pass  # eventually insert some armour here
+            defence_list = f'Armoured: {please.get_table_result(table.armour_list)}'
         elif defense == "Camouflage":
-            defence_list[
-                defence_location
-            ] = f"Camouflage against {object.Sensors} sensors"
+            defence_list.append(f"Camouflage against {defender.Sensors} sensors")
         elif defense == "Detect Ambush":
-            defence_list[
-                defence_location
-            ] = f"Detect Ambush: AWE is {object.AWE * 4} vs ambush"
+            defence_list.append(f"Detect Ambush: AWE is {defender.AWE * 4} vs ambush")
         elif defense == "Diffuse Explosives":
-            defence_list[
-                defence_location
-            ] = f"Diffuse Explosives: {object.INT*2} and level {object.Level+5} vs explosives."
+            defence_list.append(f"Diffuse Explosives: {defender.INT*2} and level {defender.Level+5} vs explosives.")
         elif defense == "Evasive Action":
-            defence_list[
-                defence_location
-            ] = f"Evasive Action: no move penalties when running away."
+            defence_list.append(f"Evasive Action: no move penalties when running away.")
         elif defense == "Force Field":
-            defence_list[
-                defence_location
-            ] = f"Force Field: {please.roll_this('1d4')*25} HPS  (cumulative)"
+            defence_list.append(f"Force Field: {please.roll_this('1d4*25')} HPS  (cumulative)")
         elif defense == "Increase HPM":
             bump = 1 + (please.roll_this("1d6") / 10)
-            object.HPM = math.ceil(object.HPM * bump)
-            defence_list[defence_location] = f"Increase HPM to {object.HPM} HPS (added)"
+            defender.HPM = math.ceil(defender.HPM * bump)
+            defence_list.append(f"Increase HPM to {defender.HPM} HPS (added)")
         elif defense == "Mental Mutation":
-            fresh_amount = True
+            mutations.single_random_mutation(defender, ['mental', 'combat'])
 
-            while fresh_amount:
-                fresh_amount = False
-                working_mutation = please.get_table_result(
-                    mutations.mental_mutation_random
-                )[1](object)
-                if (
-                    working_mutation.kind == "Defect"
-                    or working_mutation.kind == "non-combat"
-                ):
-                    fresh_amount = True
-                    object.Mutations.pop(working_mutation.name)
-
-            defence_list[
-                defence_location
-            ] = f"Mental Mutation: {working_mutation.name} (added)"
-
+        defence_list.sort()
     return defence_list
 
 
@@ -467,13 +436,13 @@ def robot_description(object: dict) -> None:
 
     ### grammar fixing something with something
     elif "moving" in loco_split:
-        betweener = secrets.choice(
+        betweener = choice(
             ["moved by", "pushed by", "propelled by", "driven by"]
         )
         base_loco = f" and {loco_split[2]} {betweener} {loco_split[0]}"
 
     elif "Slog" in loco_split or "Chemical" in loco_split:
-        betweener = secrets.choice(
+        betweener = choice(
             ["sitting on a", "mounted on a", "on top of a" "carried by a", "atop a"]
         )
         base_loco = f" {betweener} {loco_split[0]} {loco_split[1]}"
@@ -508,16 +477,11 @@ def robot_persona_name(object):
 
     return
 
-
-
-
-
 ####################################################
 #
 # List of ROBOT type functions
 #
 ####################################################
-
 
 def android(andy: table.PersonaRecord) -> table.PersonaRecord:
     """
@@ -544,7 +508,6 @@ def android(andy: table.PersonaRecord) -> table.PersonaRecord:
     ### core values
     andy.Adapt = 1
     andy.Value = 100000000
-
 
     ### vocation EXCEPTION for android
     type_options = vocation.attribute_determined(andy)
@@ -591,16 +554,16 @@ def combot(comboy: table.PersonaRecord) -> table.PersonaRecord:
     specs = [f"Unconcerned about base family ({comboy.Base_Family})."]
 
     if comboy.FAMILY_SUB == "Expendable":
-
         ### expendable core values
         comboy.Adapt = 0
         comboy.Value = 500000
         comboy.Size_Cat =  "Small"
         comboy.HPM = comboy.CON * 5
 
-        comboy.Attacks = robot_offensive_systems(comboy, 1, 1)
-        comboy.Defences = robot_defensive_systems(comboy, 1)
-        comboy.Peripherals = robotic_peripherals(comboy, 1)
+        offending_list = robot_offensive_rolls([(attack_one_rolls,1)])
+        robot_offensive_systems(comboy,offending_list)
+        comboy.Defences.append(robot_defensive_systems(comboy, 1))
+        comboy.Peripherals.append(robotic_peripherals(comboy, 1))
 
         ### expendable spec sheet
         specs.append("Robotic general infantry.")
@@ -618,13 +581,13 @@ def combot(comboy: table.PersonaRecord) -> table.PersonaRecord:
         comboy.Size_Cat =  "Large"
         comboy.HPM = comboy.CON * please.roll_this("1d10+20")
 
-        comboy.Attacks = robot_offensive_systems(comboy, 1, 1)
-        comboy.Defences = robot_defensive_systems(comboy, math.ceil(comboy.CON / 4))
-        comboy.Peripherals = robotic_peripherals(comboy, 1)
+        offending_list = robot_offensive_rolls([(attack_one_rolls,1)])
+        robot_offensive_systems(comboy,offending_list)
+        comboy.Defences.append(robot_defensive_systems(comboy,  math.ceil(comboy.CON / 4)))
+        comboy.Peripherals.append(robotic_peripherals(comboy, 1))
 
         ### defensive spec sheet
         specs.pop() # removes disregard for base_family
-        specs.append("Prefers a non-violent path")
         specs.append("Demoralize with pithy comments.")
         specs.append(f"Fortify against an attack {comboy.INT * 4}%.")
         specs.append(f"Intruder detection {comboy.AWE * 10} hex radius.")
@@ -634,312 +597,305 @@ def combot(comboy: table.PersonaRecord) -> table.PersonaRecord:
 
         return comboy # modified by side effects
 
-    elif object.FAMILY_SUB == "Offensive-Light":
+    elif comboy.FAMILY_SUB == "Offensive-Light":
 
         ### Offensive-Light core values
-        object.Adapt = -50
-        object.Value = 100000000
-        object.Size_Cat =  "Medium"
-        object.HPM = object.CON * please.roll_this("1d10+15")
+        comboy.Adapt = -50
+        comboy.Value = 100000000
+        comboy.Size_Cat =  "Medium"
+        comboy.HPM = comboy.CON * please.roll_this("1d10+15")
 
-        object.Attacks = robot_offensive_systems(comboy, 2, 2)
-        more_attacks = robot_offensive_systems(comboy, 3, 1)
-        object.Attacks = object.Attacks + more_attacks
-        object.Defences = robot_defensive_systems(comboy, 2)
-        object.Peripherals = []
+        offending_list = robot_offensive_rolls([(attack_two_rolls,2),(attack_three_rolls,1)])
+        robot_offensive_systems(comboy,offending_list)
+        comboy.Defences.append(robot_defensive_systems(comboy, 2))
+        comboy.Peripherals.append(robotic_peripherals(comboy, 1))
 
         ### Offensive-Light spec sheet
         specs.append("Violent solutions are preferable.")
         lesser_bots = please.roll_this("1d4-1")
-        if lesser_bots > 0:
-            specs.append(f"Commands {lesser_bots} expendable combot(s).")
+        commanding = "Command: Nil" if lesser_bots == 0 else f"Command: {lesser_bots} expendable combot(s)"
+        specs.append(commanding)
 
-        object.Spec_Sheet = specs
-        return
+        comboy.Spec_Sheet = specs
 
-    elif object.FAMILY_SUB == "Offensive-Heavy":
+        return comboy # modified by side effects
 
-        ### Offensive-Heavy nomenclature
-        object.FAMILY_SUB = "Offensive-Heavy"
+    elif comboy.FAMILY_SUB == "Offensive-Heavy":
 
         ### Offensive-Heavy core values
-        object.Adapt = -100
-        object.Value = 1000000042
-        object.Size_Cat =  "Gigantic"
-        object.HPM = object.CON * please.roll_this("1d10+15")
+        comboy.Adapt = -100
+        comboy.Value = 1000000042
+        comboy.Size_Cat =  "Gigantic"
+        comboy.HPM = comboy.CON * please.roll_this("1d10+15")
 
-        level_two_attacks = robot_offensive_systems(comboy, 2, 1)
-        level_three_attacks = robot_offensive_systems(comboy, 3, 1)
-        level_four_attacks = robot_offensive_systems(comboy, 4, 1)
-
-        object.Attacks = level_two_attacks + level_three_attacks + level_four_attacks
-        object.Defences = robot_defensive_systems(comboy, 3)
-        object.Peripherals = []
+        offending_list = robot_offensive_rolls([(attack_two_rolls,1),(attack_three_rolls,1),(attack_four_rolls,1)])
+        robot_offensive_systems(comboy,offending_list)
+        comboy.Defences.append(robot_defensive_systems(comboy, 3))
+        comboy.Peripherals.append(robotic_peripherals(comboy, 1))
 
         ### armour rating EXCEPTION  for Offensive-Heavy combot
-        object.AR = 775 if object.AR < 775 else object.AR
+        comboy.AR = 775 if comboy.AR < 775 else comboy.AR
 
         ### integrated heavy weapon EXCEPTION  for Offensive-Heavy combot
-        roll = please.roll_this("1d100") + object.PSTR
-        for range, weapon in table.combot_heavy_weapons.items():
-            if roll in range:
-                object.Attacks.append(weapon)
+        roll = please.roll_this("1d100") + comboy.PSTR
+        for spread, weapon in table.combot_heavy_weapons.items():
+            if roll in spread:
                 break
+        
+        bombay = artay = ""
+        if "Pop" in weapon:
+            comboy.Peripherals.append("Integrated Popcorn Maker")
 
+        if "Bomb" in weapon:
+            bombay = f'Integrated bomb: {toy.gimme_one("Bomb")}'
+
+        if "Missile" in weapon:
+            bombay = f'Integrated Missile: delivers {toy.gimme_one("Bomb")} bomb.'
+       
+        if "Art" in weapon:
+            artay = f'Integrated artillery: {toy.gimme_one("Artillery")}'
+
+        if "Naval" in weapon:
+            artay = f'Integrated naval artillery: base {toy.gimme_one("Artillery")}'
+
+        if bombay:
+            comboy.Attacks.append(bombay)
+        if artay:
+            comboy.Attacks.append(artay)
+        
+        comboy.Attacks.sort()
         ### Offensive-Heavy spec sheet
         specs.append("Mass destruction is preferred solution")
-        object.Spec_Sheet = specs
-        return
+        comboy.Spec_Sheet = specs
+
+        return comboy # modified by side effects
 
     return
 
 
-def datalyzer(object: dict) -> None:
+def datalyzer(nerdy: table.PersonaRecord) -> table.PersonaRecord:
     """
-    inject the datalyzer attributes into the object
+    inject the datalyzer attributes into the nerdy
     """
 
     ### datalyzer nomenclature
-    object.FAMILY = "Robot"
-    object.FAMILY_TYPE =  "Datalyzer"
-    object.FAMILY_SUB = "Data Nerd"
+    nerdy.FAMILY_TYPE =  "Datalyzer"
+    nerdy.FAMILY_SUB = "Data Nerd"
 
     ### core values
-    object.Adapt = 15
-    object.Value = 10000 * object.INT
-    object.Size_Cat =  "Small"
-    object.HPM = please.roll_this("1d2+2") * object.CON
+    nerdy.Adapt = 15
+    nerdy.Value = 10000 * nerdy.INT
+    nerdy.Size_Cat =  "Small"
+    nerdy.HPM = please.roll_this("1d2+2") * nerdy.CON
 
-    object.Attacks = (
-        [] if not please.do_1d100_check(5) else robot_offensive_systems(object, 1, 1)
-    )
-    object.Defences = robot_defensive_systems(object, 1)
-    if please.do_1d100_check(24):
-        object.Defences.append(robot_defensive_systems(object, 1))
-    object.Peripherals = robotic_peripherals(object, 2)
+    if please.do_1d100_check(5):
+        offending_list = robot_offensive_rolls([(attack_one_rolls, 1)])
+        nerdy.Attacks.append(robot_offensive_systems(nerdy,offending_list))
+
+
+    nerdy.Defences.append(robot_defensive_systems(nerdy, 1))
+    if please.do_1d100_check(24): #24% chance second defence
+        nerdy.Defences.append(robot_defensive_systems(nerdy, 1))
+
+    nerdy.Peripherals.append(robotic_peripherals(nerdy, 2))
 
     ### mental mutation EXCEPTION for datalyzer
     if please.do_1d100_check(
-        table.datalyzer_mental_chance[object.Base_Family] + object.INT
+        table.datalyzer_mental_chance[nerdy.Base_Family] + nerdy.INT
     ):
-        no_mutation_yet = True
-        while no_mutation_yet:
-            working_mutation = please.get_table_result(mutations.mental_mutation_random)[1](
-                object
-            )
-            if working_mutation.kind != "defect":
-                no_mutation_yet = False
+        mutations.single_random_mutation(nerdy, ['mental', 'no-defect'])
 
     ### datalyzer spec sheet
     specs = ["Tin can thinkers."]
-    object.Spec_Sheet = specs
+    nerdy.Spec_Sheet = specs
 
-    return
+    return nerdy # is modified by side effect
 
 
-def explorations(object):
+def explorations(expoh:table.PersonaRecord) -> table.PersonaRecord:
+    '''inject explorations bot '''
+
+    ### explorations nomenclature
+    expoh.FAMILY_TYPE = "Explorations"
     specs = ["Designed to explore, learn and report."]
-    intel = object.INT
-    con = object.CON
 
     # build subtype choices
     choices = ["Planetary"]
-    if intel >= 24:
+    if expoh.INT >= 24:
         choices.append("Extra-planetary")
-    comment = "Please choose your Explorations bot type."
-    chosen = please.choose_this(choices, comment)
+    if expoh.Bespoke or expoh.Fallthrough:
+        choices= ["Planetary", "Extra-Planetary" ]
+    if expoh.Fallthrough:
+        chosen = choice(choices)
+    else:
+        comment = "Please choose your Explorations bot type."
+        chosen = please.choose_this(choices, comment)
 
     if chosen == "Planetary":
-        object.FAMILY_SUB = "Planetary"
+        expoh.FAMILY_SUB = "Planetary"
         specs.append("Created to explore their own planet.")
-        object.Adapt = 0
-        object.Value = 250000
-        object.HPM = please.roll_this("1d6+10") * con
-        object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
-        # RoboticAttack check
+        expoh.Adapt = 0
+        expoh.Value = 250000
+        expoh.HPM = please.roll_this("1d6+10") * expoh.CON
+        expoh.Size_Cat =  "Medium"
+
         if please.do_1d100_check(25):
-            robot_offensive_systems(object, 1)
-        else:
-            object.Robot_Attacks = []
-        robot_defensive_systems(object, 1)
-        robotic_peripherals(object, 1)
+            offending_list = robot_offensive_rolls([(attack_one_rolls,1)])
+            robot_offensive_systems(expoh, offending_list)
 
-        specs.append("Atmospheric analysis.")
-        specs.append("Communications.")
-        specs.append("Mineral identification.")
-        specs.append("Detect Toxins. Rads, poison etc.")
-        specs.append("Obsessed with collecting samples.")
+        robot_defensive_systems(expoh, 1)
+        robotic_peripherals(expoh, 1)
 
-        object.Spec_Sheet = specs
+    elif chosen == "Extra-Planetary":
+        expoh.FAMILY_SUB = "Extra-Planetary"
+        expoh.Adapt = 0
+        expoh.AR = 800
+        expoh.Value = 1900000
+        expoh.HPM = please.roll_this("1d6+10") * expoh.CON
+        expoh.Size_Cat =  "Large"
 
-    elif chosen == "Extra-planetary":
-        object.FAMILY_SUB = "Extra-planetary"
+        offending_list = robot_offensive_rolls([(attack_two_rolls,1)])
+        robot_offensive_systems(expoh, offending_list)
+        robotic_peripherals(expoh, 1)
+
         specs.append("Created to explore unknown planets.")
-        object.Adapt = 0
-        object.AR = 800
-        object.Value = 1900000
-        object.HPM = please.roll_this("1d6+10") * con
-        object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
-        robot_offensive_systems(object, 1)
-        robot_defensive_systems(object, 3)
-        robotic_peripherals(object, 1)
-
-        specs.append("Atmospheric analysis.")
-        specs.append("Mineral identification.")
-        specs.append("Detect Toxins. Rads, poison etc.")
-        specs.append("Obsessed with collecting samples.")
         specs.append("Comprehend languages and alien intelligence.")
-        specs.append("Terrain mapping.")
         specs.append("Exatmo hardened.")
-        object.Spec_Sheet = specs
+        expoh.Spec_Sheet = specs
 
+    specs.append("Atmospheric analysis.")
+    specs.append("Communications.")
+    specs.append("Mineral identification.")
+    specs.append("Detect Toxins. Rads, poison etc.")
+    specs.append("Terrain mapping.")
+    specs.append("Obsessed with collecting samples.")
+
+    expoh.Spec_Sheet = specs
     return
 
+def hobbot(hobby:table.PersonaRecord) -> table.PersonaRecord:
+    '''insert hobbot data into persona record'''
 
-def hobbot(object):
-    object.FAMILY_SUB = ";ldsafkjdsf"
-    specs = ["Highly modified hobbyist machines."]
-    con = object.CON
-    object.Adapt = 84
-    # value moved due to calculations
-    object.HPM = please.roll_this("2d4") * con
-    object.Size_Cat =  "Indoor"
-    robot_size_wate_hite(object)
-    # robot_offensive_systems chance
+    ### hobbot data
+    hobby.FAMILY_TYPE = "Hobbot"
+    hobby.FAMILY_SUB = "Hacker Snowflake"
+    hobby.Adapt = 84
+    hobby.HPM = please.roll_this("2d4") * hobby.CON
+    hobby.Size_Cat =  "Tiny"
+
     if please.do_1d100_check(10):
-        robot_offensive_systems(object, 1)
-    else:
-        object.Robot_Attacks = []
-    # RobotDefences chance
+        offending_list = robot_offensive_rolls([(attack_one_rolls, 1)])
+        robot_offensive_systems(hobby, offending_list)
+
     if please.do_1d100_check(50):
-        robot_defensive_systems(object, 1)
-    else:
-        object.Defences = []
+        robot_defensive_systems(hobby, 1)
+
     # robotic_peripherals are random
     number = please.roll_this("2d4")
-    robotic_peripherals(object, number)
-    object.Value = 10000 + 20000 * number
+    robotic_peripherals(hobby, number)
+    hobby.Value = 10000 + 20000 * number
 
-    specs.append("Have lots of peripherals.")
-    specs.append("+2DD bonus for mechanics.")
+    specs = ["Highly modified hobbyist machines."]
+    specs.append("+25 bonus for mechanics.")
     specs.append("No two are the same.")
-    object.Spec_Sheet = specs
+    hobby.Spec_Sheet = specs
 
-    return
+    return hobby # adjusted by side effect
 
 
-def industrial(object):
-    specs = ["Building, lifting, moving."]
-    intel = object.INT
-    dex = object.DEX
-    pstr = object.PSTR
-    con = object.CON
-    awe = object.AWE
-    wa = object.WA
-    cf = object.CF
-    move = object.MoveRate
+def industrial(indy: table.PersonaRecord) -> table.PersonaRecord:
+    '''insert industrial robot into persona record'''
+
+    indy.FAMILY_TYPE = "Industrial"
+    indy.Adapt = 5
+    indy.HPM = please.roll_this("1d4+8") * indy.CON
+    indy.Size_Cat =  "Medium"
+    specs = ["Capacitor of industry."]
 
     # build subtype choices
     # fix this system for intel pstr and max
     choices = []
-    if intel >= dex and intel >= pstr:
+    if indy.INT >= indy.DEX and indy.INT >= indy.PSTR:
         choices.append("Construction")
-    if pstr >= dex and pstr >= intel:
+    if indy.PSTR >= indy.DEX and indy.PSTR >= indy.INT:
         choices.append("Lifting")
-    if dex >= pstr and dex >= intel:
+    if indy.DEX >= indy.PSTR and indy.DEX >= indy.INT:
         choices.append("Moving")
-    comment = "Please choose your Indutrial bot type."
-    chosen = please.choose_this(choices, comment)
+
+    if indy.Bespoke or indy.Fallthrough:
+        choices = ["Construction", "Lifting", "Moving"]
+
+    comment = "Please choose your Industrial bot type."
+    chosen = please.choose_this(choices, comment, indy)
 
     if chosen == "Construction":
-        object.FAMILY_SUB = "Construction"
-        specs.append("Fabricator Mechanichus.")
-        object.Adapt = 5
-        object.Value = 50000
-        object.HPM = please.roll_this("1d4+8") * con
-        object.Size_Cat =  "Indoor"
-        robot_size_wate_hite(object)
-        robot_offensive_systems(object, 2)
-        # robot_defensive_systems check
-        if please.do_1d100_check(15):
-            robot_defensive_systems(object, 1)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 2)
+        indy.FAMILY_SUB = "Construction"
+        indy.Value = 50000
 
-        specs.append("Can fabricate simple things.")
+        offenses = robot_offensive_rolls([(attack_two_rolls, 2)])
+        robot_offensive_systems(indy, offenses)
+
+        if please.do_1d100_check(15):
+            indy.Defences.append(robot_defensive_systems(indy, 1))
+
+        indy.Peripherals.append(robotic_peripherals(indy, 2))
+
+        specs.append("Likes to build things.")
+        if indy.INT >= 22: specs.append("Can design simple things.")
         specs.append("Cannot fabricate complex TOYS.")
-        if intel >= 22:
-            specs.append("Can design simple things.")
         specs.append("Programmable by a mechanic.")
-        specs.append("DD of programming increases with value.")
-        specs.append(f"Raw materials for {con} months.")
-        object.Spec_Sheet = specs
+        specs.append(f"Raw materials for {indy.CON} months.")
+        indy.Spec_Sheet = specs
 
     elif chosen == "Lifting":
-        object.FAMILY_SUB = "Lifting"
-        specs.append("Putting everything in it's place.")
-        object.Adapt = 5
-        object.Value = 30000
-        object.HPM = please.roll_this("1d4+8") * con
-        object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
-        # robot_offensive_systems check
+        indy.FAMILY_SUB = "Lifting"
+        indy.Value = 30000
+        indy.Size_Cat =  "Large"
+
         if please.do_1d100_check(35):
-            robot_offensive_systems(object, 2)
-        else:
-            object.Robot_Attacks = []
+            offenses = robot_offensive_rolls([(attack_one_rolls, 1)])
+            robot_offensive_systems(indy, offenses)
+
         # robot_defensive_systems check
         if please.do_1d100_check(16):
-            robot_defensive_systems(object, 1)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 1)
+            indy.Defences.append(robot_defensive_systems(indy, 1))
 
-        specs.append("Disemployed cargo hoists.")
-        arms = math.ceil(dex / 3)
-        specs.append(f"Has {arms} lifting articulations.")
-        lift = wa * 3
-        rise = object.PSTR_Prime + object.DEX_Prime
-        specs.append(f"Can lift {lift} kgs up to {rise} hexes.")
-        specs.append(f"Must roll vs CF ({cf}%) to drop things.")
-        object.Spec_Sheet = specs
+        indy.Peripherals.append(robotic_peripherals(indy, 1))
+
+        specs.append("Likes to lift and organize.")
+        specs.append(f"Has {math.ceil(indy.DEX / 3)} lifting articulations.")
+        specs.append(f"Can lift {indy.WA * 3} kgs up to {indy.PSTR_Prime + indy.DEX_Prime} hexes.")
+        specs.append(f"Must roll vs CF ({indy.CF}) to drop things.")
+        indy.Spec_Sheet = specs
 
     elif chosen == "Moving":
-        object.FAMILY_SUB = "Moving"
-        specs.append("Sentient delivery bots.")
-        object.Adapt = 5
-        object.Value = 20000
-        object.HPM = please.roll_this("1d4+8") * con
-        object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        indy.FAMILY_SUB = "Moving"
+        indy.Value = 20000
+        indy.Size_Cat =  "Large"
+
         # robot_offensive_systems check
         if please.do_1d100_check(35):
-            robot_offensive_systems(object, 2)
+            robot_offensive_systems(indy, 2)
         else:
-            object.Robot_Attacks = []
+            indy.Robot_Attacks = []
         # robot_defensive_systems check
         if please.do_1d100_check(15):
-            robot_defensive_systems(object, 1)
+            robot_defensive_systems(indy, 1)
         else:
-            object.Defences = []
-        robotic_peripherals(object, 1)
+            indy.Defences = []
+        robotic_peripherals(indy, 1)
 
-        object.Move = math.ceil(move * 1.5)
-        specs.append(f"Increased move to {object.Move} h/u.")
-        lift = wa * 3
-        specs.append(f"Can deliver {lift} kgs at {object.Move} h/u.")
-        specs.append(f"Deliver range is {awe * 100} kilometers.")
+        indy.Move = math.ceil(indy.Move * 1.5)
+        specs.append(f"Increased move to {indy.Move} h/u.")
+        specs.append(f"Can deliver {indy.WA * 3} kgs at {indy.Move} h/u.")
+        specs.append(f"Deliver range is {indy.AWE * 100} kilometers.")
         specs.append("Can read maps.")
-        loading = ((intel + dex) * 3) >= please.roll_this("1d100")
+        loading = ((indy.INT + indy.DEX) * 3) >= please.roll_this("1d100")
         if loading:
             specs.append("This bot is self loading (not loathing).")
-        object.Spec_Sheet = specs
+        indy.Spec_Sheet = specs
 
     return
-
 
 def janitorial(object):
     specs = ["Cleaning mopping and moping."]

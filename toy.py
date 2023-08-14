@@ -31,10 +31,12 @@ def toy_category():
 
 def gimme_one(toy_type: str) -> str:
     ''' return str place holders for toys'''
+    
     if "Any" in toy_type:
         toy_type = please.get_table_result(table.toy_categories)
 
-    if toy
+    return  please.get_table_result(table.toy_pivot[toy_type])
+
 
 
 def fresh_toy():
