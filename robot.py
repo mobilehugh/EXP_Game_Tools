@@ -1,5 +1,6 @@
 import math
 from secrets import choice
+from dataclasses import dataclass
 
 
 import anthro
@@ -12,6 +13,11 @@ import mutations
 import toy
 
 
+# set up RoboticRecord
+@dataclass
+class RobotRecord(table.Robotic):
+    FAMILY: str = "Robot"
+
 def robot_workflow():
     """
     player robot versus referee person vs persona maintenance
@@ -21,54 +27,55 @@ def robot_workflow():
     please.clear_console()
 
     workflow_function_map = {
-        "Fresh Robot (New Player)":fresh_robot,
-        "Bespoke Robot":bespoke_robot,
-        "Random Robot":rando_robot,
+        "Fresh Robot (New Player)": fresh_robot,
+        "Bespoke Robot": bespoke_robot,
+        "Random Robot": rando_robot,
         "Maintenance":please.do_referee_maintenance,
     }
 
-    list_comment = "Choose a robot workflow:"
-    option_list = list(workflow_function_map.keys()) # fix does not guarantee [0] default
-    workflow_desired = please.choose_this(option_list, list_comment)
+    comment = "Choose a robot workflow:"
+    choices = list(workflow_function_map.keys())
+    workflow_desired = please.choose_this(choices, comment)
 
     if workflow_desired in workflow_function_map:
         workflow_function_map[workflow_desired]()
 
-def control_factor(controlling: table.PersonaRecord) -> int:
+def control_factor(controlling: RobotRecord) -> int:
     """
     returns a int value control factor
     """
     return  controlling.INT + (controlling.INT_Prime * controlling.Level)
 
-def robotic_sensors(eye_eye:table.PersonaRecord) -> table.PersonaRecord:
+def robotic_sensors(eye_eye:RobotRecord) -> list:
+    ''' creates a list robot sensors'''
     sensor_list = []
     for _ in range(math.ceil(eye_eye.AWE / 4)):
         sensor_list.append(please.get_table_result(table.robotic_sensor_types))
-    eye_eye.Sensors = sensor_list
-    return eye_eye # changed by side effect
+    return sensor_list # changed by side effect
 
-def robotic_locomotion(object):
+def robotic_locomotion(move_it:RobotRecord) -> str:
+    '''create a locomotion string'''
+
     primary, secondary = please.get_table_result(table.primary_robotic_locomotion)
-    amount = ""
+
+
+    if move_it.FAMILY_TYPE == "Android":
+        return f'{move_it.Base_Family} legs' 
+    
+    if move_it.FAMILY_TYPE == "Social":
+        return f'{move_it.Base_Family} like legs'
+    
+    if 'd' in secondary:
+        return f'{please.roll_this(secondary)} {primary}'
 
     if secondary == "Secondary":
-        secondary = " moving " + please.get_table_result(
-            table.secondary_robotic_locomotion
-        )
-    elif secondary == "None":
-        secondary = ""
-    else:
-        amount = str(please.roll_this(secondary)) + " "
-        secondary = ""
+        primary = f'{primary} {choice(["moving", "pushing", "pulling"])} {please.get_table_result(table.secondary_robotic_locomotion).lower()}' 
 
-    object.Locomotion = amount + primary + secondary
+    # if secondary = "None" falls to generic return 
 
-    if object.Bot_Type == "Android" or object.Bot_Type == "Social":
-        object.Locomotion = "Limbs are per " + object.Base_Family
+    return primary
 
-    return
-
-def list_eligible_robot_types(choosing: table.PersonaRecord) -> list:
+def list_eligible_robot_types(choosing: RobotRecord) -> list:
     """
     makes a 4 character string from primes to list of robots type options
     """
@@ -78,34 +85,33 @@ def list_eligible_robot_types(choosing: table.PersonaRecord) -> list:
 
     return table.auto_prime_select_robot_type[auto_picker]
 
-def robot_size_wate_hite(object: dict) -> None:
+def robot_hite_wate_calc(sizer: RobotRecord) -> RobotRecord:
     """
-    fills the object's size, wate and hite attributes
+    fills the robot's size, wate and hite attributes
     """
 
-    if object.Bot_Type in [
-        "Android",
-        "Social",
-    ]:  # if it's an android or social already calculated
-        return
+    if sizer.FAMILY_TYPE in ["Android", "Social",]: 
+        return  sizer # if it's an android or social already calculated
 
-    ### object.Size is determined by robot type
+    ### sizer.Size is determined by robot type
 
     ### get wate from size of robot
-    object.Wate = please.roll_this(table.robot_size_to_wate[object.Size])
-    object.Wate_Suffix = "kgs"
+    sizer.Wate = please.roll_this(table.robot_size_to_wate[sizer.Size_Cat]["wate"])
+    sizer.Wate_Suffix = table.robot_size_to_wate[sizer.Size_Cat]["suffix"]
 
     ### get hite from wate to hite table
+    kilo_conv = 1 if sizer.Size_Cat == "NaNo" else sizer.Wate
+
     for hite_range, roll in table.robot_wate_to_hite.items():
-        if object.Wate in hite_range:
-            object.Hite = please.roll_this(roll)
+        if kilo_conv in hite_range:
+            sizer.Hite = please.roll_this(roll)
             break
-    object.Hite_Suffix = "cms"
+    sizer.Hite_Suffix = "cms" if sizer.Wate < 10_000 else "meters"
 
-    return
+    return sizer # modified by side effect
 
 
-def robotic_peripherals(perry: table.PersonaRecord, number: int) -> list:
+def robotic_peripherals(perry: RobotRecord, number: int) -> list:
     '''generates a list of robotic peripherals'''
     
     peripheral_list = []
@@ -149,7 +155,6 @@ def robotic_peripherals(perry: table.PersonaRecord, number: int) -> list:
             chosen = please.choose_this(choices, "Choose a secondary peripheral")
             peripheral_list.append(choice)
 
-    ### fix peripheral list for secondary effects
     for position, peripheral in enumerate(peripheral_list):
 
         if peripheral == "Vocation Computer":
@@ -278,7 +283,7 @@ def robot_offensive_rolls(offenses: list) -> list:
 
     return attack_rolls_list
 
-def robot_offensive_systems(offender: table.PersonaRecord, rolls_list: list) -> table.PersonaRecord:
+def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRecord:
     '''takes list of rolls for attack tables and adds to robot persona Attacks'''
 
     attack_tables_pivot = [table.robot_ram_dam, table.attack_table_one, table.attack_table_two, table.attack_table_three, table.attack_table_four]
@@ -325,7 +330,7 @@ def robot_offensive_systems(offender: table.PersonaRecord, rolls_list: list) -> 
     return offender # is altered by side effect
 
 
-def robot_defensive_systems(defender: table.PersonaRecord, number: int) -> list:
+def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
     """
     returns a list of defenses for the robot
     """
@@ -365,106 +370,51 @@ def robot_defensive_systems(defender: table.PersonaRecord, number: int) -> list:
     return defence_list
 
 
-def robot_description(object: dict) -> None:
+def robot_description(looks_like: RobotRecord) -> RobotRecord:
     """
     creates a wholly random robot description and colour
     """
 
     ### do none of this if android or social
-    if object.Bot_Type == "Android":
-        object.Description = "Looks like any other " + object.Base_Family.lower()
-        return
-    elif object.Bot_Type == "Social":
-        object.Description = "Looks like a mechanical " + object.Base_Family.lower()
-        return
+    if looks_like.FAMILY_TYPE == "Android":
+        looks_like.Description = "Looks like any other " + looks_like.Base_Family.lower()
+        return looks_like
+    
+    elif looks_like.FAMILY_TYPE == "Social":
+        looks_like.Description = "Looks like a mechanical " + looks_like.Base_Family.lower()
+        return looks_like
 
-    ### correct for medium size
-    sized = (
-        object.Size if object.Size not in ["Medium", "Nano"] else f"{object.Size} sized"
-    )
+    ### SIZE descriptor
+    sized = looks_like.Size_Cat if looks_like.Size_Cat not in ["Medium", "Nano", "Giga"] else f"{looks_like.Size_Cat} sized"
+    
+    ### SHAPE descriptor
+    shaped = please.get_table_result(table.base_shape)
+    shaped = shaped if shaped != "Descriptive" else please.get_table_result(table.descriptive_shapes)
+    # mangle shape?
+    shaped = shaped if please.do_1d100_check(40) else f'{please.get_table_result(table.shape_mangle)} {shaped}'
+    # adorn shape
+    shaped = shaped if please.do_1d100_check(25) else f'{shaped} and {please.get_table_result(table.adornage)}'
 
-    ### generate the base shape
-    base_shape = please.get_table_result(table.base_shape)
-    if base_shape == "Descriptive":
-        base_shape = please.get_table_result(table.descriptive_shapes)
+    ### COLOUR descriptor
+    colour = please.get_table_result(table.colour_bomb) if please.do_1d100_check(50) else f'{please.get_table_result(table.colour_bomb)} with {please.get_table_result(table.colour_bomb)} accents'
 
-    ### maybe mangle the base shape
-    if please.do_1d100_check(60):
-        base_shape_mangle = " " + please.get_table_result(table.shape_mangle)
-    else:
-        base_shape_mangle = ""
+    ###  LOCOMOTION descriptor
+    floating = True  if looks_like.Locomotion in ["Anti-Grav", "Magnetic"] else False
 
-    ### are you adornable?
-    if please.do_1d100_check(75):
-        adornmentations = " with " + please.get_table_result(table.adornage)
-    else:
-        adornmentations = ""
+    if looks_like.Locomotion[0].isdigit():
+        locomo = f'{choice["with", "sporting", "with", "moved by", "pushed by", "propelled by", "driven by"]} {looks_like.Locomotion}'
 
-    ### get the base colour
-    base_colour = please.get_table_result(table.colour_bomb)
+    elif looks_like.Locomotion in ['Chemical Slide', 'Slog Bag']:
+        locomo = f'{choice["a top", "sitting on a", "moved by"]} {looks_like.Locomotion}'
 
-    ### maybe accent the colour
-    if please.do_1d100_check(50):
-        colour_accent = " and " + please.get_table_result(table.colour_bomb)
-    else:
-        colour_accent = ""
-
-    ###############################
-    ###  locomotion and appearance
-    ###############################
-
-    # loco = object.Locomotion
-    base_loco = ""
-    loco_split = object.Locomotion.split(" ")
-
-    ### looking at no complementary locomotion type
-    floating = False  # if false uses base_loco
-    if loco_split[0] == "Anti-Grav" or loco_split[0] == "Magnetic":
-        floating = True
-        base_loco = ""
-
-    ### grammar fixing 2 legs vs 1 leg
-    elif loco_split[0].isdigit():
-        one_leg = True if int(loco_split[0]) == 1 else False
-        base_loco_ending = (
-            " ".join(loco_split[1:]) if len(loco_split) > 2 else loco_split[1]
-        )
-        if one_leg:
-            base_loco = f" on a {base_loco_ending[0:-1]}"
-        else:
-            base_loco = f" on {base_loco_ending}"
-
-    ### grammar fixing something with something
-    elif "moving" in loco_split:
-        betweener = choice(
-            ["moved by", "pushed by", "propelled by", "driven by"]
-        )
-        base_loco = f" and {loco_split[2]} {betweener} {loco_split[0]}"
-
-    elif "Slog" in loco_split or "Chemical" in loco_split:
-        betweener = choice(
-            ["sitting on a", "mounted on a", "on top of a" "carried by a", "atop a"]
-        )
-        base_loco = f" {betweener} {loco_split[0]} {loco_split[1]}"
-
-    elif "Teleport" in loco_split:
-        base_loco = " no visible means of locomotion"
-
-    else:
-        base_loco = f" on {loco_split[0]}"
-
-    ### apply the final attribute to object
-    object.Description = f"A {'floating ' if floating else ''}{sized.lower()} {base_colour}{colour_accent}{base_shape_mangle} {base_shape}{adornmentations}{'.' if floating else base_loco.lower()}{'' if floating else '.'}"
-
-    return
-
+    return f"A {'floating ' if floating else ''}{sized.lower()} {colour} {shaped}{'.' if floating else locomo.lower()}{'' if floating else '.'}"
 
 def robot_persona_name(object):
 
     print("\nWhen you are creating a robot persona you are also creating a MODEL.")
     print(
         "Your robot type is "
-        + object.Bot_Type.upper()
+        + object.FAMILY_TYPE.upper()
         + ". You look like:"
         + object.Description
     )
@@ -483,7 +433,7 @@ def robot_persona_name(object):
 #
 ####################################################
 
-def android(andy: table.PersonaRecord) -> table.PersonaRecord:
+def android(andy: RobotRecord) -> RobotRecord:
     """
     inject the android attributes into the andy
     """
@@ -525,7 +475,7 @@ def android(andy: table.PersonaRecord) -> table.PersonaRecord:
     return andy # modified by side effect
 
 
-def combot(comboy: table.PersonaRecord) -> table.PersonaRecord:
+def combot(comboy: RobotRecord) -> RobotRecord:
     """
     determine combot sub type and adjust persona record
     """
@@ -673,7 +623,7 @@ def combot(comboy: table.PersonaRecord) -> table.PersonaRecord:
     return
 
 
-def datalyzer(nerdy: table.PersonaRecord) -> table.PersonaRecord:
+def datalyzer(nerdy: RobotRecord) -> RobotRecord:
     """
     inject the datalyzer attributes into the nerdy
     """
@@ -712,7 +662,7 @@ def datalyzer(nerdy: table.PersonaRecord) -> table.PersonaRecord:
     return nerdy # is modified by side effect
 
 
-def explorations(expoh:table.PersonaRecord) -> table.PersonaRecord:
+def explorations(expoh:RobotRecord) -> RobotRecord:
     '''inject explorations bot '''
 
     ### explorations nomenclature
@@ -773,7 +723,7 @@ def explorations(expoh:table.PersonaRecord) -> table.PersonaRecord:
     expoh.Spec_Sheet = specs
     return
 
-def hobbot(hobby:table.PersonaRecord) -> table.PersonaRecord:
+def hobbot(hobby:RobotRecord) -> RobotRecord:
     '''insert hobbot data into persona record'''
 
     ### hobbot data
@@ -803,7 +753,7 @@ def hobbot(hobby:table.PersonaRecord) -> table.PersonaRecord:
     return hobby # adjusted by side effect
 
 
-def industrial(indy: table.PersonaRecord) -> table.PersonaRecord:
+def industrial(indy: RobotRecord) -> RobotRecord:
     '''insert industrial robot into persona record'''
 
     indy.FAMILY_TYPE = "Industrial"
@@ -813,7 +763,6 @@ def industrial(indy: table.PersonaRecord) -> table.PersonaRecord:
     specs = ["Capacitor of industry."]
 
     # build subtype choices
-    # fix this system for intel pstr and max
     choices = []
     if indy.INT >= indy.DEX and indy.INT >= indy.PSTR:
         choices.append("Construction")
@@ -916,7 +865,7 @@ def janitorial(object):
         object.Value = 20000
         object.HPM = please.roll_this("1d6") * con
         object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         # robot_offensive_systems check
         if please.do_1d100_check(25):
             robot_offensive_systems(object, 1)
@@ -938,7 +887,7 @@ def janitorial(object):
         object.Value = 35000
         object.HPM = please.roll_this("1d6") * con
         object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         # robot_offensive_systems
         if please.do_1d100_check(10):
             robot_offensive_systems(object, 1)
@@ -967,7 +916,7 @@ def maintenance(object):
     object.Value = 1050000
     object.HPM = please.roll_this("1d4") * con
     object.Size_Cat =  "Indoor"
-    robot_size_wate_hite(object)
+    robot_hite_wate_calc(object)
     # RoboticAttack check
     if please.do_1d100_check(40):
         robot_offensive_systems(object, 1)
@@ -1026,7 +975,7 @@ def police(object):
         object.Value = 600000
         object.HPM = please.roll_this("3d4") * con
         object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         robot_offensive_systems(object, 1)
         # special stun attack
         object.Robot_Attacks.append("Stun 4d4 intensity for 1d4 units.")
@@ -1044,7 +993,7 @@ def police(object):
         object.Value = 300000
         object.HPM = please.roll_this("1d4+9") * con
         object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         object.Robot_Attacks = []
         robot_defensive_systems(object, 1)
         robotic_peripherals(object, 1)
@@ -1099,7 +1048,7 @@ def police(object):
         object.Value = 900000
         object.HPM = please.roll_this("1d3+1") * con
         object.Size_Cat =  "Indoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         robot_offensive_systems(object, 1)
         robot_defensive_systems(object, 1)
         robotic_peripherals(object, 1)
@@ -1155,7 +1104,7 @@ def rescue(object):
         object.Value = 950000
         object.HPM = please.roll_this("2d10+5") * con
         object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         robot_offensive_systems(object, 1)
         robot_defensive_systems(object, 3)
         robotic_peripherals(object, 1)
@@ -1195,7 +1144,7 @@ def rescue(object):
         object.Value = 750000
         object.HPM = please.roll_this("2d10+5") * con
         object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         # robot_offensive_systems chance
         if please.do_1d100_check(25):
             robot_offensive_systems(object, 1)
@@ -1229,7 +1178,7 @@ def social(object):
     object.Value = 100000
     object.HPM = please.roll_this("1d3+1") * con
     # social wate and hite
-    # ob__ject.Anthro_Type = basefamily
+    # object.Anthro_Type = basefamily
     # this is no longer correct FAMILY_TYPE == social now
 
     anthro.AnthroHiteWate(object)
@@ -1280,7 +1229,7 @@ def transport(object):
         object.Value = 450000
         object.HPM = please.roll_this("1d4+8") * con
         object.Size_Cat =  "Indoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         # RobotAttacks chance
         if please.do_1d100_check(50):
             robot_offensive_systems(object, 1)
@@ -1310,7 +1259,7 @@ def transport(object):
         object.Value = 450000
         object.HPM = please.roll_this("1d4+8") * con
         object.Size_Cat =  "Indoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         # RobotAttacks chance
         if please.do_1d100_check(50):
             robot_offensive_systems(object, 1)
@@ -1362,7 +1311,7 @@ def veterinarian(object):
         object.Value = 2250000
         object.HPM = 2 * con
         object.Size_Cat =  "Indoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         object.Robot_Attacks = []
         # RobotDefences chance
         if please.do_1d100_check(10):
@@ -1388,7 +1337,7 @@ def veterinarian(object):
         object.Value = 5000000
         object.HPM = 2 * con
         object.Size_Cat =  "Outdoor"
-        robot_size_wate_hite(object)
+        robot_hite_wate_calc(object)
         object.Robot_Attacks = []
         # RobotDefences chance
         if please.do_1d100_check(10):
@@ -1431,28 +1380,9 @@ def fresh_robot():
     please.clear_console()
     print("\nYou are generating a fresh ROBOT PERSONA")
 
-    fresh = table.PersonaRecord()
-    fresh.FAMILY = "Robot"
-    fresh.FAMILY_TYPE = "Unmade"
-    fresh.FAMILY_SUB = "Unmade"
-    fresh.Vocation = "Robot"
-    fresh.Date_Created = "Unmade"
-    fresh.RP = False
-
-
-    fresh.Adapt = 0
-    fresh.Value = 42
-
-    fresh.Base_Family = "Debased"
-    fresh.CF: int = 0
-    fresh.Ramming = 0
-    fresh.Attacks = []
-    fresh.Defences = []
-    fresh.Peripherals = []
-    fresh.Spec_Sheet = []
+    fresh = RobotRecord()
 
     fresh.Player_Name = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
-
     core.initial_attributes(fresh)
     fresh.Base_Family = please.get_table_result(table.robot_fabricator_list)
     fresh.CF = control_factor(fresh)
@@ -1460,7 +1390,7 @@ def fresh_robot():
     core.wate_allowance(fresh)
     fresh.Power_Plant = please.get_table_result(table.robotic_power_plant)
     fresh.Power_Reserve = fresh.CON
-    robotic_sensors(fresh)
+    fresh.Sensors = robotic_sensors(fresh)
     core.base_armour_rating(fresh)
 
     ### choose the FAMILY_TYPE
@@ -1468,36 +1398,17 @@ def fresh_robot():
     fresh.FAMILY_TYPE = bot_type
     robot_type_function_pivot[bot_type](fresh)
 
-    ### android check
-    if fresh.FAMILY_TYPE == "Android":
-        input("stopping for droid")
-
-    please.say_goodnight_marsha()
-
-
-
-
-
-    # robot HPM based on CON and type
-    # string value per robot multiplied by CON
-    # present structure of robots as functions does not allow for values just yet
-    # the HPM is calculated and assigned by the function 
-
-    # offensive systems is called by robot type
-    # defensive systems is called by robot type
-    # peripherals is called by robot type
-
-    ### require bot_type
-    robotic_locomotion(fresh)
-    robot_size_wate_hite(fresh)
-    robot_description(fresh)
+    ### requires bot_type
+    fresh.Locomotion = robotic_locomotion(fresh)
+    robot_hite_wate_calc(fresh)
+    fresh.Quick_Description = robot_description(fresh)
 
     if fresh.Vocation != "Robot":
         vocation.set_up_first_time(fresh)
 
-    outputs.robot_review(fresh)
+    outputs.outputs_workflow(fresh, "screen")
     robot_persona_name(fresh)
-    outputs.robot_review(fresh)
+    outputs.outputs_workflow(fresh, "screen")
     please.assign_id_and_file_name(fresh)
     please.record_storage(fresh)
     return

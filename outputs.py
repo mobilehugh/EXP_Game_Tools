@@ -1316,6 +1316,8 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
 # ROBOT output to screen
 #####################################
 
+
+# fix prime outputs
 def robot_screen(bot_screen) -> None:
     """
     print the robot to screen

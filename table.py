@@ -10,6 +10,7 @@ smart people required
 from dataclasses import dataclass, field
 
 # fix create combined dataclasses as AnthroRecord, AlienRecord, and RobotRecord 
+
 @dataclass
 class PersonaRecord:
     """
@@ -41,10 +42,15 @@ class PersonaRecord:
     Age_Cat: str = "Adolescent"
     Age: int = 1
     Age_Suffix: str = "years"
+
     Size_Cat: str = "Medium"
     Hite: int = 1
+    Hite_Suffix: int = "cms"
     Wate: int = 1
     Wate_Suffix: int = "kgs"
+
+    Quick_Description: str = "Amorphous"
+
     Vocation: str = "None"
     Level: int = 1
     EXPS: int = 42
@@ -57,6 +63,46 @@ class PersonaRecord:
     Date_Updated: str = "Unborn"
     ID: str = "None"
     File_Name: str = "None" # ID + ".jsonl"
+
+@dataclass
+class Anthropic(PersonaRecord):
+    FAMILY: str = "Anthro"
+   
+
+
+@dataclass
+class Robotic(PersonaRecord):
+    FAMILY: str = "Robot"
+    FAMILY_TYPE: str = "Unmade"
+    FAMILY_SUB: str = "Unmade"
+    Vocation: str = "Robot"
+    Date_Created: str = "Unmade"
+    Date_Updated: str = "Unmade"
+    CON_Prime: int = 1
+    DEX_Prime: int = 1
+    INT_Prime: int = 1
+    PSTR_Prime: int = 1   
+    Adapt: int = 0
+    Value: int = 42
+    Base_Family:str = "Debased"
+    CF: int = 0
+    Ramming: int = 0
+    Attacks: list[str] = field(default_factory=list) 
+    Defences: list[str] = field(default_factory=list)
+    Peripherals: list[str] = field(default_factory=list)
+    Spec_Sheet: list[str] = field(default_factory=list)
+
+    Locomotion: str = "Treads"
+    Power_Plant: str = "Batteries"
+    Power_Reserve: str = "all day!"
+    Sensors: list[str] = field(default_factory=list)
+
+    
+@dataclass
+class Alienic(PersonaRecord):
+    FAMILY: str = "Alien"
+
+
 
 
 ##############################################
@@ -2977,7 +3023,6 @@ robotic_sensor_types = {
     "die_roll":"1d100",
 } 
 
-
 primary_robotic_locomotion = {
     (1, 12):"('Anti-Grav', 'None')",
     (13, 18):"('Chemical Slide', 'None')",
@@ -2999,14 +3044,12 @@ primary_robotic_locomotion = {
 
 secondary_robotic_locomotion = {
     (1, 31):"Anti-Grav",
-    (32, 41):"Chemical Slide",
+    (32, 41):" a Chemical Slide",
     (42, 56):"Skis",
     (57, 100):"Wheels",
     "name":"Robotic Secondary Locomotion",
     "die_roll":"1d100",
 } 
-
-
 
 auto_prime_select_robot_type = {
     "1111": ["Janitorial", "Transport"],
@@ -3438,6 +3481,7 @@ fling_attacks = {
     "die_roll":"1d100",
 } 
 
+# fix does every Robot have a ram!!!
 robot_ram_dam = {
     (1, 46):"Blunt Flat (1d4)",
     (47, 76):"Blunt Protuberance (1d6)",
@@ -3636,16 +3680,19 @@ descriptive_shapes = {
 } 
 
 
+# fix EXP nano for minute and Giga for Humongous, or in outputs? 
 robot_size_to_wate = {
-    "Nano": "1d1000",
-    "Tiny": "1d10",
-    "Small": "1d50",
-    "Medium": "1d50+50",
-    "Large": "5d100+100",
-    "Gigantic": "6d1000+600",
-    "Humongous": "6d100",
+    "Nano": {"wate":"1d1000", "suffix":"gms"},
+    "Tiny": {"wate": "1d10", "suffix":"kgs"},
+    "Small": {"wate": "1d50", "suffix":"kgs"},
+    "Medium": {"wate": "1d50+50", "suffix":"kgs"},
+    "Large": {"wate": "5d100+100", "suffix":"kgs"},
+    "Gigantic": {"wate": "6d1000+600", "suffix":"kgs"},
+    "Giga": {"wate": "6d100", "suffix":"tonnes"},
     "name": "wate from size",
 }
+
+
 
 robot_wate_to_hite = {
     (1, 2): "2d8",
@@ -3658,6 +3705,7 @@ robot_wate_to_hite = {
     (2001, 4000): "5d20+200",
     (4001, 6000): "12d10+300",
     (6001, 9999): "4d20+500",
+    (10000, 1000000): "2d12+4",
     "name": "Robot Dimensions",
 }
 
