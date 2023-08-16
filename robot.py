@@ -1221,161 +1221,171 @@ def social(friend: RobotRecord) -> RobotRecord:
     return friend # adjusted by side effect
 
 
-def transport(object):
+def transport(taxi: RobotRecord) -> RobotRecord:
+    '''insert transport options into record'''
+
+    taxi.FAMILY_TYPE = "Transport"
     specs = ["Getting things from one place to another."]
-    con = object.CON
-    dex = object.DEX
-    intel = object.INT
+    con = taxi.CON
+    intel = taxi.INT
 
     # build subtype choices
     choices = ["Planetary"]
 
-    if dex >= 22 and intel >= 22:
+    if taxi.DEX >= 22 and taxi.INT >= 22:
         choices.append("Extra-Planetary")
+
+    if taxi.Bespoke or taxi.Fallthrough:
+        choices = ["Planetary", "Extra-Planetary"]
+
     comment = "Please choose your type of Transport bot. "
     chosen = please.choose_this(choices, comment)
 
     if chosen == "Planetary":
-        object.FAMILY_SUB = "Planetary"
+
+        # planetary transport bot
+        taxi.FAMILY_SUB = "Planetary"
         specs.append("Planet side chauffer.")
-        object.Adapt = 22
-        object.Value = 450000
-        object.HPM = please.roll_this("1d4+8") * con
-        object.Size_Cat =  "Indoor"
-        robot_hite_wate_calc(object)
-        # RobotAttacks chance
+        taxi.Adapt = 22
+        taxi.Value = 450000
+        taxi.HPM = please.roll_this("1d4+8") * taxi.CON
+        taxi.Size_Cat =  "Small"
+
+        # RobotAttacks check
         if please.do_1d100_check(50):
-            robot_offensive_systems(object, 1)
-        else:
-            object.Robot_Attacks = []
-        # RobotDefences chance
+            fences = robot_offensive_rolls(attack_one_rolls, 1)
+            robot_offensive_systems(taxi, fences)
+
+        # RobotDefences check
         if please.do_1d100_check(40):
-            robot_defensive_systems(object, 1)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 1)
+            taxi.Defences.append(robot_defensive_systems(taxi, 1))
+
+        taxi.Peripherals.append(robotic_peripherals(taxi, 1))
 
         specs.append(
-            f"Expert driver can divide {intel + 5} specs between any vehicles."
+            f"Expert driver can divide {taxi.INT + 5} between vehicles."
         )
-        specs.append(f"Driving an unknown vehicle {intel * 4}%")
-        specs.append("Any inatmo vehicle. No space vehicles.")
+        specs.append(f"Driving an unknown vehicle {taxi.INT * 4}%")
+        specs.append("Any inatmo vehicle. No exatmo vehicles.")
         specs.append("Not skilled in vehicle combat.")
-        specs.append("Can act as a  steward skill for large vehicles.")
+        specs.append("Can act as a steward on exatmo vehicles.")
 
-        object.Spec_Sheet = specs
+        taxi.Spec_Sheet = specs
 
     elif chosen == "Extra-Planetary":
-        object.FAMILY_SUB = "Extra-Planetary"
-        specs.append("Space vehicle pilot.")
-        object.Adapt = 22
-        object.Value = 450000
-        object.HPM = please.roll_this("1d4+8") * con
-        object.Size_Cat =  "Indoor"
-        robot_hite_wate_calc(object)
-        # RobotAttacks chance
-        if please.do_1d100_check(50):
-            robot_offensive_systems(object, 1)
-        else:
-            object.Robot_Attacks = []
-        # RobotDefences chance
-        if please.do_1d100_check(40):
-            robot_defensive_systems(object, 1)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 1)
 
-        specs.append(f"Expert pilot can divide up {intel + 5} specs.")
+        # extra planetary transport bot
+        taxi.FAMILY_SUB = "Extra-Planetary"
+        specs.append("Space vehicle pilot.")
+        taxi.Adapt = 22
+        taxi.Value = 450000
+        taxi.HPM = please.roll_this("1d4+8") * taxi.CON
+        taxi.Size_Cat =  "Small"
+
+        # RobotAttacks check
+        if please.do_1d100_check(50):
+            fences = robot_offensive_rolls(attack_one_rolls, 1)
+            robot_offensive_systems(taxi, fences)
+
+        # RobotDefences check
+        if please.do_1d100_check(40):
+            taxi.Defences.append(robot_defensive_systems(taxi, 1))
+
+        taxi.Peripherals.append(robotic_peripherals(taxi, 1))
+
+        specs.append(f"Expert pilot can divide up {taxi.INT + 5} between vehicles.")
         specs.append(
-            "Can only pilot space vessels. May drive any vehicles on space vessel."
+            f"Can only pilot exatmo vehicles. {taxi.INT * 4}% chance to drive vehicles within space ship."
         )
-        specs.append(f"Driving an unknown vessel {intel * 4}%")
-        specs.append("Not skilled in vehicle combat.")
+        specs.append(f"Driving an unknown vessel {taxi.INT * 4}%")
+        specs.append("Not skilled in space vehicle combat.")
         specs.append("Has a steward skill for ships with organics.")
 
-        object.Spec_Sheet = specs
+        taxi.Spec_Sheet = specs
 
     return
 
 
-def veterinarian(object):
+def veterinarian(doc: RobotRecord) -> RobotRecord:
+    '''insert veterinarian data into record'''
+
+    doc.FAMILY_TYPE = "Veterinarian"
     specs = [
         "Veterinarian in a drum.",
-        "Very high regard for preservation of organic life.",
+        "Very high regard for organic life.",
     ]
-    con = object.CON
-    dex = object.DEX
-    intel = object.INT
-    intel_prime = object.INT_Prime
-    pstr = object.PSTR
+    dex = doc.DEX
+    intel = doc.INT
+    pstr = doc.PSTR
 
     # build subtype choices
     choices = ["Diagnostic"]
 
     if dex >= 23 and intel >= 21:
         choices.append("Interventional")
+
+    if doc.Bespoke or doc.Fallthrough:
+        choices =  ["Diagnostic", "Interventional"]
+
     comment = "Please choose your type of veterinarian bot. "
     chosen = please.choose_this(choices, comment)
 
     if chosen == "Diagnostic":
-        object.FAMILY_SUB = "Diagnostic"
-        specs.append("Prefers to figure out rather than fix.")
-        object.Adapt = 10
-        object.Value = 2250000
-        object.HPM = 2 * con
-        object.Size_Cat =  "Indoor"
-        robot_hite_wate_calc(object)
-        object.Robot_Attacks = []
+
+        # diagnostic robot info
+        doc.FAMILY_SUB = "Diagnostic"
+        specs.append("Prefers to FIGURE than fix.")
+        doc.Adapt = 10
+        doc.Value = 2250000
+        doc.HPM = 2 * doc.CON
+        doc.Size_Cat =  "Small"
+
+        # no attacks 
         # RobotDefences chance
         if please.do_1d100_check(10):
-            robot_defensive_systems(object, 1)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 1)
+            doc.Defences.append(robot_defensive_systems(doc, 1))
 
-        specs.append(
-            f"On vet performance table {intel_prime} DD bonus and {intel * 2} PT roll bonus."
-        )
-        specs.append(
-            "Good at diagnosis and minor specs. Cannot perform major interventions."
-        )
-        specs.append(f"Identify medical equipment and pharmaceuticals {intel * 5}%.")
+        doc.Peripherals.append(robotic_peripherals(doc, 1))
+        doc.Vocation = "Veterinarian"
 
-        object.Spec_Sheet = specs
+        specs.append([
+            f"Vet thinking task rolls +{doc.INT * 2} bonus.",
+            "Excellent at diagnosis and planning.",
+            "Only simple interventions.",
+            f"Identify medical equipment and pharma {doc.INT * 5}%.",
+            "Has veterinarian vocation"
+            ])
+
+        doc.Spec_Sheet = specs
 
     elif chosen == "Interventional":
-        object.FAMILY_SUB = "Interventional"
-        specs.append("Prefers to fix rather than figure out.")
-        object.Adapt = 10
-        object.Value = 5000000
-        object.HPM = 2 * con
-        object.Size_Cat =  "Outdoor"
-        robot_hite_wate_calc(object)
-        object.Robot_Attacks = []
-        # RobotDefences chance
+
+        # interventional specs
+        doc.FAMILY_SUB = "Interventional"
+        specs.append("Prefers to FIX  than figure.")
+        doc.Adapt = 10
+        doc.Value = 5000000
+        doc.HPM = 2 * doc.CON
+        doc.Size_Cat =  "Medium"
+
+        # no attacks 
+        # Defences check
         if please.do_1d100_check(10):
-            robot_defensive_systems(object, 1)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 1)
+            doc.Defences.append(robot_defensive_systems(doc, 1))
+        # Peripherals check
+        doc.Peripherals.append(robotic_peripherals(doc, 1))
 
-        specs.append("Needs direction from diagnostic bot or veterinarian.")
-        specs.append(
-            "Can perform all manner of interventions. Including surgery and anesthesia."
-        )
-        specs.append(f"On vet performance table may add INT to ({intel}) to PT roll.")
-        distance = math.ceil(pstr / 2)
-        specs.append(f"Anaesthesia has a range of {distance} hexes.")
+        specs.append([
+            "Often needs vet direction.",
+            "Can perform all manner of interventions tasks.",
+            f"Vet intervention task rolls +{doc.INT * 3} bonus.",
+            f"Anaesthesia has a range of {math.ceil(doc.PSTR / 3)} hexes.",
+            "Does NOT have a vocation" 
+            ])
 
-        object.Spec_Sheet = specs
+        doc.Spec_Sheet = specs
 
-    # be sure to add veterinarian class for PT but not CT
-    object.Vocation = "Veterinarian"
-
-    # endow veterinarian specs and abilities
-    vocation.DataGeneration(object)
-
-    return
+    return doc # is manipulated by side effect
 
 
 #####################################
