@@ -1557,7 +1557,7 @@ vocation_exps_levels = {
 }
 
 
-suggested_anthro_attribute_s = {
+suggested_anthro_attributes = {
     "AWE": {
         "long_name": "Awareness",
         "minimum": 1,
@@ -2070,7 +2070,7 @@ role_play_RP_arc_goal = {
 ################################################################
 
 
-alien_attribute_s = {
+alien_suggested_attributes = {
     "CON": {
         "long_name": "Constitution",
         "minimum": 1,
@@ -3024,20 +3024,20 @@ robotic_sensor_types = {
 } 
 
 primary_robotic_locomotion = {
-    (1, 12):"('Anti-Grav', 'None')",
-    (13, 18):"('Chemical Slide', 'None')",
-    (19, 26):"('Electromagnetic Legs', '1d10')",
-    (27, 32):"('Jets', 'Secondary')",
-    (33, 40):"('Magnetic', 'None')",
-    (41, 46):"('Pistons', '4d4')",
-    (47, 56):"('Pods', '1d10')",
-    (57, 63):"('Propellers', 'Secondary')",
-    (64, 67):"('Sails', 'Secondary')",
-    (68, 73):"('Skis', '1d4+2')",
-    (74, 75):"('Slog Bag', 'None')",
-    (76, 82):"('Tracks', 'None')",
-    (83, 99):"('Wheels', '1d12')",
-    (100, 100):"('Teleport', 'None')",
+    (1, 12):('Anti-Grav', 'None'),
+    (13, 18):('Chemical Slide', 'None'),
+    (19, 26):('Electromagnetic Legs', '1d10'),
+    (27, 32):('Jets', 'Secondary'),
+    (33, 40):('Magnetic', 'None'),
+    (41, 46):('Pistons', '4d4'),
+    (47, 56):('Pods', '1d10'),
+    (57, 63):('Propellers', 'Secondary'),
+    (64, 67):('Sails', 'Secondary'),
+    (68, 73):('Skis', '1d4+2'),
+    (74, 75):('Slog Bag', 'None'),
+    (76, 82):('Tracks', 'None'),
+    (83, 99):('Wheels', '1d12'),
+    (100, 100):('Teleport', 'None'),
     "name":"Robotic Primary Locomotion",
     "die_roll":"1d100",
 } 
@@ -3705,7 +3705,7 @@ robot_wate_to_hite = {
     (2001, 4000): "5d20+200",
     (4001, 6000): "12d10+300",
     (6001, 9999): "4d20+500",
-    (10000, 1000000): "2d12+4",
+    (10_000, 1_000_000): "2d12+4",
     "name": "Robot Dimensions",
 }
 

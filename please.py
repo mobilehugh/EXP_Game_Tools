@@ -179,9 +179,6 @@ def choose_this(choices: list, comment: str, choosy: table.PersonaRecord = None)
     quit or restart or chastise the user
     also auto return if Fallthrough is true
     """
-
-    input(f'{comment = }, {choosy = } \n{choices =}')
-
     # if fallthrough skip choosing part
     if choosy:
         if choosy.Fallthrough:
@@ -199,7 +196,7 @@ def choose_this(choices: list, comment: str, choosy: table.PersonaRecord = None)
         # present the comment and options
         print(f"\n{comment}")
 
-        if len(choices) == 2: # keeps say what ever to to one line list
+        if "Yes" in choices and len(choices) < 3: # keeps yes/no to a one line list
             print (f'1) {choices[0]} 2) {choices[1]}')
         else:
             for idx, option in enumerate(choices, start=1):

@@ -11,19 +11,28 @@ def initial_attributes(attributes_creating:table.PersonaRecord) -> table.Persona
     """
     generates initial attributes for anthro, alien and robot personae 
     """
-    # anthro core attributes DIE ROLLS dictionary comprehension
+    # ANTHRO core attributes DIE ROLLS dictionary comprehension
     attribute_die_rolls = {
         key: value["dice"]
-        for (key, value) in table.suggested_anthro_attribute_ranges.items()
+        for (key, value) in table.suggested_anthro_attributes.items()
         if key != "HPM"
     }
+    
+    for attribute in attribute_die_rolls:
+        setattr(attributes_creating, attribute, please.roll_this(attribute_die_rolls[attribute]))
 
-    # alien adjustments to CON, DEX, INT, MSTR, PSTR
+    # ALIEN REASSIGNMENTS of CON, DEX, INT, MSTR, PSTR
     if attributes_creating.FAMILY == "Alien":
-        for attribute,deets in table.alien_attribute_ranges.items():
-            attribute_die_rolls[attribute] = deets["dice"] 
+        # alien core attributes DIE ROLLS dictionary comprehension
+        attribute_die_rolls = {
+            key: value["dice"]
+            for (key, value) in table.alien_suggested_attributes.items()
+            if key != "HPM"
+        }   
+        for attribute in attribute_die_rolls:
+            setattr(attributes_creating, attribute, please.roll_this(attribute_die_rolls[attribute]))
 
-    # robot adjustments to CON, DEX, INT, PSTR
+    # ROBOT ADJUSTMENTS to CON, DEX, INT, MSTR, PSTR
     if attributes_creating.FAMILY == "Robot":
         # must assign robot primes
         attributes_creating.CON_Prime = please.roll_this("1d4")
@@ -32,19 +41,11 @@ def initial_attributes(attributes_creating:table.PersonaRecord) -> table.Persona
         attributes_creating.PSTR_Prime = please.roll_this("1d4")
 
         # reassign die rolls based on primes
-        attribute_die_rolls["CON"] = table.robot_attributes[attributes_creating.CON_Prime]["CON"]
-        attribute_die_rolls["DEX"] = table.robot_attributes[attributes_creating.DEX_Prime]["DEX"]
-        attribute_die_rolls["INT"] = table.robot_attributes[attributes_creating.INT_Prime]["INT"] 
-        attribute_die_rolls["PSTR"] = table.robot_attributes[attributes_creating.PSTR_Prime]["PSTR"]
-
-    # use die roll list to generate new attributes
-    for attribute in attribute_die_rolls:
-        die_roll = please.roll_this(attribute_die_rolls[attribute])
-        setattr(attributes_creating, attribute, die_roll)
-
-    # must reassign robotic MSTR to zero
-    if attributes_creating.FAMILY == "Robot":
-            attributes_creating.MSTR = 0
+        attributes_creating.CON = please.roll_this(table.robot_attributes[attributes_creating.CON_Prime]["CON"])
+        attributes_creating.DEX = please.roll_this(table.robot_attributes[attributes_creating.DEX_Prime]["DEX"])
+        attributes_creating.INT = please.roll_this(table.robot_attributes[attributes_creating.INT_Prime]["INT"]) 
+        attributes_creating.PSTR = please.roll_this(table.robot_attributes[attributes_creating.PSTR_Prime]["PSTR"])
+        attributes_creating.MSTR = 0
 
     return attributes_creating # modified by side effects
 

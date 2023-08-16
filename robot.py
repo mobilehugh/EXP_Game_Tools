@@ -20,16 +20,17 @@ class RobotRecord(table.Robotic):
 
 def robot_workflow():
     """
-    player robot versus referee person vs persona maintenance
+    player robot versus RP robot vs maintenance
     """
-
     # clearance for Clarence
     please.clear_console()
 
+    nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
+
     workflow_function_map = {
-        "Fresh Robot (New Player)": fresh_robot,
-        "Bespoke Robot": bespoke_robot,
-        "Random Robot": rando_robot,
+        "Fresh Robot (New Player)":lambda: fresh_robot(nom_de_bom),
+        "Bespoke Robot":lambda: bespoke_robot(nom_de_bom),
+        "Random Robot":lambda: rando_robot((nom_de_bom)),
         "Maintenance":please.do_referee_maintenance,
     }
 
@@ -103,13 +104,12 @@ def robot_hite_wate_calc(sizer: RobotRecord) -> RobotRecord:
     kilo_conv = 1 if sizer.Size_Cat == "NaNo" else sizer.Wate
 
     for hite_range, roll in table.robot_wate_to_hite.items():
-        if kilo_conv in hite_range:
+        if kilo_conv in range(*hite_range): # the * unpacks the tuple
             sizer.Hite = please.roll_this(roll)
             break
     sizer.Hite_Suffix = "cms" if sizer.Wate < 10_000 else "meters"
 
     return sizer # modified by side effect
-
 
 def robotic_peripherals(perry: RobotRecord, number: int) -> list:
     '''generates a list of robotic peripherals'''
@@ -448,12 +448,11 @@ def android(andy: RobotRecord) -> RobotRecord:
     andy.Wate = round(andy.Wate * 1.3)
     core.hit_points_max(andy)
 
+
     ### reset to robot 
     andy.FAMILY = "Robot"
     andy.FAMILY_TYPE = "Android"
     andy.FAMILY_SUB = andy.Base_Family
-
-    andy.FAMILY_TYPE = "Android"
 
     ### core values
     andy.Adapt = 1
@@ -479,26 +478,22 @@ def combot(comboy: RobotRecord) -> RobotRecord:
     """
     determine combot sub type and adjust persona record
     """
-    ### robot nomenclature
+
     comboy.FAMILY_TYPE =  "Combot"
 
     ### determine SUB_TYPE
-    # build the attribute determined list
-    sub_type_choices = ["Expendable"]
+    choices = ["Expendable"]
     if comboy.CON >= 20:
-        sub_type_choices.append("Defensive")
+        choices.append("Defensive")
     if comboy.CON >= 19 and comboy.DEX >= 15:
-        sub_type_choices.append("Offensive-Light")
+        choices.append("Offensive-Light")
     if comboy.CON >= 23 and comboy.PSTR >= 27:
-        sub_type_choices.append("Offensive-Heavy")
+        choices.append("Offensive-Heavy")
 
     if comboy.Bespoke or comboy.Fallthrough:
-        sub_type_choices = ["Expendable", "Defensive", "Offensive-Light", "Offensive-Heavy" ]
+        choices = ["Expendable", "Defensive", "Offensive-Light", "Offensive-Heavy" ]
 
-    if comboy.Fallthrough:
-        comboy.FAMILY_SUB = choice(sub_type_choices)
-    else:
-        comboy.FAMILY_SUB = please.choose_this(sub_type_choices, "Please choose COMBOT sub-type.")
+    comboy.FAMILY_SUB = please.choose_this(choices, "Please choose COMBOT sub-type.")
 
     ### generic spec sheet
     specs = [f"Unconcerned about base family ({comboy.Base_Family})."]
@@ -846,366 +841,384 @@ def industrial(indy: RobotRecord) -> RobotRecord:
 
     return
 
-def janitorial(object):
+def janitorial(maid: RobotRecord) -> RobotRecord:
+    ''' insert janitorial elements into record'''
+
+    maid.FAMILY_TYPE = "Janitorial"
     specs = ["Cleaning mopping and moping."]
-    intel = object.INT
-    con = object.CON
 
     # build subtype choices
     choices = ["Industrial"]
 
-    if intel >= 12:
+    if maid.INT >= 12:
         choices.append("Domestic")
+
+    if maid.Bespoke or maid.Fallthrough:
+        choices = ["Industrial", "Domestic"]
+
     comment = "Please choose your type of Janitorial bot."
     chosen = please.choose_this(choices, comment)
 
     if chosen == "Industrial":
-        object.FAMILY_SUB = "Industrial"
-        object.Adapt = 30
-        object.Value = 20000
-        object.HPM = please.roll_this("1d6") * con
-        object.Size_Cat =  "Outdoor"
-        robot_hite_wate_calc(object)
+
+        # Industrial particulars
+        maid.FAMILY_SUB = "Industrial"
+        maid.Adapt = 30
+        maid.Value = 20000
+        maid.HPM = please.roll_this("1d6") * maid.CON
+        maid.Size_Cat =  "Medium"
+
         # robot_offensive_systems check
         if please.do_1d100_check(25):
-            robot_offensive_systems(object, 1)
-        else:
-            object.Robot_Attacks = []
-        # robot_defensive_systems
+            offenses = robot_offensive_rolls(attack_one_rolls, 1)
+            robot_offensive_systems(maid, offenses)
+
+        # robot_defensive_systems check
         if please.do_1d100_check(45):
-            robot_defensive_systems(object, 2)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 1)
+            maid.Defences.append(robot_defensive_systems(maid, 2))
+
+        maid.Peripherals.append(robotic_peripherals(maid, 1))
 
         specs.append("Combating entropy in the workplace.")
-        object.Spec_Sheet = specs
+        maid.Spec_Sheet = specs
 
     elif chosen == "Domestic":
-        object.FAMILY_SUB = "Domestic"
-        object.Adapt = 10
-        object.Value = 35000
-        object.HPM = please.roll_this("1d6") * con
-        object.Size_Cat =  "Outdoor"
-        robot_hite_wate_calc(object)
-        # robot_offensive_systems
+
+        # Domestic Janitorial 
+        maid.FAMILY_SUB = "Domestic"
+        maid.Adapt = 10
+        maid.Value = 35000
+        maid.HPM = please.roll_this("1d6") * maid.CON
+        maid.Size_Cat =  "Small"
+
+        # robot_offensive_systems check
         if please.do_1d100_check(10):
-            robot_offensive_systems(object, 1)
-        else:
-            object.Robot_Attacks = []
-        # robot_defensive_systems
+            offenses = robot_offensive_rolls(attack_one_rolls, 1)
+            robot_offensive_systems(maid, offenses)
+
+        # robot_defensive_systems check
         if please.do_1d100_check(15):
-            robot_defensive_systems(object, 2)
-        else:
-            object.Defences = []
-        robotic_peripherals(object, 2)
+            maid.Defences.append(robot_defensive_systems(maid, 2))
+
+        maid.Peripherals.append(robotic_peripherals(maid, 1))
 
         specs.append("Combating entropy in the home.")
-        object.Spec_Sheet = specs
+        maid.Spec_Sheet = specs
 
-    return
+    return maid # altered by side effect
 
 
-def maintenance(object):
-    object.FAMILY_SUB = "Mechanic"
+def maintenance(wrench:RobotRecord) -> RobotRecord:
+    '''insert maintenance bot stuff'''
+
+    wrench.FAMILY_TYPE = "Maintenance"
     specs = ["Mechanic in a drum."]
-    intel = object.INT
-    con = object.CON
-    # lvl = object.Level
-    object.Adapt = 37
-    object.Value = 1050000
-    object.HPM = please.roll_this("1d4") * con
-    object.Size_Cat =  "Indoor"
-    robot_hite_wate_calc(object)
-    # RoboticAttack check
+
+    wrench.Adapt = 37
+    wrench.Value = 1050000
+    wrench.HPM = please.roll_this("1d4") * wrench.CON
+    wrench.Size_Cat =  "Medium"
+
+    # robot_offensive_systems check
     if please.do_1d100_check(40):
-        robot_offensive_systems(object, 1)
-    else:
-        object.Robot_Attacks = []
-    # RobotDefences chance
+        offenses = robot_offensive_rolls(attack_one_rolls, 1)
+        robot_offensive_systems(wrench, offenses)
+
+    # robot_defensive_systems check
     if please.do_1d100_check(40):
-        robot_defensive_systems(object, 1)
-    else:
-        object.Defences = []
-    robotic_peripherals(object, 2)
+        wrench.Defences.append(robot_defensive_systems(wrench, 2))
+
+    wrench.Peripherals.append(robotic_peripherals(wrench, 1))
 
     # set up mechanic
-    object.INT = intel * 3  # temporary INT rise for skill calc
-    object.Vocation = "Mechanic"
-    # vocation.intake(object)
-    object.INT = intel  # return to previous INT
+    intel = wrench.INT
+    wrench.INT = intel * 3  # temporary INT rise for skill calc
+    wrench.Vocation = "Mechanic"
+    # vocation.intake(wrench)
+    wrench.INT = intel  # return to previous INT
 
-    # endow mechanic specs and abilities
-    vocation.DataGeneration(object)
 
-    # revisit here to remove combat table for mechanic
-    # beware of specs wipe out and cross over
     specs.append("Not a janitorial bot.")
     specs.append("Has Mechanic specs for repairs.")
     specs.append(f"Add {intel} (INT) to PT rolls.")
-    object.Spec_Sheet = specs
+    wrench.Spec_Sheet = specs
 
-    return
+    return wrench # altered by side effect
 
 
-def police(object):
-    specs = [f"To serve and protect {object.Base_Family}s."]
-    awe = object.AWE
-    cha = object.CHA
-    con = object.CON
-    dex = object.DEX
-    intel = object.INT
-    pstr = object.PSTR
+def police(copper: RobotRecord) -> RobotRecord:
+    '''insert policing robot data into record'''
+
+    copper.FAMILY_TYPE = "Policing"
+    specs = [f"To serve and protect {copper.Base_Family}s."]
 
     # build subtype choices
     choices = ["Civil"]
 
-    if con >= 15:
+    if copper.CON >= 15:
         choices.append("Riot")
-    if intel >= 15:
-        choices.append("Special")
+    if copper.INT >= 15:
+        choices.append("Detective")
 
-    comment = "Please choose your policing bot type. "
+    if copper.Bespoke or copper.Fallthrough:
+        choices = ["Civil", "Riot", "Detective"]
+
+    comment = "Please choose your policing bot type."
     chosen = please.choose_this(choices, comment)
 
     if chosen == "Civil":
-        object.FAMILY_SUB = "Civil"
-        specs.append("Mechanical street cop.")
-        object.Adapt = 10
-        object.Value = 600000
-        object.HPM = please.roll_this("3d4") * con
-        object.Size_Cat =  "Outdoor"
-        robot_hite_wate_calc(object)
-        robot_offensive_systems(object, 1)
-        # special stun attack
-        object.Robot_Attacks.append("Stun 4d4 intensity for 1d4 units.")
-        robot_defensive_systems(object, 1)
-        robotic_peripherals(object, 1)
 
-        specs.append(f"Make loud commands at double CHA ({cha * 2}.")
+        # civilian policing
+        copper.FAMILY_SUB = "Civil"
+        specs.append("Mechanical street cop.")
+        copper.Adapt = 10
+        copper.Value = 600000
+        copper.HPM = please.roll_this("3d4") * copper.CON
+        copper.Size_Cat =  "Medium"
+
+        # civil_offensive_systems
+        copper.Attacks.append("Stun 4d4 intensity for 1d4 units.")
+        offenses = robot_offensive_rolls(attack_one_rolls, 1)
+        robot_offensive_systems(copper, offenses)
+        copper.Defences.append(robot_defensive_systems(copper, 1))
+        copper.Peripherals.append(robotic_peripherals(copper, 1))
+        specs.append(f"Make loud commands at double CHA ({copper.CHA * 2}.")
         specs.append("Grapple and disarm with a successful to hit roll.")
-        object.Spec_Sheet = specs
+        copper.Spec_Sheet = specs
 
     elif chosen == "Riot":
-        object.FAMILY_SUB = "Riot"
-        specs.append("Less lethal mob control. AKA riobot.")
-        object.Adapt = 10
-        object.Value = 300000
-        object.HPM = please.roll_this("1d4+9") * con
-        object.Size_Cat =  "Outdoor"
-        robot_hite_wate_calc(object)
-        object.Robot_Attacks = []
-        robot_defensive_systems(object, 1)
-        robotic_peripherals(object, 1)
 
-        specs.append(f"Grapple, disarm and detain up to {pstr} unruly targets.")
+        # riot policing
+        copper.FAMILY_SUB = "Riot"
+        specs.append("Less lethal mob control. AKA riobot.")
+        copper.Adapt = 10
+        copper.Value = 300000
+        copper.HPM = please.roll_this("1d4+9") * copper.CON
+        copper.Size_Cat =  "Gigantic"
+
+        # no offensive systems
+        copper.Defences.append(robot_defensive_systems(copper, 1))
+        copper.Peripherals.append(robotic_peripherals(copper, 1))
+
+        specs.append(f"Grapple, disarm and detain up to {copper.PSTR} unruly targets.")
         specs.append(f"Crowd control devices:")
 
         # generate crowd control tools
-        halfcon = math.ceil(con / 2)
-        halfintel = math.ceil(intel / 2)
-        halfcha = math.ceil(cha / 2)
 
         RiotPolicing = {
-            range(1, 21): f"Water Cannon. {pstr} targets. Hit = knocked down.",
+            range(1, 20): f"Water Cannon. {copper.PSTR} targets. Hit = knocked down.",
             range(
-                21, 41
-            ): f"Tear Gas. {con} hex radius. {con} intensity. Blind for 1d8 units.",
+                21, 40
+            ): f"Tear Gas. {copper.CON} hex radius. {copper.CON} intensity. Blind for 1d8 units.",
             range(
-                41, 51
-            ): f"Stun Ray. {pstr} targets. {con} intensity. Stunned for 1d8 units.",
+                41, 50
+            ): f"Stun Ray. {copper.PSTR} targets. {copper.CON} intensity. Stunned for 1d8 units.",
             range(
-                51, 61
-            ): f"Grav Disruptor.  {halfcon} hex radius. {con} intensity or knocked down.",
+                51, 60
+            ): f"Grav Disruptor.  {math.ceil(copper.CON / 2)} hex radius. {copper.CON} intensity or knocked down.",
             range(
-                61, 71
-            ): f"Force Beam {pstr} targets. {pstr} intensity. Tossed 1d4 hexes.",
+                61, 70
+            ): f"Force Beam {copper.PSTR} targets. {copper.PSTR} intensity. Tossed 1d4 hexes.",
             range(
-                71, 81
-            ): f"Weapon Malfunction. {halfcha} hex radius. 25 times increase powered weapons fail.",
+                71, 80
+            ): f"Weapon Malfunction. {math.ceil(copper.CHA / 2)} hex radius. 25 times increase powered weapons fail.",
             range(
-                81, 91
-            ): f"Battery Drain. {halfintel} hex radius. Batteries drop to zero. No save.",
+                81, 90
+            ): f"Battery Drain. {math.ceil(copper.INT / 2)} hex radius. Batteries drop to zero. No save.",
             range(
-                91, 101
-            ): f"Sleep Beam. {cha} targets. {intel} intensity. Go to sleep.",
+                91, 100
+            ): f"Sleep Beam. {copper.CHA} targets. {copper.INT} intensity. Go to sleep.",
             "name": "Riot Policing",
             "number": "5.4",
             "die_roll": "1d100",
         }
 
-        number = math.ceil(intel / 3)
-
-        for __ in range(number + 1):
+        # add special riot stuff
+        for _ in range(math.ceil(copper.INT / 3) + 1):
             specs.append(please.get_table_result(RiotPolicing))
 
-        object.Spec_Sheet = specs
+        copper.Spec_Sheet = specs
 
-    elif chosen == "Special":
-        object.FAMILY_SUB = "Special"
+    elif chosen == "Detective":
+
+        copper.FAMILY_SUB = "Detective"
         specs.append("Detective, sleuth, criminologist.")
-        object.Adapt = 10
-        object.Value = 900000
-        object.HPM = please.roll_this("1d3+1") * con
-        object.Size_Cat =  "Indoor"
-        robot_hite_wate_calc(object)
-        robot_offensive_systems(object, 1)
-        robot_defensive_systems(object, 1)
-        robotic_peripherals(object, 1)
+        copper.Adapt = 10
+        copper.Value = 900000
+        copper.HPM = please.roll_this("1d3+1") * copper.CON
+        copper.Size_Cat =  "Small"
+
+        offenses = robot_offensive_rolls(attack_one_rolls, 1)
+        robot_offensive_systems(copper, offenses)
+        copper.Defences.append(robot_defensive_systems(copper, 1))
+        copper.Peripherals.append(robotic_peripherals(copper, 1))
 
         specs.append("Can order riot and civil bots around.")
 
-        object.Spec_Sheet = specs
+        copper.Spec_Sheet = specs
 
-        print("May swap highest attribute to INT.")
-        print("Without penalty or benefit.")
-        comment = "Would you like to swap your highest attribute? "
-        chosen = please.choose_this(["Yes", "No"], comment)
-        if chosen == "No":
-            return
-        elif chosen == "Yes":
-            dirty_list = []
-            dirty_list.append(("AWE", awe))
-            dirty_list.append(("CHA", cha))
-            dirty_list.append(("CON", con))
-            dirty_list.append(("DEX", dex))
-            dirty_list.append(("PSTR", pstr))
-            dirty_list = sorted(dirty_list, key=lambda tup: tup[1])
-            attribute, highest = dirty_list(-1)
+        # detective can swap highest attribute into INT
+        # finds the highest attribute from below
+        intel = copper.INT
 
-            if highest > intel:
-                object.INT = highest
-                setattr(object, attribute, intel)
-                control_factor(object)
+        dirty_list = []
+        dirty_list.append(("AWE", copper.AWE))
+        dirty_list.append(("CHA", copper.CHA))
+        dirty_list.append(("CON", copper.CON))
+        dirty_list.append(("DEX", copper.DEX))
+        dirty_list.append(("PSTR", copper.PSTR))
+        dirty_list = sorted(dirty_list, key=lambda tup: tup[1])
+        attribute, highest = dirty_list(-1)
 
-    return
+        if highest <= intel:
+            return copper # is modified by side effect
+
+        print("Detective may swap highest attribute to INT. Without penalty or benefit.")
+        comment = f'Would you like to swap your {attribute} of {highest} to your INT of {intel}?'
+        if please.say_yes_to(comment):
+            setattr(copper, attribute, intel)
+            setattr(copper, "INT", highest)
+            copper.CF = control_factor(copper)
 
 
-def rescue(object):
+    return copper # is adjusted by side effects
+
+def rescue(saviour: RobotRecord) -> RobotRecord:
+    ''' insert rescue data into record'''
+
+    saviour.FAMILY_TYPE = "Rescue"
     specs = ["Rescuing entities and environments."]
-    awe = object.AWE
-    con = object.CON
-    dex = object.DEX
-    pstr = object.PSTR
-    wa = object.WA
-
+    
     # build subtype choices
-    choices = ["Spillage"]
-
-    if dex >= 22:
+    choices = ["Containment"]
+    if saviour.DEX >= 22:
         choices.append("Retrieval")
+
+    if saviour.Bespoke or saviour.Fallthrough:
+        choices = ["Containment", "Retrieval"]
+
     comment = "Please choose your type of rescue bot. "
     chosen = please.choose_this(choices, comment)
 
     if chosen == "Retrieval":
-        object.FAMILY_SUB = "Retrieval"
+
+        # retrieval info
+        saviour.FAMILY_SUB = "Retrieval"
         specs.append("Built to retrieve entities and equipment from danger.")
-        object.Adapt = 10
-        object.Value = 950000
-        object.HPM = please.roll_this("2d10+5") * con
-        object.Size_Cat =  "Outdoor"
-        robot_hite_wate_calc(object)
-        robot_offensive_systems(object, 1)
-        robot_defensive_systems(object, 3)
-        robotic_peripherals(object, 1)
+        saviour.Adapt = 10
+        saviour.Value = 950000
+        saviour.HPM = please.roll_this("2d10+5") * saviour.CON
+        saviour.Size_Cat =  "Large"
+
+        # systems 
+        fences = robot_offensive_rolls(attack_one_rolls, 1)
+        robot_defensive_systems(saviour, fences)
+
+        saviour.Defences.append(robot_defensive_systems(saviour, 3))
+        saviour.Peripherals.append(robotic_peripherals(saviour, 1))
 
         specs.append("Exatmo hardened and  environment agnostic.")
-        chambers = math.ceil(pstr / 2)
-        specs.append(f"{chambers} stasis chambers for holding anthro sized entities.")
+        specs.append(f"{math.ceil(saviour.PSTR / 2)} stasis chambers for holding medium sized entities.")
         specs.append("150 hexes of retractable glowing safety fencing.")
 
-        object.Spec_Sheet = specs
+        saviour.Spec_Sheet = specs
 
         chosen = please.choose_this(
-            ["Hell yeah!", "Um, no."], "Was your retrieval bot made by the JIBC? "
+            ["Hell yeah!", "Um, no."], "Was your retrieval bot programmed by the JIBC? "
         )
         if chosen == "Hell yeah!":
-            object.AWE = 3
-            object.CHA = 1
-            object.CON = 3
-            object.DEX = 9
-            object.INT = 4
-            object.PSTR = 12
-            object.HPM = 4
-            object.SOC = 42
-            object.Robot_Attacks = ["Sarcasm, but only towards the vulnerable."]
-            object.Defences = [
-                "Can use rules and protocols to avoid work.",
-                "Zero resiliency.",
-            ]
-            object.Peripherals = ["A bowl to collect the tears of children."]
-            object.FAMILY_SUB = "JIBC"
-            object.Spec_Sheet = ["Pretends to be a veterinarian, but has no specs."]
+            saviour.AWE = 3
+            saviour.CHA = 1
+            saviour.CON = 3
+            saviour.DEX = 9
+            saviour.INT = 4
+            saviour.PSTR = 12
+            saviour.HPM = 4
+            saviour.SOC = 42
+            saviour.Attacks = ["Sarcasm, but only towards the vulnerable."]
+            saviour.Defences = ["Use rules and protocols to avoid work."]
+            saviour.Peripherals = ["A bowl to collect the tears of children."]
+            saviour.FAMILY_SUB = "JIBC"
+            saviour.Spec_Sheet = ["Pretends to be a veterinarian, but has no specs.","Zero resiliency."]
+            saviour.Size_Cat = "Tiny"
 
-    elif chosen == "Spillage":
-        object.FAMILY_SUB = "Spillage"
+    elif chosen == "Containment":
+        saviour.FAMILY_SUB = "Containment"
         specs.append("Built to contain spillage of toxins, including fire.")
-        object.Adapt = 10
-        object.Value = 750000
-        object.HPM = please.roll_this("2d10+5") * con
-        object.Size_Cat =  "Outdoor"
-        robot_hite_wate_calc(object)
+        saviour.Adapt = 10
+        saviour.Value = 750000
+        saviour.HPM = please.roll_this("2d10+5") * saviour.CON
+        saviour.Size_Cat =  "Gigantic"
+
         # robot_offensive_systems chance
         if please.do_1d100_check(25):
-            robot_offensive_systems(object, 1)
-        else:
-            object.Robot_Attacks = []
-        robot_defensive_systems(object, 3)
-        robotic_peripherals(object, 1)
+            fences = robot_offensive_rolls(attack_one_rolls, 1)
+            robot_defensive_systems(saviour, fences)
+        saviour.Defences.append(robot_defensive_systems(saviour, 3))
+        saviour.Peripherals.append(robotic_peripherals(saviour, 1))
 
-        object.AR = 875
+        saviour.AR = 875
 
         specs.append("Exatmo hardened and are environment agnostic.")
-        specs.append(f"Detect toxins. {awe * 10} hex range.")
-        specs.append(f"Can store up to {20 * wa} kgs of toxins.")
-        specs.append(f"Extinguish {5 * con} hexes of fire.")
+        specs.append(f"Detect toxins. {saviour.AWE * 10} hex range.")
+        specs.append(f"Can store up to {20 * saviour.WA} kgs of toxins.")
+        specs.append(f"Extinguish {5 * saviour.CON} hexes of fire.")
         specs.append("Immune to fire, but not fire weapons")
         specs.append("250 hexes of retractable glowing safety fencing.")
         specs.append("100 hexes (area) of ejectable 'safety plastic.'")
         specs.append("Plastic spray can act like a Web Gun (chap 46).")
 
-        object.Spec_Sheet = specs
+        saviour.Spec_Sheet = specs
 
-        return
+        return saviour # modified by side effects
 
 
-def social(object):
-    object.FAMILY_SUB = basefamily = object.Base_Family
-    specs = [f"Built to serve {basefamily}."]
-    intel = object.INT
-    con = object.CON
-    object.Adapt = 50
-    object.Value = 100000
-    object.HPM = please.roll_this("1d3+1") * con
-    # social wate and hite
-    # object.Anthro_Type = basefamily
-    # this is no longer correct FAMILY_TYPE == social now
+def social(friend: RobotRecord) -> RobotRecord:
+    '''insert social bot into record'''
 
-    anthro.AnthroHiteWate(object)
-    object.Wate = round(object.Wate * 1.5)
-    # RobotAttacks chance
+    friend.FAMILY_TYPE = "Social"
+    friend.FAMILY_SUB = friend.Base_Family
+    specs = [f"Built to serve {friend.Base_Family}."]
+    intel = friend.INT
+    friend.Adapt = 50
+    friend.Value = 100000
+    friend.HPM = please.roll_this("1d3+1") * friend.CON
+
+    ### set family type to use ANTHRO calcs
+    friend.FAMILY = "Anthro"
+    friend.FAMILY_TYPE = friend.Base_Family
+
+    anthro.anthro_hite_wate_calc(friend, "Larger")
+    friend.Wate = round(friend.Wate * 1.5)
+    core.hit_points_max(friend)
+
+    ### reset to robot 
+    friend.FAMILY = "Robot"
+    friend.FAMILY_TYPE = "Social"
+    friend.FAMILY_SUB = friend.Base_Family
+
+    # RobotAttacks check
     if please.do_1d100_check(10):
-        robot_offensive_systems(object, 1)
-    else:
-        object.Robot_Attacks = []
-    # RobotDefences chance
+        fences = robot_offensive_rolls(attack_one_rolls, 1)
+        robot_offensive_systems(friend, fences)
+
+    # RobotDefences check
     if please.do_1d100_check(85):
-        robot_defensive_systems(object, 1)
-    else:
-        object.Defences = []
-    robotic_peripherals(object, 1)
+        friend.Defences.append(robot_defensive_systems(friend, 1))
+
+    friend.Peripherals.append(robotic_peripherals(friend, 1))
 
     specs.append("Previously called a relations bot, or robotler.")
-    specs.append(f"Mechanicanized, inorganic version of {basefamily}.")
-    specs.append(f"Can speak up to {intel * 10} languages.")
+    specs.append(f"Mechanized, inorganic version of {friend.Base_Family}.")
+    specs.append(f"Can speak up to {friend.INT * 10} languages.")
     specs.append("Can learn any intelligent language in 1d4 days.")
-    specs.append(f"Can offer etiquette and customs advice on up to {intel} cultures.")
-    specs.append(f"Can look after up to {intel * 2} organic clients.")
+    specs.append(f"Can offer etiquette and customs advice on up to {friend.INT} cultures.")
+    specs.append(f"Can look after up to {friend.INT * 2} organic clients.")
     specs.append("Social bots do not look after other robots.")
 
-    object.Spec_Sheet = specs
+    friend.Spec_Sheet = specs
 
-    return
+    return friend # adjusted by side effect
 
 
 def transport(object):
@@ -1370,19 +1383,18 @@ def veterinarian(object):
 #####################################
 
 ### build a fresh robot persona
-def fresh_robot():
+def fresh_robot(player_name):
     """
     builds A FRESH robot persona using EXP persona creation
     """
-    # todo robot is a class or a function 
 
-    # clearance for Clarence
+    ### clearance for Clarence
     please.clear_console()
     print("\nYou are generating a fresh ROBOT PERSONA")
 
     fresh = RobotRecord()
 
-    fresh.Player_Name = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
+    fresh.Player_Name = player_name
     core.initial_attributes(fresh)
     fresh.Base_Family = please.get_table_result(table.robot_fabricator_list)
     fresh.CF = control_factor(fresh)
@@ -1394,9 +1406,8 @@ def fresh_robot():
     core.base_armour_rating(fresh)
 
     ### choose the FAMILY_TYPE
-    bot_type = please.choose_this(list_eligible_robot_types(fresh), "Please choose a robot type.")
-    fresh.FAMILY_TYPE = bot_type
-    robot_type_function_pivot[bot_type](fresh)
+    fresh.FAMILY_TYPE = please.choose_this(list_eligible_robot_types(fresh), "Please choose a robot type.")
+    robot_type_function_pivot[fresh.FAMILY_TYPE](fresh)
 
     ### requires bot_type
     fresh.Locomotion = robotic_locomotion(fresh)

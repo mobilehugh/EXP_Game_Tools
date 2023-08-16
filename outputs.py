@@ -1318,7 +1318,7 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
 
 
 # fix prime outputs
-def robot_screen(bot_screen) -> None:
+def robot_screen(bot_screen:) -> None:
     """
     print the robot to screen
     """
@@ -1333,11 +1333,11 @@ def robot_screen(bot_screen) -> None:
         f"DEX: {bot_screen.DEX}({bot_screen.DEX_Prime}) INT: {bot_screen.INT}({bot_screen.INT_Prime}) "
         f"MSTR: {bot_screen.MSTR} PSTR: {bot_screen.PSTR}({bot_screen.PSTR_Prime}) HPS: {bot_screen.HPM}\n"
         f"Adaptability: {bot_screen.Adapt}  Control Factor: {bot_screen.CF}  Fabricator: {bot_screen.Base_Family}\n"
-        f"Family: {bot_screen.FAMILY} Type: {bot_screen.Bot_Type} Sub-Type: {bot_screen.Sub_Type} Model: {bot_screen.Robot_Model}\n"
+        f"Family: {bot_screen.FAMILY} Type: {bot_screen.FAMILY_TYPE} Sub-Type: {bot_screen.SUB_TYPE} Model: {bot_screen.Robot_Model}\n"
     )
 
     print("APPEARANCE")
-    print(f"{bot_screen.Description} \nWate: {bot_screen.Wate} kgs Hite: {bot_screen.Hite} cms")
+    print(f"{bot_screen.Quick_Description} \nWate: {bot_screen.Wate} kgs Hite: {bot_screen.Hite} cms")
 
     print("\nMECHANICS")
     print(
