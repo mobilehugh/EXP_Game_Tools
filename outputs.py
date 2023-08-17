@@ -11,6 +11,8 @@ import mutations
 import vocation
 import table
 
+
+
 # todo RP combat block: weak strong cannon fodder, canon fodder and canonical
 # todo proficiency slot with actual weapons
 
@@ -1318,7 +1320,7 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
 
 
 # fix prime outputs
-def robot_screen(bot_screen:) -> None:
+def robot_screen(bot_screen: table.PersonaRecord) -> None:
     """
     print the robot to screen
     """
@@ -1332,18 +1334,16 @@ def robot_screen(bot_screen:) -> None:
         f"AWE: {bot_screen.AWE} CHA: {bot_screen.CHA} CON: {bot_screen.CON}({bot_screen.CON_Prime}) "
         f"DEX: {bot_screen.DEX}({bot_screen.DEX_Prime}) INT: {bot_screen.INT}({bot_screen.INT_Prime}) "
         f"MSTR: {bot_screen.MSTR} PSTR: {bot_screen.PSTR}({bot_screen.PSTR_Prime}) HPS: {bot_screen.HPM}\n"
-        f"Adaptability: {bot_screen.Adapt}  Control Factor: {bot_screen.CF}  Fabricator: {bot_screen.Base_Family}\n"
-        f"Family: {bot_screen.FAMILY} Type: {bot_screen.FAMILY_TYPE} Sub-Type: {bot_screen.SUB_TYPE} Model: {bot_screen.Robot_Model}\n"
+        f"ADAPT: {bot_screen.Adapt}  CF: {bot_screen.CF}  Base_Family: {bot_screen.Base_Family}\n"
+        f"{bot_screen.FAMILY_TYPE} {bot_screen.FAMILY_SUB} Robot Model: {bot_screen.Model} by {bot_screen.Fabricator} \n"
     )
-
+ 
     print("APPEARANCE")
-    print(f"{bot_screen.Quick_Description} \nWate: {bot_screen.Wate} kgs Hite: {bot_screen.Hite} cms")
+    print(f"{bot_screen.Quick_Description} \nWate: {bot_screen.Wate} {bot_screen.Wate_Suffix} Hite: {bot_screen.Hite} {bot_screen.Hite_Suffix}")
 
     print("\nMECHANICS")
-    print(
-        f"Power Plant: {bot_screen.Power_Plant} Power Reserve: {bot_screen.Power_Reserve} months\n"
-    )
-    print(f"Sensors: {bot_screen.Sensors}")
+    print(f"Power Plant: {bot_screen.Power_Plant} \nPower Reserve: {bot_screen.Power_Reserve} months")
+    print(f"Sensors: {', '.join(bot_screen.Sensors)}")
     print(f"Locomotion: {bot_screen.Locomotion}")
 
     print("\nATTACK Functions: ", end="")
@@ -1362,6 +1362,8 @@ def robot_screen(bot_screen:) -> None:
         for x, defence in enumerate(bot_screen.Defences):
             print(f"{x + 1}) {defence}")
 
+
+
     print("\nPERIPHERAL Functions: ", end="")
     if len(bot_screen.Peripherals) == 0:
         print("None")
@@ -1370,7 +1372,7 @@ def robot_screen(bot_screen:) -> None:
         for x, periph in enumerate(bot_screen.Peripherals):
             print(f"{x + 1}) {periph}")
 
-    print(f"\n{bot_screen.Bot_Type.upper()} ROBOT Spec Sheet: ", end="")
+    print(f"\n{bot_screen.FAMILY_TYPE.upper()} ROBOT Spec Sheet: ", end="")
     if len(bot_screen.Spec_Sheet) == 0:
         print("None")
     else:

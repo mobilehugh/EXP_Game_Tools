@@ -280,8 +280,7 @@ def show_me_your_dict(dinkie: table.PersonaRecord) -> None:
             print(f"{key}: {value}", end='   ')
         print()  # Print newline after each batch
 
-def colour_my_whirled(*args):
-    pass
+
 
 def get_table_result(table: dict) -> str:
     """
@@ -289,13 +288,14 @@ def get_table_result(table: dict) -> str:
     this is the deranged version using tuples that are more table like 
     """
     random = roll_this(table["die_roll"])
-    for key in table:
-        chance_list = range(key[0],(key[1]+1))
-        if random in chance_list:
-            result = table[key]
+
+    table = {key: val for key, val in table.items() if key not in ["name","die_roll","number", "title"]}
+
+    for item_range in table.keys():
+        if random in range(item_range[0],item_range[1]+1): # correct for normal tables (90,100) -> (90,101)
+            result = table[item_range]
             break
     return result
-
 
 
 def list_table_choices(table_chosen:dict) -> list:

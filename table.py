@@ -38,6 +38,7 @@ class PersonaRecord:
     WA: int = 1
     AR: int = 500
     Move: int = 1
+
     Age_Spans: list[str] = field(default_factory=list) 
     Age_Cat: str = "Adolescent"
     Age: int = 1
@@ -68,14 +69,15 @@ class PersonaRecord:
 class Anthropic(PersonaRecord):
     FAMILY: str = "Anthro"
    
-
-
 @dataclass
 class Robotic(PersonaRecord):
     FAMILY: str = "Robot"
     FAMILY_TYPE: str = "Unmade"
     FAMILY_SUB: str = "Unmade"
     Vocation: str = "Robot"
+    Model: str = "No Name"
+    Fabricator: str = "ACME"
+
     Date_Created: str = "Unmade"
     Date_Updated: str = "Unmade"
     CON_Prime: int = 1
@@ -96,6 +98,7 @@ class Robotic(PersonaRecord):
     Power_Plant: str = "Batteries"
     Power_Reserve: str = "all day!"
     Sensors: list[str] = field(default_factory=list)
+
 
     
 @dataclass
@@ -967,8 +970,8 @@ mechanic_skills = {
     (83, 84):"Shipmanship",
     (85, 86):"Piloting",
     (87, 88):"Vehicles",
-    (89, 90):"A B Weapons",
-    (91, 92):"C Weapons",
+    (89, 90):"Non-powered Weapons",
+    (91, 92):"Powered Weapons",
     (93, 93):"Choose",
     (94, 100):"Extra Roll",
     "name":"Mechanic Skills",
@@ -2975,7 +2978,7 @@ robot_attributes = {
 }
 
 
-robot_fabricator_list = {
+Fabricator_list = {
     (1, 3):"Aquarian",
     (4, 5):"Avarian",
     (6, 11):"Canine",
@@ -3027,12 +3030,12 @@ primary_robotic_locomotion = {
     (1, 12):('Anti-Grav', 'None'),
     (13, 18):('Chemical Slide', 'None'),
     (19, 26):('Electromagnetic Legs', '1d10'),
-    (27, 32):('Jets', 'Secondary'),
+    (27, 32):('Jets', 'BackUp'),
     (33, 40):('Magnetic', 'None'),
     (41, 46):('Pistons', '4d4'),
     (47, 56):('Pods', '1d10'),
-    (57, 63):('Propellers', 'Secondary'),
-    (64, 67):('Sails', 'Secondary'),
+    (57, 63):('Propellers', 'BackUp'),
+    (64, 67):('Sails', 'BackUp'),
     (68, 73):('Skis', '1d4+2'),
     (74, 75):('Slog Bag', 'None'),
     (76, 82):('Tracks', 'None'),
@@ -3692,8 +3695,6 @@ robot_size_to_wate = {
     "name": "wate from size",
 }
 
-
-
 robot_wate_to_hite = {
     (1, 2): "2d8",
     (3, 10): "3d6",
@@ -3706,7 +3707,6 @@ robot_wate_to_hite = {
     (4001, 6000): "12d10+300",
     (6001, 9999): "4d20+500",
     (10_000, 1_000_000): "2d12+4",
-    "name": "Robot Dimensions",
 }
 
 combot_heavy_weapons = {
