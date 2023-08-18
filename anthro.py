@@ -15,7 +15,7 @@ import mutations
 class AnthroRecord(table.Anthropic):
     pass
 
-
+# fix use please.choose_this, RP and Fallthrough to replace many funcs
 def anthro_workflow() -> None: 
     """
     player persona vs referee persona vs updating existing persona
@@ -88,32 +88,24 @@ def anthro_type_fresh(choosing_anthro_type: AnthroRecord) -> AnthroRecord:
     return choosing_anthro_type # altered by side effect
 
 # todo there is some sloppy stuff here 
-def anthro_sub_type_selection(selecting_sub_type: AnthroRecord) -> AnthroRecord:
+def anthro_sub_type_selection(subway: AnthroRecord) -> AnthroRecord:
     """
     select the sub_type for the anthro type
     """
+    choices = choices = table.anthro_sub_types[subway.FAMILY_TYPE]
 
-    choices = ["Generalis (none)", "Choose", "Bespoke", "Random"]
-    choice_comment = f"How would you like to pick your {selecting_sub_type.FAMILY_TYPE.upper()} SUBTYPE? "
-    method_of_selection = please.choose_this(choices, choice_comment)
+    if subway.Fallthrough:
+        subway.FAMILY_SUB = please.choose_this(choices,"Choose anthro SUB TYPE.", subway)
+        return subway # modified by side effect
 
-    if method_of_selection == "Choose":
-        choices = table.anthro_sub_types[selecting_sub_type.FAMILY_TYPE]
-        list_comment = f"Choose your {selecting_sub_type.FAMILY_TYPE} subtype: "
-        sub_type = please.choose_this(choices, list_comment)
+    if please.say_yes_to("Do you want to create your own SUB TYPE"):
+        sub_type = please.input_this(f"Carefully input a SUB TYPE for the family {subway.FAMILY_TYPE}: ")
+    else:
+        sub_type = please.choose_this(choices,"Choose anthro SUB TYPE.", subway)
 
-    elif method_of_selection == "Bespoke":
-        sub_type = please.input_this(f"Carefully input subtype for the {selecting_sub_type.FAMILY_TYPE}: ")
+    subway.FAMILY_SUB = sub_type
 
-    elif method_of_selection == "Random":
-        sub_type = choice(table.anthro_sub_types[selecting_sub_type.FAMILY_TYPE])
-
-    elif method_of_selection == "Generalis (none)":
-        sub_type = "Generalis"
-
-    selecting_sub_type.FAMILY_SUB = sub_type
-
-    return selecting_sub_type # altered by side effect
+    return subway # altered by side effect
 
 def adjust_attributes_by_anthro_type(anthro_type_attributes_adjust: AnthroRecord) -> AnthroRecord:
     """
@@ -657,10 +649,10 @@ def random_anthro(player_name):
     core.initial_attributes(rando)
     core.hit_points_max(rando)
     adjust_mstr_by_int(rando)
-    rando.Anthro_Type = choice(
+    rando.FAMILY_TYPE = choice(
         [x for x in table.anthro_ages_by_category_and_type]
     )
-    rando.FAMILY_SUB = choice(table.anthro_sub_types[rando.Anthro_Type])
+    rando.FAMILY_SUB = choice(table.anthro_sub_types[rando.FAMILY_TYPE])
 
     adjust_attributes_by_anthro_type(rando)
     anthro_size_rando(rando)

@@ -15,6 +15,7 @@ import core
 class AlienRecord(table.Alienic):
     pass
 
+# fix use please.choose_this, RP and Fallthrough to replace many funcs
 def alien_workflow() -> None:
     """
     player alien versus referee person vs persona maintenance
@@ -23,8 +24,6 @@ def alien_workflow() -> None:
 
     print('This is a ALIEN Build')
     nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
-
-
 
     option_function_map = {
         "Fresh Alien (New Player)":lambda:fresh_alien(nom_de_bom), 

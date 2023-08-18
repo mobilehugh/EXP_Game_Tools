@@ -7,6 +7,7 @@ Yet to come: full robots, TOYs and isolated mutations.
 exp.sciencyfiction.com
 """
 
+# fix use please.choose_this, RP and Fallthrough to replace functions
 import  alien
 import  anthro
 import  mutations

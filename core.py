@@ -1,13 +1,17 @@
 import math
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
+
 
 import table
 import please
 import alien
 import mutations
 
+@dataclass 
+class AllRecords(table.AllThings):
+    pass
 
-def initial_attributes(attributes_creating:table.PersonaRecord) -> table.PersonaRecord:
+def initial_attributes(attributes_creating:AllRecords) -> AllRecords:
     """
     generates initial attributes for anthro, alien and robot personae 
     """
@@ -49,7 +53,7 @@ def initial_attributes(attributes_creating:table.PersonaRecord) -> table.Persona
 
     return attributes_creating # modified by side effects
 
-def hit_points_max(hit_points_creating:table.PersonaRecord) -> table.PersonaRecord:
+def hit_points_max(hit_points_creating:AllRecords) -> AllRecords:
     """
     generates initial hit points max for aliens, anthros and robots BY side effects
     """
@@ -81,10 +85,10 @@ def hit_points_max(hit_points_creating:table.PersonaRecord) -> table.PersonaReco
     # apply the appropriate HPM
     hit_points_creating.HPM = hpm
 
-    return table.PersonaRecord # altered by side effect
+    return AllRecords # altered by side effect
 
 
-def wate_allowance(wate_allowance:table.PersonaRecord) -> table.PersonaRecord:
+def wate_allowance(wate_allowance:AllRecords) -> AllRecords:
     ''' determine wate allowance for alien, anthro and robot'''
 
     # anthro wate allowance is straight from table
@@ -103,7 +107,7 @@ def wate_allowance(wate_allowance:table.PersonaRecord) -> table.PersonaRecord:
 
     return wate_allowance # is modified by side effect
 
-def movement_rate(moving_time: table.PersonaRecord) -> table.PersonaRecord:
+def movement_rate(moving_time: AllRecords) -> AllRecords:
     """
     dexterity determines movement rate for anthro, alien, robot
     """
@@ -123,7 +127,7 @@ def movement_rate(moving_time: table.PersonaRecord) -> table.PersonaRecord:
 
     return moving_time # is modified by side effect
 
-def base_armour_rating(armourize: table.PersonaRecord) -> table.PersonaRecord:
+def base_armour_rating(armourize: AllRecords) -> AllRecords:
     """
     determine armour rating of anthro, alien and robots
     """
@@ -141,7 +145,7 @@ def base_armour_rating(armourize: table.PersonaRecord) -> table.PersonaRecord:
     return armourize # is altered by side effects
 
 
-def assign_persona_name(avatar_name: table.PersonaRecord) -> table.PersonaRecord:
+def assign_persona_name(avatar_name: AllRecords) -> AllRecords:
     """
     I know it is only only one line, but I want to make build_show work
     """
@@ -152,7 +156,7 @@ def assign_persona_name(avatar_name: table.PersonaRecord) -> table.PersonaRecord
     return avatar_name # is modified by side effect
 
 
-def descriptive_attributes(descriptive: table.PersonaRecord) -> table.PersonaRecord:
+def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
     """
     persona attribute shifts based on descriptive words
     """
@@ -209,7 +213,7 @@ def descriptive_attributes(descriptive: table.PersonaRecord) -> table.PersonaRec
     return descriptive # is altered by side effect
 
 
-def manual_persona_update(updating: table.PersonaRecord) -> table.PersonaRecord:
+def manual_persona_update(updating: AllRecords) -> AllRecords:
     ''' painfully update every element in persona record'''
     FORBIDDEN = ["Player_Name", "FAMILY", "FAMILY_TYPE", "Fallthrough", "RP", "Show", "Bin", "Date_Created", "Date_Updated", "ID", "File_Name"]
 
@@ -233,7 +237,7 @@ def manual_persona_update(updating: table.PersonaRecord) -> table.PersonaRecord:
     return updating # altered by side effects in this function
 
 
-def mutations_bespoke(mutate_RP: table.PersonaRecord) -> table.PersonaRecord:
+def mutations_bespoke(mutate_RP: AllRecords) -> AllRecords:
 
     ### determine RP anthro mutations
     choices = ["Family Determined", "Bespoke", "Random"]

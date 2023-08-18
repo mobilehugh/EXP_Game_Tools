@@ -9,9 +9,6 @@ smart people required
 
 from dataclasses import dataclass, field
 
-# fix create combined dataclasses as AnthroRecord, 
-# fix create combined dataclass for AlienRecord
-
 @dataclass
 class PersonaRecord:
     """
@@ -113,6 +110,33 @@ class Alienic(PersonaRecord):
     Life_Stages: dict = field(default_factory=dict)
     Society: dict = field(default_factory=dict)
     Biology: list[str] = field(default_factory=list)
+
+@dataclass
+class AllThings(PersonaRecord):
+    
+    Alternating: bool = False
+    Attack_Desc: str = ""
+    Life_Stages: dict = field(default_factory=dict)
+    Society: dict = field(default_factory=dict)
+    Biology: list[str] = field(default_factory=list)
+
+    CON_Prime: int = 1
+    DEX_Prime: int = 1
+    INT_Prime: int = 1
+    PSTR_Prime: int = 1   
+    Adapt: int = 0
+    Value: int = 42
+    Base_Family:str = "Debased"
+    CF: int = 0
+    Ramming: int = 0
+    Attacks: list[str] = field(default_factory=list) 
+    Defences: list[str] = field(default_factory=list)
+    Peripherals: list[str] = field(default_factory=list)
+    Spec_Sheet: list[str] = field(default_factory=list)
+    Locomotion: str = "Treads"
+    Power_Plant: str = "Batteries"
+    Power_Reserve: str = "all day!"
+    Sensors: list[str] = field(default_factory=list)
 
 ##############################################
 # ANTHRO TABLES
@@ -259,7 +283,7 @@ anthro_type_attribute_requirements = {
 }
 
 anthro_sub_types = {
-    "Aquarian": [
+    "Aquarian": ["Generalis",
         "Crab",
         "Dolphin",
         "Eel",
@@ -269,7 +293,7 @@ anthro_sub_types = {
         "Salmon",
         "Shark",
     ],
-    "Avarian": [
+    "Avarian": ["Generalis",
         "Budgie",
         "Crow",
         "Dodo",
@@ -279,7 +303,7 @@ anthro_sub_types = {
         "Seagull",
         "Vulture",
     ],
-    "Canine": [
+    "Canine": ["Generalis",
         "Chihuahua",
         "Dane",
         "Dingo",
@@ -289,7 +313,7 @@ anthro_sub_types = {
         "Weiner",
         "Wolf",
     ],
-    "Equine": [
+    "Equine": ["Generalis",
         "Clydesdale",
         "Cow",
         "Donkey",
@@ -299,7 +323,7 @@ anthro_sub_types = {
         "Shetland pony",
         "Zebra",
     ],
-    "Feline": [
+    "Feline": ["Generalis",
         "Calico",
         "Cougar",
         "Leopard",
@@ -309,7 +333,7 @@ anthro_sub_types = {
         "Sphinx",
         "Tiger",
     ],
-    "Florian": [
+    "Florian": ["Generalis",
         "Apple",
         "Coconut",
         "Daisy",
@@ -319,7 +343,7 @@ anthro_sub_types = {
         "Shroom",
         "Turnip",
     ],
-    "Humanoid": [
+    "Humanoid": ["Generalis",
         "Chimp",
         "Dwarf",
         "Elf",
@@ -329,7 +353,7 @@ anthro_sub_types = {
         "Orc",
         "Pig",
     ],
-    "Insectoid": [
+    "Insectoid": ["Generalis",
         "Ant",
         "Beetle",
         "Fly",
@@ -339,7 +363,7 @@ anthro_sub_types = {
         "Spider",
         "Worm",
     ],
-    "Purestrain": [
+    "Purestrain": ["Generalis",
         "Black",
         "Blue",
         "Brown",
@@ -349,7 +373,7 @@ anthro_sub_types = {
         "White",
         "Yellow",
     ],
-    "Reptilian": [
+    "Reptilian": ["Generalis",
         "Alligator",
         "Brontosaur",
         "Gecko",
@@ -359,7 +383,7 @@ anthro_sub_types = {
         "T-Rex",
         "Turtle",
     ],
-    "Rodentia": [
+    "Rodentia": ["Generalis",
         "Beaver",
         "Gerbil",
         "Guinea pig",
@@ -369,7 +393,7 @@ anthro_sub_types = {
         "Rat",
         "Sloth",
     ],
-    "Ursidae": [
+    "Ursidae": ["Generalis",
         "Black bear",
         "Brown bear",
         "Grizzly bear",
