@@ -183,6 +183,11 @@ def choose_this(choices: list, comment: str, choosy: table.PersonaRecord = None)
     if choosy:
         if choosy.Fallthrough:
             return choice(choices)
+    
+    if choosy:
+        if choosy.Bespoke:
+            if say_yes_to(f'Would you like randomize -> {comment.upper()}'):   
+                return choice(choices)
 
     # [0] is default, sort, reinsert default and add directions
     default = choices.pop(0)
@@ -333,6 +338,23 @@ def collate_this(skill_list: list) -> list:
     collated_list.sort()
 
     return collated_list
+
+def enumerate_this(list_title: str, number_me: list, sort_it:bool = True) -> None:
+    '''prints out a list numbered with a title '''
+    
+    if sort_it:
+        number_me.sort()
+
+    print(f'{list_title}', end="")
+    if len(number_me) < 1:
+        print("None")
+        return
+    print("")
+    for x, attack in enumerate(number_me,1):
+        print(f"{x}) {attack}")
+
+    return
+
 
 ##############################################
 #

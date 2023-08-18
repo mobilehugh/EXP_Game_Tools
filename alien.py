@@ -1,24 +1,35 @@
 import math
 from secrets import choice
 from collections import Counter
+from dataclasses import dataclass
 
 import please
 import table
-import anthro
 import vocation
 import mutations
 import outputs
 import core
+
+# set up AlienRecord
+@dataclass
+class AlienRecord(table.Alienic):
+    pass
 
 def alien_workflow() -> None:
     """
     player alien versus referee person vs persona maintenance
     """
     please.clear_console()
+
+    print('This is a ALIEN Build')
+    nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
+
+
+
     option_function_map = {
-        "Fresh Alien (New Player)":fresh_alien, 
-        "Bespoke Alien":bespoke_alien, 
-        "Random Alien":rando_alien, 
+        "Fresh Alien (New Player)":lambda:fresh_alien(nom_de_bom), 
+        "Bespoke Alien":lambda:bespoke_alien(nom_de_bom), 
+        "Random Alien":lambda:rando_alien(nom_de_bom),
         "Maintenance":please.do_referee_maintenance
     }
 
@@ -33,7 +44,7 @@ def alien_workflow() -> None:
 # FRESH ALIEN FUNCTIONS
 ####################################
 
-def alien_attacks(type_casting: table.PersonaRecord) -> table.PersonaRecord:
+def alien_attacks(type_casting: AlienRecord) -> AlienRecord:
     ''' 
     determine the alien attack types
     '''
@@ -46,7 +57,7 @@ def alien_attacks(type_casting: table.PersonaRecord) -> table.PersonaRecord:
        
     return type_casting # filled by side effects
 
-def alien_damage_list(damaging: table.PersonaRecord) -> list:
+def alien_damage_list(damaging: AlienRecord) -> list:
     """
     damage per attack depends on Size and PSTR
     """
@@ -72,7 +83,7 @@ def alien_damage_list(damaging: table.PersonaRecord) -> list:
 
     return damages
 
-def alien_attack_description(descriptor: table.PersonaRecord) -> list:
+def alien_attack_description(descriptor: AlienRecord) -> list:
     '''
     build alien attack description in sentence form
     '''
@@ -97,7 +108,7 @@ def alien_attack_description(descriptor: table.PersonaRecord) -> list:
     descriptor.Attack_Desc = attack_desc
     return attack_desc # also persona record altered by side effect
 
-def alien_base_shape(shaping:table.PersonaRecord) -> table.PersonaRecord:
+def alien_base_shape(shaping:AlienRecord) -> AlienRecord:
     ''' assigns a random animal shape to each body part '''
     four_quarter_parts = ["Head", "Body", "Arms", "Legs"]
 
@@ -139,7 +150,7 @@ def adornalizer(part:str, adornment:str) -> str:
 
     return adorning
 
-def alien_shape_adornments(adornable:table.PersonaRecord) -> table.PersonaRecord:
+def alien_shape_adornments(adornable:AlienRecord) -> AlienRecord:
     quarter_part_pivot = {
         "Head": table.alien_head_adornments,
         "Body": table.alien_body_adornments,
@@ -166,7 +177,7 @@ def alien_shape_adornments(adornable:table.PersonaRecord) -> table.PersonaRecord
     return adornable # is altered by side effect
 
 # todo move terrain movements to calculated in outputs, and not stored
-def assign_terrain_movements(moving_time: table.PersonaRecord) -> table.PersonaRecord:
+def assign_terrain_movements(moving_time: AlienRecord) -> AlienRecord:
     '''assigns alien movements (head, body, arms, legs) -> land, air, water (l,a,w)'''
     four_quarter_parts = ["Head", "Body", "Arms", "Legs"]
     movements = []
@@ -186,7 +197,7 @@ def assign_terrain_movements(moving_time: table.PersonaRecord) -> table.PersonaR
 
     return moving_time # is altered by side effect
 
-def alien_quick_description_builder(describing: table.PersonaRecord) -> table.PersonaRecord:
+def alien_quick_description_builder(describing: AlienRecord) -> AlienRecord:
     ''' make a little ditty describing the alien '''
 
     head = describing.Head.split("(")[0].strip()
@@ -220,7 +231,7 @@ def alien_quick_description_builder(describing: table.PersonaRecord) -> table.Pe
 
     return description
 
-def alien_life_stages(staging:table.PersonaRecord, life_span:int = 42) -> dict:
+def alien_life_stages(staging:AlienRecord, life_span:int = 42) -> dict:
     ''' creates a dict of the life stages for alien'''
     age_suffix = "years" if life_span > 6 else "months"
     life_span = life_span if life_span > 6 else life_span * 12
@@ -263,7 +274,7 @@ def alien_life_span() -> int:
 
     return life_span # also aging modified by side effect
 
-def alien_age(aging:table.PersonaRecord, stage:str = "Adol") -> int:
+def alien_age(aging:AlienRecord, stage:str = "Adol") -> int:
     ''' alien age based on age category'''
     tuple_ = aging.Life_Stages[stage]
     age = choice(range(tuple_[0],tuple_[1]+1))
@@ -281,7 +292,7 @@ def alien_voice() -> str:
 
     return f"{sound_one}s and {sound_two}s"
 
-def alien_biology(biologically:table.PersonaRecord) -> table.PersonaRecord:
+def alien_biology(biologically:AlienRecord) -> AlienRecord:
     ''' create list of biological info'''
 
     alien_biology = []
@@ -297,7 +308,7 @@ def alien_biology(biologically:table.PersonaRecord) -> table.PersonaRecord:
 
     return biologically # altered by side effect
 
-def society_output(socializing: table.PersonaRecord) -> list:
+def society_output(socializing: AlienRecord) -> list:
     '''returns a list of strings describing society'''
 
     social_list = []
@@ -309,7 +320,7 @@ def society_output(socializing: table.PersonaRecord) -> list:
 
     return social_list
 
-def alien_society(socialize: table.PersonaRecord) -> table.PersonaRecord:
+def alien_society(socialize: AlienRecord) -> AlienRecord:
     ''' set up a tool use, language, and society'''
 
     awe = socialize.AWE
@@ -396,7 +407,7 @@ def alien_society(socialize: table.PersonaRecord) -> table.PersonaRecord:
 
     return socialize # altered by side effects
 
-def alien_society_bespoke(bespoken: table.PersonaRecord) -> table.PersonaRecord:
+def alien_society_bespoke(bespoken: AlienRecord) -> AlienRecord:
     """
     first generates a society for the alien
     Second allow player to modify the society
@@ -426,7 +437,7 @@ def alien_society_bespoke(bespoken: table.PersonaRecord) -> table.PersonaRecord:
 
     return bespoken # altered here by side effect
 
-def alien_vocation_check(get_a_job:table.PersonaRecord) -> table.PersonaRecord:
+def alien_vocation_check(get_a_job:AlienRecord) -> AlienRecord:
     '''assigns a vocation to an alien if appropriate'''
 
     if get_a_job.Vocation == "Alien": return
@@ -452,7 +463,7 @@ def alien_vocation_check(get_a_job:table.PersonaRecord) -> table.PersonaRecord:
 
     return get_a_job # altered by side effect
 
-def alien_speciesizer(naming: table.PersonaRecord) -> list:
+def alien_speciesizer(naming: AlienRecord) -> list:
     ''' generate a faux latin list'''
 
     # todo nomenclature mutations  "Mutations": {"Wings": null}
@@ -466,12 +477,11 @@ def alien_speciesizer(naming: table.PersonaRecord) -> list:
     for part in ["Head", "Body", "Arms", "Legs"]:
         faux = getattr(naming, part).split(" (")[0]
         tableau = table.latinicize[faux]
-        # input(f'{faux = } {tableau = } wtfbro')
         latini.append(choice(tableau))
 
     return latini
 
-def alien_culturizer(naming: table.PersonaRecord) -> list:
+def alien_culturizer(naming: AlienRecord) -> list:
     if naming.Society["Language"] == "None":
         return
     # todo nomenclature alien culture names 
@@ -480,7 +490,7 @@ def alien_culturizer(naming: table.PersonaRecord) -> list:
 
     return ["weedameeples"]
 
-def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
+def alien_nomenclature(naming: AlienRecord) -> AlienRecord:
     '''FAMILY = Alien, FAMILY_TYPE = species name, FAMILY_SUB = cultural name, persona name'''
 
     if naming.RP:
@@ -510,7 +520,7 @@ def alien_nomenclature(naming: table.PersonaRecord) -> table.PersonaRecord:
 # BESPOKE ALIEN FUNCTIONS
 ####################################
 
-def alien_hite_wate_calc(picking_sizes: table.PersonaRecord) -> table.PersonaRecord :
+def alien_hite_wate_calc(picking_sizes: AlienRecord) -> AlienRecord :
     ''' 
     return actual wate and wate_suffix based on size_cat
     '''
@@ -526,11 +536,11 @@ def alien_hite_wate_calc(picking_sizes: table.PersonaRecord) -> table.PersonaRec
 
     return picking_sizes # modified by side effects
 
-def alien_size_bespoke(choosing_sizes: table.PersonaRecord) -> table.PersonaRecord:
+def alien_size_bespoke(choosing_sizes: AlienRecord) -> AlienRecord:
     """
     generate alien size_cat including minute and humongous
     """
-    def fallthrough_diversion(m_or_h: table.PersonaRecord) -> table.PersonaRecord:
+    def fallthrough_diversion(m_or_h: AlienRecord) -> AlienRecord:
         m_or_h.Size_Cat = please.get_table_result(table.alien_size_fresh)
 
         if m_or_h.Size_Cat == "Tiny" and please.do_1d100_check(16):
@@ -558,7 +568,7 @@ def alien_size_bespoke(choosing_sizes: table.PersonaRecord) -> table.PersonaReco
 
     return choosing_sizes # adjusted by side effects
 
-def alien_attributes_bespoke(attributions: table.PersonaRecord) -> table.PersonaRecord:
+def alien_attributes_bespoke(attributions: AlienRecord) -> AlienRecord:
     """
     determine attributes
     """
@@ -584,7 +594,7 @@ def alien_attributes_bespoke(attributions: table.PersonaRecord) -> table.Persona
 
     return attributions # altered by side effect
 
-def alien_attacks_bespoke(attacking: table.PersonaRecord) -> table.PersonaRecord:
+def alien_attacks_bespoke(attacking: AlienRecord) -> AlienRecord:
     """
     alien attack type and frequency
     """
@@ -607,7 +617,7 @@ def alien_attacks_bespoke(attacking: table.PersonaRecord) -> table.PersonaRecord
 
     return attacking # is modified by side effect
 
-def alien_life_span_bespoke(lifer: table.PersonaRecord) -> table.PersonaRecord:
+def alien_life_span_bespoke(lifer: AlienRecord) -> AlienRecord:
     """
     determine alien life span
     """
@@ -639,7 +649,7 @@ def alien_life_span_bespoke(lifer: table.PersonaRecord) -> table.PersonaRecord:
 
         return
 
-def alien_biology_bespoke(biological: table.PersonaRecord) -> table.PersonaRecord:
+def alien_biology_bespoke(biological: AlienRecord) -> AlienRecord:
     """
     referee can adjust alien biology for bespoke aliens
     """
@@ -673,7 +683,7 @@ def alien_biology_bespoke(biological: table.PersonaRecord) -> table.PersonaRecor
     return biological # is altered by side effect here
 
 ### build a FRESH alien persona
-def fresh_alien():
+def fresh_alien(player_name)->AlienRecord:
     """
     builds a fresh alien object as per EXP persona creation
     """
@@ -682,23 +692,9 @@ def fresh_alien():
     please.clear_console()
     print("\nYou are generating a FRESH ALIEN Persona")
 
-    fresh = table.PersonaRecord()
-    fresh.FAMILY = "Alien"
-    fresh.FAMILY_TYPE = "undiscovered"
-    fresh.FAMILY_SUB = "undiscovered"
-    fresh.Vocation = "Alien"
-    fresh.Date_Created = "Unevolved"
-    fresh.RP = False
-    fresh.Attacks = []
-    fresh.Alternating = False
-    fresh.Attack_Desc = ""
-    fresh.Life_Stages = {}
-    fresh.Society = {}
+    fresh = AlienRecord()
 
-
-    ### get mundane player name
-    fresh.Player_Name = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
-
+    fresh.Player_Name = player_name
     core.initial_attributes(fresh)
     fresh.Size_Cat = please.get_table_result(table.alien_size_fresh)
     core.hit_points_max(fresh)
@@ -727,7 +723,7 @@ def fresh_alien():
     return
 
 ### build a BESPOKE alien persona
-def bespoke_alien():
+def bespoke_alien(player_name) -> AlienRecord:
     """
     Build a bespoke alien persona usually a referee persona
     """
@@ -736,24 +732,8 @@ def bespoke_alien():
     please.clear_console()
     print("\nYou are generating a BESPOKE ALIEN Persona")
 
-
-    bespoke = table.PersonaRecord()
-    bespoke.FAMILY = "Alien"
-    bespoke.Vocation = "Alien"
-    bespoke.FAMILY_TYPE = "undiscovered"
-    bespoke.FAMILY_SUB = "undiscovered"
-    bespoke.Date_Created = "Unevolved"
-    bespoke.RP = True
-    bespoke.Attacks = []
-    bespoke.Alternating = False
-    bespoke.Attack_Desc = ""
-    bespoke.Life_Stages = {}
-    bespoke.Biology = []
-    bespoke.Society = {}
-
-    ### get mundane player name
-    bespoke.Player_Name = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
-
+    bespoke = AlienRecord()
+    bespoke.Player_Name = player_name
     alien_attributes_bespoke(bespoke)
     alien_size_bespoke(bespoke)
     core.wate_allowance(bespoke)
@@ -786,30 +766,16 @@ def bespoke_alien():
     return
 
 ### build a RANDO alien persona
-def rando_alien():
+def rando_alien(player_name) -> AlienRecord:
     '''create an instant random alien'''
-    # clearance for Clarence
     please.clear_console()
-    print("\nYou are generating a random ANTHRO PERSONA.")
+    print("\nYou are generating a RANDOM ANTHRO persona.")
 
-    rando = table.PersonaRecord()
-    rando.FAMILY = "Alien"
-    rando.Vocation = "Alien"
-    rando.FAMILY_TYPE = "undiscovered"
-    rando.FAMILY_SUB = "undiscovered"
-    rando.Date_Created = "Unevolved"
-    rando.RP = True
+    rando = AlienRecord()
     rando.Fallthrough = True
-    rando.Attacks = []
-    rando.Alternating = False
-    rando.Attack_Desc = ""
-    rando.Life_Stages = {}
-    rando.Biology = []
-    rando.Society = {}
 
     ### get mundane terran name of the player
-    rando.Player_Name = str(please.input_this("\nPlease input your MUNDANE TERRAN NAME: "))
-
+    rando.Player_Name = player_name
     core.initial_attributes(rando)
     alien_attacks_bespoke(rando)
     alien_size_bespoke(rando)
@@ -833,7 +799,6 @@ def rando_alien():
     rando.EXPS = vocation.convert_levels_to_exps(rando)
     alien_biology_bespoke(rando)
     alien_society_bespoke(rando)
-
     if rando.Vocation != "Alien":
         vocation.set_up_first_time(rando)
         if rando.Level > 1:

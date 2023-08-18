@@ -801,7 +801,7 @@ class PDF(FPDF):
 #
 ##############################################
 
-
+# fix show_details and return_details may not be using build 
 # fix broken pdf to browser 
 def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str = "C:/") -> None:
     """
@@ -1319,66 +1319,61 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
 #####################################
 
 
-# fix prime outputs
 def robot_screen(bot_screen: table.PersonaRecord) -> None:
     """
     print the robot to screen
     """
 
     # clearance for Clarence
-    ## please.clear_console()
+    please.clear_console()
 
-    print("\n\n\nROBOT PERSONA RECORD")
+    print(f'\n\nROBOT PERSONA RECORD - {bot_screen.FAMILY_TYPE.upper()} {bot_screen.FAMILY_SUB.upper() if bot_screen.FAMILY_SUB else ""}')
     print(
-        f"{bot_screen.Persona_Name} \t\tPlayer_Name: {bot_screen.Player_Name} \tDate: {bot_screen.Date_Created}\n"
+        f"Name: {bot_screen.Persona_Name} \t\tPlayer Name: {bot_screen.Player_Name} Created: {bot_screen.Date_Created}\n"
         f"AWE: {bot_screen.AWE} CHA: {bot_screen.CHA} CON: {bot_screen.CON}({bot_screen.CON_Prime}) "
         f"DEX: {bot_screen.DEX}({bot_screen.DEX_Prime}) INT: {bot_screen.INT}({bot_screen.INT_Prime}) "
         f"MSTR: {bot_screen.MSTR} PSTR: {bot_screen.PSTR}({bot_screen.PSTR_Prime}) HPS: {bot_screen.HPM}\n"
-        f"ADAPT: {bot_screen.Adapt}  CF: {bot_screen.CF}  Base_Family: {bot_screen.Base_Family}\n"
-        f"{bot_screen.FAMILY_TYPE} {bot_screen.FAMILY_SUB} Robot Model: {bot_screen.Model} by {bot_screen.Fabricator} \n"
     )
- 
-    print("APPEARANCE")
-    print(f"{bot_screen.Quick_Description} \nWate: {bot_screen.Wate} {bot_screen.Wate_Suffix} Hite: {bot_screen.Hite} {bot_screen.Hite_Suffix}")
 
-    print("\nMECHANICS")
-    print(f"Power Plant: {bot_screen.Power_Plant} \nPower Reserve: {bot_screen.Power_Reserve} months")
-    print(f"Sensors: {', '.join(bot_screen.Sensors)}")
-    print(f"Locomotion: {bot_screen.Locomotion}")
+    print("APPEARANCE:")
+    print(f"{bot_screen.Quick_Description} \nSize: {bot_screen.Size_Cat} Wate: {bot_screen.Wate} {bot_screen.Wate_Suffix} Hite: {bot_screen.Hite} {bot_screen.Hite_Suffix}")
 
-    print("\nATTACK Functions: ", end="")
-    if len(bot_screen.Attacks) == 0:
+    # build mechanicals for consistency 
+    mechanicals = []
+    mechanicals.append(f'Robot Type: {bot_screen.FAMILY_TYPE}')
+    if bot_screen.FAMILY_SUB:
+        mechanicals.append(f'Robot Sub Type: {bot_screen.FAMILY_SUB}')
+    mechanicals.append(f"Base Family:  {bot_screen.Base_Family} ")
+    mechanicals.append(f'Model Name: {bot_screen.Model}')
+    mechanicals.append(f'Manufacturer: {bot_screen.Fabricator}')
+    mechanicals.append(f'Control Factor: {bot_screen.CF}')
+    mechanicals.append(f"Adaptability: {bot_screen.Adapt}")
+    mechanicals.append(f"Power Plant: {bot_screen.Power_Plant}")
+    mechanicals.append(f"Power Reserve: {bot_screen.Power_Reserve} months")
+    mechanicals.append(f"Sensors: {', '.join(bot_screen.Sensors)}")
+    mechanicals.append(f"Locomotion: {bot_screen.Locomotion}")   
+
+    please.enumerate_this("\nMECHANICALS: ", mechanicals, False)
+
+    please.enumerate_this("\nSPEC SHEET: ", bot_screen.Spec_Sheet, False)
+
+    please.enumerate_this("\nATTACKS: ", bot_screen.Attacks)
+
+    please.enumerate_this("\nDEFENCES: ", bot_screen.Defences)
+
+    please.enumerate_this("\nPERIPHERALS: ", bot_screen.Peripherals)
+
+    print("\nANOMALIES: ", end=" ")
+
+    if len(bot_screen.Mutations) == 0:
         print("None")
+
     else:
-        print("")
-        for x, attack in enumerate(bot_screen.Attacks):
-            print(f"{x + 1}) {attack}")
-
-    print("\nDEFENCE Functions: ", end="")
-    if len(bot_screen.Defences) == 0:
-        print("None")
-    else:
-        print("")
-        for x, defence in enumerate(bot_screen.Defences):
-            print(f"{x + 1}) {defence}")
-
-
-
-    print("\nPERIPHERAL Functions: ", end="")
-    if len(bot_screen.Peripherals) == 0:
-        print("None")
-    else:
-        print("")
-        for x, periph in enumerate(bot_screen.Peripherals):
-            print(f"{x + 1}) {periph}")
-
-    print(f"\n{bot_screen.FAMILY_TYPE.upper()} ROBOT Spec Sheet: ", end="")
-    if len(bot_screen.Spec_Sheet) == 0:
-        print("None")
-    else:
-        print("")
-        for x, periph in enumerate(bot_screen.Spec_Sheet):
-            print(f"{x + 1}) {periph}")
+        all_mutations = mutations.mutation_list_builder()
+        for mutation_name in bot_screen.Mutations.keys():
+            mutuple = next((t for t in all_mutations if t[0] == mutation_name), None)
+            working_mutation = mutuple[1](bot_screen)
+            working_mutation.post_details(working_mutation.__class__)
 
     # show the combat table
     screen_attack_table(bot_screen)

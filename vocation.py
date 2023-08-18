@@ -139,8 +139,6 @@ def spie_martial_arts(spie_fu_record: table.PersonaRecord) -> str:
 
     return  f'AR: {martial_ar} DMG: {spied_fu["Damage"]} Attacks: {spied_fu["freq"]} Order: {spied_fu["order"]}.'
 
-
-
 def veterinarian(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     set up the Veterinarian vocation
@@ -159,41 +157,33 @@ def attribute_determined(get_a_job: table.PersonaRecord) -> list:
     """
 
     # find eligible vocations for any attribute set
-    awe = get_a_job.AWE
-    cha = get_a_job.CHA
-    con = get_a_job.CON
-    dex = get_a_job.DEX
-    intel = get_a_job.INT
-    mstr = get_a_job.MSTR
-    pstr = get_a_job.PSTR
-    hpm = get_a_job.HPM
 
     vocation_list = []
 
-    if (awe + intel) >= 18:
+    if (get_a_job.AWE + get_a_job.INT) >= 18:
         vocation_list.append("Biologist")
 
-    if (dex >= 15) and (mstr >= 18) and (hpm >= 25):
+    if (get_a_job.DEX >= 15) and (get_a_job.MSTR >= 18) and (get_a_job.HPM >= 25):
         if please.say_yes_to("Is KNITE referee approved?"):
             vocation_list.append("Knite")
 
-    if intel >= 13:
+    if get_a_job.INT >= 13:
         vocation_list.append("Mechanic")
 
-    if ((con + dex + pstr) >= 22) and (hpm >= 40):
+    if ((get_a_job.CON + get_a_job.DEX + get_a_job.PSTR) >= 22) and (get_a_job.HPM >= 40):
         vocation_list.append("Mercenary")
 
-    if (awe >= 10) and (con >= 6) and (intel >= 5) and (hpm >= 20):
+    if (get_a_job.AWE >= 10) and (get_a_job.CON >= 6) and (get_a_job.INT >= 5) and (get_a_job.HPM >= 20):
         vocation_list.append("Nomad")
 
     #  any persona can pursue Nothing vocation
     vocation_list.append("Nothing")
 
-    if ((awe + cha + con + dex + intel + mstr + pstr) >= 92) and (hpm >= 30):
+    if ((get_a_job.AWE + get_a_job.CHA + get_a_job.CON + get_a_job.DEX + get_a_job.INT + get_a_job.MSTR + get_a_job.PSTR) >= 92) and (get_a_job.HPM >= 30):
         if please.say_yes_to("Is SPIE referee approved?"):
             vocation_list.append("Spie")
 
-    if (cha >= 12) and ((dex + intel) >= 16):
+    if (get_a_job.CHA >= 12) and ((get_a_job.DEX + get_a_job.INT) >= 16):
         vocation_list.append("Veterinarian")
 
     return vocation_list
@@ -280,7 +270,7 @@ def exps_level_picker(level_persona: table.PersonaRecord) -> table.PersonaRecord
     return level_persona # is adjusted by side effect
 
 
-def convert_levels_to_exps(get_a_job: dict, new_level:int = 0) -> int:
+def convert_levels_to_exps(get_a_job: table.PersonaRecord, new_level:int = 0) -> int:
     """
     Returns an EXPS total based on the experience Level of the get_a_job
     does not alter get_a_job.
@@ -289,7 +279,7 @@ def convert_levels_to_exps(get_a_job: dict, new_level:int = 0) -> int:
     vocation = get_a_job.Vocation
     exps_table = table.vocation_exps_levels[vocation]
 
-    exp_ranger = {l:x for x, l in exps_table.items() if isinstance(x, tuple)} # reverse the dictionary
+    exp_ranger = {l:x for x, l in exps_table.items() if isinstance(x, tuple)}
     level = new_level if new_level > get_a_job.Level else get_a_job.Level
     top_level = exps_table["top_level"]
 
@@ -310,7 +300,7 @@ def convert_levels_to_exps(get_a_job: dict, new_level:int = 0) -> int:
 
 
 # todo double check that exps in is related to get_a_job.EXPS
-def convert_exps_to_levels(get_a_job: dict, new_exps = 0) -> int:
+def convert_exps_to_levels(get_a_job: table.PersonaRecord, new_exps = 0) -> int:
     """
     Generates an experience Level based on the EXPS of the get_a_job
     Does not alter get_a_job.
@@ -321,7 +311,7 @@ def convert_exps_to_levels(get_a_job: dict, new_exps = 0) -> int:
     top_level = exps_table["top_level"]
     rate = exps_table["rate"]
 
-    level_ranger = {x:l for x, l in exps_table.items() if isinstance(x, tuple)} # reverse the dictionary
+    level_ranger = {x:l for x, l in exps_table.items() if isinstance(x, tuple)} # reverses from level -> EXPS
 
     if exps_amount > top:
         new_level = top_level + math.ceil((exps_amount - top) / rate)
@@ -356,7 +346,7 @@ def update_gifts(returning_gifts: table.PersonaRecord) -> list:
     return gift_list
 
 
-def fresh_interests(get_a_job: dict, interest_rolls: int) -> list:
+def fresh_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> list:
     """
     generates a fresh list of interests on first level
     """
@@ -384,7 +374,7 @@ def fresh_interests(get_a_job: dict, interest_rolls: int) -> list:
     return interest_list
 
 
-def fresh_skills(get_a_job: dict, skill_rolls: int) -> list:
+def fresh_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     """
     generates a fresh list of skills on first level
     """
@@ -418,10 +408,14 @@ def fresh_skills(get_a_job: dict, skill_rolls: int) -> list:
     return skill_list
 
 
-def update_interests(get_a_job: dict, interest_rolls: int) -> list:
+def update_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> list:
     """
     returns a list to EXTEND get_a_job.Interests using get_a_job.Vocation and increase in level
     """
+    if get_a_job.Vocation in ["Alien", "Robot"]:
+        # no work for you here aliens and robots
+        return []
+
 
     ### create a list of all interests
     do_not_include = ["Choose", "name", "die_roll"]
@@ -466,7 +460,7 @@ def update_interests(get_a_job: dict, interest_rolls: int) -> list:
     return interest_list
 
 
-def update_skills(get_a_job: dict, skill_rolls: int) -> list:
+def update_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     """
     returns a list to EXTEND get_a_job.Skills using get_a_job.Vocation and get_a_job.Level
     """

@@ -71,14 +71,12 @@ def hit_points_max(hit_points_creating:table.PersonaRecord) -> table.PersonaReco
             hpm = math.ceil(hit_points_creating.HPM * ((hit_points_creating.Wate / 1000)))
             
    
-    # todo robot hit points max
-    # robot HPM based on CON and type
-    elif hit_points_creating.FAMILY == "Robot":
+        elif hit_points_creating.FAMILY == "Robot":
         # if hit_points_creating.FAMILY == "Robot":
         # string value per robot multiplied by CON
         # present structure of robots as functions does not allow for values just yet
         # the HPM is calculated and assigned by the function 
-        pass
+            pass
         
     # apply the appropriate HPM
     hit_points_creating.HPM = hpm
@@ -147,21 +145,27 @@ def assign_persona_name(avatar_name: table.PersonaRecord) -> table.PersonaRecord
     """
     I know it is only only one line, but I want to make build_show work
     """
+    input(f'you are at assign_persona_name')
     ### get mundane terran name of the player
     avatar_name.Persona_Name = please.input_this(f'\nPlease input your PERSONA NAME: ')
 
     return avatar_name # is modified by side effect
 
 
-def descriptive_attributes(describing_changes: table.PersonaRecord) -> table.PersonaRecord:
+def descriptive_attributes(descriptive: table.PersonaRecord) -> table.PersonaRecord:
     """
     persona attribute shifts based on descriptive words
     """
+    # todo descriptive attributes need a logic check 
     # todo descriptive attributes missing size, age, AR, 
     # todo descriptive knock on effects of PSTR -> WA, DEX -> Move, CON -> HPS
     # builds a combined table 
-    if describing_changes.FAMILY == "Alien":
+    if descriptive.FAMILY == "Alien":
         upwards_table = {**table.descriptive_attributes_higher, **table.alien_descriptive_attributes}
+
+    elif descriptive.FAMILY == "Robot":
+        upwards_table = {**table.descriptive_attributes_higher, **table.alien_descriptive_attributes}
+        
     else:
         upwards_table = table.descriptive_attributes_higher
 
@@ -178,30 +182,31 @@ def descriptive_attributes(describing_changes: table.PersonaRecord) -> table.Per
             alter_attribute = upwards_table[altering_descriptor][0]
             alter_amount = upwards_table[altering_descriptor][1]
 
-            if altering_descriptor == "Fast":
-                describing_changes.Move *= 2
-            elif altering_descriptor == "Resilient":
-                describing_changes.HPM *=2
-                describing_changes.HPM = describing_changes.HPM if describing_changes.HPM > 70 else 70
+            if altering_descriptor in ["Fast", "Resilient", "Independent", "Efficient", "Adaptable"]:
+                before = getattr(descriptive, alter_attribute)
+                setattr(descriptive, alter_attribute, before*int(alter_amount))
+                if altering_descriptor == "Resilient":
+                    descriptive.HPM = descriptive.HPM if descriptive.HPM > 70 else 70
+                   
             else:
-                old_attribute = getattr(describing_changes, alter_attribute)
+                old_attribute = getattr(descriptive, alter_attribute)
                 new_attribute = please.roll_this(alter_amount)
                 new_attribute = new_attribute if new_attribute > old_attribute else old_attribute + please.roll_this("1d3")
-                setattr(describing_changes, alter_attribute, new_attribute)
+                setattr(descriptive, alter_attribute, new_attribute)
 
         if altering_descriptor in downwards_list:
             alter_attribute = table.descriptive_attributes_lower[altering_descriptor][0]
             alter_amount = table.descriptive_attributes_lower[altering_descriptor][1]
             if altering_descriptor == "Slow":
-                describing_changes.Move = math.floor(describing_changes.Move/2)
+                descriptive.Move = math.floor(descriptive.Move/2)
             else:
                 new_attribute = please.roll_this(alter_amount)
-                setattr(describing_changes, alter_attribute, new_attribute)
+                setattr(descriptive, alter_attribute, new_attribute)
                
         if altering_descriptor == "Exit":
             exit
 
-    return describing_changes # is altered by side effect
+    return descriptive # is altered by side effect
 
 
 def manual_persona_update(updating: table.PersonaRecord) -> table.PersonaRecord:
@@ -231,7 +236,7 @@ def manual_persona_update(updating: table.PersonaRecord) -> table.PersonaRecord:
 def mutations_bespoke(mutate_RP: table.PersonaRecord) -> table.PersonaRecord:
 
     ### determine RP anthro mutations
-    choices = ["Family Type Determined", "Bespoke", "Random"]
+    choices = ["Family Determined", "Bespoke", "Random"]
     choice_comment = "What selection method do you want for MUTATIONS?"
     method_type_selection = please.choose_this(choices, choice_comment)
 

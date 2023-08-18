@@ -13,10 +13,10 @@ import mutations
 import toy
 
 
-# set up RoboticRecord
+# set up RobotRecord
 @dataclass
 class RobotRecord(table.Robotic):
-    FAMILY: str = "Robot"
+    pass
 
 def robot_workflow():
     """
@@ -25,6 +25,7 @@ def robot_workflow():
     # clearance for Clarence
     please.clear_console()
 
+    print('This is a ROBOT Build')
     nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
     workflow_function_map = {
@@ -54,10 +55,29 @@ def robotic_sensors(eye_eye:RobotRecord) -> list:
         sensor_list.append(please.get_table_result(table.robotic_sensor_types))
     return sensor_list # changed by side effect
 
+
+
+
+
+
 def robotic_locomotion(move_it:RobotRecord) -> str:
     '''create a locomotion string'''
 
-    primary, secondary = please.get_table_result(table.primary_robotic_locomotion)
+    # bespoke locomotion skips fallthrough as regular is fallthrough
+    if move_it.Bespoke:
+        locomo_tuples = please.list_table_choices(table.primary_robotic_locomotion)
+        locomo_choices = [t[0] for t in locomo_tuples]
+        chosen = please.choose_this(locomo_choices, "Choose LOCOMOTION type.", move_it)        
+        for tuple in locomo_tuples:
+            if chosen in tuple:
+                chosen = tuple
+                break
+
+    else:
+        chosen = please.get_table_result(table.primary_robotic_locomotion)
+
+
+    primary, secondary = chosen[0], chosen[1]
 
     if move_it.FAMILY_TYPE == "Android":
         return f'{move_it.Base_Family} legs' 
@@ -162,7 +182,7 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
             peripheral_list[position] = new_peripheral
 
         elif peripheral == "Cybernetic Part":
-            toy_type = toy.gimme_one("Any")
+            toy_type = toy.gimme_one("any")
             new_peripheral = f"A hard wired toy - {toy_type}"
             peripheral_list[position] = new_peripheral
 
@@ -313,7 +333,7 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
                     offender.Attacks.append(f'{new_attack}: {please.get_table_result(table.fling_attacks)}, {fancy_attacks[fancy_strike]}')
           
             elif "Defensive" in new_attack:
-                offender.Defences.extend(please.get_table_result(table.robotic_defences))
+                offender.Defences.append(please.get_table_result(table.robotic_defences))
 
             elif new_attack in ["Gun", "Aerosol", "Bomb", "Grenade"]:
                 offender.Attacks.append(f'{new_attack}: {toy.gimme_one(new_attack)}')
@@ -347,7 +367,7 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
         elif defense == "Artifact Armour":
             defence_list = f'Armoured: {please.get_table_result(table.armour_list)}'
         elif defense == "Camouflage":
-            defence_list.append(f"Camouflage vs: {' '.join(defender.Sensors)} sensors")
+            defence_list.append(f"Camouflage vs: {', '.join(defender.Sensors)} detection")
         elif defense == "Detect Ambush":
             defence_list.append(f"Detect Ambush: AWE is {defender.AWE * 4} vs ambush")
         elif defense == "Diffuse Explosives":
@@ -368,7 +388,7 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
     return defence_list
 
 
-def robot_description(looks_like: RobotRecord) -> RobotRecord:
+def robot_description(looks_like: RobotRecord) -> str:
     """
     creates a wholly random robot description and colour
     """
@@ -398,10 +418,10 @@ def robot_description(looks_like: RobotRecord) -> RobotRecord:
     floating = True  if looks_like.Locomotion in ["Anti-Grav", "Magnetic"] else False
 
     if looks_like.Locomotion[0].isdigit():
-        locomo = f'{choice(["on", "sporting", "with", "moved by", "pushed by", "propelled by", "driven by"])} {looks_like.Locomotion}'
+        locomo = f'{choice([" on", " sporting", " with", " moved by", " pushed by", " propelled by", " driven by"])} {looks_like.Locomotion}'
 
     elif looks_like.Locomotion in ['Chemical Slide', 'Slog Bag']:
-        locomo = f'{choice(["a top", "sitting on a", "moved by"])} {looks_like.Locomotion}'
+        locomo = f'{choice([" a top", " sitting on a", " moved by"])} {looks_like.Locomotion}'
 
     else:
         locomo = f'{looks_like.Locomotion}'
@@ -424,6 +444,7 @@ def change_to_leet(s: str) -> str:
 def robot_nomenclature(name_it: RobotRecord) -> RobotRecord:
     ''' sort out MODEL, Company and persona names'''
 
+    print("\n\n============================\nTime to give names to the robot above")
     print(f'This robot is a {name_it.FAMILY_SUB} {name_it.FAMILY_TYPE}.')
     print(f'{name_it.Quick_Description}')
 
@@ -594,12 +615,12 @@ def combot(comboy: RobotRecord) -> RobotRecord:
         ### integrated heavy weapon EXCEPTION  for Offensive-Heavy combot
         roll = please.roll_this("1d100") + comboy.PSTR
         for spread, weapon in table.combot_heavy_weapons.items():
-            if roll in spread:
+            if roll in range(*spread):
                 break
         
         bombay = artay = ""
         if "Pop" in weapon:
-            comboy.Peripherals.extend("Integrated Popcorn Maker")
+            comboy.Peripherals.append("Integrated Popcorn Maker")
 
         if "Bomb" in weapon:
             bombay = f'Integrated bomb: {toy.gimme_one("Bomb")}'
@@ -635,7 +656,7 @@ def datalyzer(nerdy: RobotRecord) -> RobotRecord:
 
     ### datalyzer info
     nerdy.FAMILY_TYPE =  "Datalyzer"
-    nerdy.FAMILY_SUB = "Data Nerd"
+    nerdy.FAMILY_SUB = ""
 
     ### core values
     nerdy.Adapt = 15
@@ -677,7 +698,7 @@ def explorations(expoh:RobotRecord) -> RobotRecord:
     # build subtype choices
     choices = ["Planetary"]
     if expoh.INT >= 24:
-        choices.append("Extra-planetary")
+        choices.append("Extra-Planetary")
     if expoh.Bespoke or expoh.Fallthrough:
         choices= ["Planetary", "Extra-Planetary" ]
     if expoh.Fallthrough:
@@ -733,7 +754,7 @@ def hobbot(hobby:RobotRecord) -> RobotRecord:
 
     ### hobbot data
     hobby.FAMILY_TYPE = "Hobbot"
-    hobby.FAMILY_SUB = "Hacker Snowflake"
+    hobby.FAMILY_SUB = ""
     hobby.Adapt = 84
     hobby.HPM = please.roll_this("2d4") * hobby.CON
     hobby.Size_Cat =  "Tiny"
@@ -922,6 +943,7 @@ def maintenance(wrench:RobotRecord) -> RobotRecord:
     '''insert maintenance bot stuff'''
 
     wrench.FAMILY_TYPE = "Maintenance"
+    wrench.FAMILY_SUB = ""
     specs = ["Mechanic in a drum."]
 
     wrench.Adapt = 37
@@ -1174,8 +1196,7 @@ def social(friend: RobotRecord) -> RobotRecord:
 
     friend.FAMILY_TYPE = "Social"
     friend.FAMILY_SUB = friend.Base_Family
-    specs = [f"Built to serve {friend.Base_Family}."]
-    intel = friend.INT
+    specs = [f"Built to serve the {friend.Base_Family}."]
     friend.Adapt = 50
     friend.Value = 100000
     friend.HPM = please.roll_this("1d3+1") * friend.CON
@@ -1339,7 +1360,7 @@ def veterinarian(doc: RobotRecord) -> RobotRecord:
         doc.Peripherals.extend(robotic_peripherals(doc, 1))
         doc.Vocation = "Veterinarian"
 
-        specs.append([
+        specs.extend([
             f"Vet thinking task rolls +{doc.INT * 2} bonus.",
             "Excellent at diagnosis and planning.",
             "Only simple interventions.",
@@ -1366,7 +1387,7 @@ def veterinarian(doc: RobotRecord) -> RobotRecord:
         # Peripherals check
         doc.Peripherals.extend(robotic_peripherals(doc, 1))
 
-        specs.append([
+        specs.extend([
             "Often needs vet direction.",
             "Can perform all manner of interventions tasks.",
             f"Vet intervention task rolls +{doc.INT * 3} bonus.",
@@ -1384,7 +1405,7 @@ def veterinarian(doc: RobotRecord) -> RobotRecord:
 #####################################
 
 ### build a fresh robot persona
-def fresh_robot(player_name):
+def fresh_robot(player_name) -> RobotRecord:
     """
     builds A FRESH robot persona using EXP persona creation
     """
@@ -1395,11 +1416,9 @@ def fresh_robot(player_name):
 
     fresh = RobotRecord()
 
-    fresh.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram
-
     fresh.Player_Name = player_name
     core.initial_attributes(fresh)
-    fresh.Base_Family = please.get_table_result(table.Fabricator_list)
+    fresh.Base_Family = please.get_table_result(table.robot_base_family)
     fresh.CF = control_factor(fresh)
     core.movement_rate(fresh)
     core.wate_allowance(fresh)
@@ -1412,6 +1431,11 @@ def fresh_robot(player_name):
     fresh.FAMILY_TYPE = please.choose_this(list_eligible_robot_types(fresh), "Please choose a robot type.")
     robot_type_function_pivot[fresh.FAMILY_TYPE](fresh)
 
+    if fresh.FAMILY_TYPE != "Android":
+        fresh.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
+
+
+
     ### requires bot_type
     fresh.Locomotion = robotic_locomotion(fresh)
     robot_hite_wate_calc(fresh)
@@ -1419,6 +1443,8 @@ def fresh_robot(player_name):
 
     if fresh.Vocation != "Robot":
         vocation.set_up_first_time(fresh)
+
+
 
     outputs.outputs_workflow(fresh, "screen")
     robot_nomenclature(fresh)
@@ -1432,16 +1458,163 @@ def fresh_robot(player_name):
 # build a BESPOKE robot persona
 #####################################
 
-def bespoke_robot():
-    pass
+def bespoke_robot(player_name):
+    """
+    builds A BESPOKE robot persona using EXP persona creation
+    """
 
+    bespoke = RobotRecord()
+    bespoke.Bespoke = True
+
+    ### clearance for Clarence
+    please.clear_console()
+    print(f'\n{player_name} you are generating a BESPOKE ROBOT PERSONA')
+
+    if please.say_yes_to("Is this a REFEREE PERSONA"):
+        bespoke.RP = True
+
+    bespoke.Player_Name = player_name
+
+    core.initial_attributes(bespoke) # cannot use descriptive attributes until later
+    bespoke.CF = control_factor(bespoke)
+    core.movement_rate(bespoke)
+    core.wate_allowance(bespoke)
+    bespoke.Power_Reserve = bespoke.CON
+    
+
+    base_family_choices = please.list_table_choices(table.robot_base_family)
+    bespoke.Base_Family = please.choose_this(base_family_choices, "Choose a base family", bespoke)
+
+    power_plant_choices = please.list_table_choices(table.robotic_power_plant)
+    bespoke.Power_Plant = please.choose_this(power_plant_choices, "Choose a power plant", bespoke)
+
+    sensor_choices = please.list_table_choices(table.robotic_sensor_types)
+    sensor_amount = math.ceil(bespoke.AWE / 4)
+    sensors = []
+
+    if please.say_yes_to("Randomly determine SENSORS? "):
+        bespoke.Sensors = robotic_sensors(bespoke)
+    else:
+        for _ in range(sensor_amount):
+            sensors.append(please.choose_this(sensor_choices, "Choose a sensor."))
+        bespoke.Sensors.extend(sensors)
+
+    core.base_armour_rating(bespoke)
+
+
+    if please.say_yes_to("Determine robot type by ATTRIBUTES? <- you don't choose."):
+        bespoke.FAMILY_TYPE = please.choose_this(list_eligible_robot_types(bespoke), "Please choose a robot type.")
+    else:
+        family_type_choices = please.list_table_choices(table.single_roll_robot_type)
+        bespoke.FAMILY_TYPE = please.choose_this(family_type_choices, "Choose robot type", bespoke)
+
+    robot_type_function_pivot[bespoke.FAMILY_TYPE](bespoke)
+
+    if bespoke.FAMILY_TYPE != "Android":
+        bespoke.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
+
+    ### past this line requires bot_type
+
+    bespoke.Locomotion = robotic_locomotion(bespoke)
+
+    robot_hite_wate_calc(bespoke)
+
+    if please.say_yes_to("Do you want a robot vocation? "):
+        bespoke.Vocation = please.choose_this([x for x in table.vocations_gifts_pivot], "Choose a VOCATION type.")
+        
+    if bespoke.Vocation != "Robot":
+        vocation.set_up_first_time(bespoke)
+
+    vocation.exps_level_picker(bespoke)
+
+    if bespoke.Level > 1:
+        print(f"You have {bespoke.Level - 1} additional INTEREST(s) and SKILL(s).")
+        bespoke.Interests.extend(
+            vocation.update_interests(bespoke, (bespoke.Level - 1))
+        )
+        bespoke.Skills.extend(vocation.update_skills(bespoke, (bespoke.Level - 1)))
+
+    ### generate RP EXPS points
+    bespoke.EXPS = 42 if bespoke.Level == 1 else vocation.convert_levels_to_exps(bespoke)
+
+    if please.say_yes_to("Do you want any descriptive changes? "):
+        core.descriptive_attributes(bespoke)
+
+    bespoke.Quick_Description = robot_description(bespoke)
+    outputs.outputs_workflow(bespoke, "screen")
+    robot_nomenclature(bespoke)
+    outputs.outputs_workflow(bespoke, "screen")
+    please.assign_id_and_file_name(bespoke)
+    please.record_storage(bespoke)
+    return
 
 #####################################
 # build a RANDO robot persona
 #####################################
 
-def rando_robot():
-    pass
+def rando_robot(player_name):
+    """
+    builds A RANDOM robot persona using EXP persona creation
+    """
+
+    rando = RobotRecord()
+    rando.Fallthrough = True
+
+    ### clearance for Clarence
+    please.clear_console()
+    print(f'\n{player_name} you are generating a rando ROBOT PERSONA')
+
+    if please.say_yes_to("Is this a REFEREE PERSONA"):
+        rando.RP = True
+
+    rando.Player_Name = player_name
+
+    core.initial_attributes(rando)
+    rando.CF = control_factor(rando)
+    core.movement_rate(rando)
+    core.wate_allowance(rando)
+    rando.Power_Reserve = rando.CON
+    
+    base_family_choices = please.list_table_choices(table.robot_base_family)
+    rando.Base_Family = please.choose_this(base_family_choices, "rando", rando)
+
+    power_plant_choices = please.list_table_choices(table.robotic_power_plant)
+    rando.Power_Plant = please.choose_this(power_plant_choices, "rando", rando)
+    rando.Sensors = robotic_sensors(rando)
+    core.base_armour_rating(rando)
+    rando.FAMILY_TYPE = choice(please.list_table_choices(table.single_roll_robot_type))
+    robot_type_function_pivot[rando.FAMILY_TYPE](rando)
+
+    if rando.FAMILY_TYPE != "Android":
+        rando.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
+
+    ### past this line requires bot_type
+
+    rando.Locomotion = robotic_locomotion(rando)
+
+    robot_hite_wate_calc(rando)
+
+    if please.do_1d100_check(2):
+        rando.Vocation = please.choose_this([x for x in table.vocations_gifts_pivot], "rando")
+        
+    if rando.Vocation != "Robot":
+        vocation.set_up_first_time(rando)
+
+    vocation.exps_level_picker(rando)
+
+    if rando.Level > 1:
+        rando.Interests.extend(vocation.update_interests(rando, (rando.Level - 1)))
+        rando.Skills.extend(vocation.update_skills(rando, (rando.Level - 1)))
+
+    rando.EXPS = 42 if rando.Level == 1 else vocation.convert_levels_to_exps(rando)
+
+    rando.Quick_Description = robot_description(rando)
+    outputs.outputs_workflow(rando, "screen")
+    robot_nomenclature(rando)
+    outputs.outputs_workflow(rando, "screen")
+    please.assign_id_and_file_name(rando)
+    please.record_storage(rando)
+    return
 
 robot_type_function_pivot = {
     "Android": android,

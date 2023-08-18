@@ -43,7 +43,7 @@ def record_chooser()->None:
             choices_function_map[record_type_desired]()
 
 
-def main()->None:
+def main() -> None:
     '''
     this is where is all starts
     '''

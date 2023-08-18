@@ -9,7 +9,8 @@ smart people required
 
 from dataclasses import dataclass, field
 
-# fix create combined dataclasses as AnthroRecord, AlienRecord, and RobotRecord 
+# fix create combined dataclasses as AnthroRecord, 
+# fix create combined dataclass for AlienRecord
 
 @dataclass
 class PersonaRecord:
@@ -99,14 +100,19 @@ class Robotic(PersonaRecord):
     Power_Reserve: str = "all day!"
     Sensors: list[str] = field(default_factory=list)
 
-
-    
 @dataclass
 class Alienic(PersonaRecord):
     FAMILY: str = "Alien"
-
-
-
+    FAMILY_TYPE: str = "undiscovered"
+    FAMILY_SUB: str = "undiscovered"
+    Vocation: str = "Alien"
+    Date_Created: str = "Unevolved"
+    Attacks: list[str] = field(default_factory=list) 
+    Alternating: bool = False
+    Attack_Desc: str = ""
+    Life_Stages: dict = field(default_factory=dict)
+    Society: dict = field(default_factory=dict)
+    Biology: list[str] = field(default_factory=list)
 
 ##############################################
 # ANTHRO TABLES
@@ -1645,7 +1651,6 @@ suggested_anthro_attributes = {
 }
 
 
-
 descriptive_attributes_higher = {
     "Alert": ["AWE", "1d6+16"],
     "Famous": ["SOC", "1d100+900"],
@@ -1678,7 +1683,12 @@ alien_descriptive_attributes = {
     "Smart": ["INT", "1d6+20"],
     "Strong": ["PSTR", "1d6+25"],
     "Tough": ["CON", "1d6+20"],
+}
 
+robot_descriptive_attributes = {
+    "Independent": ["CF", "2"],
+    "Efficient": ["Power_Reserve", "2"],
+    "Adaptable": ["Adaptability", "2"]
 }
 
 attribute_improve_by_anthro_type = {
@@ -2978,7 +2988,7 @@ robot_attributes = {
 }
 
 
-Fabricator_list = {
+robot_base_family = {
     (1, 3):"Aquarian",
     (4, 5):"Avarian",
     (6, 11):"Canine",
@@ -3017,7 +3027,7 @@ robotic_power_plant = {
 
 robotic_sensor_types = {
     (1, 71):"Video",
-    (72, 77):"Alternate Optical",
+    (72, 77):"Optical",
     (78, 84):"Vibrations",
     (85, 91):"Sonar",
     (92, 97):"Radar",
@@ -3363,7 +3373,54 @@ auto_prime_select_robot_type = {
     "4444": ["Android"],
 }
 
+single_roll_robot_type = {
+    (1, 5): "Android",
+    (6, 137): "Combot",
+    (138, 187): "Datalyzer",
+    (188, 222): "Exploration",
+    (223, 262): "Hobbot",
+    (263, 442): "Industrial",
+    (443, 522): "Janitorial",
+    (523, 562): "Maintenance",
+    (563, 702): "Policing",
+    (703, 782): "Rescue",
+    (783, 845): "Social",
+    (846, 920): "Transport",
+    (921, 1000): "Veterinarian",
+    "die_roll":"1d1000"
+}
 
+
+
+
+single_roll_robot_exact = {
+    (1, 5): "Android",
+    (6, 55): "Expendable Combot",
+    (56, 95): "Combot Offensive-Light",
+    (96, 135): "Combot Defensive",
+    (136, 137): "Combot Offensive-Heavy",
+    (138, 187): "Datalyzer",
+    (188, 202): "Exploration Extra-Planetary",
+    (203, 222): "Exploration Planetary",
+    (223, 262): "Hobbot",
+    (263, 322): "Industrial Building",
+    (323, 382): "Industrial Lifting",
+    (383, 442): "Industrial Moving",
+    (443, 482): "Janitorial Commercial",
+    (483, 522): "Janitorial Domestic",
+    (523, 562): "Maintenance",
+    (563, 622): "Policing Civil",
+    (623, 662): "Policing Riot",
+    (663, 702): "Policing Detective",
+    (703, 742): "Rescue Containment",
+    (743, 782): "Rescue Retrieval",
+    (783, 845): "Social",
+    (846, 905): "Transport Inatmo",
+    (906, 920): "Transport Extra-Planetary",
+    (921, 960): "Veterinarian Diagnostic",
+    (961, 1000): "Veterinarian Interventional",
+    "die_roll":"1d1000"
+}
 
 primary_robotic_peripheral = {
     (1, 17):"Articulation",
@@ -3484,7 +3541,6 @@ fling_attacks = {
     "die_roll":"1d100",
 } 
 
-# fix does every Robot have a ram!!!
 robot_ram_dam = {
     (1, 46):"Blunt Flat (1d4)",
     (47, 76):"Blunt Protuberance (1d6)",
@@ -3643,7 +3699,7 @@ colour_bomb = {
     (3, 3): "brown",
     (4, 4): "green",
     (5, 5): "grey",
-    (6, 6): "o",
+    (6, 6): "orange",
     (7, 7): "pink",
     (8, 8): "purple",
     (9, 9): "red",
@@ -3683,7 +3739,6 @@ descriptive_shapes = {
 } 
 
 
-# fix EXP nano for minute and Giga for Humongous, or in outputs? 
 robot_size_to_wate = {
     "Nano": {"wate":"1d1000", "suffix":"gms"},
     "Tiny": {"wate": "1d10", "suffix":"kgs"},
@@ -3726,17 +3781,16 @@ datalyzer_mental_chance = {
     "Canine": 18,
     "Equine": 8,
     "Feline": 10,
+    "Florian": 7,
     "Humanoid": 23,
     "Insectoid": 23,
     "Purestrain": 3,
     "Reptilian": 8,
-    "Rodentian": 6,
+    "Rodentia": 6,
     "Ursidae": 13,
     "Alien": 1,
     "Robot": 0,
 }
-
-
 
 mutation_absorbs = {
     (1, 10): "Concussion",
@@ -3973,7 +4027,7 @@ toy_categories = {
     (31, 42):"Miscellaneous Equipment",
     (43, 43):"Robot",
     (44, 53):"Miscellaneous Weapon",
-    (54, 65):"Pharmaceutical",
+    (54, 65):"Pharma",
     (66, 75):"Random Junque",
     (76, 85):"Treasure",
     (86, 89):"Vehicle",
@@ -4242,7 +4296,10 @@ misc_eq_list = {
     "die_roll":"1d100"
 }
 
-robot_list = {(1,100): "No robots yet buddy"}
+robot_list = {
+    (1,100): "No robots yet buddy",
+    "die_roll":"1d100"    
+    }
 
 misc_wep_list = {
     (1, 4): "Arm of Ephro",
@@ -4324,9 +4381,15 @@ treasure_list = {
     "die_roll":"1d100"
 }
 
-vehicle_list = {(1,100): "No vehicles yet buddy"}
+vehicle_list = {
+    (1,100): "No vehicles yet buddy",
+    "die_roll":"1d100"
+    }
 
-rocketeer_list = {(1,100): "No space vehicles yet buddy"}
+rocketeer_list = {
+    (1,100): "No space vehicles yet buddy",
+    "die_roll":"1d100"
+    }
 
 vet_eq_list = {
     (1, 3): "Age Determiner",

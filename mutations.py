@@ -6,7 +6,7 @@ from typing import Sequence
 import please
 import table
 
-# fix show_details and return_details may not be using build 
+
 # todo allow Fallthrough to skip mutation choices
 # fix defects get worse as level increases!
 
