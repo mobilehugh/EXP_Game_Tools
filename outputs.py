@@ -24,6 +24,7 @@ def outputs_workflow(outputter:table.PersonaRecord, out_type: str) -> None:
     '''
     family_type = outputter.FAMILY
 
+    # todo correct the difference between pdf screen and type
     if out_type == "pdf":
         pdf_output_chooser(outputter)
     elif family_type == 'Toy':
@@ -1470,7 +1471,7 @@ def anthro_screen(persona) -> None:
             working_mutation.post_details(working_mutation.__class__)
 
     if persona.RP:
-        print("\nReferee Persona ROLE-PLAYING CUES")
+        print("\nROLE-PLAYING CUES")
         for fun in persona.RP_Fun:
             print(f"{fun}")
 

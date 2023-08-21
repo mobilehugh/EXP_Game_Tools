@@ -149,7 +149,6 @@ def assign_persona_name(avatar_name: AllRecords) -> AllRecords:
     """
     I know it is only only one line, but I want to make build_show work
     """
-    input(f'you are at assign_persona_name')
     ### get mundane terran name of the player
     avatar_name.Persona_Name = please.input_this(f'\nPlease input your PERSONA NAME: ')
 

@@ -49,7 +49,7 @@ class PersonaRecord:
     Wate_Suffix: int = "kgs"
 
     Quick_Description: str = "Amorphous"
-
+    RP_Fun: list[str] = field(default_factory=list)
     Vocation: str = "None"
     Level: int = 1
     EXPS: int = 42
@@ -141,6 +141,21 @@ class AllThings(PersonaRecord):
 ##############################################
 # ANTHRO TABLES
 ##############################################
+
+anthro_types_list = [
+    "Aquarian",
+    "Avarian",
+    "Canine",
+    "Equine",
+    "Feline",
+    "Florian",
+    "Humanoid",
+    "Insectoid",
+    "Purestrain",
+    "Reptilian",
+    "Rodentia",
+    "Ursidae"
+]
 
 mstr_adjusted_by_int = {
     1: -5,
@@ -785,8 +800,18 @@ family_hit_location_pivot_table = {
 # VOCATION TABLES
 ###############################################
 
-# BIOLOGIST Gifts, Interests and Skills
+vocation_list = [
+    "Biologist",
+    "Knite",
+    "Mechanic",
+    "Mercenary"
+    "Nomad",
+    "Nothing",
+    "Spie",
+    "Veterinarian"
+]
 
+# BIOLOGIST Gifts, Interests and Skills
 biologist_gifts = {
     (1, 4): "Danger",
     (4, 7): "Disvenomation",

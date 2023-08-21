@@ -250,22 +250,11 @@ def exps_level_picker(level_persona: table.PersonaRecord) -> table.PersonaRecord
     only assigns a Level to the get_a_job.
     level adjustments elsewhere
     """
-    if level_persona.Fallthrough:
-        level = please.get_table_result(table.random_EXPS_levels_list)
-        return
+    if level_persona.Fallthrough or level_persona.Bespoke:
+        level_choices = [lvl for lvl in range(1,16)]
 
-    option_list = ["Random", "Bespoke"]
-    list_comment = "Choose a method for EXPS LEVEL?"
-    Bespoke_Level = please.choose_this(option_list, list_comment)
-
-    if Bespoke_Level == "Bespoke":
-        level = int(please.input_this("What is the Bespoke Level? [1 to 15] "))
-        level = 1 if level < 1 else level
-
-    elif Bespoke_Level == "Random":
-        level = please.get_table_result(table.random_EXPS_levels_list)
-
-    level_persona.Level = level
+    list_comment = "Choose an EXPS LEVEL?"
+    level_persona.Level = please.choose_this(level_choices, list_comment, level_persona)
 
     return level_persona # is adjusted by side effect
 

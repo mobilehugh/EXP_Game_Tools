@@ -26,7 +26,6 @@ def anthro_workflow() -> None:
     print('This is a ANTHRO Build')
     nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
-
     workflow_function_map = {
         "Fresh Anthro (new player)":lambda: fresh_anthro(nom_de_bom),
         "Bespoke Anthro":lambda: bespoke_anthro(nom_de_bom),
@@ -44,18 +43,15 @@ def anthro_workflow() -> None:
 # FRESH ANTHRO FUNCTIONS
 ####################################
 
-def adjust_mstr_by_int(mind_adjusting:AnthroRecord) -> AnthroRecord:
+def adjust_mstr_by_int(minding:AnthroRecord) -> AnthroRecord:
     """
     alters MSTR based on persona's INT
     """
-    old_mstr = mind_adjusting.MSTR
-    mstr_adjustment = table.mstr_adjusted_by_int[mind_adjusting.INT]
-    mstr = (old_mstr + mstr_adjustment) if (old_mstr + mstr_adjustment) > 0 else 1
-    mind_adjusting.MSTR = mstr
+    adjusted_MSTR = minding.MSTR + table.mstr_adjusted_by_int[minding.INT]
+    minding.MSTR = adjusted_MSTR if adjusted_MSTR > 0 else 1 
+    return minding # altered by side effect
 
-    return mind_adjusting # altered by side effect
-
-def list_eligible_anthro_types(making_anthro_list) -> list:
+def anthro_type_by_attribute(making_anthro_list: AnthroRecord) -> list:
     """
     returns a list of eligible anthro types based on attributes
     """
@@ -74,21 +70,23 @@ def list_eligible_anthro_types(making_anthro_list) -> list:
         if anthro_type_flag:
             anthro_type_choices.append(anthro_type)
 
-    return anthro_type_choices # altered by side effect
+    return anthro_type_choices
 
-def anthro_type_fresh(choosing_anthro_type: AnthroRecord) -> AnthroRecord:
+def anthro_type_choose(choosey: AnthroRecord) -> AnthroRecord:
     """
     pick from the eligible anthro types
     """
-    choices = list_eligible_anthro_types(choosing_anthro_type)
-    choice_comment = "Please choose an anthro type? "
-    type_choice = please.choose_this(choices, choice_comment)
-    choosing_anthro_type.FAMILY_TYPE= type_choice
+    if choosey.Fallthrough or choosey.Bespoke:
+        choices = please.list_table_choices(table.anthro_types_list)
+    else:
+        choices = anthro_type_by_attribute(choosey)
 
-    return choosing_anthro_type # altered by side effect
+    choosey.FAMILY_TYPE = please.choose_this(choices, "Choose an anthro TYPE.", choosey)
+
+    return choosey # altered by side effect
 
 # todo there is some sloppy stuff here 
-def anthro_sub_type_selection(subway: AnthroRecord) -> AnthroRecord:
+def anthro_sub_choose(subway: AnthroRecord) -> AnthroRecord:
     """
     select the sub_type for the anthro type
     """
@@ -153,21 +151,18 @@ def anthro_hite_wate_calc(size_this:AnthroRecord, sizer: str) -> AnthroRecord:
 
     return size_this # is modified by side effects
 
-def anthro_size_chooser(choosing_size:AnthroRecord) -> AnthroRecord:
-    '''player chooses a size for her persona'''
+def anthro_size_chooser(size_me:AnthroRecord) -> AnthroRecord:
+    '''player chooses a size for her persona, all size_cat are medium'''
+
     choices = ["Smaller", "Larger"]
-    choice_comment = f'Choose the size of your {choosing_size.FAMILY_TYPE}, {choosing_size.FAMILY_SUB}. '
-    anthro_size_choice = please.choose_this(choices, choice_comment)
-    anthro_hite_wate_calc(choosing_size, anthro_size_choice)
+    choice_comment = f'Choose the SIZE of your {size_me.FAMILY_TYPE.upper()}. '
+    anthro_size_choice = please.choose_this(choices, choice_comment,size_me)
+    anthro_hite_wate_calc(size_me, anthro_size_choice)
 
-    return choosing_size # is modified by side effects in anthro_hite_wate_calc
+    return size_me # is modified by side effects in anthro_hite_wate_calc
 
-def anthro_size_rando(rando_size):
-    '''chooses a random size for anthro persona'''
-    anthro_size_choice = choice(["Smaller", "Larger"])
-    anthro_hite_wate_calc(rando_size, anthro_size_choice)
-    return rando_size # is modified by side effects in anthro_hite_wate_calc
 
+# todo crappy aging logic
 def anthro_age_calc(years_old: AnthroRecord, ager: str) -> AnthroRecord:
     '''add the anthro age and age_cat to the persona record'''
     anthro_type = years_old.FAMILY_TYPE
@@ -175,12 +170,11 @@ def anthro_age_calc(years_old: AnthroRecord, ager: str) -> AnthroRecord:
     die_roll = table.anthro_ages_by_category_and_type[anthro_type][age_categories.index(ager)]
     age_years = please.roll_this(die_roll)
 
-    years_old.Age_Cat = ager
     years_old.Age = age_years
 
     return years_old # modified by side effect
 
-
+# todo anthro mutations requires a code review
 def anthro_mutations_rando(randomly_mutating: AnthroRecord) -> AnthroRecord:
     """
     assigns mutations to persona record by side effect in the mutation class
@@ -234,208 +228,18 @@ def anthro_mutations_rando(randomly_mutating: AnthroRecord) -> AnthroRecord:
 
     return randomly_mutating # record is adjusted by side effect in a mutation subclass method
 
-
-def anthro_vocations_fresh(get_a_job: AnthroRecord) -> AnthroRecord:
-    choices = vocation.attribute_determined(get_a_job)
-    choice_comment = "Choose a VOCATION: "
-    type_choice = please.choose_this(choices, choice_comment)
-    get_a_job.Vocation = type_choice
-
-    return get_a_job # modified by side effect
-
-
-####################################
-# BESPOKE ANTHRO FUNCTIONS
-####################################
-
-def bespoke_anthro_attribute_ranges(object):
-    """
-    input specific desired attribute scores
-    rolled or by hand
-    """
-
-    print("Manually inputting bespoke attributes")
-
-    if object.FAMILY == "Anthro":
-        ranges_table = table.suggested_anthro_attribute_ranges
-
-    elif object.FAMILY == "Alien":
-        ranges_table = table.alien_attribute_ranges
-
-    for attribute, attribute_data in ranges_table.items():
-        attribute_value = "new attribute value"
-        break_flag = False
-
-        while (
-            isinstance(attribute_value, str)
-            or int(attribute_value) < attribute_data["minimum"]
-            or int(attribute_value) > attribute_data["start_max"]
-        ):
-
-            # print(f'\nInputting {attribute_data["long_name"]}:')
-            suggested = getattr(object, attribute)
-
-            if please.say_yes_to(
-                f'Accept {attribute} of {suggested} from {attribute_data["dice"]}?'
-            ):
-                attribute_value = suggested
-                break_flag = True
-
-            else:
-                attribute_value = input(f"Enter new {attribute_data['long_name']}: ")
-                break_flag = True
-
-            attribute_value = int(attribute_value)
-
-            if attribute_value > attribute_data["start_max"]:
-
-                if please.say_yes_to(
-                    f"{attribute_value} seems high for {attribute}. Is this correct?"
-                ):
-                    break_flag = True
-                    break  # do I need this break? not sure
-
-            if break_flag:
-                break
-
-            if attribute_value < attribute_data["minimum"]:
-                print(
-                    f" {attribute_value} for {attribute}. Is not compatible with existence.\n Correcting to minimum of {attribute_data['minimum']}"
-                )
-                attribute_value = attribute_data["minimum"]
-                break
-
-        setattr(object, attribute, attribute_value)
-
-    return
-
-def anthro_attributes_bespoke(attribute_adjusting: AnthroRecord) -> AnthroRecord:
-    '''allows player to adjust attributes of their persona'''
-
-    # creates the attributes to mess with 
-    core.initial_attributes(attribute_adjusting)
-    core.hit_points_max(attribute_adjusting) 
-    adjust_mstr_by_int(attribute_adjusting)
-    core.movement_rate(attribute_adjusting)
-    core.base_armour_rating(attribute_adjusting)
-    core.wate_allowance(attribute_adjusting)
-
-    methods = ["Random", "Manual", "Descriptive"]
-    choice_comment = "Choose a method for ATTRIBUTES? "
-    chosen = please.choose_this(methods, choice_comment)
-
-    if chosen == "Manual":
-        core.manual_persona_update(attribute_adjusting)
-
-    elif chosen == "Random":
-        pass # because already chosen
-
-    elif chosen == "Descriptive":
-        core.descriptive_attributes(attribute_adjusting)
-
-    return attribute_adjusting # is modified by side effect in other functions
-
-def improve_attributes_by_anthro_type(object):
-    """
-    bestow improved attributes based on anthro type
-    """
-    anthro_type = object.FAMILY_TYPE
-    if anthro_type not in table.attribute_improve_by_anthro_type:
-        print(f"No bespoke attributes for {anthro_type}")
-        return
-
-    attribute_to_adjust = table.attribute_improve_by_anthro_type[anthro_type][0]
-
-    old_attribute = getattr(object, attribute_to_adjust)
-    die_roll = please.roll_this(table.attribute_improve_by_anthro_type[anthro_type][1])
-    die_roll = old_attribute if die_roll < old_attribute else die_roll
-    setattr(object, attribute_to_adjust, die_roll)
-    return
-
-def anthro_type_bespoke(object):
-
-    ### choose RP anthro type
-    choices = ["Attribute Determined", "Bespoke", "Random"]
-    choice_comment = "Choose a method for ANTHRO TYPE?"
-    method_type_selection = please.choose_this(choices, choice_comment)
-
-    all_anthro_types = [key for key in table.anthro_sub_types.keys()]
-
-    if method_type_selection == "Attribute Determined":
-        type_options = list_eligible_anthro_types(object)
-        comment = "Which ANTHRO TYPE do you want?"
-        type_chosen = please.choose_this(type_options, comment)
-        object.FAMILY_TYPE= type_chosen
-
-    elif method_type_selection == "Bespoke":
-        type_options = all_anthro_types
-        comment = "Which anthro type do you want?"
-        type_chosen = please.choose_this(type_options, comment)
-        object.FAMILY_TYPE= type_chosen
-
-    elif method_type_selection == "Random":
-        type_chosen = all_anthro_types[
-            (please.roll_this("1d" + str(len(all_anthro_types))) - 1)
-        ]  ### -1 to avoid indexing error
-        object.FAMILY_TYPE= type_chosen
-
-    else:
-        print("\nYou have not selected a valid anthro type selection method")
-
-    if please.say_yes_to("Do you want to adjust attributes by anthro type?"):
-        improve_attributes_by_anthro_type(object)
-
-    return
-
-
-def anthro_vocation_bespoke(get_a_job: AnthroRecord) -> AnthroRecord:
-    """
-    determine bespoke vocation type
-    """
-
-    ### choose RP anthro vocation
-    choices = ["Attribute Determined", "Bespoke", "Random"]
-    choice_comment = f'Choose a method te select VOCATION for a level {get_a_job.Level} persona.'
-    method_type_selection = please.choose_this(choices, choice_comment)
-
-    # create list of all vocations
-    all_vocations = [key for key in table.attributes_improve_by_vocation.keys()]
-
-    if method_type_selection == "Attribute Determined":
-        anthro_vocations_fresh(get_a_job)
-
-    elif method_type_selection == "Bespoke":
-        choices = all_vocations
-        choice_comment = f'Please choose a VOCATION for a level {get_a_job.Level} persona.'
-        get_a_job.Vocation = please.choose_this(choices, choice_comment)
-
-    elif method_type_selection == "Random":
-        get_a_job.Vocation = choice(all_vocations)
-
-    else:
-        print("\nYou have not selected a valid anthro vocation type selection method")
-
-def anthro_choose_age_cat(years_old: AnthroRecord) -> AnthroRecord:
+def anthro_return_age_cat(years_old: AnthroRecord) -> str:
     """
     allow user to select an anthro age category
     """
     option_list = ["Child", "Adolescent", "Adult", "Elder", "Aged"]
     list_comment = "Choose a bespoke age range."
-    age_cat = please.choose_this(option_list, list_comment)
+    age_cat = please.choose_this(option_list, list_comment, years_old)
 
-    anthro_age_calc(years_old, age_cat)
-    return
+    return age_cat
 
-def random_anthro_age_category(years_old: AnthroRecord) -> AnthroRecord:
-    """
-    randomly generate age category and actual age
-    """
-    random_age_range = please.get_table_result(table.anthro_random_age_category)
-    anthro_age_calc(years_old,random_age_range)
-
-    return
-
-def role_play_RP_arc():
+# todo code review this mess
+def role_play_RP_arc() -> str:
     """
     return referee person arc in relation to expedition now
     """
@@ -445,7 +249,7 @@ def role_play_RP_arc():
 
     return f"Past: {past}, Present: {present}, Goal: {goal}."
 
-def role_play_RP_beliefs(object: dict) -> str:
+def role_play_RP_beliefs() -> str:
     """
     add religion, philosophy, politics or not
     """
@@ -470,7 +274,7 @@ def role_play_RP_beliefs(object: dict) -> str:
 
     return f"Beliefs: {religious}, {philosophy}, {politics}."
 
-def role_play_RP_personality():
+def role_play_RP_personality()->str:
     """
     personality descriptor
     introvert, extrovert, insane
@@ -491,27 +295,26 @@ def role_play_RP_personality():
 
     return personality
 
-def build_RP_role_play(object):
+def build_RP_role_play(player:AnthroRecord) -> AnthroRecord:
     """
     create all the fun role_play elements for a referee persona
     """
 
     print("Building the role playing components of the referee persona")
-    object.RP_Fun = []
-    object.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
-    object.RP_Fun.append(
+    player.RP_Fun = []
+    player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
+    player.RP_Fun.append(
         f"Dress: {please.get_table_result(table.referee_persona_dress)} Hygiene: {please.get_table_result(table.referee_persona_hygiene)} Odor: {please.get_table_result(table.alien_biology_aroma)}"
     )
-    object.RP_Fun.append(
+    player.RP_Fun.append(
         f"Personality: {role_play_RP_personality()} Voice: {please.get_table_result(table.laban)} Move: { please.get_table_result(table.laban)} "
     )
-    object.RP_Fun.append(f"{role_play_RP_beliefs(object)}")
+    player.RP_Fun.append(f"{role_play_RP_beliefs()}")
 
     return
 
 #####################################
 # build a FRESH anthro persona
-# choices within the context of rolls
 #####################################
 
 def fresh_anthro(player_name) -> AnthroRecord:
@@ -524,23 +327,27 @@ def fresh_anthro(player_name) -> AnthroRecord:
 
     ### set up the object for Anthro persona
     fresh = AnthroRecord()
+    fresh.RP = True if please.say_yes_to("Do you want role playing cues? ") else False
 
     # todo proper  input_this with cyclic 
     fresh.Player_Name = player_name
     core.initial_attributes(fresh)
     core.hit_points_max(fresh)
     adjust_mstr_by_int(fresh)
-    anthro_type_fresh(fresh)
-    anthro_sub_type_selection(fresh)
+    anthro_type_choose(fresh)
+    anthro_sub_choose(fresh)
     adjust_attributes_by_anthro_type(fresh)
     anthro_size_chooser(fresh)
     core.movement_rate(fresh)
     core.base_armour_rating(fresh)
     core.wate_allowance(fresh)
-    anthro_age_calc(fresh, "Adolescent")
+    fresh.Age_Cat = "Adolescent"
+    anthro_age_calc(fresh, fresh.Age_Cat)
     mental_amount, physical_amount = mutations.biologic_mutations_number(fresh)
     mutations.mutation_assignment(fresh, mental_amount, physical_amount,"any")
-    anthro_vocations_fresh(fresh)
+
+    fresh.Vocation = please.choose_this(vocation.attribute_determined(fresh), "Choose a VOCATION")
+
     vocation.set_up_first_time(fresh)
     outputs.anthro_screen(fresh)
     core.assign_persona_name(fresh)
@@ -552,7 +359,6 @@ def fresh_anthro(player_name) -> AnthroRecord:
 
 #####################################
 # build a BESPOKE anthro persona
-# choices that reflect story needs
 #####################################
 
 def bespoke_anthro(player_name):
@@ -567,49 +373,50 @@ def bespoke_anthro(player_name):
     ### set up the object for Anthro persona
     bespoke = AnthroRecord()
     bespoke.Bespoke = True
-    bespoke.RP = True if please.say_yes_to("Is this a referee persona? ") else False
+    bespoke.RP = True if please.say_yes_to("Do you want referee persona cues? ") else False
 
-    ### get mundane terran name of the player
     bespoke.Player_Name = player_name
-    ### build list of functions
-    anthro_attributes_bespoke(bespoke)
-    anthro_type_bespoke(bespoke)
-    anthro_sub_type_selection(bespoke)
-    anthro_size_chooser(bespoke)
+    core.initial_attributes(bespoke)
+    core.hit_points_max(bespoke) 
+    adjust_mstr_by_int(bespoke)
     core.movement_rate(bespoke)
     core.base_armour_rating(bespoke)
     core.wate_allowance(bespoke)
 
-    vocation.exps_level_picker(bespoke)
+    anthro_type_choose(bespoke)
+    anthro_sub_choose(bespoke)
+    anthro_size_chooser(bespoke)
+    adjust_attributes_by_anthro_type(bespoke)
+
+    # todo  bespoke and random mutation
     core.mutations_bespoke(bespoke)
-    anthro_vocation_bespoke(bespoke)
+
+    if please.say_yes_to("Do you want attribute selected VOCATION"):
+        bespoke.Vocation = please.choose_this(vocation.attribute_determined(bespoke), "Choose a VOCATION")
+    else:
+        bespoke.Vocation = please.choose_this(table.vocation_list, "Choose VOCATION type.",bespoke)
+ 
     vocation.set_up_first_time(bespoke)
-
-    # adjust RP attributes by vocation
-    if please.say_yes_to("Do you want ADJUST RP attributes by VOCATION? (recommended)"):
-        vocation.attributes_to_vocation(bespoke)
-    # add additional interests and skills (gifts are dynamic )
-    
-    if bespoke.Level > 1:
-        print(f"You have {bespoke.Level - 1} additional INTEREST(s) and SKILL(s).")
-        bespoke.Interests.extend(
-            vocation.update_interests(bespoke, (bespoke.Level - 1))
-        )
-        bespoke.Skills.extend(vocation.update_skills(bespoke, (bespoke.Level - 1)))
-
-    ### generate RP EXPS points
+    vocation.exps_level_picker(bespoke)
     bespoke.EXPS = 42 if bespoke.Level == 1 else vocation.convert_levels_to_exps(bespoke)
 
-    ### determine RP Age
-    option_list = ["Bespoke", "Random"]
-    list_comment = "Choose how to determine persona AGE."
-    determine_ate_method = please.choose_this(option_list, list_comment)
+    if bespoke.Level > 1:
+        bespoke.Interests.extend(vocation.update_interests(bespoke, (bespoke.Level - 1)))
+        bespoke.Skills.extend(vocation.update_skills(bespoke, (bespoke.Level - 1)))
 
-    if determine_ate_method == "Bespoke":
-        anthro_choose_age_cat(bespoke)
+    if please.say_yes_to("Do you want adjust attributes by VOCATION? (recommended)"):
+        vocation.attributes_to_vocation(bespoke)
+
+    if please.say_yes_to("Do you want to adjust attributes by DESCRIPTION?"):
+        core.descriptive_attributes(bespoke)
+
+    if please.say_yes_to("Use table AGE CATEGORY?"):
+        bespoke.Age_Cat = please.get_table_result(table.anthro_random_age_category)
     else:
-        random_anthro_age_category(bespoke)
+        bespoke.Age_Cat = anthro_return_age_cat(bespoke)
 
+    anthro_age_calc(bespoke, bespoke.Age_Cat)
+    
     # todo RP level impact  on: attributes mutations vocation gifts, interests, and skills combat table EXPS amount
 
     ### generate RP Fun
@@ -625,7 +432,6 @@ def bespoke_anthro(player_name):
 
 #####################################
 # build a RANDOM anthro persona
-# does not stop uses RP flag
 #####################################
 
 def random_anthro(player_name):
@@ -639,7 +445,7 @@ def random_anthro(player_name):
 
     ### set up the object for Anthro persona
     rando = AnthroRecord()
-    rando.RP = True if please.say_yes_to("Is this a referee persona? ") else False
+    rando.RP = True if please.say_yes_to("Do you want role playing cues? ") else False
     rando.Fallthrough = True
 
     ### get mundane terran name of the player
@@ -649,36 +455,31 @@ def random_anthro(player_name):
     core.initial_attributes(rando)
     core.hit_points_max(rando)
     adjust_mstr_by_int(rando)
-    rando.FAMILY_TYPE = choice(
-        [x for x in table.anthro_ages_by_category_and_type]
-    )
+    rando.FAMILY_TYPE = choice(table.anthro_types_list)
     rando.FAMILY_SUB = choice(table.anthro_sub_types[rando.FAMILY_TYPE])
-
     adjust_attributes_by_anthro_type(rando)
-    anthro_size_rando(rando)
+    anthro_size_chooser(rando)
     core.movement_rate(rando)
     core.base_armour_rating(rando)
     core.wate_allowance(rando)
     anthro_mutations_rando(rando)
-    rando.Vocation = choice([x for x in table.vocations_gifts_pivot])
+    rando.Vocation = choice(table.vocation_list)
     vocation.set_up_first_time(rando)
     rando.Level = please.get_table_result(table.random_EXPS_levels_list)
     rando.EXPS = vocation.convert_levels_to_exps(rando)
-
-    ### add additional interests and skills
     if rando.Level > 1:
         rando.Interests.extend(vocation.update_interests(rando, (rando.Level - 1)))
         rando.Skills.extend(vocation.update_skills(rando, (rando.Level - 1)))
 
     vocation.attributes_to_vocation(rando)
-    random_anthro_age_category(rando)
-    core.wate_allowance(rando)
-
+    rando.Age_Cat = please.get_table_result(table.anthro_random_age_category)    
+    anthro_age_calc(rando, rando.Age_Cat)
     if rando.RP:
         build_RP_role_play(rando)
 
     ### generate RP storage data including temporary name
-    rando.Persona_Name = f"{rando.Player_Name}y Mac Thunder{rando.Player_Name}"
+    
+    rando.Persona_Name = f"{rando.Player_Name}y Mac{rando.Player_Name}face"
     please.assign_id_and_file_name(rando)
     outputs.anthro_screen(rando)
 
