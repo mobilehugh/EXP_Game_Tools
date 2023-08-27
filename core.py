@@ -53,39 +53,32 @@ def initial_attributes(attributes_creating:AllRecords) -> AllRecords:
 
     return attributes_creating # modified by side effects
 
-def hit_points_max(hit_points_creating:AllRecords) -> AllRecords:
+def hit_points_max(pointy:AllRecords) -> int:
     """
     generates initial hit points max for aliens, anthros and robots BY side effects
     """
     # anthro HPM based on CON only
 
-    if hit_points_creating.FAMILY == "Anthro":
-        con = hit_points_creating.CON
+    if pointy.FAMILY == "Anthro":
+        con = pointy.CON
         dice = math.ceil(con / 2)
         die_roll = str(dice) + "d8+" + str(con)
         hpm = please.roll_this(die_roll)
 
     # alien HPM based on CON an SIZE
-    elif hit_points_creating.FAMILY == "Alien":
-        size = hit_points_creating.Size_Cat
-        con = str(hit_points_creating.CON)
+    elif pointy.FAMILY == "Alien":
+        size = pointy.Size_Cat
+        con = str(pointy.CON)
         hpm = please.roll_this(con + table.alien_HPM_size_and_dice[size])
 
-        if hit_points_creating.Size_Cat == "Minute":
-            hpm = math.ceil(hit_points_creating.HPM * ((hit_points_creating.Wate / 1000)))
+        if pointy.Size_Cat == "Minute":
+            hpm = math.ceil(pointy.HPM * ((pointy.Wate / 1000)))
             
    
-        elif hit_points_creating.FAMILY == "Robot":
-        # if hit_points_creating.FAMILY == "Robot":
-        # string value per robot multiplied by CON
-        # present structure of robots as functions does not allow for values just yet
-        # the HPM is calculated and assigned by the function 
-            pass
+    elif pointy.FAMILY == "Robot":
+        hpm = -1
         
-    # apply the appropriate HPM
-    hit_points_creating.HPM = hpm
-
-    return AllRecords # altered by side effect
+    return hpm
 
 
 def wate_allowance(wate_allowance:AllRecords) -> AllRecords:

@@ -5,8 +5,6 @@ by converting .adoc tables to python dictionaries.
 smart people required
 """
 
-# todo move pivot tables to function maps
-
 from dataclasses import dataclass, field
 
 @dataclass

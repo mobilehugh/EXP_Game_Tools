@@ -124,9 +124,7 @@ def do_1d100_check(number: int) -> bool:
 #
 ###########################################
 
-# todo apply input_this to every input
 # todo input_this needs to get for_a_list flag called 
-
 def input_this(message: str, for_a_list: bool = False) ->  Union[str, List[str]]:
     ''' protects input data and returns str or list'''
 

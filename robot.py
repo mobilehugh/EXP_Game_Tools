@@ -224,7 +224,6 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
 
 ### robot offensive systems
 
-# todo should these 4 functions be inside of robot_offensive_rolls?
 def attack_one_rolls(rolls_list:list) -> list:
     '''adjusts attack_rolls_list (# of rolls) via recursion'''
     

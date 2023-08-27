@@ -15,7 +15,7 @@ import mutations
 class AnthroRecord(table.Anthropic):
     pass
 
-# fix use please.choose_this, RP and Fallthrough to replace many funcs
+
 def anthro_workflow() -> None: 
     """
     player persona vs referee persona vs updating existing persona
@@ -332,7 +332,7 @@ def fresh_anthro(player_name) -> AnthroRecord:
     # todo proper  input_this with cyclic 
     fresh.Player_Name = player_name
     core.initial_attributes(fresh)
-    core.hit_points_max(fresh)
+    fresh.HPM = core.hit_points_max(fresh)
     adjust_mstr_by_int(fresh)
     anthro_type_choose(fresh)
     anthro_sub_choose(fresh)
@@ -377,7 +377,7 @@ def bespoke_anthro(player_name):
 
     bespoke.Player_Name = player_name
     core.initial_attributes(bespoke)
-    core.hit_points_max(bespoke) 
+    bespoke.HPM = core.hit_points_max(bespoke) 
     adjust_mstr_by_int(bespoke)
     core.movement_rate(bespoke)
     core.base_armour_rating(bespoke)
@@ -453,7 +453,7 @@ def random_anthro(player_name):
 
     ### build list of functions
     core.initial_attributes(rando)
-    core.hit_points_max(rando)
+    rando.HPM = core.hit_points_max(rando)
     adjust_mstr_by_int(rando)
     rando.FAMILY_TYPE = choice(table.anthro_types_list)
     rando.FAMILY_SUB = choice(table.anthro_sub_types[rando.FAMILY_TYPE])
