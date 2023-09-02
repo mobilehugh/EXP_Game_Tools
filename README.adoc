@@ -3,6 +3,8 @@ Python tools to decrease the crunchiness and increases the fun of the sciency fi
 
 Check out the rule set at http://exp.sciencyfiction.com
 
+Now built on VSCodium
+
 ## How To 
 . install python interpreter (3.8 and up)
 . pip install fpdf2 (for viewing printable and browser readable persona record)
