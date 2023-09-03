@@ -1027,7 +1027,7 @@ def screen_attack_table(persona) -> None:
     CPROF = table.numbers_2_words[CPROF] if isinstance(CPROF,int) else CPROF
 
     # print out the combat table
-    print(f'\nATTACK TABLE -- {persona.Vocation}')
+    print(f'\nATTACK TABLE: -- {persona.Vocation}')
     print(f'{" ":>6} {"Skill":>6} {"Raw":>6} {"Max":>6} {"Force":>6} {"PROF":>5}')
     if ABP > 0:
         print(f"Strike {ABP:>6} {ABNP:>6} {AMR:>6} {ADB:>6}  {APROF}")
@@ -1313,7 +1313,10 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
     for soc_line in alien.society_output(screenery):
         print(f"{soc_line}")
 
-    return None
+    if screenery.RP:
+        print("\nROLE-PLAYING CUES:")
+        for fun in screenery.RP_Fun:
+            print(f"{fun}")
 
 #####################################
 # ROBOT output to screen
@@ -1401,6 +1404,12 @@ def robot_screen(bot_screen: table.PersonaRecord) -> None:
         for x, skill in enumerate(collated_skills):
             print(f"{x + 1}) {skill}")
 
+
+    if bot_screen.RP:
+        print("\nROLE-PLAYING CUES:")
+        for fun in bot_screen.RP_Fun:
+            print(f"{fun}")
+
 #####################################
 # ANTHRO output to screen
 #####################################
@@ -1471,7 +1480,7 @@ def anthro_screen(persona) -> None:
             working_mutation.post_details(working_mutation.__class__)
 
     if persona.RP:
-        print("\nROLE-PLAYING CUES")
+        print("\nROLE-PLAYING CUES:")
         for fun in persona.RP_Fun:
             print(f"{fun}")
 

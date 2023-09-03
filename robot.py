@@ -2,7 +2,6 @@ import math
 from secrets import choice
 from dataclasses import dataclass
 
-
 import anthro
 import outputs
 import please
@@ -54,11 +53,6 @@ def robotic_sensors(eye_eye:RobotRecord) -> list:
     for _ in range(math.ceil(eye_eye.AWE / 4)):
         sensor_list.append(please.get_table_result(table.robotic_sensor_types))
     return sensor_list # changed by side effect
-
-
-
-
-
 
 def robotic_locomotion(move_it:RobotRecord) -> str:
     '''create a locomotion string'''
@@ -307,6 +301,7 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
     attack_tables_pivot = [table.robot_ram_dam, table.attack_table_one, table.attack_table_two, table.attack_table_three, table.attack_table_four]
     fancy_attacks = {"Electro":"+2d8 DMG, +100 attack vs robots","Inertia":"*3 DMG +10","Stun":"DMG = Intensity","Vibro":"+20 DMG, +100 attack"}
 
+    # fix intermittent error with rolls_list and enumerate, combot error in rando first
     for index, attack_table in enumerate(attack_tables_pivot):
         for _ in range(rolls_list[index]):
             new_attack = please.get_table_result(attack_table)
@@ -352,6 +347,11 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
     """
     defence_list = []
 
+    if isinstance(number, int):
+        pass
+    else:
+        input(f"ooops {defender.FAMILY_TYPE} {number = }")
+
     ### defensive systems does not have extra roll or choose.
     for _ in range(number):
         defense = please.get_table_result(table.robotic_defences)
@@ -364,7 +364,7 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
             defender.AR += please.roll_this("1d6*50")
             defence_list.append(f"Hardened AR: new AR is {defender.AR}")
         elif defense == "Artifact Armour":
-            defence_list = f'Armoured: {please.get_table_result(table.armour_list)}'
+            defence_list.append(f'Armoured: {please.get_table_result(table.armour_list)}')
         elif defense == "Camouflage":
             defence_list.append(f"Camouflage vs: {', '.join(defender.Sensors)} detection")
         elif defense == "Detect Ambush":
@@ -523,7 +523,7 @@ def combot(comboy: RobotRecord) -> RobotRecord:
     if comboy.Bespoke or comboy.Fallthrough:
         choices = ["Expendable", "Defensive", "Offensive-Light", "Offensive-Heavy" ]
 
-    comboy.FAMILY_SUB = please.choose_this(choices, "Please choose COMBOT sub-type.")
+    comboy.FAMILY_SUB = please.choose_this(choices, "Please choose COMBOT sub-type.", comboy)
 
     ### generic spec sheet
     specs = [f"Unconcerned about base family ({comboy.Base_Family})."]
@@ -698,13 +698,12 @@ def explorations(expoh:RobotRecord) -> RobotRecord:
     choices = ["Planetary"]
     if expoh.INT >= 24:
         choices.append("Extra-Planetary")
+
     if expoh.Bespoke or expoh.Fallthrough:
         choices= ["Planetary", "Extra-Planetary" ]
-    if expoh.Fallthrough:
-        chosen = choice(choices)
-    else:
-        comment = "Please choose your Explorations bot type."
-        chosen = please.choose_this(choices, comment)
+
+    comment = "Please choose your Explorations bot type."
+    chosen = please.choose_this(choices, comment, expoh)
 
     if chosen == "Planetary":
         expoh.FAMILY_SUB = "Planetary"
@@ -719,7 +718,8 @@ def explorations(expoh:RobotRecord) -> RobotRecord:
             robot_offensive_systems(expoh, offending_list)
 
         robot_defensive_systems(expoh, 1)
-        robotic_peripherals(expoh, 1)
+
+        expoh.Peripherals.extend(robotic_peripherals(expoh, 1))
 
     elif chosen == "Extra-Planetary":
         expoh.FAMILY_SUB = "Extra-Planetary"
@@ -731,7 +731,8 @@ def explorations(expoh:RobotRecord) -> RobotRecord:
 
         offending_list = robot_offensive_rolls([(attack_two_rolls,1)])
         robot_offensive_systems(expoh, offending_list)
-        robotic_peripherals(expoh, 1)
+
+        expoh.Peripherals.extend(robotic_peripherals(expoh, 1))
 
         specs.append("Created to explore unknown planets.")
         specs.append("Comprehend languages and alien intelligence.")
@@ -767,7 +768,7 @@ def hobbot(hobby:RobotRecord) -> RobotRecord:
 
     # robotic_peripherals are random
     number = please.roll_this("2d4")
-    robotic_peripherals(hobby, number)
+    hobby.Peripherals.extend(robotic_peripherals(hobby, number))
     hobby.Value = 10000 + 20000 * number
 
     specs = ["Highly modified hobbyist machines."]
@@ -785,7 +786,7 @@ def industrial(indy: RobotRecord) -> RobotRecord:
     indy.Adapt = 5
     indy.HPM = please.roll_this("1d4+8") * indy.CON
     indy.Size_Cat =  "Medium"
-    specs = ["Capacitor of industry."]
+    specs = ["Capacitors of industry."]
 
     # build subtype choices
     choices = []
@@ -857,7 +858,9 @@ def industrial(indy: RobotRecord) -> RobotRecord:
             robot_defensive_systems(indy, 1)
         else:
             indy.Defences = []
-        robotic_peripherals(indy, 1)
+
+        indy.Peripherals.extend(robotic_peripherals(indy, 1))
+
 
         indy.Move = math.ceil(indy.Move * 1.5)
         specs.append(f"Increased move to {indy.Move} h/u.")
@@ -887,7 +890,7 @@ def janitorial(maid: RobotRecord) -> RobotRecord:
         choices = ["Industrial", "Domestic"]
 
     comment = "Please choose your type of Janitorial bot."
-    chosen = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment, maid)
 
     if chosen == "Industrial":
 
@@ -977,7 +980,7 @@ def maintenance(wrench:RobotRecord) -> RobotRecord:
     return wrench # altered by side effect
 
 
-def police(copper: RobotRecord) -> RobotRecord:
+def Policing(copper: RobotRecord) -> RobotRecord:
     '''insert policing robot data into record'''
 
     copper.FAMILY_TYPE = "Policing"
@@ -995,7 +998,7 @@ def police(copper: RobotRecord) -> RobotRecord:
         choices = ["Civil", "Riot", "Detective"]
 
     comment = "Please choose your policing bot type."
-    chosen = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment, copper)
 
     if chosen == "Civil":
 
@@ -1115,7 +1118,7 @@ def rescue(saviour: RobotRecord) -> RobotRecord:
         choices = ["Containment", "Retrieval"]
 
     comment = "Please choose your type of rescue bot. "
-    chosen = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment, saviour)
 
     if chosen == "Retrieval":
 
@@ -1140,24 +1143,25 @@ def rescue(saviour: RobotRecord) -> RobotRecord:
 
         saviour.Spec_Sheet = specs
 
-        chosen = please.choose_this(
-            ["Hell yeah!", "Um, no."], "Was your retrieval bot programmed by the JIBC? "
-        )
-        if chosen == "Hell yeah!":
-            saviour.AWE = 3
-            saviour.CHA = 1
-            saviour.CON = 3
-            saviour.DEX = 9
-            saviour.INT = 4
-            saviour.PSTR = 12
-            saviour.HPM = 4
-            saviour.SOC = 42
-            saviour.Attacks = ["Sarcasm, but only towards the vulnerable."]
-            saviour.Defences = ["Use rules and protocols to avoid work."]
-            saviour.Peripherals = ["A bowl to collect the tears of children."]
-            saviour.FAMILY_SUB = "JIBC"
-            saviour.Spec_Sheet = ["Pretends to be a veterinarian, but has no specs.","Zero resiliency."]
-            saviour.Size_Cat = "Tiny"
+        if not saviour.Fallthrough:
+            chosen = please.choose_this(
+                ["Hell yeah!", "Um, no."], "Was your retrieval bot programmed by the JIBC? "
+            )
+            if chosen == "Hell yeah!":
+                saviour.AWE = 3
+                saviour.CHA = 1
+                saviour.CON = 3
+                saviour.DEX = 9
+                saviour.INT = 4
+                saviour.PSTR = 12
+                saviour.HPM = 4
+                saviour.SOC = 42
+                saviour.Attacks = ["Sarcasm, but only towards the vulnerable."]
+                saviour.Defences = ["Use rules and protocols to avoid work."]
+                saviour.Peripherals = ["A bowl to collect the tears of children."]
+                saviour.FAMILY_SUB = "JIBC"
+                saviour.Spec_Sheet = ["Pretends to be a veterinarian, but has no specs.","Zero resiliency."]
+                saviour.Size_Cat = "Tiny"
 
     elif chosen == "Containment":
         saviour.FAMILY_SUB = "Containment"
@@ -1253,7 +1257,7 @@ def transport(taxi: RobotRecord) -> RobotRecord:
         choices = ["Planetary", "Extra-Planetary"]
 
     comment = "Please choose your type of Transport bot. "
-    chosen = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment, taxi)
 
     if chosen == "Planetary":
 
@@ -1339,7 +1343,7 @@ def veterinarian(doc: RobotRecord) -> RobotRecord:
         choices =  ["Diagnostic", "Interventional"]
 
     comment = "Please choose your type of veterinarian bot. "
-    chosen = please.choose_this(choices, comment)
+    chosen = please.choose_this(choices, comment, )
 
     if chosen == "Diagnostic":
 
@@ -1443,7 +1447,7 @@ def fresh_robot(player_name) -> RobotRecord:
     if fresh.Vocation != "Robot":
         vocation.set_up_first_time(fresh)
 
-
+    core.build_RP_role_play(fresh)
 
     outputs.outputs_workflow(fresh, "screen")
     robot_nomenclature(fresh)
@@ -1540,6 +1544,10 @@ def bespoke_robot(player_name):
         core.descriptive_attributes(bespoke)
 
     bespoke.Quick_Description = robot_description(bespoke)
+
+    core.build_RP_role_play(bespoke)
+
+
     outputs.outputs_workflow(bespoke, "screen")
     robot_nomenclature(bespoke)
     outputs.outputs_workflow(bespoke, "screen")
@@ -1608,6 +1616,10 @@ def rando_robot(player_name):
     rando.EXPS = 42 if rando.Level == 1 else vocation.convert_levels_to_exps(rando)
 
     rando.Quick_Description = robot_description(rando)
+
+    core.build_RP_role_play(rando)
+
+
     outputs.outputs_workflow(rando, "screen")
     robot_nomenclature(rando)
     outputs.outputs_workflow(rando, "screen")
@@ -1624,7 +1636,7 @@ robot_type_function_pivot = {
     "Industrial": industrial,
     "Janitorial": janitorial,
     "Maintenance": maintenance,
-    "Police": police,
+    "Policing": Policing,
     "Rescue": rescue,
     "Social": social,
     "Transport": transport,

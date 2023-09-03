@@ -238,80 +238,6 @@ def anthro_return_age_cat(years_old: AnthroRecord) -> str:
 
     return age_cat
 
-# todo code review this mess
-def role_play_RP_arc() -> str:
-    """
-    return referee person arc in relation to expedition now
-    """
-    past = please.get_table_result(table.role_play_RP_arc_past)
-    present = please.get_table_result(table.role_play_RP_arc_present)
-    goal = please.get_table_result(table.role_play_RP_arc_goal)
-
-    return f"Past: {past}, Present: {present}, Goal: {goal}."
-
-def role_play_RP_beliefs() -> str:
-    """
-    add religion, philosophy, politics or not
-    """
-    complexity = please.get_table_result(table.role_play_RP_belief_complexity)
-
-    if complexity[0]:
-        religious = f"Religion: {please.get_table_result(table.role_play_RP_religion)}"
-    else:
-        religious = f"Religion: None"
-
-    if complexity[1]:
-        philosophy = (
-            f"Philosophy: {please.get_table_result(table.role_play_RP_philosophy)}"
-        )
-    else:
-        philosophy = f"Philosophy: None"
-
-    if complexity[2]:
-        politics = f"Politics: {please.get_table_result(table.role_play_RP_politics)}"
-    else:
-        politics = f"Politics: None"
-
-    return f"Beliefs: {religious}, {philosophy}, {politics}."
-
-def role_play_RP_personality()->str:
-    """
-    personality descriptor
-    introvert, extrovert, insane
-    """
-
-    personality = please.get_table_result(table.extroverted_personality)
-
-    if personality == "Introverted":
-        personality = (
-            please.get_table_result(table.introverted_personality) + ", Introverted"
-        )
-
-    elif personality == "Insane":
-        personality = please.get_table_result(table.insane_personality) + ", Insane"
-
-    else:
-        personality = personality + ", Extroverted"
-
-    return personality
-
-def build_RP_role_play(player:AnthroRecord) -> AnthroRecord:
-    """
-    create all the fun role_play elements for a referee persona
-    """
-
-    print("Building the role playing components of the referee persona")
-    player.RP_Fun = []
-    player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
-    player.RP_Fun.append(
-        f"Dress: {please.get_table_result(table.referee_persona_dress)} Hygiene: {please.get_table_result(table.referee_persona_hygiene)} Odor: {please.get_table_result(table.alien_biology_aroma)}"
-    )
-    player.RP_Fun.append(
-        f"Personality: {role_play_RP_personality()} Voice: {please.get_table_result(table.laban)} Move: { please.get_table_result(table.laban)} "
-    )
-    player.RP_Fun.append(f"{role_play_RP_beliefs()}")
-
-    return
 
 #####################################
 # build a FRESH anthro persona
@@ -349,6 +275,10 @@ def fresh_anthro(player_name) -> AnthroRecord:
     fresh.Vocation = please.choose_this(vocation.attribute_determined(fresh), "Choose a VOCATION")
 
     vocation.set_up_first_time(fresh)
+
+    ### generate RP Fun
+    core.build_RP_role_play(fresh)
+
     outputs.anthro_screen(fresh)
     core.assign_persona_name(fresh)
     outputs.anthro_screen(fresh)
@@ -420,7 +350,7 @@ def bespoke_anthro(player_name):
     # todo RP level impact  on: attributes mutations vocation gifts, interests, and skills combat table EXPS amount
 
     ### generate RP Fun
-    build_RP_role_play(bespoke)
+    core.build_RP_role_play(bespoke)
 
     ### generate RP storage data including temporary name
     outputs.anthro_screen(bespoke)
@@ -474,8 +404,9 @@ def random_anthro(player_name):
     vocation.attributes_to_vocation(rando)
     rando.Age_Cat = please.get_table_result(table.anthro_random_age_category)    
     anthro_age_calc(rando, rando.Age_Cat)
-    if rando.RP:
-        build_RP_role_play(rando)
+
+
+    core.build_RP_role_play(rando)
 
     ### generate RP storage data including temporary name
     

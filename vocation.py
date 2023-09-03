@@ -453,6 +453,11 @@ def update_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     """
     returns a list to EXTEND get_a_job.Skills using get_a_job.Vocation and get_a_job.Level
     """
+
+    if get_a_job.Vocation in ["Alien", "Robot"]:
+        # no skills for you here aliens and robots
+        return []
+
     ### create a list of all skills (3 tables) without Choose
     all_skills = []
     for sub_list in table.vocation_skills_tables[get_a_job.Vocation]:

@@ -178,6 +178,7 @@ def choose_this(choices: list, comment: str, choosy: table.PersonaRecord = None)
     also auto return if Fallthrough is true
     """
     # if fallthrough skip choosing part
+
     if choosy:
         if choosy.Fallthrough:
             return choice(choices)
@@ -555,6 +556,12 @@ def do_referee_maintenance():
             say_goodnight_marsha()
 
     return
+
+def fix_robot_MSTR(mr_int: table.PersonaRecord) -> int:
+    '''swap robot INT for MSTR where needed'''
+    return mr_int.MSTR if mr_int.FAMILY != "Robot" else mr_int.INT
+
+
 
 def clear_console() -> None:
     """

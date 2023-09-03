@@ -10,6 +10,7 @@ import table
 # todo allow Fallthrough to skip mutation choices
 # fix defects get worse as level increases!
 
+
 def mutation_workflow() -> None:
     """
     Mutate now avoid the post bomb rush
@@ -530,7 +531,7 @@ class ForceFieldGeneration(Mutation):
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
         # level part here
-        ffabsorbs = 10 * (self.object.MSTR + self.object.Level)
+        ffabsorbs = 10 * (self.object.Level + please.fix_robot_MSTR(self.object))
         description = f'Personal energy shield absorbs {ffabsorbs} HPS.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -719,7 +720,7 @@ class Levitation(Mutation):
         perm = super().return_perm(self.name, self.table_name) # perm part
         if self.object.FAMILY == "Anthro":
             dexmove = self.object.Move
-            mstrmove = table.anthro_movement_rate_and_DEX[self.object.MSTR]
+            mstrmove = table.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)]
             levimove = (dexmove if dexmove > mstrmove else mstrmove) * 2
         else:
             levimove = self.object.Move
@@ -838,7 +839,7 @@ class MechanicalSense(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        chance_talk = (self.object.MSTR + self.object.Level) * 3
+        chance_talk = (please.fix_robot_MSTR(self.object) + self.object.Level) * 3
         description = f'{chance_talk}% chance to talk with a specific machine. Also 2nd level mechanic.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1140,7 +1141,7 @@ class PlanalHoldAway(Mutation):
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
         if self.object.FAMILY in ["Anthro", "Alien"]:
-            storage = table.wate_allowance_and_PSTR[self.object.MSTR] + self.object.Level
+            storage = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
         else:
             storage = math.ceil(self.object.WA / 2)
         description = f'Carry {storage} kgs in your own space time aberration backpack.'
@@ -1278,7 +1279,7 @@ class PsionicDefence(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        description = f'MSTR is {self.object.MSTR * 2 + self.object.Level} for defensive MSTR rolls.'
+        description = f'MSTR is {please.fix_robot_MSTR(self.object) * 2 + self.object.Level} for defensive MSTR rolls.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
 
@@ -1461,7 +1462,7 @@ class SonicAttack(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        distance = math.ceil(self.object.MSTR / 2) + self.object.Level
+        distance = math.ceil(please.fix_robot_MSTR(self.object) / 2) + self.object.Level
         description = f'Sound blast range and damage: 1h 4d8 HPS, {math.ceil(distance/2)}h 3d8 HPS, {distance}h 2d8 HPS.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1533,8 +1534,8 @@ class Telekinesis(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        speed = table.anthro_movement_rate_and_DEX[self.object.MSTR] + self.object.Level
-        amount = table.wate_allowance_and_PSTR[self.object.MSTR] + self.object.Level
+        speed = table.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)] + self.object.Level
+        amount = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
         description = f'Move up to {amount} kgs at {speed} h/u with your mind.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1558,7 +1559,7 @@ class TelekineticArm(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        arm_wate = table.wate_allowance_and_PSTR[self.object.MSTR] + self.object.Level
+        arm_wate = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
         arm_hps = math.ceil(self.object.HPM/2)  + self.object.Level
         description = f'Invisible extra hand with {arm_hps} HPS that can lift {arm_wate} kgs.'
         super().add_mutation(self.name, perm, description) # check to add
@@ -1582,7 +1583,7 @@ class TelekineticFlight(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        speed = table.anthro_movement_rate_and_DEX[self.object.MSTR] * 2 + self.object.Level
+        speed = table.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)] * 2 + self.object.Level
         description = f'Fly around at {speed} h/u.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1674,7 +1675,7 @@ class TimeStop(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        lift = table.wate_allowance_and_PSTR[self.object.MSTR] * 10 + self.object.Level
+        lift = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] * 10 + self.object.Level
         description = f'Arrest the movement of time. Move freely and lift {lift} kgs.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1768,7 +1769,7 @@ class WeaponDischarging(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        boom = math.ceil((self.object.MSTR - self.object.Level) / 2)
+        boom = math.ceil((please.fix_robot_MSTR(self.object) - self.object.Level) / 2)
         boom_boom = boom if boom > 0 else 2
 
         description = f'A {boom_boom}% chance of accidental activation'
@@ -2596,7 +2597,7 @@ class NewOrgan(Mutation):
             bonus_info = f'Cloud water as needed. Squirt to blind {math.ceil(self.object.CON/2) + self.object.Level} intensity, {math.ceil(self.object.Level)} hex range, alternating units.' 
 
         elif title == "Kirlian Energy Reflective Skull":
-            bonus_info = f'MSTR is {self.object.MSTR * 2 + self.object.Level} vs mental attacks.'
+            bonus_info = f'MSTR is {please.fix_robot_MSTR(self.object) * 2 + self.object.Level} vs mental attacks.'
 
         description = f'{perm} {bonus_info}'
         super().add_mutation(self.name, perm, description) # check to add
@@ -3060,7 +3061,7 @@ class SonarAttack(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        distance = math.ceil(self.object.MSTR / 2) + self.object.Level
+        distance = math.ceil(please.fix_robot_MSTR(self.object) / 2) + self.object.Level
         description = f'Sound blast: 1h 4d8, {math.ceil(distance/2)}h 3d8, {distance}h 2d8'
         super().add_mutation(self.name, perm, description) # check to add
         return description

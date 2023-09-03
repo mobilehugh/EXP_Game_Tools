@@ -714,6 +714,9 @@ def fresh_alien(player_name)->AlienRecord:
     alien_biology(fresh)
     alien_society(fresh)
     alien_vocation_check(fresh)
+
+    core.build_RP_role_play(fresh)
+
     outputs.outputs_workflow(fresh, "screen")
     alien_nomenclature(fresh)
     please.assign_id_and_file_name(fresh)
@@ -757,6 +760,9 @@ def bespoke_alien(player_name) -> AlienRecord:
         if bespoke.Level > 1:
             vocation.update_interests(bespoke, (bespoke.Level - 1))
             vocation.update_skills(bespoke, (bespoke.Level - 1))
+
+    core.build_RP_role_play(bespoke)
+
     outputs.outputs_workflow(bespoke, "screen")
     alien_nomenclature(bespoke)
     please.assign_id_and_file_name(bespoke)
@@ -803,6 +809,9 @@ def rando_alien(player_name) -> AlienRecord:
         if rando.Level > 1:
             vocation.update_interests(rando, (rando.Level - 1))
             vocation.update_skills(rando, (rando.Level - 1))
+
+    core.build_RP_role_play(rando)
+
     outputs.outputs_workflow(rando, "screen")
     alien_nomenclature(rando)
     please.assign_id_and_file_name(rando)
