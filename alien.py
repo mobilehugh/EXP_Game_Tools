@@ -729,13 +729,15 @@ def bespoke_alien(player_name) -> AlienRecord:
     """
     Build a bespoke alien persona usually a referee persona
     """
-    
-    # clearance for Clarence
-    please.clear_console()
-    print("\nYou are generating a BESPOKE ALIEN Persona")
 
     bespoke = AlienRecord()
     bespoke.Player_Name = player_name
+
+    please.clear_console()
+    print("\nYou are generating a BESPOKE ALIEN Persona")
+    bespoke.RP = True if please.say_yes_to("Do you want role playing cues?") else False
+    bespoke.Bespoke = True
+
     alien_attributes_bespoke(bespoke)
     alien_size_bespoke(bespoke)
     core.wate_allowance(bespoke)
@@ -778,6 +780,9 @@ def rando_alien(player_name) -> AlienRecord:
 
     rando = AlienRecord()
     rando.Fallthrough = True
+    rando.RP = True if please.say_yes_to("Do you want role playing cues?") else False
+
+
 
     ### get mundane terran name of the player
     rando.Player_Name = player_name

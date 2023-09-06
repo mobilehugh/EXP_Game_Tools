@@ -1,7 +1,6 @@
 import math
 from dataclasses import asdict, dataclass
 
-
 import table
 import please
 import alien
@@ -74,7 +73,6 @@ def hit_points_max(pointy:AllRecords) -> int:
         if pointy.Size_Cat == "Minute":
             hpm = math.ceil(pointy.HPM * ((pointy.Wate / 1000)))
             
-   
     elif pointy.FAMILY == "Robot":
         hpm = -1
         
@@ -318,17 +316,40 @@ def build_RP_role_play(player:AllRecords) -> AllRecords:
     """
 
     player.RP_Fun = []
-    player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
-    player.RP_Fun.append(
-        f"Dress: {please.get_table_result(table.referee_persona_dress)}, Hygiene: {please.get_table_result(table.referee_persona_hygiene)}, Odor: {please.get_table_result(table.alien_biology_aroma)}"
-    )
-    player.RP_Fun.append(
-        f"Personality: {role_play_RP_personality()}"
-    )
-    player.RP_Fun.append(f'Triangle: Voice: {please.get_table_result(table.laban)}, Move: { please.get_table_result(table.laban)}')
 
-    player.RP_Fun.append(f"{role_play_RP_beliefs()}")
+    ## ARC:
+    if player.FAMILY in ["Anthro","Robot"]:
+        player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
+    else: 
+        if player.Society["Tools"] == "Flora or Fauna":
+            player.RP_Fun.append("Arc: Past: Reproducing, Present: Not Dying, Goal: Eating.")
+        else:
+            player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
 
-    return
+    ## DRESS    
+    if player.FAMILY in ["Anthro","Robot"]:
+        player.RP_Fun.append(
+        f"Dress: {please.get_table_result(table.referee_persona_dress)}, Hygiene: {please.get_table_result(table.referee_persona_hygiene)}, Odor: {please.get_table_result(table.alien_biology_aroma)}")
+    else:
+        if player.Society["Tools"] != "Flora or Fauna":
+            player.RP_Fun.append(
+            f"Dress: {please.get_table_result(table.referee_persona_dress)}, Hygiene: {please.get_table_result(table.referee_persona_hygiene)}")
+
+    if player.FAMILY in ["Anthro","Robot"]:
+        player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
+    else:
+        if player.Society["Tools"] != "Flora or Fauna":
+            player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
+
+    # todo specialized personalites for robots and aliens
+    player.RP_Fun.append(f'Laban: Voice: {please.get_table_result(table.laban)}, Move: { please.get_table_result(table.laban)}')
+
+    if player.FAMILY in ["Anthro","Robot"]:
+        player.RP_Fun.append(f"{role_play_RP_beliefs()}")
+    else:
+        if player.Society["Tools"] != "Flora or Fauna":
+            player.RP_Fun.append(f"{role_play_RP_beliefs()}")
+
+    return player # modified by side effects
 
 

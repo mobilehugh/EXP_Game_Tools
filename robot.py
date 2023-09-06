@@ -11,6 +11,7 @@ import core
 import mutations
 import toy
 
+# todo consider minimum HPM for robot 
 
 # set up RobotRecord
 @dataclass
@@ -54,40 +55,6 @@ def robotic_sensors(eye_eye:RobotRecord) -> list:
         sensor_list.append(please.get_table_result(table.robotic_sensor_types))
     return sensor_list # changed by side effect
 
-def robotic_locomotion(move_it:RobotRecord) -> str:
-    '''create a locomotion string'''
-
-    # bespoke locomotion skips fallthrough as regular is fallthrough
-    if move_it.Bespoke:
-        locomo_tuples = please.list_table_choices(table.primary_robotic_locomotion)
-        locomo_choices = [t[0] for t in locomo_tuples]
-        chosen = please.choose_this(locomo_choices, "Choose LOCOMOTION type.", move_it)        
-        for tuple in locomo_tuples:
-            if chosen in tuple:
-                chosen = tuple
-                break
-
-    else:
-        chosen = please.get_table_result(table.primary_robotic_locomotion)
-
-
-    primary, secondary = chosen[0], chosen[1]
-
-    if move_it.FAMILY_TYPE == "Android":
-        return f'{move_it.Base_Family} legs' 
-    
-    if move_it.FAMILY_TYPE == "Social":
-        return f'{move_it.Base_Family} like legs'
-    
-    if 'd' in secondary:
-        return f'{please.roll_this(secondary)} {primary}'
-
-    if secondary == "BackUp":
-        primary = f'{primary} {choice(["moving", "pushing", "pulling"])} {please.get_table_result(table.secondary_robotic_locomotion).lower()}' 
-
-    # if secondary = "None" falls to generic return 
-
-    return primary
 
 def list_eligible_robot_types(choosing: RobotRecord) -> list:
     """
@@ -386,6 +353,39 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
         defence_list.sort()
     return defence_list
 
+def robotic_locomotion(move_it:RobotRecord) -> str:
+    '''create a locomotion string'''
+
+    # bespoke locomotion skips fallthrough as fresh  is also a fallthrough
+    if move_it.Bespoke:
+        locomo_tuples = please.list_table_choices(table.primary_robotic_locomotion)
+        locomo_choices = [t[0] for t in locomo_tuples]
+        chosen = please.choose_this(locomo_choices, "Choose LOCOMOTION type.", move_it)        
+        for tuple in locomo_tuples:
+            if chosen in tuple:
+                chosen = tuple
+                break
+
+    else:
+        chosen = please.get_table_result(table.primary_robotic_locomotion)
+
+
+    primary, secondary = chosen[0], chosen[1]
+
+    if move_it.FAMILY_TYPE == "Android":
+        return f'{move_it.Base_Family} legs' 
+    
+    if move_it.FAMILY_TYPE == "Social":
+        return f'{move_it.Base_Family} like legs'
+    
+    if 'd' in secondary:
+        return f'{please.roll_this(secondary)} {primary}'
+
+    if secondary == "BackUp":
+       return f'{primary} {choice(["moving", "pushing","propelling"])} {please.get_table_result(table.secondary_robotic_locomotion).lower()}' 
+
+    return primary # [anti-grav, magnetic, chem slide, slog bag] 
+
 
 def robot_description(looks_like: RobotRecord) -> str:
     """
@@ -402,30 +402,43 @@ def robot_description(looks_like: RobotRecord) -> str:
     ### SIZE descriptor
     sized = looks_like.Size_Cat if looks_like.Size_Cat not in ["Medium", "Nano", "Giga"] else f"{looks_like.Size_Cat} sized"
     
+    ### COLOUR descriptor
+    colour = please.get_table_result(table.colour_bomb) if please.do_1d100_check(50) else f'{please.get_table_result(table.colour_bomb)} and {please.get_table_result(table.colour_bomb)}'
+
     ### SHAPE descriptor
     shaped = please.get_table_result(table.base_shape)
     shaped = shaped if shaped != "Descriptive" else please.get_table_result(table.descriptive_shapes)
     # mangle shape?
     shaped = shaped if please.do_1d100_check(40) else f'{please.get_table_result(table.shape_mangle)} {shaped}'
-    # adorn shape
+    # adorn shape?
     shaped = shaped if please.do_1d100_check(25) else f'{shaped} with {please.get_table_result(table.adornage)}'
 
-    ### COLOUR descriptor
-    colour = please.get_table_result(table.colour_bomb) if please.do_1d100_check(50) else f'{please.get_table_result(table.colour_bomb)} and {please.get_table_result(table.colour_bomb)}'
-
     ###  LOCOMOTION descriptor
-    floating = True  if looks_like.Locomotion in ["Anti-Grav", "Magnetic"] else False
+    floating = False
 
     if looks_like.Locomotion[0].isdigit():
-        locomo = f'{choice([" on", " sporting", " with", " moved by", " pushed by", " propelled by", " driven by"])} {looks_like.Locomotion}'
+        locomo = f', {choice(["atop", "sporting", "with", "moved by", "pushed by", "propelled by", "driven by"])} {looks_like.Locomotion}'
 
     elif looks_like.Locomotion in ['Chemical Slide', 'Slog Bag']:
-        locomo = f'{choice([" a top", " sitting on a", " moved by"])} {looks_like.Locomotion}'
+        locomo = f' {choice(["atop a", "sitting on a", "moving on a"])} {looks_like.Locomotion}'
+
+    elif looks_like.Locomotion in ["Anti-Grav", "Magnetic"]:
+        floating = True
+
+    elif looks_like.Locomotion == "Teleport":
+        locomo = " with no obvious locomotion."
 
     else:
-        locomo = f'{looks_like.Locomotion}'
+        locomo = f' and {looks_like.Locomotion}' 
 
-    return f"A {'floating ' if floating else ''}{sized.lower()} {colour} {shaped}{'.' if floating else locomo.lower()}{'' if floating else '.'}"
+    ### punk tuition 
+    # to add . or , when connecting description and locomotion.
+    if floating:
+        descripto = f"A floating {sized.lower()} {colour} {shaped}."
+    else:
+        descripto = f"A {sized.lower()} {colour} {shaped}{locomo.lower()}."
+
+    return descripto
 
 def change_to_leet(s: str) -> str:
     ''' turns a string into l33tsp34k'''
@@ -463,6 +476,7 @@ def robot_nomenclature(name_it: RobotRecord) -> RobotRecord:
 #
 ####################################################
 
+
 def android(andy: RobotRecord) -> RobotRecord:
     """
     inject the android attributes into the andy
@@ -470,29 +484,23 @@ def android(andy: RobotRecord) -> RobotRecord:
 
     ### androids are odd in that they skip most of the robot attributes
 
-    ### set family type to use ANTHRO calcs
-    andy.FAMILY = "Anthro"
+    ### temp set FAMILY_TYPE for anthro hite wate calc
     andy.FAMILY_TYPE = andy.Base_Family
-
     anthro.anthro_hite_wate_calc(andy, "Larger")
     andy.Wate = round(andy.Wate * 1.3)
-    core.hit_points_max(andy)
-
-
-    ### reset to robot 
-    andy.FAMILY = "Robot"
     andy.FAMILY_TYPE = "Android"
     andy.FAMILY_SUB = andy.Base_Family
 
     ### core values
     andy.Adapt = 1
     andy.Value = 100000000
+    HPM_roll = str(math.ceil(andy.CON / 2)) + "d8+" + str(andy.CON)
+    andy.HPM = please.roll_this(HPM_roll)
 
     ### vocation EXCEPTION for android
-    type_options = vocation.attribute_determined(andy)
+    type_options = table.vocation_list.remove("Knite")
     comment = "Choose your vocation."
-    type_choice = please.choose_this(type_options, comment)
-    andy.Vocation = type_choice
+    andy.Vocation  = please.choose_this(type_options, comment, andy)
     vocation.set_up_first_time(andy)
 
     ### building the spec sheet
@@ -1420,8 +1428,8 @@ def fresh_robot(player_name) -> RobotRecord:
     fresh = RobotRecord()
 
     fresh.Player_Name = player_name
+    fresh.Base_Family = please.get_table_result(table.robot_base_family) # must be first for Android
     core.initial_attributes(fresh)
-    fresh.Base_Family = please.get_table_result(table.robot_base_family)
     fresh.CF = control_factor(fresh)
     core.movement_rate(fresh)
     core.wate_allowance(fresh)
@@ -1436,8 +1444,6 @@ def fresh_robot(player_name) -> RobotRecord:
 
     if fresh.FAMILY_TYPE != "Android":
         fresh.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
-
-
 
     ### requires bot_type
     fresh.Locomotion = robotic_locomotion(fresh)
@@ -1478,6 +1484,10 @@ def bespoke_robot(player_name):
 
     bespoke.Player_Name = player_name
 
+    base_family_choices = please.list_table_choices(table.robot_base_family)
+    bespoke.Base_Family = please.choose_this(base_family_choices, "Choose a base family", bespoke)
+
+
     core.initial_attributes(bespoke) # cannot use descriptive attributes until later
     bespoke.CF = control_factor(bespoke)
     core.movement_rate(bespoke)
@@ -1485,8 +1495,6 @@ def bespoke_robot(player_name):
     bespoke.Power_Reserve = bespoke.CON
     
 
-    base_family_choices = please.list_table_choices(table.robot_base_family)
-    bespoke.Base_Family = please.choose_this(base_family_choices, "Choose a base family", bespoke)
 
     power_plant_choices = please.list_table_choices(table.robotic_power_plant)
     bespoke.Power_Plant = please.choose_this(power_plant_choices, "Choose a power plant", bespoke)
@@ -1571,10 +1579,13 @@ def rando_robot(player_name):
     please.clear_console()
     print(f'\n{player_name} you are generating a rando ROBOT PERSONA')
 
-    if please.say_yes_to("Is this a REFEREE PERSONA"):
+    if please.say_yes_to("Do you want Referee Persona Cues?"):
         rando.RP = True
 
     rando.Player_Name = player_name
+
+    base_family_choices = please.list_table_choices(table.robot_base_family)
+    rando.Base_Family = please.choose_this(base_family_choices, "rando", rando)
 
     core.initial_attributes(rando)
     rando.CF = control_factor(rando)
@@ -1582,8 +1593,6 @@ def rando_robot(player_name):
     core.wate_allowance(rando)
     rando.Power_Reserve = rando.CON
     
-    base_family_choices = please.list_table_choices(table.robot_base_family)
-    rando.Base_Family = please.choose_this(base_family_choices, "rando", rando)
 
     power_plant_choices = please.list_table_choices(table.robotic_power_plant)
     rando.Power_Plant = please.choose_this(power_plant_choices, "rando", rando)
@@ -1598,11 +1607,10 @@ def rando_robot(player_name):
     ### past this line requires bot_type
 
     rando.Locomotion = robotic_locomotion(rando)
-
     robot_hite_wate_calc(rando)
 
     if please.do_1d100_check(2):
-        rando.Vocation = please.choose_this([x for x in table.vocations_gifts_pivot], "rando")
+        rando.Vocation = please.choose_this([x for x in table.vocations_gifts_pivot], "rando", rando)
         
     if rando.Vocation != "Robot":
         vocation.set_up_first_time(rando)

@@ -802,7 +802,7 @@ vocation_list = [
     "Biologist",
     "Knite",
     "Mechanic",
-    "Mercenary"
+    "Mercenary",
     "Nomad",
     "Nothing",
     "Spie",
@@ -3104,7 +3104,7 @@ primary_robotic_locomotion = {
 
 secondary_robotic_locomotion = {
     (1, 31):"Anti-Grav",
-    (32, 41):" a Chemical Slide",
+    (32, 41):"Chemical Slide",
     (42, 56):"Skis",
     (57, 100):"Wheels",
     "name":"Robotic Secondary Locomotion",
