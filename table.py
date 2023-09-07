@@ -20,7 +20,7 @@ class PersonaRecord:
     Fallthrough: bool = False
     Bespoke: bool = False
     RP: bool = False
-    Show: bool = False
+    RP_Cues: bool = False
     Bin: bool = False
     AWE: int = 1
     CHA: int = 1
@@ -58,8 +58,7 @@ class PersonaRecord:
     Equipment: list[str] = field(default_factory=list)
     Date_Created: str = "Unborn"
     Date_Updated: str = "Unborn"
-    ID: str = "None"
-    File_Name: str = "None" # ID + ".jsonl"
+    File_Name: str = "None"
 
 @dataclass
 class Anthropic(PersonaRecord):
@@ -182,7 +181,6 @@ mstr_adjusted_by_int = {
     24: 6,
     25: 7,
 }
-
 
 anthro_type_attribute_requirements = {
     "Aquarian": {
@@ -640,7 +638,6 @@ anthro_movement_rate_and_DEX = {
     30: 20,
 }
 
-
 small_anthro_sizes = {
     "Aquarian": {"Base": 150, "Hite": "6d20+100", "Wate": 60},
     "Avarian": {"Base": 175, "Hite": "3d10+155", "Wate": 65},
@@ -656,7 +653,6 @@ small_anthro_sizes = {
     "Ursidae": {"Base": 176, "Hite": "2d20+156", "Wate": 78},
 }
 
-
 large_anthro_sizes = {
     "Aquarian": {"Base": 150, "Hite": "6d20+100", "Wate": 60},
     "Avarian": {"Base": 175, "Hite": "2d20+135", "Wate": 71},
@@ -671,7 +667,6 @@ large_anthro_sizes = {
     "Rodentia": {"Base": 175, "Hite": "2d20+160", "Wate": 71},
     "Ursidae": {"Base": 208, "Hite": "2d20+188", "Wate": 139},
 }
-
 
 anthro_type_mutation_chance = {
     "Aquarian": {
@@ -747,8 +742,6 @@ anthro_type_mutation_chance = {
         "physnumber": "1d2",
     },
 }
-
-
 
 # SNAP hit location tables
 anthro_snap_hit_location = {
@@ -2103,12 +2096,12 @@ role_play_RP_arc_past = {
 } 
  
 role_play_RP_arc_present = {
-    (1, 4):"Want's to harm  ",
+    (1, 4):"Want's to harm",
     (3, 11):"Want's to deceive",
     (12, 31):"Curious and not trusting",
     (32, 91):"Plain curious",
     (76, 85):"Has fair business",
-    (86, 96):"Curious and trusting ",
+    (86, 96):"Curious and trusting",
     (97, 100):"Wants to Help",
     "name":"Referee Persona Present",
     "die_roll":"1d100",
@@ -2782,7 +2775,7 @@ alien_biology_aroma = {
     (62, 64):"Lemons",
     (65, 67):"Methane",
     (68, 70):"Oats",
-    (71, 73):"Os",
+    (71, 73):"Oak",
     (74, 76):"Pork",
     (77, 79):"Rubber",
     (80, 82):"Salmon",
@@ -2880,7 +2873,7 @@ alien_sounds = {
     (81, 81):"Squeal",
     (82, 82):"Swish",
     (83, 83):"Tatter",
-    (84, 84):"Telepathy",
+    (84, 84):"Telepathic",
     (85, 85):"Thump",
     (86, 86):"Troat",
     (87, 87):"Trumpet",

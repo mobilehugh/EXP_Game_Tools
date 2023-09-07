@@ -136,14 +136,7 @@ def base_armour_rating(armourize: AllRecords) -> AllRecords:
     return armourize # is altered by side effects
 
 
-def assign_persona_name(avatar_name: AllRecords) -> AllRecords:
-    """
-    I know it is only only one line, but I want to make build_show work
-    """
-    ### get mundane terran name of the player
-    avatar_name.Persona_Name = please.input_this(f'\nPlease input your PERSONA NAME: ')
 
-    return avatar_name # is modified by side effect
 
 
 def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
@@ -341,7 +334,6 @@ def build_RP_role_play(player:AllRecords) -> AllRecords:
         if player.Society["Tools"] != "Flora or Fauna":
             player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
 
-    # todo specialized personalites for robots and aliens
     player.RP_Fun.append(f'Laban: Voice: {please.get_table_result(table.laban)}, Move: { please.get_table_result(table.laban)}')
 
     if player.FAMILY in ["Anthro","Robot"]:

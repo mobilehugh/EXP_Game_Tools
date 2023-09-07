@@ -32,6 +32,7 @@ def anthro_workflow() -> None:
         "Random Anthro":lambda:random_anthro(nom_de_bom),
         "Maintenance":please.do_referee_maintenance
     }
+    please.clear_console()
     choice_comment = "Choose anthro workflow? "
     choices= list(workflow_function_map.keys())
     anthro_record_type = please.choose_this(choices, choice_comment)
@@ -238,25 +239,31 @@ def anthro_return_age_cat(years_old: AnthroRecord) -> str:
 
     return age_cat
 
+def anthro_nomenclature(avatar:AnthroRecord) -> AnthroRecord:
+    '''name the  anthro persona'''
+    clear_console()
+    print(f'\n{avatar_name.Player_Name} you are NAMING a {kind_of(avatar_name)} {avatar_name.FAMILY.upper()} persona.')
+    print(f'The persona looks like: {avatar.Quick_Description}')
+    avatar.Persona_Name = please.input_this(f"\nPlease input the PERSONA NAME: ")
+    return avatar # altered by side effects 
+
+
+
+
+
 
 #####################################
 # build a FRESH anthro persona
 #####################################
 
-def fresh_anthro(player_name) -> AnthroRecord:
+def fresh_anthro(player_name:str) -> None:
     """
     builds the anthro record for a fresh persona
     """
-
-    please.clear_console()
-    print("\nYou are generating a fresh ANTHRO PERSONA")
-
-    ### set up the object for Anthro persona
     fresh = AnthroRecord()
-    fresh.RP = True if please.say_yes_to("Do you want role playing cues? ") else False
-
-    # todo proper  input_this with cyclic 
     fresh.Player_Name = player_name
+    please.setup_persona(fresh)
+
     core.initial_attributes(fresh)
     fresh.HPM = core.hit_points_max(fresh)
     adjust_mstr_by_int(fresh)
@@ -273,39 +280,27 @@ def fresh_anthro(player_name) -> AnthroRecord:
     mutations.mutation_assignment(fresh, mental_amount, physical_amount,"any")
 
     fresh.Vocation = please.choose_this(vocation.attribute_determined(fresh), "Choose a VOCATION")
-
     vocation.set_up_first_time(fresh)
 
-    ### generate RP Fun
-    core.build_RP_role_play(fresh)
+    if fresh.RP_Cues:
+        core.build_RP_role_play(fresh) 
 
-    outputs.anthro_screen(fresh)
-    core.assign_persona_name(fresh)
-    outputs.anthro_screen(fresh)
-    please.assign_id_and_file_name(fresh)
-    please.record_storage(fresh)
-    
-    return fresh # built with side effects mostly
+    fresh.Quick_Description = f'A {fresh.Age} {fresh.Age_Suffix.lower()} old {fresh.FAMILY_SUB.lower()} {fresh.FAMILY_TYPE.lower()} {fresh.Vocation.lower()}'
+    please.wrap_up_persona(fresh)
 
 #####################################
 # build a BESPOKE anthro persona
 #####################################
 
-def bespoke_anthro(player_name):
+def bespoke_anthro(player_name:str) -> None:
     """
     building a bespoke anthro persona typically a referee persona
     """
-
-    # clearance for Clarence
-    please.clear_console()
-    print("\nYou are generating a bespoke ANTHRO PERSONA.")
-
-    ### set up the object for Anthro persona
     bespoke = AnthroRecord()
     bespoke.Bespoke = True
-    bespoke.RP = True if please.say_yes_to("Do you want referee persona cues? ") else False
-
     bespoke.Player_Name = player_name
+    please.setup_persona(bespoke)
+
     core.initial_attributes(bespoke)
     bespoke.HPM = core.hit_points_max(bespoke) 
     adjust_mstr_by_int(bespoke)
@@ -318,7 +313,7 @@ def bespoke_anthro(player_name):
     anthro_size_chooser(bespoke)
     adjust_attributes_by_anthro_type(bespoke)
 
-    # todo  bespoke and random mutation
+    # todo bespoke and random mutation
     core.mutations_bespoke(bespoke)
 
     if please.say_yes_to("Do you want attribute selected VOCATION"):
@@ -346,42 +341,27 @@ def bespoke_anthro(player_name):
         bespoke.Age_Cat = anthro_return_age_cat(bespoke)
 
     anthro_age_calc(bespoke, bespoke.Age_Cat)
+
+    if bespoke.RP_Cues:
+        core.build_RP_role_play(bespoke) 
     
-    # todo RP level impact  on: attributes mutations vocation gifts, interests, and skills combat table EXPS amount
-
-    ### generate RP Fun
-    core.build_RP_role_play(bespoke)
-
-    ### generate RP storage data including temporary name
-    outputs.anthro_screen(bespoke)
-    core.assign_persona_name(bespoke)   
-    please.assign_id_and_file_name(bespoke)
-    outputs.anthro_screen(bespoke)
-    please.record_storage(bespoke)
-    return
+    bespoke.Quick_Description = f'A {bespoke.Age} {bespoke.Age_Suffix.lower()} old {bespoke.FAMILY_SUB.lower()} {bespoke.FAMILY_TYPE.lower()} {bespoke.Vocation.lower()}'
+    # todo RP level impact  on: attributes mutations
+    please.wrap_up_persona(bespoke)
 
 #####################################
 # build a RANDOM anthro persona
 #####################################
 
-def random_anthro(player_name):
+def random_anthro(player_name:str) -> None:
     """
     building a RANDOM anthro persona, typically a referee persona
     """
-
-    # clearance for Clarence
-    please.clear_console()
-    print("\nYou are generating a RANDOM ANTHRO PERSONA.")
-
-    ### set up the object for Anthro persona
     rando = AnthroRecord()
-    rando.RP = True if please.say_yes_to("Do you want role playing cues? ") else False
     rando.Fallthrough = True
-
-    ### get mundane terran name of the player
     rando.Player_Name = player_name
+    please.setup_persona(rando)
 
-    ### build list of functions
     core.initial_attributes(rando)
     rando.HPM = core.hit_points_max(rando)
     adjust_mstr_by_int(rando)
@@ -405,15 +385,9 @@ def random_anthro(player_name):
     rando.Age_Cat = please.get_table_result(table.anthro_random_age_category)    
     anthro_age_calc(rando, rando.Age_Cat)
 
+    if rando.RP_Cues:
+        core.build_RP_role_play(rando) 
 
-    core.build_RP_role_play(rando)
+    rando.Quick_Description = f'A {rando.Age} {rando.Age_Suffix.lower()} old {rando.FAMILY_SUB.lower()} {rando.FAMILY_TYPE.lower()} {rando.Vocation.lower()}'
 
-    ### generate RP storage data including temporary name
-    
-    rando.Persona_Name = f"{rando.Player_Name}y Mac{rando.Player_Name}face"
-    please.assign_id_and_file_name(rando)
-    outputs.anthro_screen(rando)
-
-    ### ultimate persona disposition
-    please.record_storage(rando)
-    return
+    please.wrap_up_persona(rando)

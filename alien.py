@@ -10,12 +10,16 @@ import mutations
 import outputs
 import core
 
+# fix alien bespoke ain't very bespoke
+# fix use please.choose_this, RP and Fallthrough to replace many funcs
+# fix undiscovered is appearing in file name
+
 # set up AlienRecord
 @dataclass
 class AlienRecord(table.Alienic):
     pass
 
-# fix use please.choose_this, RP and Fallthrough to replace many funcs
+
 def alien_workflow() -> None:
     """
     player alien versus referee person vs persona maintenance
@@ -26,12 +30,12 @@ def alien_workflow() -> None:
     nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
     option_function_map = {
-        "Fresh Alien (New Player)":lambda:fresh_alien(nom_de_bom), 
+        "Fresh Alien (New Player)":lambda: fresh_alien(nom_de_bom), 
         "Bespoke Alien":lambda:bespoke_alien(nom_de_bom), 
         "Random Alien":lambda:rando_alien(nom_de_bom),
         "Maintenance":please.do_referee_maintenance
     }
-
+    please.clear_console()
     option_list = list(option_function_map.keys())
     list_comment = "Choose an alien workflow:"
     plan_desired = please.choose_this(option_list, list_comment)
@@ -307,18 +311,6 @@ def alien_biology(biologically:AlienRecord) -> AlienRecord:
 
     return biologically # altered by side effect
 
-def society_output(socializing: AlienRecord) -> list:
-    '''returns a list of strings describing society'''
-
-    social_list = []
-
-    ### add in tool usage
-    for component,result in socializing.Society.items():
-        if result != "None":
-            social_list.append(f'{component}: {result}')
-
-    return social_list
-
 def alien_society(socialize: AlienRecord) -> AlienRecord:
     ''' set up a tool use, language, and society'''
 
@@ -331,7 +323,6 @@ def alien_society(socialize: AlienRecord) -> AlienRecord:
     tool_score = 0
     language = culture = education = vocay = vocay_path = False
     religion = politics = philosophy = False
-
 
     #########################################
     # set up boolean flags for each society
@@ -357,6 +348,7 @@ def alien_society(socialize: AlienRecord) -> AlienRecord:
         chance = chance if chance > 0 else 0  # ternary vs -ve chance
         if please.do_1d100_check(chance):
             religion = True
+
     elif please.do_1d100_check(intel * 2):  # check tool score if culture is false
             tool_score += 1
 
@@ -392,17 +384,17 @@ def alien_society(socialize: AlienRecord) -> AlienRecord:
     # build alien society dict
     ######################################################
 
-    alien_society = {}
-    alien_society["Tools"] = "Flora or Fauna" if table.alien_tool_score[tool_score] == "None" and not language else table.alien_tool_score[tool_score]
-    alien_society["Language"] = "None" if not language else socialize.Sounds
-    alien_society["Culture"] = "None" if not culture else "Yes"
-    alien_society["Religion"] = "None" if not religion else please.get_table_result(table.role_play_RP_religion)
-    alien_society["Education"] = "None" if not education else "Yes"
-    alien_society["Politics"] = "None" if not politics else please.get_table_result(table.role_play_RP_politics)
-    alien_society["Vocation"] = "None" if not vocay else "Yes"
-    alien_society["Philosophy"] = "None" if not philosophy else please.get_table_result(table.role_play_RP_philosophy)
+    society = {}
+    society["Tools"] = "Flora or Fauna" if table.alien_tool_score[tool_score] == "None" and not language else table.alien_tool_score[tool_score]
+    society["Language"] = "None" if not language else socialize.Sounds
+    society["Culture"] = "None" if not culture else "Yes"
+    society["Religion"] = "None" if not religion else please.get_table_result(table.role_play_RP_religion)
+    society["Education"] = "None" if not education else "Yes"
+    society["Politics"] = "None" if not politics else please.get_table_result(table.role_play_RP_politics)
+    society["Vocation"] = "None" if not vocay else "Yes"
+    society["Philosophy"] = "None" if not philosophy else please.get_table_result(table.role_play_RP_philosophy)
  
-    socialize.Society = alien_society
+    socialize.Society = society
 
     return socialize # altered by side effects
 
@@ -462,7 +454,7 @@ def alien_vocation_check(get_a_job:AlienRecord) -> AlienRecord:
 
     return get_a_job # altered by side effect
 
-def alien_speciesizer(naming: AlienRecord) -> list:
+def alien_speciesizer_list(naming: AlienRecord) -> list:
     ''' generate a faux latin list'''
 
     # todo nomenclature mutations  "Mutations": {"Wings": null}
@@ -491,25 +483,47 @@ def alien_culturizer(naming: AlienRecord) -> list:
 
 def alien_nomenclature(naming: AlienRecord) -> AlienRecord:
     '''FAMILY = Alien, FAMILY_TYPE = species name, FAMILY_SUB = cultural name, persona name'''
+    please.clear_console()
+    print(f'\n{naming.Player_Name} you are NAMING an ALIEN persona.')
+    print(f'The ALIEN looks like: {naming.Quick_Description}')
 
-    if naming.RP:
-        latini = alien_speciesizer(naming)
-        naming.FAMILY_TYPE = f'{choice(latini)} {choice(latini)}'
-        core.assign_persona_name(naming)
-        return naming # modified by side effect
+    ### species name 
+    # todo assign file name should use FAMILY_SUB only
+    print(f'This ALIEN needs a SPECIES name')
+    latini = alien_speciesizer_list(naming)
+    species = f'{choice(latini)} {choice(latini)}'
 
-
-    ### species name FAMILY_TYPE
-    latini = alien_speciesizer(naming)
-    family_type = f'{choice(latini)} {choice(latini)}'
+    while not please.say_yes_to(f'Do you like the species name {species}? '):
+        species = f'{choice(latini)} {choice(latini)}'
+    naming.FAMILY_SUB = species
     
-    if please.say_yes_to(f'Species Name is {family_type}'):
-        naming.FAMILY_TYPE = family_type
+    ### society name
+    # todo society name for alien randomizer and parameters
+    please.clear_console()
+    print(f'This ALIEN needs a SOCIETY name')
+    print(f'The ALIEN looks like: {naming.Quick_Description}\nSPECIES name:{naming.FAMILY_SUB}')
+    print(f'Tool Usage: {naming.Society["Tools"]}, Language: {naming.Society["Language"]}')
 
+    if naming.Society["Tools"] == "Flora or Fauna" or naming.Society["Language"] == "None":
+        print(f'{naming.FAMILY_SUB} CANNOT name itself.')
+        naming.FAMILY_TYPE = please.input_this("What is the species called? ")
     else:
-        alien_nomenclature(naming)
+        print(f'A language of {naming.Sounds.lower()}. ',end="")
+        for element in ["Religion", "Politics", "Philosophy"]:
+            if naming.Society[element] != "None":
+                print(f'{element}: {naming.Society[element]}', end='')
+        print(f'{naming.FAMILY_SUB} can name itself.')
+        naming.FAMILY_TYPE = please.input_this("What is the SOCIETY name? ")
 
-    core.assign_persona_name(naming)
+    ### persona name
+    please.clear_console()
+    print(f'This ALIEN needs a personal PERSONA name')
+    print(f'The ALIEN looks like: {naming.Quick_Description}\nSPECIES name:{naming.FAMILY_SUB} ')
+    naming.Persona_Name = please.input_this(f"\nPlease input the PERSONA NAME: ")
+
+
+
+
 
     # todo use alien_culturizer()
 
@@ -682,18 +696,14 @@ def alien_biology_bespoke(biological: AlienRecord) -> AlienRecord:
     return biological # is altered by side effect here
 
 ### build a FRESH alien persona
-def fresh_alien(player_name)->AlienRecord:
+def fresh_alien(player_name:str) -> None:
     """
     builds a fresh alien object as per EXP persona creation
     """
-
-    # clearance for Clarence
-    please.clear_console()
-    print("\nYou are generating a FRESH ALIEN Persona")
-
     fresh = AlienRecord()
-
     fresh.Player_Name = player_name
+    please.setup_persona(fresh)
+
     core.initial_attributes(fresh)
     fresh.Size_Cat = please.get_table_result(table.alien_size_fresh)
     fresh.HPM = core.hit_points_max(fresh)
@@ -713,30 +723,23 @@ def fresh_alien(player_name)->AlienRecord:
     fresh.Age = alien_age(fresh)
     alien_biology(fresh)
     alien_society(fresh)
+
     alien_vocation_check(fresh)
 
-    core.build_RP_role_play(fresh)
 
-    outputs.outputs_workflow(fresh, "screen")
-    alien_nomenclature(fresh)
-    please.assign_id_and_file_name(fresh)
-    outputs.outputs_workflow(fresh, "screen")
-    please.record_storage(fresh)
-    return
+
+
+    please.wrap_up_persona(fresh)
 
 ### build a BESPOKE alien persona
-def bespoke_alien(player_name) -> AlienRecord:
+def bespoke_alien(player_name:str) -> None:
     """
     Build a bespoke alien persona usually a referee persona
     """
-
     bespoke = AlienRecord()
-    bespoke.Player_Name = player_name
-
-    please.clear_console()
-    print("\nYou are generating a BESPOKE ALIEN Persona")
-    bespoke.RP = True if please.say_yes_to("Do you want role playing cues?") else False
     bespoke.Bespoke = True
+    bespoke.Player_Name = player_name
+    please.setup_persona(bespoke)
 
     alien_attributes_bespoke(bespoke)
     alien_size_bespoke(bespoke)
@@ -757,35 +760,27 @@ def bespoke_alien(player_name) -> AlienRecord:
     bespoke.EXPS = vocation.convert_levels_to_exps(bespoke)
     alien_biology_bespoke(bespoke)
     alien_society_bespoke(bespoke)
+
+    if bespoke.RP_Cues:
+        core.build_RP_role_play(bespoke) 
+
     if bespoke.Vocation != "Alien":
         vocation.set_up_first_time(bespoke)
         if bespoke.Level > 1:
             vocation.update_interests(bespoke, (bespoke.Level - 1))
             vocation.update_skills(bespoke, (bespoke.Level - 1))
 
-    core.build_RP_role_play(bespoke)
+    please.wrap_up_persona(bespoke)
 
-    outputs.outputs_workflow(bespoke, "screen")
-    alien_nomenclature(bespoke)
-    please.assign_id_and_file_name(bespoke)
-    outputs.outputs_workflow(bespoke, "screen")
-    please.record_storage(bespoke)
-    return
 
 ### build a RANDO alien persona
-def rando_alien(player_name) -> AlienRecord:
+def rando_alien(player_name:str) -> None:
     '''create an instant random alien'''
-    please.clear_console()
-    print("\nYou are generating a RANDOM ANTHRO persona.")
-
     rando = AlienRecord()
     rando.Fallthrough = True
-    rando.RP = True if please.say_yes_to("Do you want role playing cues?") else False
-
-
-
-    ### get mundane terran name of the player
     rando.Player_Name = player_name
+    please.setup_persona(rando)
+
     core.initial_attributes(rando)
     alien_attacks_bespoke(rando)
     alien_size_bespoke(rando)
@@ -809,16 +804,14 @@ def rando_alien(player_name) -> AlienRecord:
     rando.EXPS = vocation.convert_levels_to_exps(rando)
     alien_biology_bespoke(rando)
     alien_society_bespoke(rando)
+
+    if rando.RP_Cues:
+        core.build_RP_role_play(rando) 
+
     if rando.Vocation != "Alien":
         vocation.set_up_first_time(rando)
         if rando.Level > 1:
             vocation.update_interests(rando, (rando.Level - 1))
             vocation.update_skills(rando, (rando.Level - 1))
 
-    core.build_RP_role_play(rando)
-
-    outputs.outputs_workflow(rando, "screen")
-    alien_nomenclature(rando)
-    please.assign_id_and_file_name(rando)
-    outputs.outputs_workflow(rando, "screen")
-    please.record_storage(rando)
+    please.wrap_up_persona(rando)

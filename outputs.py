@@ -4,6 +4,8 @@ import time
 import webbrowser
 
 from fpdf import FPDF
+from dataclasses import dataclass
+
 
 import alien
 import please
@@ -11,31 +13,25 @@ import mutations
 import vocation
 import table
 
-
-
 # todo RP combat block: weak strong cannon fodder, canon fodder and canonical
 # todo proficiency slot with actual weapons
 
-def outputs_workflow(outputter:table.PersonaRecord, out_type: str) -> None:
+@dataclass 
+class AllRecords(table.AllThings):
+    pass
+
+def outputs_workflow(outputter:AllRecords, out_type: str) -> None:
     '''
     divides outputs between screen and pdf
-    pdf has been rationalized for all families
-    screen has not 
     '''
-    family_type = outputter.FAMILY
+    out_type = "screen" if out_type not in ["pdf","screen"] else out_type
 
     # todo correct the difference between pdf screen and type
     if out_type == "pdf":
         pdf_output_chooser(outputter)
-    elif family_type == 'Toy':
-        input("this doesn't exist yet!")
-        please.say_goodnight_marsha
-    elif family_type == "Anthro" and out_type == "screen":
-        anthro_screen(outputter)  
-    elif family_type == "Alien" and out_type == "screen":
-        alien_screen(outputter)
-    elif family_type == "Robot" and out_type == "screen":
-        robot_screen(outputter)
+
+    elif out_type == "screen":
+        please.screen_this(outputter)
 
     return None
 
@@ -143,8 +139,7 @@ class PDF(FPDF):
         line_height = self.font_size * 1.6
         self.set_xy(8, 273)
         persona.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
-        blob = f" **Printed:** {persona.Date_Updated} **Created:** {persona.Date_Created} **ID:** {persona.ID}"
-
+        blob = f" **Printed:** {persona.Date_Updated} **Created:** {persona.Date_Created} **File:** {persona.File_Name}"
         self.cell(
             w=0,
             h=line_height,
@@ -1027,7 +1022,7 @@ def screen_attack_table(persona) -> None:
     CPROF = table.numbers_2_words[CPROF] if isinstance(CPROF,int) else CPROF
 
     # print out the combat table
-    print(f'\nATTACK TABLE: -- {persona.Vocation}')
+    print(f'\nATTACK TABLE: -- {persona.Vocation} Level {persona.Level}')
     print(f'{" ":>6} {"Skill":>6} {"Raw":>6} {"Max":>6} {"Force":>6} {"PROF":>5}')
     if ABP > 0:
         print(f"Strike {ABP:>6} {ABNP:>6} {AMR:>6} {ADB:>6}  {APROF}")
@@ -1241,9 +1236,8 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
     # clearance for Clarence
     please.clear_console()
 
-
     print(
-        f"ALIEN PERSONA RECORD\n"
+        f"\nALIEN PERSONA RECORD\n"
         f"Persona: {screenery.Persona_Name} \t\tPlayer Name: {screenery.Player_Name} \tCreated: {screenery.Date_Created}\n"
         f"AWE: {screenery.AWE} CHA: {screenery.CHA} CON: {screenery.CON} DEX: {screenery.DEX} "
         f"INT: {screenery.INT} MSTR: {screenery.MSTR} PSTR: {screenery.PSTR} HPS: {screenery.HPM} SOC: {screenery.SOC} WA: {screenery.WA}\n"
@@ -1251,8 +1245,9 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
         f"Age: {screenery.Age} {screenery.Age_Suffix} Size: {screenery.Size_Cat} Wate: {screenery.Wate} {screenery.Wate_Suffix}"
     )
 
-
-    if screenery.Vocation != "Alien":
+    if screenery.Vocation == "Alien":
+        print(f"{screenery.FAMILY_SUB} Level: {screenery.Level} EXPS: {screenery.EXPS}")
+    else:    
         print(f"Vocation: {screenery.Vocation} Level: {screenery.Level} EXPS: {screenery.EXPS}")
 
     print("\nDESCRIPTION: " + screenery.Quick_Description)
@@ -1289,31 +1284,45 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
             print(f"{x + 1}) {skill}")
 
     # print out the Alien powers aka mutations
-    print(f"\nNATURAL POWERS of {screenery.FAMILY_TYPE}")
+    print(f"\nNATURAL POWERS: ", end='')
 
     if len(screenery.Mutations) == 0:
         print("None")
-
-
     else:
+        print()
         all_mutations = mutations.mutation_list_builder()
         for mutation_name in screenery.Mutations.keys():
             mutuple = next((t for t in all_mutations if t[0] == mutation_name), None)
             working_mutation = mutuple[1](screenery)
             working_mutation.post_details(working_mutation.__class__)
 
-    print(f"\nBIOLOGY of {screenery.FAMILY_TYPE}")
+    print(f"\nBIOLOGY of {screenery.FAMILY_SUB}")
     for bio_line in screenery.Biology:
         print(f"{bio_line}")
-    print("")
+    print()
+
+
     for stage,tuple_ in screenery.Life_Stages.items():
-        print(f"{stage} {tuple_[0]} to {tuple_[1]} {screenery.Age_Suffix}")
+        if stage == "Life Span":
+            print(f'LIFE SPAN: {tuple_[1]} {screenery.Age_Suffix}')
+        else:    
+            print(f"{stage} {tuple_[0]} to {tuple_[1]} {screenery.Age_Suffix}")
 
     print(f"\nSOCIETY of {screenery.FAMILY_TYPE}")
-    for soc_line in alien.society_output(screenery):
-        print(f"{soc_line}")
+    for element,value in screenery.Society.items():
+        if element == "Tool":
+            print(f'Tool Usage: {value}')
+        elif element == "Language":
+            if value == "None":
+                print(f'No language: {screenery.Sounds}')
+            else:
+                print(f'Language of {screenery.Sounds}')
+        else:
+            if value != "None":
+                print(f'{element}: {value}')
+        
 
-    if screenery.RP:
+    if screenery.RP_Cues:
         print("\nROLE-PLAYING CUES:")
         for fun in screenery.RP_Fun:
             print(f"{fun}")
@@ -1321,7 +1330,6 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
 #####################################
 # ROBOT output to screen
 #####################################
-
 
 def robot_screen(bot_screen: table.PersonaRecord) -> None:
     """
@@ -1405,7 +1413,7 @@ def robot_screen(bot_screen: table.PersonaRecord) -> None:
             print(f"{x + 1}) {skill}")
 
 
-    if bot_screen.RP:
+    if bot_screen.RP_Cues:
         print("\nROLE-PLAYING CUES:")
         for fun in bot_screen.RP_Fun:
             print(f"{fun}")
@@ -1479,8 +1487,18 @@ def anthro_screen(persona) -> None:
             working_mutation = mutuple[1](persona)
             working_mutation.post_details(working_mutation.__class__)
 
-    if persona.RP:
+    if persona.RP_Cues:
         print("\nROLE-PLAYING CUES:")
         for fun in persona.RP_Fun:
             print(f"{fun}")
+
+
+#####################################
+# TOY output to screen
+#####################################
+
+def toy_screen(blank:any) -> None:
+    ''' prints out a toy to the screen'''
+    return
+    
 

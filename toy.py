@@ -2,6 +2,21 @@ import a_persona_record
 import please
 import table
 
+from secrets import choice
+from dataclasses import dataclass, field
+
+@dataclass
+class ToyRecord:
+    FAMILY: str = "Toy"
+    FAMILY_TYPE: str = "unmade"
+    FAMILY_SUB: str = "unmade"
+    Perms: dict = field(default_factory=dict)
+    Vocation: str = "Toy"
+    Date_Created: str = "Unmade"
+    Date_Updated: str = "Unmade"
+    File_Name: str = "None"
+    Bin: bool = False
+
 
 def toy_workflow() -> None:
     """
@@ -27,7 +42,7 @@ def toy_workflow() -> None:
 def toy_category():
     return please.get_table_result(table.toy_categories)
 
-def gimme_one(toy_type: str = "any") -> str:
+def toy_cat_type(toy_type: str = "any") -> str:
     ''' return str place holders for toys'''
     
     if "any" in toy_type:
@@ -35,21 +50,35 @@ def gimme_one(toy_type: str = "any") -> str:
 
     return  please.get_table_result(table.toy_pivot[toy_type])
 
-
-
 def fresh_toy() -> None:
     '''prints out toys till you get tired'''
 
+    toy = ToyRecord()
     give_me_more = True
+
     while give_me_more:
         toy_cat = please.get_table_result(table.toy_categories)
-        toy_type = gimme_one(toy_cat)
+        toy_type = toy_cat_type(toy_cat)
 
-        if please.say_yes_to(f'{toy_cat}: {toy_type}. Stop here?'):
-            give_me_more = False
+        toy.FAMILY_TYPE = toy_cat
+        toy.FAMILY_SUB = toy_type
+    
+        shaped = please.get_table_result(table.base_shape)
+        shaped = shaped if shaped != "Descriptive" else please.get_table_result(table.descriptive_shapes)
+        # mangle shape?
+        shaped = shaped if please.do_1d100_check(40) else f'{please.get_table_result(table.shape_mangle)} {shaped}'
+
+        toy.Perms["Desc"] = f'{please.get_table_result(table.colour_bomb)} and {please.get_table_result(table.colour_bomb).lower()} {shaped}'
+
+
+        if please.say_yes_to(f'SAVE THIS: {toy_cat}: {toy_type} ({toy.Perms["Desc"]}).'):
+            please.assign_file_name(toy)
+            please.record_storage(toy)
+
+            if please.say_yes_to(f'No more Toys. I am done.'):
+                give_me_more = False
 
     return
-
 
 def bespoke_toy():
    pass

@@ -143,7 +143,7 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
             peripheral_list[position] = new_peripheral
 
         elif peripheral == "Cybernetic Part":
-            toy_type = toy.gimme_one("any")
+            toy_type = toy.toy_cat_type("any")
             new_peripheral = f"A hard wired toy - {toy_type}"
             peripheral_list[position] = new_peripheral
 
@@ -268,7 +268,7 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
     attack_tables_pivot = [table.robot_ram_dam, table.attack_table_one, table.attack_table_two, table.attack_table_three, table.attack_table_four]
     fancy_attacks = {"Electro":"+2d8 DMG, +100 attack vs robots","Inertia":"*3 DMG +10","Stun":"DMG = Intensity","Vibro":"+20 DMG, +100 attack"}
 
-    # fix intermittent error with rolls_list and enumerate, combot error in rando first
+    
     for index, attack_table in enumerate(attack_tables_pivot):
         for _ in range(rolls_list[index]):
             new_attack = please.get_table_result(attack_table)
@@ -297,7 +297,7 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
                 offender.Defences.append(please.get_table_result(table.robotic_defences))
 
             elif new_attack in ["Gun", "Aerosol", "Bomb", "Grenade"]:
-                offender.Attacks.append(f'{new_attack}: {toy.gimme_one(new_attack)}')
+                offender.Attacks.append(f'{new_attack}: {toy.toy_cat_type(new_attack)}')
 
             elif "Mutation" in new_attack:
                 mutations.single_random_mutation(offender, ['any', 'combat'])
@@ -498,11 +498,10 @@ def android(andy: RobotRecord) -> RobotRecord:
     andy.HPM = please.roll_this(HPM_roll)
 
     ### vocation EXCEPTION for android
-    type_options = table.vocation_list.remove("Knite")
-    comment = "Choose your vocation."
-    andy.Vocation  = please.choose_this(type_options, comment, andy)
-    vocation.set_up_first_time(andy)
 
+    comment = "Choose your vocation."
+    andy.Vocation  = please.choose_this([vocation for vocation in table.vocation_list if vocation != "Knite"], comment, andy)
+  
     ### building the spec sheet
     specs = [f"Built in the image of their maker ({andy.FAMILY_SUB})."]
     specs.append(f"Has no biologic life force.")
@@ -630,16 +629,16 @@ def combot(comboy: RobotRecord) -> RobotRecord:
             comboy.Peripherals.append("Integrated Popcorn Maker")
 
         if "Bomb" in weapon:
-            bombay = f'Integrated bomb: {toy.gimme_one("Bomb")}'
+            bombay = f'Integrated bomb: {toy.toy_cat_type("Bomb")}'
 
         if "Missile" in weapon:
-            bombay = f'Integrated Missile: delivers {toy.gimme_one("Bomb")} bomb.'
+            bombay = f'Integrated Missile: delivers {toy.toy_cat_type("Bomb")} bomb.'
        
         if "Art" in weapon:
-            artay = f'Integrated artillery: {toy.gimme_one("Artillery")}'
+            artay = f'Integrated artillery: {toy.toy_cat_type("Artillery")}'
 
         if "Naval" in weapon:
-            artay = f'Integrated naval artillery: base {toy.gimme_one("Artillery")}'
+            artay = f'Integrated naval artillery: base {toy.toy_cat_type("Artillery")}'
 
         if bombay:
             comboy.Attacks.append(bombay)
@@ -1416,18 +1415,14 @@ def veterinarian(doc: RobotRecord) -> RobotRecord:
 #####################################
 
 ### build a fresh robot persona
-def fresh_robot(player_name) -> RobotRecord:
+def fresh_robot(player_name:str) -> None:
     """
     builds A FRESH robot persona using EXP persona creation
     """
-
-    ### clearance for Clarence
-    please.clear_console()
-    print("\nYou are generating a fresh ROBOT PERSONA")
-
     fresh = RobotRecord()
-
     fresh.Player_Name = player_name
+    please.setup_persona(fresh)
+
     fresh.Base_Family = please.get_table_result(table.robot_base_family) # must be first for Android
     core.initial_attributes(fresh)
     fresh.CF = control_factor(fresh)
@@ -1440,7 +1435,7 @@ def fresh_robot(player_name) -> RobotRecord:
 
     ### choose the FAMILY_TYPE
     fresh.FAMILY_TYPE = please.choose_this(list_eligible_robot_types(fresh), "Please choose a robot type.")
-    robot_type_function_pivot[fresh.FAMILY_TYPE](fresh)
+    robot_types_func_map[fresh.FAMILY_TYPE](fresh)
 
     if fresh.FAMILY_TYPE != "Android":
         fresh.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
@@ -1453,40 +1448,28 @@ def fresh_robot(player_name) -> RobotRecord:
     if fresh.Vocation != "Robot":
         vocation.set_up_first_time(fresh)
 
-    core.build_RP_role_play(fresh)
+    if fresh.RP_Cues:
+        core.build_RP_role_play(fresh) 
 
-    outputs.outputs_workflow(fresh, "screen")
-    robot_nomenclature(fresh)
-    outputs.outputs_workflow(fresh, "screen")
-    please.assign_id_and_file_name(fresh)
-    please.record_storage(fresh)
-    return
+    please.wrap_up_persona(fresh)
+
 
 
 #####################################
 # build a BESPOKE robot persona
 #####################################
 
-def bespoke_robot(player_name):
+def bespoke_robot(player_name:str) -> None:
     """
     builds A BESPOKE robot persona using EXP persona creation
     """
-
     bespoke = RobotRecord()
     bespoke.Bespoke = True
-
-    ### clearance for Clarence
-    please.clear_console()
-    print(f'\n{player_name} you are generating a BESPOKE ROBOT PERSONA')
-
-    if please.say_yes_to("Is this a REFEREE PERSONA"):
-        bespoke.RP = True
-
     bespoke.Player_Name = player_name
+    please.setup_persona(bespoke)
 
     base_family_choices = please.list_table_choices(table.robot_base_family)
     bespoke.Base_Family = please.choose_this(base_family_choices, "Choose a base family", bespoke)
-
 
     core.initial_attributes(bespoke) # cannot use descriptive attributes until later
     bespoke.CF = control_factor(bespoke)
@@ -1494,6 +1477,11 @@ def bespoke_robot(player_name):
     core.wate_allowance(bespoke)
     bespoke.Power_Reserve = bespoke.CON
     
+    if please.say_yes_to("Determine robot type by ATTRIBUTES? <- you don't choose."):
+        bespoke.FAMILY_TYPE = please.choose_this(list_eligible_robot_types(bespoke), "Please choose a robot type.")
+    else:
+        family_type_choices = please.list_table_choices(table.single_roll_robot_type)
+        bespoke.FAMILY_TYPE = please.choose_this(family_type_choices, "Choose robot type", bespoke)
 
 
     power_plant_choices = please.list_table_choices(table.robotic_power_plant)
@@ -1512,14 +1500,7 @@ def bespoke_robot(player_name):
 
     core.base_armour_rating(bespoke)
 
-
-    if please.say_yes_to("Determine robot type by ATTRIBUTES? <- you don't choose."):
-        bespoke.FAMILY_TYPE = please.choose_this(list_eligible_robot_types(bespoke), "Please choose a robot type.")
-    else:
-        family_type_choices = please.list_table_choices(table.single_roll_robot_type)
-        bespoke.FAMILY_TYPE = please.choose_this(family_type_choices, "Choose robot type", bespoke)
-
-    robot_type_function_pivot[bespoke.FAMILY_TYPE](bespoke)
+    robot_types_func_map[bespoke.FAMILY_TYPE](bespoke)
 
     if bespoke.FAMILY_TYPE != "Android":
         bespoke.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
@@ -1529,10 +1510,7 @@ def bespoke_robot(player_name):
     bespoke.Locomotion = robotic_locomotion(bespoke)
 
     robot_hite_wate_calc(bespoke)
-
-    if please.say_yes_to("Do you want a robot vocation? "):
-        bespoke.Vocation = please.choose_this([x for x in table.vocations_gifts_pivot], "Choose a VOCATION type.")
-        
+  
     if bespoke.Vocation != "Robot":
         vocation.set_up_first_time(bespoke)
 
@@ -1551,38 +1529,26 @@ def bespoke_robot(player_name):
     if please.say_yes_to("Do you want any descriptive changes? "):
         core.descriptive_attributes(bespoke)
 
+    if bespoke.RP_Cues:
+        core.build_RP_role_play(bespoke) 
+
     bespoke.Quick_Description = robot_description(bespoke)
 
-    core.build_RP_role_play(bespoke)
+    please.wrap_up_persona(bespoke)
 
-
-    outputs.outputs_workflow(bespoke, "screen")
-    robot_nomenclature(bespoke)
-    outputs.outputs_workflow(bespoke, "screen")
-    please.assign_id_and_file_name(bespoke)
-    please.record_storage(bespoke)
-    return
 
 #####################################
 # build a RANDO robot persona
 #####################################
 
-def rando_robot(player_name):
+def rando_robot(player_name:str) -> None:
     """
     builds A RANDOM robot persona using EXP persona creation
     """
-
     rando = RobotRecord()
     rando.Fallthrough = True
-
-    ### clearance for Clarence
-    please.clear_console()
-    print(f'\n{player_name} you are generating a rando ROBOT PERSONA')
-
-    if please.say_yes_to("Do you want Referee Persona Cues?"):
-        rando.RP = True
-
     rando.Player_Name = player_name
+    please.setup_persona(rando)
 
     base_family_choices = please.list_table_choices(table.robot_base_family)
     rando.Base_Family = please.choose_this(base_family_choices, "rando", rando)
@@ -1593,13 +1559,12 @@ def rando_robot(player_name):
     core.wate_allowance(rando)
     rando.Power_Reserve = rando.CON
     
-
     power_plant_choices = please.list_table_choices(table.robotic_power_plant)
     rando.Power_Plant = please.choose_this(power_plant_choices, "rando", rando)
     rando.Sensors = robotic_sensors(rando)
     core.base_armour_rating(rando)
     rando.FAMILY_TYPE = choice(please.list_table_choices(table.single_roll_robot_type))
-    robot_type_function_pivot[rando.FAMILY_TYPE](rando)
+    robot_types_func_map[rando.FAMILY_TYPE](rando)
 
     if rando.FAMILY_TYPE != "Android":
         rando.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
@@ -1608,10 +1573,7 @@ def rando_robot(player_name):
 
     rando.Locomotion = robotic_locomotion(rando)
     robot_hite_wate_calc(rando)
-
-    if please.do_1d100_check(2):
-        rando.Vocation = please.choose_this([x for x in table.vocations_gifts_pivot], "rando", rando)
-        
+   
     if rando.Vocation != "Robot":
         vocation.set_up_first_time(rando)
 
@@ -1623,19 +1585,14 @@ def rando_robot(player_name):
 
     rando.EXPS = 42 if rando.Level == 1 else vocation.convert_levels_to_exps(rando)
 
+    if rando.RP_Cues:
+        core.build_RP_role_play(rando) 
+
     rando.Quick_Description = robot_description(rando)
 
-    core.build_RP_role_play(rando)
+    please.wrap_up_persona(rando)
 
-
-    outputs.outputs_workflow(rando, "screen")
-    robot_nomenclature(rando)
-    outputs.outputs_workflow(rando, "screen")
-    please.assign_id_and_file_name(rando)
-    please.record_storage(rando)
-    return
-
-robot_type_function_pivot = {
+robot_types_func_map = {
     "Android": android,
     "Combot": combot,
     "Datalyzer": datalyzer,

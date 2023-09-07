@@ -9,6 +9,7 @@ import time
 from typing import Union, List
 from itertools import islice
 from collections import Counter
+from dataclasses import dataclass
 
 import a_persona_record
 import core
@@ -18,11 +19,19 @@ import outputs
 import mutations
 import toy
 
+import alien
+from anthro import anthro_nomenclature
+from robot import robot_nomenclature
+
+@dataclass 
+class AllRecords(table.AllThings):
+    pass
 
 """ 
 Please contains several functions that respond to please.<whatever>
 These are helper functions that are used by all record types
 """
+
 
 ###########################################
 #
@@ -124,9 +133,8 @@ def do_1d100_check(number: int) -> bool:
 #
 ###########################################
 
-# todo input_this needs to get for_a_list flag called 
-def input_this(message: str, for_a_list: bool = False) ->  Union[str, List[str]]:
-    ''' protects input data and returns str or list'''
+def toxic(safer:str) -> bool:
+    '''bad letters or too short letters '''
 
     def evil_characters(is_input_evil:str) -> bool:
         '''are there any evil characters in the str? '''
@@ -149,28 +157,28 @@ def input_this(message: str, for_a_list: bool = False) ->  Union[str, List[str]]
         else:
             return True
 
-
-    safer = input(message)
-    if safer.isdigit():
-        safer = int(safer)
-
-    while too_short_word(safer) or evil_characters(safer):
-        print(f'Too short, too long or knotty characters.')
-        safer = input(message)
-        if safer.isdigit():
-            safer = int(safer)
-
-    if for_a_list:
-        a_list = []
-        a_list.append(safer)
+    if too_short_word(safer) or evil_characters(safer):
+        return True
     else:
-        a_list = safer
+        return False
     
-    return a_list
+def input_this(message: str) -> str:
+    ''' protects input data and returns str '''
+    safer = input(message)
+    safer = int(safer) if safer.isdigit() else safer
 
-# todo connect choose this with clean this input
-# todo what should R reset  do?
-def choose_this(choices: list, comment: str, choosy: table.PersonaRecord = None) -> str:
+    while toxic(safer):
+        print(f'Too short, too long, or knotty characters.')
+        safer = input(message)
+        safer = int(safer) if safer.isdigit() else safer
+
+    if say_yes_to(f'Are you okay with {safer}:'):
+        return safer
+    else:
+        # clear_console()
+        return input_this(message)
+
+def choose_this(choices: list, comment: str, choosy: AllRecords = None) -> str:
     """
     Choose from a list of choices and return the chosen item
     [default] element for list choices[0]
@@ -257,7 +265,7 @@ def say_no_to(question: str) -> bool:
 #
 ###########################################
 
-def show_me_your_dict(dinkie: table.PersonaRecord) -> None:
+def show_me_your_dict(dinkie: AllRecords) -> None:
     """
     Prints out the dict or object's attribute dictionary.
     should this be deprecated
@@ -285,7 +293,7 @@ def show_me_your_dict(dinkie: table.PersonaRecord) -> None:
         print()  # Print newline after each batch
 
 
-
+# todo should be one function for table and list result
 def get_table_result(table: dict) -> str:
     """
     return a single result from a random table
@@ -361,7 +369,7 @@ def enumerate_this(list_title: str, number_me: list, sort_it:bool = True) -> Non
 #
 ##############################################
 
-def store_this(record_to_store: table.PersonaRecord) -> None:
+def store_this(record_to_store: AllRecords) -> None:
     """
     takes chosen record_to_store and converts it to a JSONified dict and stores it locally
     """
@@ -376,8 +384,11 @@ def store_this(record_to_store: table.PersonaRecord) -> None:
 
     ### determine the directory to use
     # beware of the ternary for ./Records/Referee/ vs ./Records/Players/
-    if record_to_store.FAMILY != "Toy":
+    if record_to_store.FAMILY == "Toy":
+        store_here = "Toy"
+    else:
         store_here = "Referee" if record_to_store.RP else "Player"
+
     if record_to_store.Bin:
         store_here = "Bin"
 
@@ -393,35 +404,21 @@ def store_this(record_to_store: table.PersonaRecord) -> None:
     with open(f"{directory_to_use}{file_name_to_use}", "a") as file:
         file.write(f"{json_to_add}\n")
 
-    input(f"\n*** Record stored at {directory_to_use}{file_name_to_use}. Continue? ")
-
-def record_storage(record_to_store: table.PersonaRecord) -> None:
+def record_storage(record_to_store: AllRecords) -> None:
     """
     organizes what to do with a record and prints it out
     """
-    option_list = [
-        "Save",
-        "Copy Out",
-        "Bin",
-    ]
+    print(f'{record_to_store.File_Name}')
 
-    list_comment = f"\nWhat do you want to do with: {record_to_store.File_Name}?"
+    option_list = ["Save", "Copy Out","Bin"]
+
+    list_comment = f"What do you want to do with {record_to_store.Persona_Name}?"
     storage_chosen = choose_this(option_list, list_comment)
-
-    ### prep for outputs
-    # no pdfs
-
-    function_map_reviews = {
-        "Alien": outputs.alien_screen,
-        "Anthro": outputs.anthro_screen,
-        "Robot": outputs.robot_screen,
-    }
-    review_screen = function_map_reviews[record_to_store.FAMILY]
 
     if storage_chosen == "Copy Out":
         store_this(record_to_store)
-        review_screen(record_to_store) #prints out on screen
-        print("\n\nCOPY JSON BELOW for TRANSFER include curly brackets {}")
+        clear_console()
+        print("\n\nCOPY JSON BELOW for TRANSFER (include curly brackets {})")
         print(json.dumps(record_to_store.__dict__))
         print("\n\n")
         input("\nPress Enter to continue...")
@@ -429,56 +426,44 @@ def record_storage(record_to_store: table.PersonaRecord) -> None:
 
     elif storage_chosen == "Save":
         store_this(record_to_store)
-        review_screen(record_to_store) #prints out on screen no more stored PDFs
         return
 
     elif storage_chosen == "Bin":
         record_to_store.Bin = True
         store_this(record_to_store)        
-        clear_console()
         return
 
 
-def assign_id_and_file_name(persona_record: table.PersonaRecord) -> None:
+def assign_file_name(persona_record: AllRecords) -> None:
     """
-    Assigns an ID and  File_name to persona_record for the very first time. like a version...
+    Assigns a File_name to persona_record for the very first time. like a version...
     I think this is only used once per record
     """
-    try:
-        if persona_record.FAMILY == "Toy":
-            id_name = (
-                f'{(persona_record.Persona_Name.replace(" ", "_").lower() + "_") if persona_record.Persona_Name != "Nobody" else ""}'
-                f'{persona_record.FAMILY_TYPE.upper()}_{persona_record.FAMILY_SUB.replace(" ","_").upper()}_'
-                f'{str(math.ceil(time.time()))}' # unique time stamp and file type
-            )
-        elif persona_record.RP and persona_record.FAMILY != "Toy":
-            id_name = (
-                f'{persona_record.Persona_Name.replace(" ", "_").upper()}_'
-                f'{persona_record.FAMILY.lower()}_{persona_record.FAMILY_TYPE.lower()}_'
-                f'{(persona_record.FAMILY_SUB.lower() + "_") if persona_record.FAMILY_SUB else ""}'
-                f'{persona_record.Vocation.lower()}_'
-                f'{str(math.ceil(time.time()))}' # unique time stamp and file type
-            )
-        else:
-            id_name = (
-                f'{persona_record.Player_Name.replace(" ", "_").upper()}_'
-                f'{(persona_record.Persona_Name.replace(" ", "_").lower() + "_") if persona_record.Persona_Name != "Nobody" else ""}'
-                f'{persona_record.FAMILY.lower()}_{persona_record.FAMILY_TYPE.lower()}_'
-                f'{(persona_record.FAMILY_SUB.lower() + "_") if persona_record.FAMILY_SUB else ""}'
-                f'{persona_record.Vocation.lower()}_'
-                f'{str(math.ceil(time.time()))}' # unique time stamp and file type
-            )
-        persona_record.ID = id_name
-        persona_record.File_Name = id_name + ".jsonl"
+    if persona_record.FAMILY == "Toy":
+        front = persona_record.Perms["Desc"].replace(" ", "_").upper()
 
-        if persona_record.Date_Created in ["Unevolved", "Soon", "Unborn", "Unmade"]:
-            persona_record.Date_Created = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
+    elif persona_record.RP and persona_record.FAMILY != "Toy": 
+        front = persona_record.Persona_Name.replace(" ", "_").upper()
 
-        persona_record.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
-    except AttributeError as error:
-        print(f"PersonaRecord doesn't have the necessary attributes. {error}")
+    elif not persona_record.RP and persona_record.FAMILY != "Toy":
+        front = persona_record.Player_Name.replace(" ", "_").upper()
 
-def collect_desired_record() -> table.PersonaRecord:
+    back = f'{persona_record.FAMILY.lower()}_{persona_record.FAMILY_TYPE.replace(" ", "_").lower()}_{persona_record.FAMILY_SUB.replace(" ", "_").lower()}'
+    vocay = "" if persona_record.Vocation in ["Alien","Robot","Toy"] else f'_{persona_record.Vocation.lower()}'
+    unix_time = f'_{str(math.ceil(time.time()))}'
+
+
+    ## assign File_Name
+    persona_record.File_Name = f'{front}_{back}{vocay}{unix_time}.jsonl'
+
+    ## assign Date_Created first time
+    if persona_record.Date_Created in ["Unevolved", "Soon", "Unborn", "Unmade"]:
+        persona_record.Date_Created = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
+    
+    ## assign Date_Updated first time 
+    persona_record.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
+
+def collect_desired_record() -> AllRecords:
     """
     generates a list of required records, user selects one
     """
@@ -521,7 +506,7 @@ def collect_desired_record() -> table.PersonaRecord:
 
     data_pairs = json.loads(file_data)
 
-    record_to_return = table.PersonaRecord()
+    record_to_return = AllRecords()
     for key, value in data_pairs.items():
         setattr(record_to_return, key, value)
     return record_to_return
@@ -557,11 +542,9 @@ def do_referee_maintenance():
 
     return
 
-def fix_robot_MSTR(mr_int: table.PersonaRecord) -> int:
+def fix_robot_MSTR(mr_int: AllRecords) -> int:
     '''swap robot INT for MSTR where needed'''
     return mr_int.MSTR if mr_int.FAMILY != "Robot" else mr_int.INT
-
-
 
 def clear_console() -> None:
     """
@@ -574,7 +557,6 @@ def clear_console() -> None:
     except subprocess.CalledProcessError as e:
         raise Exception(f"Failed to clear the console: {e}")
 
-
 def say_goodnight_marsha() -> None:
     """
     Clears the console, prints a farewell message, and exits the program.
@@ -584,3 +566,82 @@ def say_goodnight_marsha() -> None:
     print("* Thank you for your service. *")
     print("".center(31, "*"), "\n") # "\n" added here to create a new line
     sys.exit()
+
+def setup_persona(choosy:AllRecords)-> AllRecords:
+    '''initial setup for personas'''
+
+    # clearance for Clarence
+    clear_console()
+
+    if choosy.Bespoke:
+        kindof = "BESPOKE"
+    elif choosy.Fallthrough:
+        kindof = "RANDOM"
+    else:
+        kindof = "FRESH"
+    
+    print(f"\nHello {choosy.Player_Name}. You are generating a {kindof} {choosy.FAMILY.upper()} persona.")  
+
+    if choosy.Bespoke or choosy.Fallthrough:
+        choosy.RP = True if say_yes_to("Are you generating a REFEREE PERSONA?") else False
+    choosy.RP_Cues = True if say_yes_to("Would you like role-playing cues? ") else False
+    return choosy # altered by side effects
+
+def kind_of(kindy:AllRecords) -> str:
+    ''' returns FRESH, BESPOKE or RANDO for wrap up'''
+    if kindy.Bespoke:
+        kindof = "BESPOKE"
+    elif kindy.Fallthrough:
+        kindof = "RANDOM"
+    else:
+        kindof = "FRESH"
+        
+    return kindof
+
+
+def screen_this(screeny:AllRecords) -> None:
+    ''' directs person to correct screening type based on FAMILY'''
+    ## determine show on screen function by FAMILY
+    function_map_reviews = {
+        "Alien": outputs.alien_screen,
+        "Anthro": outputs.anthro_screen,
+        "Robot": outputs.robot_screen,
+        "Toy": outputs.toy_screen,
+    }
+    screen_func = function_map_reviews[screeny.FAMILY]
+    screen_func(screeny)
+
+
+def persona_nomenclature(avatar_name: AllRecords) -> None:
+    """
+    direct to correct naming func by FAMILY
+    """
+
+    ### get mundane terran name of the player
+    nomenclature_map ={
+        "Alien": alien.alien_nomenclature,
+        "Anthro": anthro_nomenclature,
+        "Robot": robot_nomenclature,
+        "Toy": outputs.toy_screen,
+    }
+
+    nomenclature_func = nomenclature_map[avatar_name.FAMILY]   
+    nomenclature_func(avatar_name)
+
+
+def wrap_up_persona(wrappy:AllRecords)->AllRecords:
+    '''review, name and file the persona'''
+
+    clear_console()
+    input(f'\n{wrappy.Player_Name} has created a {kind_of(wrappy)} {wrappy.FAMILY.upper()} persona.\nHit RETURN to review..')
+    screen_this(wrappy)
+    print(f'\nYou may need to SCROLL UP to fully review...')
+    input(f'Hit RETURN when ready to NAME your {kind_of(wrappy)} {wrappy.FAMILY.upper()}...')
+    persona_nomenclature(wrappy)
+    assign_file_name(wrappy)
+    clear_console()
+    screen_this(wrappy)
+    print(f'\nYou may need to SCROLL UP to fully review...')
+    record_storage(wrappy)
+
+    return wrappy # modified by side effects

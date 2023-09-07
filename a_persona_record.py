@@ -35,7 +35,7 @@ def record_chooser()->None:
             "Maintenance": please.do_referee_maintenance,
         }
 
-        choices_comment = "What do you want to do? "
+        choices_comment = "What domain are you exploring? "
         choices = list(choices_function_map.keys())
         record_type_desired = please.choose_this(choices, choices_comment)
         
