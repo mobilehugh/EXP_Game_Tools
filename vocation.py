@@ -28,6 +28,8 @@ SKILLS are added to the Skills [] as strings
 
 '''
 
+
+
 def biologist(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     """
     Set up the biologist vocation.
@@ -362,7 +364,6 @@ def fresh_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> list
 
     return interest_list
 
-
 def fresh_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     """
     generates a fresh list of skills on first level
@@ -448,7 +449,6 @@ def update_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> lis
 
     return interest_list
 
-
 def update_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     """
     returns a list to EXTEND get_a_job.Skills using get_a_job.Vocation and get_a_job.Level
@@ -462,7 +462,7 @@ def update_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     all_skills = []
     for sub_list in table.vocation_skills_tables[get_a_job.Vocation]:
         for key, value in sub_list.items():
-            if value != "1d100" and key != "Name" and value != "Choose":
+            if key not in ["name", "die_roll"] and value != "Choose":
                 all_skills.append(value)
 
     ### check to see if any extra rolls, this is a hack for skills 2% chance of extra

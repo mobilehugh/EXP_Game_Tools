@@ -2,14 +2,11 @@ import math
 import secrets
 from typing import Sequence
 
-
 import please
 import table
 
 
 # todo allow Fallthrough to skip mutation choices
-# fix defects get worse as level increases!
-
 
 def mutation_workflow() -> None:
     """

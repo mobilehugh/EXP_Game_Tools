@@ -241,8 +241,8 @@ def anthro_return_age_cat(years_old: AnthroRecord) -> str:
 
 def anthro_nomenclature(avatar:AnthroRecord) -> AnthroRecord:
     '''name the  anthro persona'''
-    clear_console()
-    print(f'\n{avatar_name.Player_Name} you are NAMING a {kind_of(avatar_name)} {avatar_name.FAMILY.upper()} persona.')
+    please.clear_console()
+    print(f'\n{avatar.Player_Name} you are NAMING a {please.get_kind_of(avatar)} {avatar.FAMILY.upper()} persona.')
     print(f'The persona looks like: {avatar.Quick_Description}')
     avatar.Persona_Name = please.input_this(f"\nPlease input the PERSONA NAME: ")
     return avatar # altered by side effects 

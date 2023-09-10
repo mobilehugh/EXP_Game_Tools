@@ -966,10 +966,10 @@ mechanic_gifts = {
 }
 
 mechanic_interests = {
-    (1, 41):"Repair",
-    (42, 80):"Enhance",
-    (82, 95):"Research",
-    (97, 99):"Choose",
+    (1, 40):"Repair",
+    (41, 80):"Enhance",
+    (81, 95):"Research",
+    (96, 99):"Choose",
     (100, 100):"Extra Roll",
     "name":"Mechanic Interests",
     "die_roll":"1d100",
@@ -1101,9 +1101,9 @@ nomad_gifts = {
 
 
 nomad_interests = {
-    (1, 41):"Biomes",
-    (42, 61):"Domestication",
-    (62, 95):"Survival",
+    (1, 40):"Biomes",
+    (41, 60):"Domestication",
+    (61, 95):"Survival",
     (96, 99):"Choose",
     (100, 100):"Extra Roll",
     "name":"Nomad Interests",
@@ -2481,7 +2481,8 @@ alien_quarter_shapes = [
 /* cSpell:disable */
 '''
 
-latinicize = {
+# todo add tapir
+latinicize_shapes = {
     "Alligator": ["Alligatoridae", "Crocodylia", "Caimanis", "Dentitudo", "Chompeus", "Dentatus"],
     "Amoeba": ["Amoebida", "Tubulinea", "Amoebozoa","Gooiae", "Flaccidia", "Blobaceus", "Amoprphia", "Ambiguosa", "Blobbus"],
     "Amphioxus": ["Filteria", "Leptocardii", "Lanceletia", "Ostrichiae"],
@@ -2567,23 +2568,23 @@ latinicize = {
     "Mushroom": ["Agaricomycetes", "Basidiomycota", "Moisturia", "Mykas", "Hyphae","Thallophyta"],
     "Nil": ["Danadia", "Evaporus", "Oblivia", "Obliviata", "Nullus", "Vacuus", "Nillia", "Oudenia"],
     "Nototherium": ["Notobeastus", "Paleopouchus", "Probiscua", "Nototheria"],
-    "Opossum": ["Didelphidae", "Didelphimorphia", "Necrofakia"],
-    "Orangutan": ["Hominidae", "Primates", "Baldinia"],
-    "Orca": ["Delphinidae", "Cetacea", "Splashisius"],
-    "Osprey": ["Pandionidae", "Accipitriformes", "Aves"],
-    "Ostrich": ["Struthionidae", "Struthioniformes", "Aves"],
-    "Ox": ["Bovidae", "Artiodactyla", "Oxenia"],
-    "Oyster": ["Ostreidae", "Ostreoida", "Mollusca"],
-    "Paramecium": ["Parameciidae", "Ciliophora", "Protista"],
-    "Penguin": ["Spheniscidae", "Sphenisciformes", "Aves"],
-    "Piranha": ["Characidae", "Characiformes", "Teleostei"],
-    "Pig": ["Suidae", "Artiodactyla", "Coponia"],
-    "Pillbug": ["Armadillidiidae", "Isopoda", "Crustacea"],
-    "Planaria": ["Planariidae", "Tricladida", "Platyhelminthes"],
-    "Plasmodium": ["Plasmodiidae", "Haemosporida", "Protista"],
-    "Platypus": ["Ornithorhynchidae", "Monotremata", "Wierdusia"],
-    "Porcupine": ["Hystricidae", "Rodentia", "Canadiansa"],
-    "Preying Mantis": ["Mantidae", "Mantodea", "Insecta"],
+    "Opossum": ["Didelphidae", "Didelphimorphia", "Necrofakia", "Narcoleptis" ],
+    "Orangutan": ["Jowlia", "Makrilongus", "Baldinia", "Planifaces", "Naterubrus"],
+    "Orca": ["Orcinus", "Interfectoketos", "Splashisius", "Thērcetus"],
+    "Osprey": ["Haliaetus", "Agyrtrhynchos", "Rhynchagyrto", "Pedespina", "Pedispina"],
+    "Ostrich": ["Struthionidae", "Struthioniformes", "Caputarena","Cephalosilicae"],
+    "Ox": ["Geedextera", "Hawsinistra", "Oxenia", "Bulloxia", "Bovitardes"],
+    "Oyster": ["Ostreidae", "Ostreoida", "Shucksia","Corpusandia", "Corpuscochiae", "Somakoilia"],
+    "Paramecium": ["Parameciidae", "Ciliophora", "Oblongus", "Unuscilium"],
+    "Penguin": ["Spheniscidae", "Opensorcii", "Linuxis", "Aptenodytes"],
+    "Piranha": ["Characidae", "Characiformes", "Acidentis", "Teleostei", "Serrasalmus", "Oxydentae"],
+    "Pig": ["Sus", "Baconicus", "Coponia", "Porkonia", "Snoutis"],
+    "Pillbug": ["Armadillidiidae", "Pharmisect", "Carpenteria", "Doodilia"],
+    "Planaria": ["Planariidae", "Planusvermis", "Platoskelis", "Platyhelminthes"],
+    "Plasmodium": ["Plasmodiidae", "Haemosporida", "Anogenesii","Hemofixia"],
+    "Platypus": ["Ornithorhynchidae", "Monotremata", "Wierdusia", "Rhynchosprosopon", "Rostrumfacies", "Ovomammis"],
+    "Porcupine": ["Hystricognathi", "Acutectus", "Canadiensa", "Belenkalupto"],
+    "Preying Mantis": ["Oratioinsectum", "Insectumorans", "Proseuchentomon", "Entomonproseucho", "Mantidae", "Mantodea", "Religiosa", "Mantearia"],
     "Priapolid": ["Priapulidae", "Priapulida", "Cycloneuralia"],
     "Pterosaur": ["Pterosauria", "Archosauria", "Beakinius"],
     "Puffer fish":["Bloati", "Puffi", "Expandis"],

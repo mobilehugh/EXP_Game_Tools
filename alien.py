@@ -12,7 +12,6 @@ import core
 
 # fix alien bespoke ain't very bespoke
 # fix use please.choose_this, RP and Fallthrough to replace many funcs
-# fix undiscovered is appearing in file name
 
 # set up AlienRecord
 @dataclass
@@ -464,11 +463,14 @@ def alien_speciesizer_list(naming: AlienRecord) -> list:
     # todo nomenclature attacks "Attacks": ["Strike", "Strike", "Shoot"]
     # todo nomenclature "Biology": ["Biome: Tropic Grassland", "Biome Characteristic: Normal", "Energy Source: Carnivore", "Energy Procurement: Infesting", "Reproduction: Parasitic", "Domicile: Hollow", "Aroma: Lemons", "Group Size: Pack", "Sounds: Blubs and Clangs."],
 
+    ### options based on quarter parts
     latini = []
     for part in ["Head", "Body", "Arms", "Legs"]:
         faux = getattr(naming, part).split(" (")[0]
-        tableau = table.latinicize[faux]
+        tableau = table.latinicize_shapes[faux]
         latini.append(choice(tableau))
+
+
 
     return latini
 
@@ -520,10 +522,6 @@ def alien_nomenclature(naming: AlienRecord) -> AlienRecord:
     print(f'This ALIEN needs a personal PERSONA name')
     print(f'The ALIEN looks like: {naming.Quick_Description}\nSPECIES name:{naming.FAMILY_SUB} ')
     naming.Persona_Name = please.input_this(f"\nPlease input the PERSONA NAME: ")
-
-
-
-
 
     # todo use alien_culturizer()
 

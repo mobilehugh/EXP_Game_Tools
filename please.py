@@ -301,12 +301,18 @@ def get_table_result(table: dict) -> str:
     """
     random = roll_this(table["die_roll"])
 
+    result = "" # todo remove when all tables fixed
+
     table = {key: val for key, val in table.items() if key not in ["name","die_roll","number", "title"]}
 
     for item_range in table.keys():
         if random in range(item_range[0],item_range[1]+1): # correct for normal tables (90,100) -> (90,101)
             result = table[item_range]
             break
+
+    if not result: # todo remove when all tables fixed
+        input(f'there is an error in the table {repr(table)}\n return to go on' )
+
     return result
 
 
@@ -467,7 +473,8 @@ def collect_desired_record() -> AllRecords:
     """
     generates a list of required records, user selects one
     """
-    record_type = choose_this(["Players", "Alien", "Anthro", "Robot", "Toy", "Ref"], "What directory to search?")    
+    clear_console()
+    record_type = choose_this(["Players", "Alien", "Anthro", "Robot", "Toy", "Ref", "Bin"], "What directory to search?")    
     
     # finder for long list of hard to type file names
     if record_type == "Toy":
@@ -478,9 +485,9 @@ def collect_desired_record() -> AllRecords:
 
     elif record_type in ["Alien", "Anthro", "Robot", "Ref"]:
         directory_to_search = "./Records/Referee/"
-    else:
-        print("\n*** ERROR: directory not found")
-        say_goodnight_marsha()
+
+    elif record_type == "Bin":
+        directory_to_search = ".Records/Bin/"
 
     list_of_files = os.listdir(directory_to_search)
 
@@ -511,6 +518,8 @@ def collect_desired_record() -> AllRecords:
         setattr(record_to_return, key, value)
     return record_to_return
 
+
+# todo add move file to maintenance 
 def do_referee_maintenance():
     """
     things that referee's need to access and do
@@ -587,7 +596,7 @@ def setup_persona(choosy:AllRecords)-> AllRecords:
     choosy.RP_Cues = True if say_yes_to("Would you like role-playing cues? ") else False
     return choosy # altered by side effects
 
-def kind_of(kindy:AllRecords) -> str:
+def get_kind_of(kindy:AllRecords) -> str:
     ''' returns FRESH, BESPOKE or RANDO for wrap up'''
     if kindy.Bespoke:
         kindof = "BESPOKE"
@@ -633,10 +642,10 @@ def wrap_up_persona(wrappy:AllRecords)->AllRecords:
     '''review, name and file the persona'''
 
     clear_console()
-    input(f'\n{wrappy.Player_Name} has created a {kind_of(wrappy)} {wrappy.FAMILY.upper()} persona.\nHit RETURN to review..')
+    input(f'\n{wrappy.Player_Name} has created a {get_kind_of(wrappy)} {wrappy.FAMILY.upper()} persona.\nHit RETURN to review..')
     screen_this(wrappy)
     print(f'\nYou may need to SCROLL UP to fully review...')
-    input(f'Hit RETURN when ready to NAME your {kind_of(wrappy)} {wrappy.FAMILY.upper()}...')
+    input(f'Hit RETURN when ready to NAME your {get_kind_of(wrappy)} {wrappy.FAMILY.upper()}...')
     persona_nomenclature(wrappy)
     assign_file_name(wrappy)
     clear_console()

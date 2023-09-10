@@ -797,7 +797,6 @@ class PDF(FPDF):
 #
 ##############################################
 
-# fix show_details and return_details may not be using build 
 # fix broken pdf to browser 
 def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str = "C:/") -> None:
     """
