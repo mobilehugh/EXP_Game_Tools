@@ -196,11 +196,12 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
     return descriptive # is altered by side effect
 
 
+# fix manual update needs subcategories based attributes, on FAMILY, etc
 def manual_persona_update(updating: AllRecords) -> AllRecords:
     ''' painfully update every element in persona record'''
     FORBIDDEN = ["Player_Name", "FAMILY", "FAMILY_TYPE", "Fallthrough", "RP", "Show", "Bin", "Date_Created", "Date_Updated", "ID", "File_Name"]
 
-    print(f"Manually adjusting {len(asdict(updating).keys())} items in {updating.Persona_Name}")
+    print(f"\nManually adjusting {len(asdict(updating).keys())} items in {updating.Persona_Name}")
     for attr, value in asdict(updating).items():
 
         if attr not in FORBIDDEN:

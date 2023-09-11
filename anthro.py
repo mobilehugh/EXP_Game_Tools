@@ -23,7 +23,7 @@ def anthro_workflow() -> None:
     # clearance for Clarence
     please.clear_console()
 
-    print('This is a ANTHRO Build')
+    print('You are about to embark on an ANTHRO Build')
     nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
     workflow_function_map = {
@@ -33,7 +33,7 @@ def anthro_workflow() -> None:
         "Maintenance":please.do_referee_maintenance
     }
     please.clear_console()
-    choice_comment = "Choose anthro workflow? "
+    choice_comment = "Choose ANTHRO workflow? "
     choices= list(workflow_function_map.keys())
     anthro_record_type = please.choose_this(choices, choice_comment)
 

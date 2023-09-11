@@ -19,6 +19,7 @@ class PersonaRecord:
     FAMILY_SUB: str = "Generalis"
     Fallthrough: bool = False
     Bespoke: bool = False
+    # if Fallthrough and Bespoke = False, record is fresh
     RP: bool = False
     RP_Cues: bool = False
     Bin: bool = False
@@ -2060,7 +2061,7 @@ role_play_RP_politics = {
     (52, 56):"Fascism",
     (57, 61):"Feudalism",
     (62, 66):"Imperialism",
-    (67, 71):"Ma",
+    (67, 71):"Materialism",
     (72, 76):"Militarism",
     (77, 81):"Monarchy",
     (82, 86):"Technocracy",

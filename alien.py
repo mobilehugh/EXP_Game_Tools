@@ -10,9 +10,6 @@ import mutations
 import outputs
 import core
 
-# fix alien bespoke ain't very bespoke
-# fix use please.choose_this, RP and Fallthrough to replace many funcs
-
 # set up AlienRecord
 @dataclass
 class AlienRecord(table.Alienic):
@@ -25,7 +22,7 @@ def alien_workflow() -> None:
     """
     please.clear_console()
 
-    print('This is a ALIEN Build')
+    print('You are about to embark on an ALIEN Build')
     nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
     option_function_map = {
@@ -36,7 +33,7 @@ def alien_workflow() -> None:
     }
     please.clear_console()
     option_list = list(option_function_map.keys())
-    list_comment = "Choose an alien workflow:"
+    list_comment = "Choose an ALIEN workflow:"
     plan_desired = please.choose_this(option_list, list_comment)
 
     if plan_desired in option_function_map:
@@ -46,18 +43,37 @@ def alien_workflow() -> None:
 # FRESH ALIEN FUNCTIONS
 ####################################
 
-def alien_attacks(type_casting: AlienRecord) -> AlienRecord:
-    ''' 
-    determine the alien attack types
-    '''
+def alien_attack_number(attacker: AlienRecord) -> int:
+    '''determine the number of alien attacks per unit'''
+
+    if attacker.RP and not attacker.Fallthrough:
+        if please.say_yes_to("Would you like to choose your own NUMBER of ATTACKS per unit? "):
+            attack_no = int(please.input_this("How many ATTACKS PER UNIT? "))
+            if attack_no > 5 and not please.say_no_to(f'{attack_no} per unit is hella lot of attack rolls. You sure? '):
+                return alien_attack_number(attacker)
+            else:
+                return attack_no
+
     attack_no = please.get_table_result(table.attacks_per_unit)
-    type_casting.Alternating = True if attack_no == 0 else False
-    attack_no = 1 if attack_no == 0 else attack_no
+    attacker.Alternating = True if attack_no == 0 else False
+    attack_no = 1 if attack_no == 0 else attack_no    
+
+    return attack_no
+
+def alien_attack_types(attacktyper: AlienRecord, attack_no:int) -> AlienRecord:
+    ''' assign strike, fling or shoot attack types in a list'''
+
+    if attacktyper.RP and not attacktyper.Fallthrough:
+        if please.say_yes_to("Would you like to choose your own ATTACK TYPES? "):
+            print(f'The alien has {attack_no} attack(s) that need ATTACK TYPES.')
+            for indxr in range(attack_no):
+                attacktyper.Attacks.append(please.choose_this(["Strike", "Fling", "Shoot"], f"Choose ATTACK TYPE for attack #{indxr+1}. "))
+            return attacktyper # modified by side effe
 
     for _ in range(attack_no):
-        type_casting.Attacks.append(f'{please.get_table_result(table.alien_attack_type)}')
-       
-    return type_casting # filled by side effects
+        attacktyper.Attacks.append(f'{please.get_table_result(table.alien_attack_type)}')
+
+    return 
 
 def alien_damage_list(damaging: AlienRecord) -> list:
     """
@@ -110,7 +126,7 @@ def alien_attack_description(descriptor: AlienRecord) -> list:
     descriptor.Attack_Desc = attack_desc
     return attack_desc # also persona record altered by side effect
 
-def alien_base_shape(shaping:AlienRecord) -> AlienRecord:
+def alien_base_shape_random(shaping:AlienRecord) -> AlienRecord:
     ''' assigns a random animal shape to each body part '''
     four_quarter_parts = ["Head", "Body", "Arms", "Legs"]
 
@@ -119,6 +135,18 @@ def alien_base_shape(shaping:AlienRecord) -> AlienRecord:
         setattr(shaping, part, part_shape)
 
     return shaping # adjusted by side effects in this function
+
+def alien_base_shape_bespoke(shaping:AlienRecord) -> AlienRecord:
+    ''' player assigned quarter shapes '''
+    alien_base_shape_random(shaping)
+
+    four_quarter_parts = ["Head", "Body", "Arms", "Legs"]
+
+    for part in four_quarter_parts:
+        quarter = getattr(shaping, part)
+        if not please.say_yes_to(f'Proposed alien {part}: {quarter} '):
+            new_quarter = please.choose_this(table.alien_quarter_shapes, f"Choose alien's {part.upper}: ")
+            setattr(shaping, part, new_quarter)
 
 def adornalizer(part:str, adornment:str) -> str:
     """
@@ -490,7 +518,6 @@ def alien_nomenclature(naming: AlienRecord) -> AlienRecord:
     print(f'The ALIEN looks like: {naming.Quick_Description}')
 
     ### species name 
-    # todo assign file name should use FAMILY_SUB only
     print(f'This ALIEN needs a SPECIES name')
     latini = alien_speciesizer_list(naming)
     species = f'{choice(latini)} {choice(latini)}'
@@ -547,108 +574,68 @@ def alien_hite_wate_calc(picking_sizes: AlienRecord) -> AlienRecord :
 
     return picking_sizes # modified by side effects
 
-def alien_size_bespoke(choosing_sizes: AlienRecord) -> AlienRecord:
+def alien_size_cat_rando(sizer:AlienRecord) -> AlienRecord:
+    ''' returns a size cat that includes Minute and Humongous'''
+    sizer.Size_Cat = please.get_table_result(table.alien_size_fresh)
+    sizer.Size_Cat = "Minute" if sizer.Size_Cat == "Tiny" and please.do_1d100_check(16) else "Tiny"
+    sizer.Size_Cat = "Humongous" if sizer.Size_Cat == "Gigantic" and please.do_1d100_check(16) else "Gigantic"
+    return # sizer is altered by side effect
+
+def alien_size_cat_bespoke(sizer: AlienRecord) -> AlienRecord:  # side effects
     """
     generate alien size_cat including minute and humongous
     """
-    def fallthrough_diversion(m_or_h: AlienRecord) -> AlienRecord:
-        m_or_h.Size_Cat = please.get_table_result(table.alien_size_fresh)
+    if please.say_yes_to("Random alien SIZE? "):
+        alien_size_cat_rando(sizer)
+        return # sizer is altered by side effect
+    else:
+        methods = please.list_table_choices(table.alien_size_fresh) + ["Humongous", "Minute"]
+        choice_comment = "Choose a SIZE for your alien."
+        sizer.Size_Cat = please.choose_this(methods, choice_comment)
+        return
 
-        if m_or_h.Size_Cat == "Tiny" and please.do_1d100_check(16):
-            m_or_h.Size_Cat = "Minute"
-
-        elif m_or_h.Size_Cat == "Gigantic" and please.do_1d100_check(16):
-            m_or_h.Size_Cat = "Humongous"
-
-        return # stays within bespoke
-
-    if choosing_sizes.Fallthrough:
-        fallthrough_diversion(choosing_sizes)
-        return # choosing_sizes is altered by side effect
-
-    methods = ["Random", "Bespoke"]
-    choice_comment = "Choose a method for alien SIZE?"
-    chosen = please.choose_this(methods, choice_comment)
-
-    if chosen == "Random":
-        fallthrough_diversion(choosing_sizes)
-
-    elif chosen == "Bespoke":
-        size_choices = [sizes for sizes in table.alien_size_and_WA.keys()]
-        choosing_sizes.Size_Cat = please.choose_this(size_choices, "Choose a SIZE for your alien.")
-
-    return choosing_sizes # adjusted by side effects
 
 def alien_attributes_bespoke(attributions: AlienRecord) -> AlienRecord:
     """
-    determine attributes
+    determine alien attributes
     """
+    core.initial_attributes(attributions)
 
     if attributions.Fallthrough:
-        core.initial_attributes(attributions)
         return attributions # altered by side effect
 
-    methods = ["Random", "Manual", "Descriptive"]
+    methods = ["Random", "Descriptive", "Specific <- painful"]
     choice_comment = "Choose a method for alien ATTRIBUTES?"
     chosen = please.choose_this(methods, choice_comment)
 
-    if chosen == "Manual":
-        core.initial_attributes(attributions)
+    if chosen == "Specific <- painful":
         core.manual_persona_update(attributions)
 
     elif chosen == "Random":
-        core.initial_attributes(attributions)
+        return attributions # altered by side effect
 
     elif chosen == "Descriptive":
-        core.initial_attributes(attributions)
         core.descriptive_attributes(attributions)
 
     return attributions # altered by side effect
 
-def alien_attacks_bespoke(attacking: AlienRecord) -> AlienRecord:
-    """
-    alien attack type and frequency
-    """
-
-    if attacking.Fallthrough:
-        alien_attacks(attacking)
-        return
-        
-    methods = ["Random", "Bespoke"]
-    choice_comment = "Choose a method for alien ATTACKS?"
-    chosen = please.choose_this(methods, choice_comment)
-
-    if chosen == "Random":
-        alien_attacks(attacking)
-
-    elif chosen == "Bespoke":
-        attack_no = int(please.input_this("How many ATTACKS PER UNIT? "))
-        for _ in range(attack_no):
-            attacking.Attacks.append(f'{please.get_table_result(table.alien_attack_type)}')
-
-    return attacking # is modified by side effect
 
 def alien_life_span_bespoke(lifer: AlienRecord) -> AlienRecord:
     """
     determine alien life span
     """
 
-    if lifer.Fallthrough:
-        life_span = alien_life_span()
-        alien_life_stages(lifer, life_span)
-        return lifer # modified by side effect
-
-
-    methods = ["Random", "Bespoke"]
+    methods = ["Random", "Extreme"]
     chosen = please.choose_this(methods, "Choose a method for alien LIFE SPAN?")
 
     if chosen == "Random":
         life_span = alien_life_span()
         alien_life_stages(lifer,life_span)
 
-    elif chosen == "Bespoke":
+    elif chosen == "Extreme":
         life_span_choices = [key for key in table.alien_life_span_descriptors.keys()]
-        chosen = please.choose_this(life_span_choices, "Choose a LIFE SPAN DESCRIPTOR.")
+        chosen = please.choose_this(life_span_choices, "Choose an EXTREME life. ")
+
         die_roll, multi = table.alien_life_span_descriptors[chosen]
         life_span = please.roll_this(die_roll) * multi
         alien_life_stages(lifer, life_span)
@@ -657,6 +644,14 @@ def alien_life_span_bespoke(lifer: AlienRecord) -> AlienRecord:
             lifer.Age_Suffix = choice(['Seconds', 'Minutes', 'Days'])
         elif chosen == "Progeny":
             lifer.Age_Suffix = choice(["Days","Weeks","Months"])
+
+        # todo test progenic rationalization
+        if chosen in ["Progeny - Short", "Progeny"] and please.say_yes_to(f"Rationalize size for short life span? "):
+                ''' major fix for short lived'''
+                if lifer.Size_Cat not in ["Tiny","Minute"]:
+                    lifer.Size_Cat = choice(["Tiny","Minute"])
+                    alien_hite_wate_calc(lifer)
+                    core.wate_allowance(lifer)
 
         return
 
@@ -707,26 +702,27 @@ def fresh_alien(player_name:str) -> None:
     fresh.HPM = core.hit_points_max(fresh)
     alien_hite_wate_calc(fresh)
     core.wate_allowance(fresh)
-    alien_attacks(fresh)
+
+    attack_no = alien_attack_number(fresh)
+    alien_attack_types(fresh, attack_no)
     alien_attack_description(fresh)
+
+
     core.base_armour_rating(fresh)
-    alien_base_shape(fresh)
+    alien_base_shape_random(fresh)
     alien_shape_adornments(fresh)
     core.movement_rate(fresh)
     alien_quick_description_builder(fresh)
     mental_amount, physical_amount = mutations.biologic_mutations_number(fresh)
     mutations.mutation_assignment(fresh, mental_amount, physical_amount,"any")
+    
     life_span  = alien_life_span()
     alien_life_stages(fresh, life_span)
     fresh.Age = alien_age(fresh)
+
     alien_biology(fresh)
     alien_society(fresh)
-
     alien_vocation_check(fresh)
-
-
-
-
     please.wrap_up_persona(fresh)
 
 ### build a BESPOKE alien persona
@@ -740,24 +736,31 @@ def bespoke_alien(player_name:str) -> None:
     please.setup_persona(bespoke)
 
     alien_attributes_bespoke(bespoke)
-    alien_size_bespoke(bespoke)
+    alien_size_cat_bespoke(bespoke)
     core.wate_allowance(bespoke)
     bespoke.HPM = core.hit_points_max(bespoke)
     alien_hite_wate_calc(bespoke)
-    alien_attacks_bespoke(bespoke)
+
+    attack_no = alien_attack_number(bespoke)
+    alien_attack_types(bespoke, attack_no)
     alien_attack_description(bespoke)
+
     core.base_armour_rating(bespoke)
-    alien_base_shape(bespoke)
+    alien_base_shape_bespoke(bespoke)
     alien_shape_adornments(bespoke)
     core.movement_rate(bespoke)
-    alien_quick_description_builder(bespoke)
+
     core.mutations_bespoke(bespoke)
+
     alien_life_span_bespoke(bespoke)
-    alien_age(bespoke)
+    bespoke.Age = alien_age(bespoke)
+
     vocation.exps_level_picker(bespoke)
     bespoke.EXPS = vocation.convert_levels_to_exps(bespoke)
     alien_biology_bespoke(bespoke)
     alien_society_bespoke(bespoke)
+
+    alien_quick_description_builder(bespoke)
 
     if bespoke.RP_Cues:
         core.build_RP_role_play(bespoke) 
@@ -780,15 +783,18 @@ def rando_alien(player_name:str) -> None:
     please.setup_persona(rando)
 
     core.initial_attributes(rando)
-    alien_attacks_bespoke(rando)
-    alien_size_bespoke(rando)
+    alien_size_cat_rando(rando)
     core.wate_allowance(rando)
     rando.HPM = core.hit_points_max(rando)
     alien_hite_wate_calc(rando)
-    alien_attacks_bespoke(rando)
+
+    attack_no = alien_attack_number(rando)
+    alien_attack_types(rando, attack_no)
     alien_attack_description(rando)
+
     core.base_armour_rating(rando)
-    alien_base_shape(rando)
+
+    alien_base_shape_random(rando)
     alien_shape_adornments(rando)
     core.movement_rate(rando)
     alien_quick_description_builder(rando)
@@ -796,8 +802,10 @@ def rando_alien(player_name:str) -> None:
     mental_amount, physical_amount = mutations.biologic_mutations_number(rando)
     mutations.mutation_assignment(rando, mental_amount, physical_amount,"any")
     
-    alien_life_span_bespoke(rando)
+    life_span = alien_life_span()
+    alien_life_stages(rando, life_span)
     rando.Age = alien_age(rando)
+
     vocation.exps_level_picker(rando)
     rando.EXPS = vocation.convert_levels_to_exps(rando)
     alien_biology_bespoke(rando)

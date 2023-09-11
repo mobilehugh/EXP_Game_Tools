@@ -25,7 +25,7 @@ def robot_workflow():
     # clearance for Clarence
     please.clear_console()
 
-    print('This is a ROBOT Build')
+    print('You are about to embark on a ROBOT Build')
     nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
 
     workflow_function_map = {
@@ -35,7 +35,7 @@ def robot_workflow():
         "Maintenance":please.do_referee_maintenance,
     }
 
-    comment = "Choose a robot workflow:"
+    comment = "Choose a ROBOT workflow:"
     choices = list(workflow_function_map.keys())
     workflow_desired = please.choose_this(choices, comment)
 
