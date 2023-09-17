@@ -301,7 +301,7 @@ def get_table_result(table: dict) -> str:
     """
     random = roll_this(table["die_roll"])
 
-    result = "" # todo remove when all tables fixed
+    result = ""
 
     table = {key: val for key, val in table.items() if key not in ["name","die_roll","number", "title"]}
 
@@ -310,7 +310,7 @@ def get_table_result(table: dict) -> str:
             result = table[item_range]
             break
 
-    if not result: # todo remove when all tables fixed
+    if not result:
         input(f'there is an error in the table {repr(table)}\n return to go on' )
 
     return result
@@ -530,7 +530,7 @@ def do_referee_maintenance():
     "EXPS": vocation.update_persona_exps,
     "Level": vocation.update_persona_exps,
     "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
-    "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"),
+    "PDF <- off service": lambda persona: outputs.outputs_workflow(persona, "screen"), # todo change back when PDF working
     "Attributes": lambda persona: core.manual_persona_update(persona),
     "Change Record": lambda persona: do_referee_maintenance(),}
     

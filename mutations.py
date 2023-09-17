@@ -4,6 +4,7 @@ from typing import Sequence
 
 import please
 import table
+import toy
 
 
 # todo allow Fallthrough to skip mutation choices
@@ -16,7 +17,7 @@ def mutation_workflow() -> None:
     please.clear_console()
 
     option_list = ["Random Mutations", "Bespoke Mutations"]
-    list_comment = "Cruise through mutations :"
+    list_comment = "Cruise through mutations:"
     plan_desired = please.choose_this(option_list, list_comment)
 
     fake_record = table.PersonaRecord
@@ -2429,7 +2430,6 @@ class MechanicalInsertion(Mutation):
         self.table_name = None
         self.link = "#_mechanical_insertion"
 
-    ### todo roll the actual toy type
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
@@ -2437,7 +2437,7 @@ class MechanicalInsertion(Mutation):
         if self.name not in self.object.Mutations:
             insertion_location = please.get_table_result(table.family_hit_location_pivot_table[self.object.FAMILY])
             insertion_type = please.get_table_result(table.toy_categories)
-            perm = f'{insertion_location}:{insertion_type}'
+            perm = f'{insertion_location}:{toy.toy_cat_type()}'
 
         ### build description
         insertion_location, insertion_type = perm.split(":")

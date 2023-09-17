@@ -2,10 +2,11 @@ import math
 import os
 import time
 import webbrowser
+import sys
 
 from fpdf import FPDF
 from dataclasses import dataclass
-
+from typing import Tuple, Union
 
 import alien
 import please
@@ -26,7 +27,6 @@ def outputs_workflow(outputter:AllRecords, out_type: str) -> None:
     '''
     out_type = "screen" if out_type not in ["pdf","screen"] else out_type
 
-    # todo correct the difference between pdf screen and type
     if out_type == "pdf":
         pdf_output_chooser(outputter)
 
@@ -103,9 +103,22 @@ class PDF(FPDF):
         must be called last for z value coverage
         '''
         self.set_draw_color(0, 0, 0) 
-        self.set_line_width(1)
+        self.set_line_width(1.2)
         self.rect(5, 13, (self.epw - 10), (self.eph - 20), "D")
 
+    def set_or_get(self, x:float = -1, y:float = -1 ) -> None:
+        ''' return x and y or set LEFT is X, TOP is Y  mm assigned, heights are points ''' 
+
+        if x == -1 or y == -1: 
+            x = self.get_x()
+            y = self.get_y()
+            print(f'{x = }, {y = }')
+        else:
+            print(f'setting {x}, {y}')
+            self.set_y(y)
+            self.set_x(x)
+
+    # todo for depracation
     def title_line(self, persona, title_name: str = 'PERSONA') -> None:
         '''
         prints the top line title above the perimeter box 
@@ -130,6 +143,102 @@ class PDF(FPDF):
             border=False,
             align="R",
         )
+
+    def print_MD_string_noxy(self, blob: str = 'where da blob', font_size: int = 12)-> None:
+        self.set_font("Helvetica", "", font_size)
+        self.set_draw_color(0)
+        line_height = self.font_size * 1.6
+
+        self.cell(
+            markdown=True,
+            txt=blob,
+        )
+
+    def print_MD_string_right_noxy(self, blob: str = 'where da blob', font_size: int = 12)-> None:
+        self.set_font("Helvetica", "", font_size)
+        self.set_draw_color(0)
+        line_height = self.font_size * 1.6
+        left_push = self.get_string_width(blob)
+        self.set_x(self.get_x()-left_push)
+
+        self.cell(
+            markdown=True,
+            txt=blob,
+            align="R",
+            new_x="LMARGIN",
+            new_y="NEXT"
+        )
+
+    def grey_box_title_strip(self,announce:str = "",drivel:str = "") -> None:
+        '''
+        prints a formatted title for string
+        '''
+        self.set_fill_color(200)
+        self.set_draw_color(75)
+        self.set_line_width(.2)
+        self.set_font("Helvetica", style='B',size=14)
+        line_height = self.font_size * 1.6
+        line_width = self.get_string_width(announce, markdown=True) + 2 # + x is padding
+
+        self.cell(
+            markdown=True,
+            txt=announce,
+            fill=True,
+            border=True,
+            new_x="RIGHT",
+            new_y="TOP"
+        )
+
+        self.cell(
+            markdown=True,
+            txt=drivel,
+            fill=True,
+            border=True,
+
+        )
+
+
+    def grey_box_title(self,blob, x=0,y=0)->None:
+        '''
+        prints a formatted title for string
+        '''
+        self.set_xy(x,y)
+        self.set_fill_color(200)
+        self.set_draw_color(75)
+        self.set_line_width(.2)
+        self.set_font("Helvetica", style='B',size=14)
+        line_height = self.font_size * 1.6
+        line_width = self.get_string_width(blob, markdown=True) + 2 # + x is padding
+
+        self.cell(
+            w=line_width,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            ln=1,
+            fill=True,
+            border=True,
+        )
+
+
+
+
+    def print_MD_string(self, blob: str = 'where da blob', font_size: int = 12, x:float = 0, y:float = 0)-> None:
+        self.set_font("Helvetica", "", font_size)
+        self.set_draw_color(0)
+        line_height = self.font_size * 1.6
+        self.set_xy(x,y)
+
+        self.cell(
+            w=0,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            ln=1,
+            fill=False,
+            border=False,
+        )
+
 
     def data_footer(self, persona):
         '''
@@ -248,9 +357,7 @@ class PDF(FPDF):
         prints the persona's vocation and level and exps goal
         '''
 
-        exps_next = list(table.vocation_exps_levels[persona.Vocation].keys())[
-            persona.Level - 1
-        ].stop  # pulls next exps goal from range based on level
+        exps_next = list(table.vocation_exps_levels[persona.Vocation].keys())[persona.Level - 1].stop  # pulls next exps goal from range based on level
 
         # build a blob to use
         vocation_info = f'{persona.Vocation}' if persona.FAMILY == "Anthro" else f'{persona.FAMILY}'
@@ -338,44 +445,10 @@ class PDF(FPDF):
         return y
 
 
-    def grey_box_title(self,blob, x=0,y=0)->None:
-        '''
-        prints a formatted title for string
-        '''
-        self.set_xy(x,y)
-        self.set_fill_color(200)
-        self.set_draw_color(75)
-        self.set_line_width(.2)
-        self.set_font("Helvetica", style='B',size=14)
-        line_height = self.font_size * 1.6
-        line_width = self.get_string_width(blob, markdown=True) + 2 # + x is padding
 
-        self.cell(
-            w=line_width,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
-        )
     
 
-    def print_MD_string(self, blob: str = 'where da blob', font_size: int = 12, x:float = 0, y:float = 0)-> None:
-        self.set_font("Helvetica", "", font_size)
-        self.set_draw_color(0)
-        line_height = self.font_size * 1.6
-        self.set_xy(x,y)
 
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
 
     def center_grid(self, radius=25)-> None:
         '''
@@ -1500,4 +1573,11 @@ def toy_screen(blank:any) -> None:
     ''' prints out a toy to the screen'''
     return
     
+
+#####################################
+#
+# PDF testing
+#
+#####################################
+
 
