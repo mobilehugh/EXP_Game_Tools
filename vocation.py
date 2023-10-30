@@ -30,7 +30,7 @@ SKILLS are added to the Skills [] as strings
 
 
 
-def biologist(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def biologist(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     Set up the biologist vocation.
     """
@@ -42,7 +42,7 @@ def biologist(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     return get_a_job # modified by side effects
 
 
-def knite(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def knite(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     Set up the knite vocation.
     """
@@ -54,7 +54,7 @@ def knite(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     return get_a_job # modified by side effects
 
 
-def mechanic(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def mechanic(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     Set up the mechanic vocation.
     """
@@ -66,7 +66,7 @@ def mechanic(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     return get_a_job # modified by side effects
 
 
-def mercenary(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def mercenary(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     Set up the mercenary vocation.
     """
@@ -78,7 +78,7 @@ def mercenary(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     return get_a_job # modified by side effects
 
 
-def nomad(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def nomad(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """ 
     set up the nomad vocation.
     """
@@ -90,7 +90,7 @@ def nomad(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     return get_a_job # modified by side effects
 
 
-def nothing(nothing_happening: table.PersonaRecord) -> table.PersonaRecord:
+def nothing(nothing_happening: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     set up the nothing vocation.
     """
@@ -101,20 +101,20 @@ def nothing(nothing_happening: table.PersonaRecord) -> table.PersonaRecord:
 
     ### Vocation aspiration is specific to the nothing vocation
     if nothing_happening.Fallthrough:
-        vocation_desired = secrets.choice(list(table.vocation_aspiration_exps.keys()))
+        vocation_desired = secrets.choice(list(exp_tables.vocation_aspiration_exps.keys()))
 
     else:
-        choices = list(table.vocation_aspiration_exps.keys())
+        choices = list(exp_tables.vocation_aspiration_exps.keys())
         comment = "A nomad needs a VOCATIONAL ASPIRATION. Please pick one. "
         vocation_desired = please.choose_this(choices, comment)
 
     nothing_happening.Vocay_Aspiration = vocation_desired
-    nothing_happening.Vocay_Aspiration_EXPS = table.vocation_aspiration_exps[vocation_desired]
+    nothing_happening.Vocay_Aspiration_EXPS = exp_tables.vocation_aspiration_exps[vocation_desired]
 
     return nothing_happening # modified by side effects
 
 
-def spie(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def spie(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     set up the Spie vocation
     """
@@ -126,13 +126,13 @@ def spie(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     return get_a_job # modified by side effects
 
 
-def spie_martial_arts(spie_fu_record: table.PersonaRecord) -> str:
+def spie_martial_arts(spie_fu_record: exp_tables.PersonaRecord) -> str:
     """
     return the spie fu string based on level 
     """
 
     # collect data from martial arts table
-    spied_fu = table.spie_martial_arts[
+    spied_fu = exp_tables.spie_martial_arts[
         spie_fu_record.Level if spie_fu_record.Level < 10 else 10
     ]
 
@@ -141,7 +141,7 @@ def spie_martial_arts(spie_fu_record: table.PersonaRecord) -> str:
 
     return  f'AR: {martial_ar} DMG: {spied_fu["Damage"]} Attacks: {spied_fu["freq"]} Order: {spied_fu["order"]}.'
 
-def veterinarian(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def veterinarian(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     set up the Veterinarian vocation
     """
@@ -153,7 +153,7 @@ def veterinarian(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
     return get_a_job # modified by side effects
 
 
-def attribute_determined(get_a_job: table.PersonaRecord) -> list:
+def attribute_determined(get_a_job: exp_tables.PersonaRecord) -> list:
     """
     returns a list of eligible vocations determined by attribute
     """
@@ -191,13 +191,13 @@ def attribute_determined(get_a_job: table.PersonaRecord) -> list:
     return vocation_list
 
 
-def attributes_to_vocation(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def attributes_to_vocation(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     bestow improved attributes by vocation type
     """
     vocation = get_a_job.Vocation
 
-    for attribute, die_roll in table.attributes_improve_by_vocation[vocation].items():
+    for attribute, die_roll in exp_tables.attributes_improve_by_vocation[vocation].items():
 
         if die_roll == "mercshift":
             old_attribute = getattr(get_a_job, attribute)
@@ -222,7 +222,7 @@ def attributes_to_vocation(get_a_job: table.PersonaRecord) -> table.PersonaRecor
     return get_a_job # is adjusted by side effect
 
 
-def set_up_first_time(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
+def set_up_first_time(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     activates the vocation function to update vocation record
     """
@@ -247,7 +247,7 @@ def set_up_first_time(get_a_job: table.PersonaRecord) -> table.PersonaRecord:
 #                                                       #
 #########################################################
 
-def exps_level_picker(level_persona: table.PersonaRecord) -> table.PersonaRecord:
+def exps_level_picker(level_persona: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     only assigns a Level to the get_a_job.
     level adjustments elsewhere
@@ -261,16 +261,16 @@ def exps_level_picker(level_persona: table.PersonaRecord) -> table.PersonaRecord
     return level_persona # is adjusted by side effect
 
 
-def convert_levels_to_exps(get_a_job: table.PersonaRecord, new_level:int = 0) -> int:
+def convert_levels_to_exps(get_a_job: exp_tables.PersonaRecord, new_level:int = 0) -> int:
     """
     Returns an EXPS total based on the experience Level of the get_a_job
     does not alter get_a_job.
     """
 
     vocation = get_a_job.Vocation
-    exps_table = table.vocation_exps_levels[vocation]
+    exps_table = exp_tables.vocation_exps_levels[vocation]
 
-    exp_ranger = {l:x for x, l in exps_table.items() if isinstance(x, tuple)}
+    exp_ranger = {l:x for x, l in exps_exp_tables.items() if isinstance(x, tuple)}
     level = new_level if new_level > get_a_job.Level else get_a_job.Level
     top_level = exps_table["top_level"]
 
@@ -291,18 +291,18 @@ def convert_levels_to_exps(get_a_job: table.PersonaRecord, new_level:int = 0) ->
 
 
 # todo double check that exps in is related to get_a_job.EXPS
-def convert_exps_to_levels(get_a_job: table.PersonaRecord, new_exps = 0) -> int:
+def convert_exps_to_levels(get_a_job: exp_tables.PersonaRecord, new_exps = 0) -> int:
     """
     Generates an experience Level based on the EXPS of the get_a_job
     Does not alter get_a_job.
     """
-    exps_table = table.vocation_exps_levels[get_a_job.Vocation]
+    exps_table = exp_tables.vocation_exps_levels[get_a_job.Vocation]
     exps_amount = new_exps if new_exps > get_a_job.Level else get_a_job.Level
     top = exps_table["top_amount"]
     top_level = exps_table["top_level"]
     rate = exps_table["rate"]
 
-    level_ranger = {x:l for x, l in exps_table.items() if isinstance(x, tuple)} # reverses from level -> EXPS
+    level_ranger = {x:l for x, l in exps_exp_tables.items() if isinstance(x, tuple)} # reverses from level -> EXPS
 
     if exps_amount > top:
         new_level = top_level + math.ceil((exps_amount - top) / rate)
@@ -321,12 +321,12 @@ def convert_exps_to_levels(get_a_job: table.PersonaRecord, new_exps = 0) -> int:
 #########################################################
 
 
-def update_gifts(returning_gifts: table.PersonaRecord) -> list:
+def update_gifts(returning_gifts: exp_tables.PersonaRecord) -> list:
     """
     returns a list of gifts based on the persona level
     """
     gift_list = []
-    gift_table = list(table.vocations_gifts_pivot[returning_gifts.Vocation].values())
+    gift_table = list(exp_tables.vocations_gifts_pivot[returning_gifts.Vocation].values())
     
     gift_list.append(gift_table[0])
     if returning_gifts.Level > 3:
@@ -337,12 +337,12 @@ def update_gifts(returning_gifts: table.PersonaRecord) -> list:
     return gift_list
 
 
-def fresh_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> list:
+def fresh_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) -> list:
     """
     generates a fresh list of interests on first level
     """
 
-    interest_table = table.vocations_interests_pivot[get_a_job.Vocation]
+    interest_table = exp_tables.vocations_interests_pivot[get_a_job.Vocation]
     interest_list = []
     while len(interest_list) < interest_rolls:
         interest = please.get_table_result(interest_table)
@@ -364,17 +364,17 @@ def fresh_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> list
 
     return interest_list
 
-def fresh_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
+def fresh_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list:
     """
     generates a fresh list of skills on first level
     """
     
     ### vocation skills can be combined from multiple tables
     skills_table = []
-    for skillist in table.vocation_skills_tables[get_a_job.Vocation]:
+    for skillist in exp_tables.vocation_skills_tables[get_a_job.Vocation]:
         for key, value in skillist.items():
             if key != "die_roll" and key != "name":
-                skills_table.append(value)
+                skills_exp_tables.append(value)
 
     skill_list = []
     while len(skill_list) < skill_rolls:
@@ -398,7 +398,7 @@ def fresh_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     return skill_list
 
 
-def update_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> list:
+def update_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) -> list:
     """
     returns a list to EXTEND get_a_job.Interests using get_a_job.Vocation and increase in level
     """
@@ -412,7 +412,7 @@ def update_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> lis
 
     all_interests = [
             val
-            for lose, val in table.vocations_interests_pivot[get_a_job.Vocation].items()
+            for lose, val in exp_tables.vocations_interests_pivot[get_a_job.Vocation].items()
             if lose not in do_not_include and  val not in do_not_include
         ]
     
@@ -420,7 +420,7 @@ def update_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> lis
     initial_number_of_rolls = interest_rolls
     for _ in range(initial_number_of_rolls):
         if (
-            please.get_table_result(table.vocations_interests_pivot[get_a_job.Vocation])
+            please.get_table_result(exp_tables.vocations_interests_pivot[get_a_job.Vocation])
             == "Extra Roll"
         ):
             interest_rolls += 1
@@ -449,7 +449,7 @@ def update_interests(get_a_job: table.PersonaRecord, interest_rolls: int) -> lis
 
     return interest_list
 
-def update_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
+def update_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list:
     """
     returns a list to EXTEND get_a_job.Skills using get_a_job.Vocation and get_a_job.Level
     """
@@ -460,7 +460,7 @@ def update_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
 
     ### create a list of all skills (3 tables) without Choose
     all_skills = []
-    for sub_list in table.vocation_skills_tables[get_a_job.Vocation]:
+    for sub_list in exp_tables.vocation_skills_tables[get_a_job.Vocation]:
         for key, value in sub_list.items():
             if key not in ["name", "die_roll"] and value != "Choose":
                 all_skills.append(value)
@@ -499,7 +499,7 @@ def update_skills(get_a_job: table.PersonaRecord, skill_rolls: int) -> list:
     return skills_list
 
 
-def update_persona_exps(record_to_update: table.PersonaRecord) -> table.PersonaRecord:
+def update_persona_exps(record_to_update: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     increases EXPS or Level and adjust record_to_update accordingly
     also updates interest and skills if appropriate
@@ -564,7 +564,7 @@ def update_persona_exps(record_to_update: table.PersonaRecord) -> table.PersonaR
 
     ### updates interests and skills if level increase and NOT alien or robot
     if (
-        record_to_update.Vocation in [key for key in table.attributes_improve_by_vocation.keys()]
+        record_to_update.Vocation in [key for key in exp_tables.attributes_improve_by_vocation.keys()]
         and level_increase > 0
     ):
         # gifts are updated on the fly as the results are fixed

@@ -20,7 +20,7 @@ def mutation_workflow() -> None:
     list_comment = "Cruise through mutations:"
     plan_desired = please.choose_this(option_list, list_comment)
 
-    fake_record = table.PersonaRecord
+    fake_record = exp_tables.PersonaRecord
     fake_record.Mutations ={}
 
     if plan_desired == "Random Mutations":
@@ -149,7 +149,7 @@ class Atestical(Mutation):
         self.CR = "+4"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.mutation_absorbs
+        self.table_name = exp_tables.mutation_absorbs
         self.link = "#_absorption"
 
     """ template
@@ -192,7 +192,7 @@ class Absorption(Mutation):
         self.CR = "+4"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.mutation_absorbs
+        self.table_name = exp_tables.mutation_absorbs
         self.link = "#_absorption"
         
     def build_desc(self) -> str:
@@ -376,7 +376,7 @@ class Detections(Mutation):
         self.CR = "0"
         self.roll_bonus = "+20 on searching rolls"
         self.attribute_bonus = None
-        self.table_name = table.detection_types
+        self.table_name = exp_tables.detection_types
         self.link = "#_detections"
 
     def build_desc(self) -> str:
@@ -718,7 +718,7 @@ class Levitation(Mutation):
         perm = super().return_perm(self.name, self.table_name) # perm part
         if self.object.FAMILY == "Anthro":
             dexmove = self.object.Move
-            mstrmove = table.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)]
+            mstrmove = exp_tables.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)]
             levimove = (dexmove if dexmove > mstrmove else mstrmove) * 2
         else:
             levimove = self.object.Move
@@ -1139,7 +1139,7 @@ class PlanalHoldAway(Mutation):
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
         if self.object.FAMILY in ["Anthro", "Alien"]:
-            storage = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
+            storage = exp_tables.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
         else:
             storage = math.ceil(self.object.WA / 2)
         description = f'Carry {storage} kgs in your own space time aberration backpack.'
@@ -1249,7 +1249,7 @@ class ProtectionShell(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.protection_shell_options
+        self.table_name = exp_tables.protection_shell_options
         self.link = "#_protection_shell"
 
     def build_desc(self) -> str:
@@ -1532,8 +1532,8 @@ class Telekinesis(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        speed = table.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)] + self.object.Level
-        amount = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
+        speed = exp_tables.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)] + self.object.Level
+        amount = exp_tables.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
         description = f'Move up to {amount} kgs at {speed} h/u with your mind.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1557,7 +1557,7 @@ class TelekineticArm(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        arm_wate = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
+        arm_wate = exp_tables.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] + self.object.Level
         arm_hps = math.ceil(self.object.HPM/2)  + self.object.Level
         description = f'Invisible extra hand with {arm_hps} HPS that can lift {arm_wate} kgs.'
         super().add_mutation(self.name, perm, description) # check to add
@@ -1581,7 +1581,7 @@ class TelekineticFlight(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        speed = table.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)] * 2 + self.object.Level
+        speed = exp_tables.anthro_movement_rate_and_DEX[please.fix_robot_MSTR(self.object)] * 2 + self.object.Level
         description = f'Fly around at {speed} h/u.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1673,7 +1673,7 @@ class TimeStop(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        lift = table.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] * 10 + self.object.Level
+        lift = exp_tables.wate_allowance_and_PSTR[please.fix_robot_MSTR(self.object)] * 10 + self.object.Level
         description = f'Arrest the movement of time. Move freely and lift {lift} kgs.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -1864,7 +1864,7 @@ class AttractionOdor(Mutation):
         self.CR = "0"
         self.roll_bonus = "+15 on negotiation rolls"
         self.attribute_bonus = ("CHA", 2)
-        self.table_name = table.list_of_life_forms
+        self.table_name = exp_tables.list_of_life_forms
         self.link = "#_attraction_odor"
 
     def build_desc(self) -> str:
@@ -1898,11 +1898,11 @@ class Arms(Mutation):
     def build_desc(self) -> str:
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
-        arm_table = table.family_hit_location_pivot_table[self.object.FAMILY]
+        arm_table = exp_tables.family_hit_location_pivot_table[self.object.FAMILY]
         arms_number = please.roll_this("1d4")
 
         if self.name not in self.object.Mutations:
-            arm_table = table.family_hit_location_pivot_table[self.object.FAMILY]
+            arm_table = exp_tables.family_hit_location_pivot_table[self.object.FAMILY]
             arms_number = please.roll_this("1d4")
             perm = ""
             for army in range(arms_number):
@@ -1960,10 +1960,10 @@ class Carapace(Mutation):
         perm = super().return_perm(self.name, self.table_name) # perm part
 
         if self.name not in self.object.Mutations: #create the perm thickness
-            carapaline = please.get_table_result(table.carapace_thickness)
+            carapaline = please.get_table_result(exp_tables.carapace_thickness)
             perm = next(iter(carapaline))
             
-        for _, carapacity in table.carapace_thickness.items():
+        for _, carapacity in exp_tables.carapace_thickness.items():
             if perm in carapacity:
                 break
         
@@ -2069,7 +2069,7 @@ class DiminishedSense(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.diminished_sense
+        self.table_name = exp_tables.diminished_sense
         self.link = "#_diminished_sense"
 
     def build_desc(self) -> str:
@@ -2192,7 +2192,7 @@ class FatCellAccumulation(Mutation):
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
         if self.name not in self.object.Mutations:
-            perm = please.get_table_result(table.family_hit_location_pivot_table[self.object.FAMILY])
+            perm = please.get_table_result(exp_tables.family_hit_location_pivot_table[self.object.FAMILY])
         description = f'Big obvious fat blob on the {perm} of the persona.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -2210,7 +2210,7 @@ class GasGeneration(Mutation):
         self.CR = "10"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.poison_gas_type
+        self.table_name = exp_tables.poison_gas_type
         self.link = "#_gas_generation"
 
     def build_desc(self) -> str:
@@ -2280,7 +2280,7 @@ class HeightenedAttribute(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.heightened_attribute
+        self.table_name = exp_tables.heightened_attribute
         self.link = "#_heightened_attribute"
 
     def build_desc(self) -> str:
@@ -2311,7 +2311,7 @@ class HeightenedVision(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.heightened_vision
+        self.table_name = exp_tables.heightened_vision
         self.link = "#_heightened_vision"
 
     def build_desc(self) -> str:
@@ -2435,8 +2435,8 @@ class MechanicalInsertion(Mutation):
         perm = super().return_perm(self.name, self.table_name) # perm part
 
         if self.name not in self.object.Mutations:
-            insertion_location = please.get_table_result(table.family_hit_location_pivot_table[self.object.FAMILY])
-            insertion_type = please.get_table_result(table.toy_categories)
+            insertion_location = please.get_table_result(exp_tables.family_hit_location_pivot_table[self.object.FAMILY])
+            insertion_type = please.get_table_result(exp_tables.toy_categories)
             perm = f'{insertion_location}:{toy.toy_cat_type()}'
 
         ### build description
@@ -2488,7 +2488,7 @@ class MechanicalProsthesis(Mutation):
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
         if self.name not in self.object.Mutations:
-            perm = please.get_table_result(table.family_hit_location_pivot_table[self.object.FAMILY])
+            perm = please.get_table_result(exp_tables.family_hit_location_pivot_table[self.object.FAMILY])
         description = f'A noisy prosthesis has replaced the {perm} of this persona.'
         super().add_mutation(self.name, perm, description) # check to add
         return description
@@ -2513,7 +2513,7 @@ class MultipleBodyParts(Mutation):
         '''returns mutation description and side effect via add_mutation()'''
 
         if self.name not in self.object.Mutations: # complex perm generation
-            perm = f'{please.get_table_result(table.multiple_body_parts)}:{please.roll_this("1d4")}'
+            perm = f'{please.get_table_result(exp_tables.multiple_body_parts)}:{please.roll_this("1d4")}'
         else:
             perm = super().return_perm(self.name, self.table_name) # perm part
 
@@ -2566,7 +2566,7 @@ class NewOrgan(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.new_organ_type
+        self.table_name = exp_tables.new_organ_type
         self.link = "#_new_organ"
 
     def build_desc(self) -> str:
@@ -2685,7 +2685,7 @@ class OversizedBodyPart(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.oversized_body_part
+        self.table_name = exp_tables.oversized_body_part
         self.link = "#_oversized_body_part"
 
     def build_desc(self) -> str:
@@ -2998,7 +2998,7 @@ class SkinStructureChange(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.skin_structure_change
+        self.table_name = exp_tables.skin_structure_change
         self.link = "#_skin_structure_change"
         # self.add_mutation() removed for complex perm
 
@@ -3075,7 +3075,7 @@ class SpitPoison(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.poison_spittle_type
+        self.table_name = exp_tables.poison_spittle_type
         self.link = "#_spit_poison"
 
     def build_desc(self) -> str:
@@ -3124,7 +3124,7 @@ class StrangeNewBodyPart(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.strange_new_body_part
+        self.table_name = exp_tables.strange_new_body_part
         self.link = "#_strange_new_body_part"
 
     def build_desc(self) -> str:
@@ -3210,7 +3210,7 @@ class UndersizedBodyPart(Mutation):
         self.CR = "0"
         self.roll_bonus = None
         self.attribute_bonus = None
-        self.table_name = table.undersized_body_part
+        self.table_name = exp_tables.undersized_body_part
         self.link = "#_undersized_body_part"
 
     def build_desc(self) -> str:
@@ -3304,7 +3304,7 @@ class Wings(Mutation):
 #
 #######################################
 
-def biologic_mutations_number(mutation_number: table.PersonaRecord) -> int:
+def biologic_mutations_number(mutation_number: exp_tables.PersonaRecord) -> int:
     '''returns the number of mental and physical mutations for anthros and aliens'''
 
     ## anthros get mutations 
@@ -3312,8 +3312,8 @@ def biologic_mutations_number(mutation_number: table.PersonaRecord) -> int:
 
         ## determine chances of mental and physical mutations
         anthro_type = mutation_number.FAMILY_TYPE
-        mentchance = table.anthro_type_mutation_chance[anthro_type]["mentchance"]
-        physchance = table.anthro_type_mutation_chance[anthro_type]["physchance"]
+        mentchance = exp_tables.anthro_type_mutation_chance[anthro_type]["mentchance"]
+        physchance = exp_tables.anthro_type_mutation_chance[anthro_type]["physchance"]
 
         if not mutation_number.Fallthrough:
             if please.say_yes_to("Do you want to mutate? "):
@@ -3321,8 +3321,8 @@ def biologic_mutations_number(mutation_number: table.PersonaRecord) -> int:
                 physchance = physchance * 2 if anthro_type != "Humanoid" else 100
 
         ## assign amount of mutations then zero if not change
-        mental_amount = please.roll_this(table.anthro_type_mutation_chance[anthro_type]["mentnumber"])
-        physical_amount = please.roll_this(table.anthro_type_mutation_chance[anthro_type]["physnumber"])       
+        mental_amount = please.roll_this(exp_tables.anthro_type_mutation_chance[anthro_type]["mentnumber"])
+        physical_amount = please.roll_this(exp_tables.anthro_type_mutation_chance[anthro_type]["physnumber"])       
 
         if not please.do_1d100_check(mentchance):
             mental_amount = 0
@@ -3341,7 +3341,7 @@ def biologic_mutations_number(mutation_number: table.PersonaRecord) -> int:
 
     return mental_amount, physical_amount
 
-def mutation_assignment(mutating_persona: table.PersonaRecord, mental_amount: int = 0, physical_amount: int = 0, allowed:str = "any") -> table.PersonaRecord:
+def mutation_assignment(mutating_persona: exp_tables.PersonaRecord, mental_amount: int = 0, physical_amount: int = 0, allowed:str = "any") -> exp_tables.PersonaRecord:
     """
     adjust PersonaRecord.Mutations to add mutations
     """
@@ -3391,7 +3391,7 @@ def mutation_assignment(mutating_persona: table.PersonaRecord, mental_amount: in
 def mutation_list_builder(directions:list = ['any']) -> list:
     '''returns a bespoke list of tuples  *val cannot have a default value'''
     ALLOWED_LIST = ['any', 'mental', 'physical','combat','non-combat','defect', 'no-defect']
-    fake_record = table.PersonaRecord
+    fake_record = exp_tables.PersonaRecord
     build_mutations = []
 
     # todo this may be redundant now that list is built
@@ -3442,7 +3442,7 @@ def mutation_list_builder(directions:list = ['any']) -> list:
 
     return build_mutations
 
-def single_random_mutation(random_mutating:table.PersonaRecord, directions:list =['any']) -> table.PersonaRecord:
+def single_random_mutation(random_mutating:exp_tables.PersonaRecord, directions:list =['any']) -> exp_tables.PersonaRecord:
     """
     return or add a mutation ['any', 'mental', 'physical','combat','non-combat','defect', 'no-defect']
     """
@@ -3454,7 +3454,7 @@ def single_random_mutation(random_mutating:table.PersonaRecord, directions:list 
     return random_mutating # adjusted by side effect  in build_desc
 
 
-def pick_bespoke_mutation(bespoke_mutating:table.PersonaRecord) -> table.PersonaRecord:
+def pick_bespoke_mutation(bespoke_mutating:exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     '''choose specific mutations from chosen list and add to persona'''
     
     ALLOWED_LIST = ['any', 'mental', 'physical','combat','non-combat','defect', 'no-defect']

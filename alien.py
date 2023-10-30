@@ -12,7 +12,7 @@ import core
 
 # set up AlienRecord
 @dataclass
-class AlienRecord(table.Alienic):
+class AlienRecord(exp_tables.Alienic):
     pass
 
 
@@ -54,7 +54,7 @@ def alien_attack_number(attacker: AlienRecord) -> int:
             else:
                 return attack_no
 
-    attack_no = please.get_table_result(table.attacks_per_unit)
+    attack_no = please.get_table_result(exp_tables.attacks_per_unit)
     attacker.Alternating = True if attack_no == 0 else False
     attack_no = 1 if attack_no == 0 else attack_no    
 
@@ -71,7 +71,7 @@ def alien_attack_types(attacktyper: AlienRecord, attack_no:int) -> AlienRecord:
             return attacktyper # modified by side effe
 
     for _ in range(attack_no):
-        attacktyper.Attacks.append(f'{please.get_table_result(table.alien_attack_type)}')
+        attacktyper.Attacks.append(f'{please.get_table_result(exp_tables.alien_attack_type)}')
 
     return 
 
@@ -84,7 +84,7 @@ def alien_damage_list(damaging: AlienRecord) -> list:
     pstr = damaging.PSTR
     damages = []
     ### pull the damage line for a alien PSTR
-    for strange, damage_line in table.alien_attack_damage.items():
+    for strange, damage_line in exp_tables.alien_attack_damage.items():
         if pstr >= strange[0] and pstr <= strange[1]:
             break
 
@@ -115,11 +115,11 @@ def alien_attack_description(descriptor: AlienRecord) -> list:
     if breadth == 1:
         alternating = "alternating units." if descriptor.Alternating else "every unit."
         attack_type = descriptor.Attacks[0]
-        attack_desc += f'{table.numbers_2_words[attack_no]} {attack_type} attack{"s" if attack_no > 1 else ""} ({damages[0]}) {alternating} '
+        attack_desc += f'{exp_tables.numbers_2_words[attack_no]} {attack_type} attack{"s" if attack_no > 1 else ""} ({damages[0]}) {alternating} '
        
     elif breadth > 1:
         for i, (attack_type, attack_no) in enumerate(attacks_counted.items()):
-            attack_desc += f'{table.numbers_2_words[attack_no]} {attack_type} attack{"s" if attack_no > 1 else ""} ({damages[i]}), '
+            attack_desc += f'{exp_tables.numbers_2_words[attack_no]} {attack_type} attack{"s" if attack_no > 1 else ""} ({damages[i]}), '
         attack_desc = attack_desc[:-2] + " every unit."
 
     attack_desc = attack_desc.capitalize()
@@ -131,7 +131,7 @@ def alien_base_shape_random(shaping:AlienRecord) -> AlienRecord:
     four_quarter_parts = ["Head", "Body", "Arms", "Legs"]
 
     for part in four_quarter_parts:
-        part_shape = choice(table.alien_quarter_shapes)
+        part_shape = choice(exp_tables.alien_quarter_shapes)
         setattr(shaping, part, part_shape)
 
     return shaping # adjusted by side effects in this function
@@ -145,7 +145,7 @@ def alien_base_shape_bespoke(shaping:AlienRecord) -> AlienRecord:
     for part in four_quarter_parts:
         quarter = getattr(shaping, part)
         if not please.say_yes_to(f'Proposed alien {part}: {quarter} '):
-            new_quarter = please.choose_this(table.alien_quarter_shapes, f"Choose alien's {part.upper}: ")
+            new_quarter = please.choose_this(exp_tables.alien_quarter_shapes, f"Choose alien's {part.upper}: ")
             setattr(shaping, part, new_quarter)
 
 def adornalizer(part:str, adornment:str) -> str:
@@ -182,9 +182,9 @@ def adornalizer(part:str, adornment:str) -> str:
 
 def alien_shape_adornments(adornable:AlienRecord) -> AlienRecord:
     quarter_part_pivot = {
-        "Head": table.alien_head_adornments,
-        "Body": table.alien_body_adornments,
-        "Arms": table.alien_arm_adornments,
+        "Head": exp_tables.alien_head_adornments,
+        "Body": exp_tables.alien_body_adornments,
+        "Arms": exp_tables.alien_arm_adornments,
     }
 
     ## fabricate the three adornments
@@ -263,15 +263,16 @@ def alien_quick_description_builder(describing: AlienRecord) -> AlienRecord:
 
 def alien_life_stages(staging:AlienRecord, life_span:int = 42) -> dict:
     ''' creates a dict of the life stages for alien'''
+    life_span = int(life_span)
     age_suffix = "years" if life_span > 6 else "months"
     life_span = life_span if life_span > 6 else life_span * 12
 
     ### calculate portion of life span in each stage
     # percent of age spent in each phase, times life_span = years spent in each stage
-    child = life_span * (please.roll_this(table.alien_life_stages["Child"]) / 100)
-    adol = life_span * (please.roll_this(table.alien_life_stages["Adolescent"])/ 100)
-    adult = life_span * (please.roll_this(table.alien_life_stages["Adult"]) / 100)
-    aged = life_span * (please.roll_this(table.alien_life_stages["Aged"]) / 100)
+    child = life_span * (please.roll_this(exp_tables.alien_life_stages["Child"]) / 100)
+    adol = life_span * (please.roll_this(exp_tables.alien_life_stages["Adolescent"])/ 100)
+    adult = life_span * (please.roll_this(exp_tables.alien_life_stages["Adult"]) / 100)
+    aged = life_span * (please.roll_this(exp_tables.alien_life_stages["Aged"]) / 100)
 
     ### build life cycle dict
     life_cycle ={}
@@ -299,7 +300,7 @@ def alien_life_stages(staging:AlienRecord, life_span:int = 42) -> dict:
 
 def alien_life_span() -> int:
     '''build the alien life pan dictionary'''
-    die_roll, multi = please.get_table_result(table.alien_life_span_data)
+    die_roll, multi = please.get_table_result(exp_tables.alien_life_span_data)
     life_span = please.roll_this(die_roll) * multi
 
     return life_span # also aging modified by side effect
@@ -315,10 +316,10 @@ def alien_voice() -> str:
     """
     returns a random alien noise
     """
-    sound_one = please.get_table_result(table.alien_sounds)
-    sound_two = please.get_table_result(table.alien_sounds)
+    sound_one = please.get_table_result(exp_tables.alien_sounds)
+    sound_two = please.get_table_result(exp_tables.alien_sounds)
     while sound_one == sound_two:
-        sound_two = please.get_table_result(table.alien_sounds)
+        sound_two = please.get_table_result(exp_tables.alien_sounds)
 
     return f"{sound_one}s and {sound_two}s"
 
@@ -326,7 +327,7 @@ def alien_biology(biologically:AlienRecord) -> AlienRecord:
     ''' create list of biological info'''
 
     alien_biology = []
-    for bio_name, bio_table in table.core_biology.items():
+    for bio_name, bio_table in exp_tables.core_biology.items():
         alien_biology.append(f'{bio_name}: {please.get_table_result(bio_table)}')
 
     ### alien sounds
@@ -412,14 +413,14 @@ def alien_society(socialize: AlienRecord) -> AlienRecord:
     ######################################################
 
     society = {}
-    society["Tools"] = "Flora or Fauna" if table.alien_tool_score[tool_score] == "None" and not language else table.alien_tool_score[tool_score]
+    society["Tools"] = "Flora or Fauna" if exp_tables.alien_tool_score[tool_score] == "None" and not language else exp_tables.alien_tool_score[tool_score]
     society["Language"] = "None" if not language else socialize.Sounds
     society["Culture"] = "None" if not culture else "Yes"
-    society["Religion"] = "None" if not religion else please.get_table_result(table.role_play_RP_religion)
+    society["Religion"] = "None" if not religion else please.get_table_result(exp_tables.role_play_RP_religion)
     society["Education"] = "None" if not education else "Yes"
-    society["Politics"] = "None" if not politics else please.get_table_result(table.role_play_RP_politics)
+    society["Politics"] = "None" if not politics else please.get_table_result(exp_tables.role_play_RP_politics)
     society["Vocation"] = "None" if not vocay else "Yes"
-    society["Philosophy"] = "None" if not philosophy else please.get_table_result(table.role_play_RP_philosophy)
+    society["Philosophy"] = "None" if not philosophy else please.get_table_result(exp_tables.role_play_RP_philosophy)
  
     socialize.Society = society
 
@@ -445,11 +446,11 @@ def alien_society_bespoke(bespoken: AlienRecord) -> AlienRecord:
             continue
         else:
             if soc_name in ["Tools", "Language", "Culture", "Education", "Vocation"]:
-                chosen = please.choose_this(table.core_society[soc_name], f'Choose a new value for {soc_name}')
+                chosen = please.choose_this(exp_tables.core_society[soc_name], f'Choose a new value for {soc_name}')
                 bespoken.Society[soc_name] = chosen
 
             elif soc_name in ["Philosophy", "Politics","Religion"]:
-                choice_list = [val for key,val in table.core_society[soc_name].items() if key not in ["name", "die_roll"]]
+                choice_list = [val for key,val in exp_tables.core_society[soc_name].items() if key not in ["name", "die_roll"]]
                 chosen = please.choose_this(choice_list, f'Choose a new value for {soc_name}')
                 bespoken.Society[soc_name] = chosen
 
@@ -461,7 +462,7 @@ def alien_vocation_check(get_a_job:AlienRecord) -> AlienRecord:
     if get_a_job.Vocation == "Alien": return
 
     if get_a_job.Fallthrough:    
-        get_a_job.Vocation = choice([x for x in table.vocations_gifts_pivot])
+        get_a_job.Vocation = choice([x for x in exp_tables.vocations_gifts_pivot])
         vocation.set_up_first_time(get_a_job)
 
     ### add additional interests and skills
@@ -495,7 +496,7 @@ def alien_speciesizer_list(naming: AlienRecord) -> list:
     latini = []
     for part in ["Head", "Body", "Arms", "Legs"]:
         faux = getattr(naming, part).split(" (")[0]
-        tableau = table.latinicize_shapes[faux]
+        tableau = exp_tables.latinicize_shapes[faux]
         latini.append(choice(tableau))
 
 
@@ -562,7 +563,7 @@ def alien_hite_wate_calc(picking_sizes: AlienRecord) -> AlienRecord :
     ''' 
     return actual wate and wate_suffix based on size_cat
     '''
-    picking_sizes.Wate = please.roll_this(table.alien_size_wate[picking_sizes.Size_Cat])
+    picking_sizes.Wate = please.roll_this(exp_tables.alien_size_wate[picking_sizes.Size_Cat])
     
     if picking_sizes.Size_Cat == "Minute":
         picking_sizes.Wate_Suffix = "gms"
@@ -576,7 +577,7 @@ def alien_hite_wate_calc(picking_sizes: AlienRecord) -> AlienRecord :
 
 def alien_size_cat_rando(sizer:AlienRecord) -> AlienRecord:
     ''' returns a size cat that includes Minute and Humongous'''
-    sizer.Size_Cat = please.get_table_result(table.alien_size_fresh)
+    sizer.Size_Cat = please.get_table_result(exp_tables.alien_size_fresh)
     sizer.Size_Cat = "Minute" if sizer.Size_Cat == "Tiny" and please.do_1d100_check(16) else "Tiny"
     sizer.Size_Cat = "Humongous" if sizer.Size_Cat == "Gigantic" and please.do_1d100_check(16) else "Gigantic"
     return # sizer is altered by side effect
@@ -589,7 +590,7 @@ def alien_size_cat_bespoke(sizer: AlienRecord) -> AlienRecord:  # side effects
         alien_size_cat_rando(sizer)
         return # sizer is altered by side effect
     else:
-        methods = please.list_table_choices(table.alien_size_fresh) + ["Humongous", "Minute"]
+        methods = please.list_table_choices(exp_tables.alien_size_fresh) + ["Humongous", "Minute"]
         choice_comment = "Choose a SIZE for your alien."
         sizer.Size_Cat = please.choose_this(methods, choice_comment)
         return
@@ -633,10 +634,10 @@ def alien_life_span_bespoke(lifer: AlienRecord) -> AlienRecord:
         alien_life_stages(lifer,life_span)
 
     elif chosen == "Extreme":
-        life_span_choices = [key for key in table.alien_life_span_descriptors.keys()]
+        life_span_choices = [key for key in exp_tables.alien_life_span_descriptors.keys()]
         chosen = please.choose_this(life_span_choices, "Choose an EXTREME life. ")
 
-        die_roll, multi = table.alien_life_span_descriptors[chosen]
+        die_roll, multi = exp_tables.alien_life_span_descriptors[chosen]
         life_span = please.roll_this(die_roll) * multi
         alien_life_stages(lifer, life_span)
 
@@ -673,7 +674,7 @@ def alien_biology_bespoke(biological: AlienRecord) -> AlienRecord:
             if please.say_yes_to(f'{bio_line} keep this? '):
                 continue
             else:
-                choices = [value for key, value in table.core_biology[bio_title].items() if key not in ["name","die_roll"] ]
+                choices = [value for key, value in exp_tables.core_biology[bio_title].items() if key not in ["name","die_roll"] ]
                 comment = f'Choose new value for {bio_title} '
                 chosen = please.choose_this(choices, comment)
             biology_list[i] = f'{bio_title}: {choice}'
@@ -698,7 +699,7 @@ def fresh_alien(player_name:str) -> None:
     please.setup_persona(fresh)
 
     core.initial_attributes(fresh)
-    fresh.Size_Cat = please.get_table_result(table.alien_size_fresh)
+    fresh.Size_Cat = please.get_table_result(exp_tables.alien_size_fresh)
     fresh.HPM = core.hit_points_max(fresh)
     alien_hite_wate_calc(fresh)
     core.wate_allowance(fresh)

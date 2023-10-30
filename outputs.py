@@ -18,7 +18,7 @@ import table
 # todo proficiency slot with actual weapons
 
 @dataclass 
-class AllRecords(table.AllThings):
+class AllRecords(exp_tables.AllThings):
     pass
 
 def outputs_workflow(outputter:AllRecords, out_type: str) -> None:
@@ -41,28 +41,29 @@ def outputs_workflow(outputter:AllRecords, out_type: str) -> None:
 #
 ################################################
 '''
-US LETTER =
-origin point = (0, 0) = top-left corner
-x-coordinate increases moves right =  width = 215.9 = self.epw = effective page width
-y-coordinate increases moves down  = height = 279.4 = self.eph = effective page height
+US LETTER:  
+width (x) 215.9 mm, height (y) = 279.4 mm
+origin point = (0, 0) = Left, Top corner
+x-coordinate increases moves right =  width = 215.9 = epw() = effective page width
+y-coordinate increases moves down  = height = 279.4 = eph() = effective page height
 
-LINE SAFETY:
-1) set x,y start point outside of functions
-2) only alter position in function if multiline 
-
-numbers are  mm (millimeters) NOT pixels
+UNITS:
+numbers are  mm (millimeters) NOT pixels and are FLOATS
 font size is in points 1/72 of an inch
+on a 72 ppi screen a point = a pixel 
+BUT 72 ppi screen is not guaranteed so must use millimeters
+
 there are 25.4 mm in 1 inch
 12 point font is 4.23 mm
 arial 12 space = 1.8 mm 
 
-def convert_points_to_mm(font_size_points):
-    inches = font_size_points / 72  # convert points to inches
-    mm = inches * 25.4  # convert inches to mm
-    return mm
 
+WARNINGS:
+1) set_y(y) resets x to 0 
+must use set_xy(x,y) to work as expected
 
-to center a circle abscissa and ordinate represent a bounding box not x,y center of circle
+2) circle(x,y,radius)
+to center a circle x,y represent the bounding box not x,y center of circle
 self.circle(
     (x - radius / 2),
     (y - radius / 2),
@@ -70,18 +71,24 @@ self.circle(
     "D",
         )
 
-and... 
-
+3) getting cross
 Parameters for line: (x1, y1, x2, y2) where (x1, y1) is start point and (x2, y2) is end point
-self.line(50, 50, 70, 70)  # Line 1: from point (50, 50) to point (70, 70)
-self.line(50, 70, 70, 50)  # Line 2: from point (50, 70) to point (70, 50)
-is a cross over
+line(start_left,start_top, end_left, end_top)
+line(50, 50, 70, 70)  # Line 1: from point (50, 50) to point (70, 70)
+line(50, 70, 70, 50)  # Line 2: from point (50, 70) to point (70, 50)
 
-### testing management 
-pdf.locutus() # puts a target where xy is 
-pdf.center_line() # puts full page targe at page center
+4) fontery
+font_size() changes width(x) and height(y) called line_height
 
-### display the build PDF
+TOOLS:
+def convert_points_to_mm(font_size_points):
+    inches = font_size_points / 72  # convert points to inches
+    mm = inches * 25.4  # convert inches to mm
+    return mm
+
+locutus() # puts a target where xy is 
+center_grid() # puts full page center target on a grid
+
 pdf.output(
     name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
     dest="F",
@@ -95,56 +102,56 @@ show_pdf()
 #
 ################################################
 
+# todo corrections for x axis (left to right) work using get_string_width, NOT line height
+
 class PDF(FPDF):
 
     def perimiter_box(self)->None:
         '''
         draws a rectangle around entire page 
-        must be called last for z value coverage
+        MUST BE CALLED LAST FOR Z coverage
         '''
         self.set_draw_color(0, 0, 0) 
         self.set_line_width(1.2)
         self.rect(5, 13, (self.epw - 10), (self.eph - 20), "D")
 
-    def set_or_get(self, x:float = -1, y:float = -1 ) -> None:
-        ''' return x and y or set LEFT is X, TOP is Y  mm assigned, heights are points ''' 
-
-        if x == -1 or y == -1: 
-            x = self.get_x()
-            y = self.get_y()
-            print(f'{x = }, {y = }')
-        else:
-            print(f'setting {x}, {y}')
+    def set_or_get(self, *args) -> tuple:
+        '''
+        takes args and prints variants x,y,location  
+        remove the 4 print statements for operations
+        ''' 
+        if len(args) == 3: # set and tell
+            x,y,verbose = args
+            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo turn off for operations 
             self.set_y(y)
             self.set_x(x)
 
-    # todo for depracation
-    def title_line(self, persona, title_name: str = 'PERSONA') -> None:
-        '''
-        prints the top line title above the perimeter box 
-        '''
-        blob_left =f"**{title_name.upper()} RECORD** for {persona.Persona_Name}"
-        blob_right = f"**Player:** {persona.Player_Name}"
-        x=3.3
-        y=4
+        elif len(args) == 2: # set and don't tell
+            x,y = args
+            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo turn off for operations 
+            self.set_y(y)
+            self.set_x(x)
 
-        # print out PERSONA NAME BIG and LEFT justified
-        self.print_MD_string(blob_left,18,x,y)
+        elif len(args) == 1: # get and tell and return
+            verbose = args[0]
+            if verbose == "hide":
+                x = self.get_x()
+                y = self.get_y()
+                return x,y
+            else:
+                x = self.get_x()
+                y = self.get_y()
+                print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo  for operations find and remove all set_or_get(Locating:
+                return x,y
+            
+        elif len(args) == 0: # get and don't tell and return 
+            x = self.get_x()
+            y = self.get_y()
+            print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo  for operations find and remove all set_or_get(Locating:          
+            return x,y
 
-        # print out PLAYER NAME Small and RIGHT justified
-        self.set_xy(3.3,6.3) # y adjust smaller font
-        self.set_font("helvetica","", 12)
-        right_most = self.epw - 10
-        self.cell(
-            w=(right_most),
-            markdown=True,
-            txt=blob_right,
-            fill=False,
-            border=False,
-            align="R",
-        )
-
-    def print_MD_string_noxy(self, blob: str = 'where da blob', font_size: int = 12)-> None:
+    def persona_title(self, blob: str = 'where da blob', font_size: int = 12)-> None:
+        '''prints PERSONA NAME above perimiter box left justified'''
         self.set_font("Helvetica", "", font_size)
         self.set_draw_color(0)
         line_height = self.font_size * 1.6
@@ -154,7 +161,8 @@ class PDF(FPDF):
             txt=blob,
         )
 
-    def print_MD_string_right_noxy(self, blob: str = 'where da blob', font_size: int = 12)-> None:
+    def player_title(self, blob: str = 'where da blob', font_size: int = 12)-> None:
+        '''prints PLAYER NAME above perimeter box right justified'''
         self.set_font("Helvetica", "", font_size)
         self.set_draw_color(0)
         line_height = self.font_size * 1.6
@@ -169,259 +177,369 @@ class PDF(FPDF):
             new_y="NEXT"
         )
 
-    def grey_box_title_strip(self,announce:str = "",drivel:str = "") -> None:
+    def section_title(self,announce:str = "",drivel:str = "") -> None:
         '''
-        prints a formatted title for string
+        prints a pre formatted section title and drivel
         '''
+
+        # paint the swath
         self.set_fill_color(200)
+        left, top, width, height = self.get_x(),self.get_y(),205,8
+        self.rect(left,top,width,height, "F")
+
         self.set_draw_color(75)
-        self.set_line_width(.2)
+        self.set_line_width(.4)
         self.set_font("Helvetica", style='B',size=14)
-        line_height = self.font_size * 1.6
-        line_width = self.get_string_width(announce, markdown=True) + 2 # + x is padding
+        line_height = 8
+        announce_width = self.get_string_width(announce) + 2
 
         self.cell(
-            markdown=True,
+            announce_width,
+            line_height,
             txt=announce,
-            fill=True,
             border=True,
             new_x="RIGHT",
             new_y="TOP"
         )
 
+        self.set_font("Helvetica",size=14)
+        self.set_xy(self.get_x() + 2, self.get_y() + 1.5)
         self.cell(
-            markdown=True,
             txt=drivel,
-            fill=True,
-            border=True,
-
         )
 
-
-    def grey_box_title(self,blob, x=0,y=0)->None:
-        '''
-        prints a formatted title for string
-        '''
-        self.set_xy(x,y)
-        self.set_fill_color(200)
-        self.set_draw_color(75)
-        self.set_line_width(.2)
-        self.set_font("Helvetica", style='B',size=14)
+    def markdown(self, blob: str = 'where da blob')-> None:
+    
+        self.set_font("Helvetica",size=14)
         line_height = self.font_size * 1.6
-        line_width = self.get_string_width(blob, markdown=True) + 2 # + x is padding
+        line_width = self.get_string_width(blob, markdown=True) + 2
 
         self.cell(
             w=line_width,
             h=line_height,
-            markdown=True,
             txt=blob,
-            ln=1,
-            fill=True,
-            border=True,
+            align="L",
+            markdown=True,
+            new_x="RIGHT",
+            new_y="LAST",
         )
 
 
-
-
-    def print_MD_string(self, blob: str = 'where da blob', font_size: int = 12, x:float = 0, y:float = 0)-> None:
-        self.set_font("Helvetica", "", font_size)
-        self.set_draw_color(0)
-        line_height = self.font_size * 1.6
-        self.set_xy(x,y)
-
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-        )
-
-
-    def data_footer(self, persona):
-        '''
-        prints the info at page bottom outside perimeter box
-        '''
-        self.set_font("Helvetica", size=7)
-        line_height = self.font_size * 1.6
-        self.set_xy(8, 273)
-        persona.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
-        blob = f" **Printed:** {persona.Date_Updated} **Created:** {persona.Date_Created} **File:** {persona.File_Name}"
-        self.cell(
-            w=0,
-            h=line_height,
-            markdown=True,
-            txt=blob,
-            ln=1,
-            fill=False,
-            border=False,
-            align="C",
-        )
-
-    def description_line(self, persona,x:float = 0, y:float=0) -> float:
-        '''
-        prints  description of the persona
-        '''
-
-        if persona.FAMILY == "Anthro":
-            blob = f"{persona.Persona_Name} is a {persona.Age} year-old {persona.FAMILY_TYPE} {persona.FAMILY_SUB.lower()} {persona.Vocation.lower()}."
-        elif persona.FAMILY == "Alien":
-            blob = f"{persona.Persona_Name} is a {persona.Quick_Description}"
-        elif persona.FAMILY == "Robot":
-            blob = f"{persona.Persona_Name} is a {persona.Description}"
-        else:
-            blob = "ERROR: No description for this persona"
-
-        self.print_MD_string(blob,14,x,y)
-        return y
-
-    def attributes_lines(self, persona, x:float=0,y:float=0)->None:
-        '''
-        prints the three attribute lines: acronym, value, long form
-        '''
-
-        self.set_xy(x,y)
-        ### title box 
-        self.grey_box_title('ATTRIBUTES',5,y)
-
-        ### description line
-        x += self.get_string_width('ATTRIBUTES')
-        self.set_xy(x,y)
-        self.description_line(persona,x,y)
-
-        ### [0] acronym and styling align-style, [1] long and center, [2] Prime for bot
-        attribute_formatting = [
-                ("**AWE**","Awareness",False),
-                ("**CHA**","Charisma",False),
-                ("**CON**","Constitution", True if persona.FAMILY == "Robot" else False),
-                ("**DEX**","Dexterity",True if persona.FAMILY == "Robot" else False),
-                ("**INT**","Intelligence",True if persona.FAMILY == "Robot" else False),
-                ("**MSTR**","Mind",False),
-                ("**PSTR**","Strength",True if persona.FAMILY == "Robot" else False),
-                ("**SOC**","Privilege",False),
-                ("**HPM**","Max Hit Points",False),
+    def attributes_table(self,persona:AllRecords) -> None:
+        """
+        prints atttribute acronyms, values (+/- primes) and descriptions (+/-)
+        """
+        TABLE_DATA = [
+            ["AWE", "CHA", "CON", "DEX", "INT", "MSTR", "PSTR", "SOC", "HPM", ("Helvetica", "B", 14)],
+            [persona.AWE, persona.CHA, persona.CON, persona.DEX, persona.INT, persona.MSTR, persona.PSTR, persona.SOC, persona.HPM,("Helvetica", "I",18)]
         ]
+        if not persona.RP:
+             TABLE_DATA.append(["Awareness", "Charisma", "Constitution", "Dexterity", "Intelligence", "Mind", "Strength", "Privilege", "Damagability", ("Helvetica","B", 7)])
 
-        self.set_xy(x+8,y+11)
 
-        ### acronym line
-        start_x = 18
-        right_bump = 0 # total bump along x-axis
-        bumpit = 22 # bump along x-axis increment
+        if persona.FAMILY == "Robot":
+            prime_con = f'({persona.CON_Prime})'            
+            prime_dex = f'({persona.DEX_Prime})'
+            prime_int = f'({persona.INT_Prime})'
+            prime_pstr = f'({persona.PSTR_Prime})'
 
-        self.set_font(family="helvetica",size=14)
-        self.set_text_color(0) # black
-        for attuple in attribute_formatting:
-            acronym = attuple[0]
-            self.set_x(start_x + right_bump)
-            right_bump += bumpit #bump the next element right 
-            self.cell(txt=acronym, align='X', markdown=True)
+            TABLE_DATA.append(["ROBOT", "PRIMES", prime_con, prime_dex, prime_int, "", prime_pstr, "", "",("Helvetica", "I",10)])
 
-        ### value line
-        ### uses stripped acronym to get data from record
-        self.set_y(self.get_y()+8) 
-        right_bump = 0
-        self.set_font(family="helvetica",size=16)
-        self.set_text_color(0) # black
+        col_width = 22.1
+        row_height = 7
+        start_right,top = self.set_or_get("top of attribute table")
+        for data_row in TABLE_DATA:
+            for datum in data_row[:-1]: # sliced to hide format tuple
+                font,style,size = data_row[-1] # format tuple
+                self.set_font(font,style=style,size=size)
+                datum = str(datum) if isinstance(datum, int) else datum
+                self.cell(
+                    w=col_width, 
+                    h=row_height, 
+                    txt=datum, 
+                    border=False, 
+                    align='C',    
+                    new_x="RIGHT",
+                    new_y="LAST",
+                    )
+            top += row_height
+            self.set_or_get(start_right,top,"new line")
 
-        for attuple in attribute_formatting:
-            acronym = attuple[0]
-            acronym = acronym.strip("*")
-            self.set_x(start_x + right_bump)
-            right_bump += bumpit #bump the next attribute element right 
-            blob = str(getattr(persona, acronym))
-
-            # check for robotic primes
-            if attuple[2]: # boolean if is a prime
-                prime = acronym + '_PRIME'
-                prime_add = int(getattr(persona,prime))
-                blob += f'({prime_add})'
-            self.cell(txt=blob, align='X', markdown=True)
-
-        ### long version line
-        self.set_y(self.get_y()+8)
-        right_bump = 0
-        self.set_font(family="helvetica",size=9)
-        self.set_text_color(0) # black
-        for attuple in attribute_formatting:
-            long_name = attuple[1]
-            self.set_x(start_x + right_bump)
-            right_bump += bumpit #bump the next attribute element right 
-            self.cell(txt=long_name, align='X', markdown=True)
-    
-
-    def persona_level_info(self, persona, x:float = 0, y:float = 0) -> None:
+    def persona_level_info(self, persona:AllRecords) -> str:
         '''
-        prints the persona's vocation and level and exps goal
+        returns the persona's vocation and level and exps goal
         '''
+        exps_next = list(exp_tables.vocation_exps_levels[persona.Vocation].keys())[persona.Level][1]
+        return f'level {persona.Level} {persona.Vocation.lower()} exps {persona.EXPS}/{exps_next}'
 
-        exps_next = list(table.vocation_exps_levels[persona.Vocation].keys())[persona.Level - 1].stop  # pulls next exps goal from range based on level
 
-        # build a blob to use
-        vocation_info = f'{persona.Vocation}' if persona.FAMILY == "Anthro" else f'{persona.FAMILY}'
-        exps_info = f' **Level** {persona.Level} **EXPS** ({persona.EXPS}/{exps_next})'
-        blob = vocation_info + exps_info
-        self.print_MD_string(blob,12,x,y)
+    def move_and_AR(self, persona:AllRecords) -> None:
+        ''' may be redundant'''
 
-    def pdf_attack_table(self, persona, x:float = 0, y:float = 0)->float:
+    ### movement
+        self.markdown(
+            self, 
+            blob = '**MOVE**',
+            font_size = 12,
+        )
+
+        if persona.FAMILY == 'Alien':
+            movit = f'land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'      
+        else:
+            movit = f'{persona.Move} h/u'
+
+        self.markdown(self, blob=movit,font_size=12)
+
+
+        ### armour rating
+        x+= 4 + pdf.get_string_width(blob)
+        pdf.print_MD_string("**ARMOUR RATING (AR)**",14,x,the_y)
+        x+= 1 + pdf.get_string_width("**ARMOUR RATING (AR)**", markdown=True)
+        pdf.print_MD_string(f'{persona.AR}   **____   ____**',14,x,the_y)
+
+        ### attack table header
+        the_y+=8
+        pdf.print_MD_string('**ATTACK TABLE**', 14,8,the_y)
+
+
+    def attack_table_tester(self, persona:AllRecords)->None:
         '''
-        prints the attack table  makes a list for table_vomit
+        attack table composition and print out combined
         A = Strike, B = Fling, C = Shoot
         BP = Skilled, BNP = Raw, MR = Max, DB = Force
         '''
 
-        self.set_xy(x,y)
-        attack_table = attack_table_composer(persona)
+        print(dir(FPDF))
 
-        data = [
-            [
-                "Type:LB",
-                "Raw:CB",
-                "Skilled:CB",
-                "Max:CB",
-                "Force:CB",
-            ]
+        # collect needed data
+        awe = persona.AWE
+        dex = persona.DEX
+        intel = persona.INT
+        pstr = persona.PSTR
+        family = persona.FAMILY
+        vocation = persona.Vocation
+        level = persona.Level
+        table_level = (persona.Level - 1 if persona.Level < 11 else 9)  # no level bonus for level one
+        attacks = persona.Attacks if family=="Alien" else []
+
+        if family == "Robot":
+            con_prime = persona.CON_Prime 
+            dex_prime = persona.DEX_Prime
+            int_prime = persona.INT_Prime
+            pstr_prime = persona.PSTR_Prime
+       
+        # STRIKE line
+        if family == "Anthro": # Anthro = Vocation STRIKE row (type A)
+            ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
+            ABP = ABP + exp_tables.vocation_level_bonus[vocation]["A"] * level
+            ABNP = math.ceil(ABP * exp_tables.vocation_non_proficient[vocation]["A"] / 100)
+            AMR = 625 + ABP
+            ADB = math.ceil(pstr / 2)
+
+        elif family == "Robot": # Robot STRIKE row (Type A)
+            ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
+            ABNP = 0
+            AMR = "---"
+            ADB = pstr
+
+        elif family == "Alien" and "Strike" in attacks: # Alien STRIKE row *
+            ABP = ABNP = 10 * (pstr + level)
+            AMR = 700 + ABP
+            ADB = level
+
+        # FLING line
+        if family == "Anthro": # Vocation FLING row (Type B)
+            BBP = awe + (4 * dex) + intel + (2 * pstr)
+            BBP = BBP + exp_tables.vocation_level_bonus[vocation]["B"] * level
+            BBNP = math.ceil(BBP * (exp_tables.vocation_non_proficient[vocation]["B"] / 100))
+            BMR = 650 + BBP
+            BDB = math.ceil(pstr / 4)
+
+        elif family == "Robot": # Robot FLING row (Type B)
+            BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (level * dex)
+            BBNP = 0
+            BMR = "---"
+            BDB = math.ceil(pstr / 2)
+
+        elif family == "Alien" and "Fling" in attacks: # Alien FLING row (Type B)
+            BBP = BBNP = 10 * (dex + level)
+            BMR = 700 + BBP
+            BDB = level
+
+        # SHOOT line 
+        if family == "Anthro":  # Vocation SHOOT row (Type C)
+            CBP = awe + (9 * dex) + intel + pstr
+            CBP = CBP + exp_tables.vocation_level_bonus[vocation]["C"] * level
+            CBNP = math.ceil(CBP * (exp_tables.vocation_non_proficient[vocation]["C"] / 100))
+            CMR = 675 + CBP
+            CDB = 0
+
+        elif family == "Robot":  # Robot SHOOT row (Type C)
+            CBP = (5 * awe) + (5 * dex) + (int_prime * intel) + (level * intel)
+            CBNP = 0
+            CMR = "---"
+            CDB = 0
+
+        elif family == "Alien" and "Shoot" in attacks: # Alien SHOOT row (Type C)
+            CBP = CBNP = 10 * (intel + level)
+            CMR = 700 + CBP
+            CDB = level        
+
+
+        # attack header line
+        TABLE_DATA = (
+            ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills"),
+            ("Strike", ABP,ABNP, AMR, ADB,"______________"),
+            ("Fling", BBP, BBNP, BMR, BDB, "______________"),
+            ("Shoot", CBP,CBNP,CMR, CDB, "______________")
+        )
+
+        self.set_font("Times", size=16)
+        with self.table(width=180, col_widths=(30, 30, 30, 30, 30, 30)) as attack_table:
+            print("DORK")
+            for data_row in TABLE_DATA:
+                print("DICK")
+                row = attack_exp_tables.row()
+                for datum in data_row:
+                    print("DACK")
+                    row.cell(datum)
+
+
+    def attack_table_pdf(self, persona:AllRecords)->None:
+        '''
+        attack table composition and print out combined
+        A = Strike, B = Fling, C = Shoot
+        BP = Skilled, BNP = Raw, MR = Max, DB = Force
+        '''
+        # collect needed data
+        awe = persona.AWE
+        dex = persona.DEX
+        intel = persona.INT
+        pstr = persona.PSTR
+        family = persona.FAMILY
+        vocation = persona.Vocation
+        level = persona.Level
+        table_level = (persona.Level - 1 if persona.Level < 11 else 9)  # no level bonus for level one
+        attacks = persona.Attacks if family=="Alien" else []
+
+        if family == "Robot":
+            con_prime = persona.CON_Prime 
+            dex_prime = persona.DEX_Prime
+            int_prime = persona.INT_Prime
+            pstr_prime = persona.PSTR_Prime
+       
+        # attack header line
+        TABLE_DATA = [
+            ["TYPE", "SKILLED", "RAW", "MAX", "FORCE", ("Helvetica","B",12)],
         ]
 
-        # build data if BP exists.
-        if attack_table["A"]["BP"] > 0:
-            data.append(
-                [
-                    "Strike:LB",
-                    f'{attack_table["A"]["BNP"]}:CI',
-                    f'{attack_table["A"]["BP"]}:CI',
-                    f'{attack_table["A"]["MR"]}:CI',
-                    f'{attack_table["A"]["ADB"]}:CI',
-                ]
-            )
+        # STRIKE line
+        if family == "Anthro": # Anthro = Vocation STRIKE row (type A)
+            ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
+            ABP = ABP + exp_tables.vocation_level_bonus[vocation]["A"] * level
+            ABNP = math.ceil(ABP * exp_tables.vocation_non_proficient[vocation]["A"] / 100)
+            AMR = 625 + ABP
+            ADB = math.ceil(pstr / 2)
+            TABLE_DATA.append(["Strike", str(ABP),str(ABNP),str(AMR),str(ADB), ("Helvetica","I",14)])
 
-        if attack_table["B"]["BP"] > 0:
-            data.append(
-                [
-                    "Fling:LB",
-                    f'{attack_table["B"]["BNP"]}:CI',
-                    f'{attack_table["B"]["BP"]}:CI',
-                    f'{attack_table["B"]["MR"]}:CI',
-                    f'{attack_table["B"]["BDB"]}:CI',
-                ]
-            )
+        elif family == "Robot": # Robot STRIKE row (Type A)
+            ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
+            ABNP = 0
+            AMR = "---"
+            ADB = pstr
+            TABLE_DATA.append(["Strike", str(ABP),str(ABNP),str(AMR),str(ADB),  ("Helvetica","I",14)])
 
-        if attack_table["C"]["BP"] > 0:
-            data.append(
-                [
-                    "Shoot:LB",
-                    f'{attack_table["C"]["BNP"]}:CI',
-                    f'{attack_table["C"]["BP"]}:CI',
-                    f'{attack_table["C"]["MR"]}:CI',
-                    f'{attack_table["C"]["CDB"]}:CI',
-                ]
-            )
- 
-        # table_vomit the ABCs of combat table
-        self.table_vomit(data, 9, 105, self.get_y(), 1.5, 0.25)
+        elif family == "Alien" and "Strike" in attacks: # Alien STRIKE row *
+            ABP = ABNP = 10 * (pstr + level)
+            AMR = 700 + ABP
+            ADB = level
+            TABLE_DATA.append(["Strike", str(ABP),str(ABNP),str(AMR),str(ADB), ("Helvetica","I",14)])
 
+        # FLING line
+        if family == "Anthro": # Vocation FLING row (Type B)
+            BBP = awe + (4 * dex) + intel + (2 * pstr)
+            BBP = BBP + exp_tables.vocation_level_bonus[vocation]["B"] * level
+            BBNP = math.ceil(BBP * (exp_tables.vocation_non_proficient[vocation]["B"] / 100))
+            BMR = 650 + BBP
+            BDB = math.ceil(pstr / 4)
+            TABLE_DATA.append(["Fling", str(BBP), str(BBNP), str(BMR), str(BDB),("Helvetica","I",14)])
+
+        elif family == "Robot": # Robot FLING row (Type B)
+            BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (level * dex)
+            BBNP = 0
+            BMR = "---"
+            BDB = math.ceil(pstr / 2)
+            TABLE_DATA.append(["Fling", str(BBP), str(BBNP), str(BMR), str(BDB), ("Helvetica","I",14)])
+
+        elif family == "Alien" and "Fling" in attacks: # Alien FLING row (Type B)
+            BBP = BBNP = 10 * (dex + level)
+            BMR = 700 + BBP
+            BDB = level
+            TABLE_DATA.append(["Fling", str(BBP), str(BBNP), str(BMR), str(BDB), ("Helvetica","I",14)])
+
+        # SHOOT line 
+        if family == "Anthro":  # Vocation SHOOT row (Type C)
+            CBP = awe + (9 * dex) + intel + pstr
+            CBP = CBP + exp_tables.vocation_level_bonus[vocation]["C"] * level
+            CBNP = math.ceil(CBP * (exp_tables.vocation_non_proficient[vocation]["C"] / 100))
+            CMR = 675 + CBP
+            CDB = 0
+            TABLE_DATA.append(["Shoot", str(CBP),str(CBNP), str(CMR), str(CDB), ("Helvetica","I",14)])
+
+        elif family == "Robot":  # Robot SHOOT row (Type C)
+            CBP = (5 * awe) + (5 * dex) + (int_prime * intel) + (level * intel)
+            CBNP = 0
+            CMR = "---"
+            CDB = 0
+            TABLE_DATA.append(["Shoot", str(CBP),str(CBNP), str(CMR), str(CDB), ("Helvetica","I",14)])
+
+        elif family == "Alien" and "Shoot" in attacks: # Alien SHOOT row (Type C)
+            CBP = CBNP = 10 * (intel + level)
+            CMR = 700 + CBP
+            CDB = level        
+            TABLE_DATA.append(["Shoot", str(CBP),str(CBNP), str(CMR), str(CDB), ("Helvetica","I",14)])
+
+        col_width = 18
+        row_height = 5
+        start_right,top = self.set_or_get("inside attack table")
+        for data_row in TABLE_DATA:
+            for datum in data_row[:-1]: # sliced to hide format tuple
+                font,style,size = data_row[-1] # format tuple
+                self.set_font(font,style=style,size=size)
+                datum = str(datum) if isinstance(datum, int) else datum
+                self.cell(
+                    w=col_width, 
+                    h=row_height, 
+                    txt=datum, 
+                    border=True, 
+                    align='C',    
+                    new_x="RIGHT",
+                    new_y="LAST",
+                    )
+            top += row_height
+            self.set_or_get(start_right,top,"new line")
+
+
+        
+    """ 
+    those fucking proficiencies
+    ANTHROS assigned by
+        APROF = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
+        if APROF = 42:
+            if vocation == "Mercenary":
+                APROF = "All weapons"
+            else: # this would be Nothing
+                APROF = "One weapon only"
+
+        BPROF = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
+        CPROF = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
+
+    ROBOTS 
+        APROF = BPROF = CPROF = "Robots have no weapon skills."
+
+    ALIENS 
+        APROF = BPROF = CPROF = "Natural."
+    """
 
     def combat_table_explainer(self, persona, x:float = 0, y:float = 0) -> float:
         '''
@@ -444,9 +562,6 @@ class PDF(FPDF):
         y+=y_bump
         return y
 
-
-
-    
 
 
 
@@ -483,39 +598,6 @@ class PDF(FPDF):
         for x in range(0,int(self.epw),10):
             self.line(x,0,x,self.eph)
 
-    def pdf_do_not_use(self)->None:
-        '''
-        draws a obfuscating pattern
-        prints plea to not use this page
-        '''
-
-        self.set_draw_color(32) # dark lines
-        self.set_line_width(.3)
-
-        # x = epw = 216, y = eph = 280  
-        # perimeter  TL= 5, 13, TR= (self.epw - 10),13 BL= 5,(self.eph - 20) BR= (self.epw - 10), (self.eph - 20)
-
-        #bezier top left to right side 
-        for y in range(13,int(self.eph-10),10):
-            self.line(5,13,self.epw-5,y)
-
-        #bezier top right to left side 
-        for y in range(13,int(self.eph-5),10):
-            self.line(self.epw-10,13,  5,y)
-
-        #bezier middle
-        for x in range(5,int(self.epw-5),10):
-            self.line((self.epw-10)/2,13, x, self.eph-8)
-
-        blob = "DO NOT USE"
-        x=((self.epw/2)-(self.get_string_width(blob)/2))
-        y=self.eph/2
-        self.grey_box_title(blob,x,y)
-        y+=12
-
-        blob = f"Keep notes on attached sheets"
-        x=((self.epw/2)-(self.get_string_width(blob)/2))
-        self.grey_box_title(blob,x,y)
 
 
     def locutus(self)->None:
@@ -541,47 +623,6 @@ class PDF(FPDF):
         self.line(x-centering,y-centering, x+centering, y+centering)
         self.line(x-centering,y+centering,x+centering,y-centering)
 
-    def table_vomit(
-        self,
-        data: list,
-        x_left: float,
-        x_right: float,
-        why: float,
-        line_height: float,
-        border: float,
-    ) -> None:
-        '''
-        prints out the given list
-        only used for attack table
-        '''
-
-        table_width = x_right - x_left
-        line_height = self.font_size * line_height
-        border_on = 1 if border > 0 else 0
-        width = border
-
-        self.set_draw_color(0, 0, 0)
-        self.set_line_width(width)
-        self.set_y(why)
-        for row in data:
-            col_width = table_width / (len(row) if len(row) > 0 else 1)
-            self.set_x(x_left)
-            for datum in row:
-                content, styling = datum.split(":")
-                alignment = styling[0]
-                accenture = styling[1] if len(styling) > 1 and styling[1] != "N" else ""
-
-                self.set_font(self.font_family, accenture, self.font_size_pt)
-                self.multi_cell(
-                    w=col_width,
-                    h=line_height,
-                    txt=content,
-                    border=border_on,
-                    max_line_height=self.font_size,
-                    ln=3,
-                    align=alignment,
-                )
-            self.ln()
 
     def task_info(self, persona,x:float=0,y:float=0)->float:
         '''
@@ -863,6 +904,24 @@ class PDF(FPDF):
         self.set_xy(8,y)
         self.cell(txt=f'{"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}', align='L')
 
+    def sheet_footer(self, persona:AllRecords) -> None:
+        '''
+        prints the info at page bottom outside perimeter box
+        '''
+        self.set_font("Helvetica", size=7)
+        line_height = self.font_size * 1.6
+        self.set_xy(8, 273)
+        persona.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
+        blob = f" **Printed:** {persona.Date_Updated} **Created:** {persona.Date_Created} **File:** {persona.File_Name}"
+        self.cell(
+            w=0,
+            h=line_height,
+            markdown=True,
+            txt=blob,
+            align="C",
+        )
+
+
 
 ##############################################
 #
@@ -894,7 +953,7 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def attack_table_composer(attack_tabler:table.PersonaRecord)-> dict:
+def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
     '''
     creates an attack table dictionary based on FAMILY 
     '''
@@ -923,27 +982,27 @@ def attack_table_composer(attack_tabler:table.PersonaRecord)-> dict:
     if vocation not in ["Alien","Robot"]: 
         # Vocation STRIKE row (Type A)
         ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
-        ABP = ABP + table.vocation_level_bonus[vocation]["A"] * level
-        ABNP = math.ceil(ABP * table.vocation_non_proficient[vocation]["A"] / 100)
+        ABP = ABP + exp_tables.vocation_level_bonus[vocation]["A"] * level
+        ABNP = math.ceil(ABP * exp_tables.vocation_non_proficient[vocation]["A"] / 100)
         AMR = 625 + ABP
         ADB = math.ceil(pstr / 2)
-        APROF = table.vocation_proficiencies[vocation]["A"][table_level]
+        APROF = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
 
         # Vocation FLING row (Type B)
         BBP = awe + (4 * dex) + intel + (2 * pstr)
-        BBP = BBP + table.vocation_level_bonus[vocation]["B"] * level
-        BBNP = math.ceil(BBP * (table.vocation_non_proficient[vocation]["B"] / 100))
+        BBP = BBP + exp_tables.vocation_level_bonus[vocation]["B"] * level
+        BBNP = math.ceil(BBP * (exp_tables.vocation_non_proficient[vocation]["B"] / 100))
         BMR = 650 + BBP
         BDB = math.ceil(pstr / 4)
-        BPROF = table.vocation_proficiencies[vocation]["B"][table_level]
+        BPROF = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
 
         # Vocation SHOOT row (Type C)
         CBP = awe + (9 * dex) + intel + pstr
-        CBP = CBP + table.vocation_level_bonus[vocation]["C"] * level
-        CBNP = math.ceil(CBP * (table.vocation_non_proficient[vocation]["C"] / 100))
+        CBP = CBP + exp_tables.vocation_level_bonus[vocation]["C"] * level
+        CBNP = math.ceil(CBP * (exp_tables.vocation_non_proficient[vocation]["C"] / 100))
         CMR = 675 + CBP
         CDB = 0
-        CPROF = table.vocation_proficiencies[vocation]["C"][table_level]
+        CPROF = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
 
         # Vocation PROF assignment
         if APROF == 42 and vocation == "Mercenary":
@@ -982,7 +1041,7 @@ def attack_table_composer(attack_tabler:table.PersonaRecord)-> dict:
             CBP = CBNP = CMR = CDB = 0
         
         # populate the PROF column
-        APROF = BPROF = CPROF = f"Natural."
+
 
     elif family == "Robot":
         # specific robot attributes
@@ -1085,13 +1144,13 @@ def screen_attack_table(persona) -> None:
             nummer_profs = attack_table[proficiency[0]][proficiency[1:]]
             attack_table[proficiency[0]][
                 proficiency[1:]
-            ] = f"{table.numbers_2_words[int(nummer_profs)].capitalize()} {table.attack_type_words[proficiency]} weapons."
+            ] = f"{exp_tables.numbers_2_words[int(nummer_profs)].capitalize()} {exp_tables.attack_type_words[proficiency]} weapons."
     '''
 
     # assign proficiencies 
-    APROF = table.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
-    BPROF = table.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
-    CPROF = table.numbers_2_words[CPROF] if isinstance(CPROF,int) else CPROF
+    APROF = exp_tables.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
+    BPROF = exp_tables.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
+    CPROF = exp_tables.numbers_2_words[CPROF] if isinstance(CPROF,int) else CPROF
 
     # print out the combat table
     print(f'\nATTACK TABLE: -- {persona.Vocation} Level {persona.Level}')
@@ -1300,7 +1359,7 @@ def equip_notes_one_shot(pdf, persona)->None:
 # ALIEN output to screen
 #####################################
 
-def alien_screen(screenery:table.PersonaRecord) -> None:
+def alien_screen(screenery:exp_tables.PersonaRecord) -> None:
     """
     screen prints alien persona
     """
@@ -1403,7 +1462,7 @@ def alien_screen(screenery:table.PersonaRecord) -> None:
 # ROBOT output to screen
 #####################################
 
-def robot_screen(bot_screen: table.PersonaRecord) -> None:
+def robot_screen(bot_screen: exp_tables.PersonaRecord) -> None:
     """
     print the robot to screen
     """
@@ -1570,8 +1629,8 @@ def anthro_screen(persona) -> None:
 #####################################
 
 def toy_screen(blank:any) -> None:
-    ''' prints out a toy to the screen'''
-    return
+    '''prints out a toy to the screen'''
+    pass
     
 
 #####################################

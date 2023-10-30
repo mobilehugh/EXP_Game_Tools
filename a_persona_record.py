@@ -27,15 +27,15 @@ def record_chooser()->None:
         please.clear_console()
 
         choices_function_map = {
-            "Anthro": anthro.anthro_workflow,
-            "Alien": alien.alien_workflow,
-            "Robot": robot.robot_workflow,
-            "Toy": toy.toy_workflow,
-            "Mutation": mutations.mutation_workflow,
+            "Anthros": anthro.anthro_workflow,
+            "Aliens": alien.alien_workflow,
+            "Robots": robot.robot_workflow,
+            "Toys": toy.toy_workflow,
+            "Mutations": mutations.mutation_workflow,
             "Maintenance": please.do_referee_maintenance,
         }
 
-        choices_comment = "What domain are you exploring? "
+        choices_comment = "What are you exploring? "
         choices = list(choices_function_map.keys())
         record_type_desired = please.choose_this(choices, choices_comment)
         

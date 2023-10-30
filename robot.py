@@ -15,7 +15,7 @@ import toy
 
 # set up RobotRecord
 @dataclass
-class RobotRecord(table.Robotic):
+class RobotRecord(exp_tables.Robotic):
     pass
 
 def robot_workflow():
@@ -52,7 +52,7 @@ def robotic_sensors(eye_eye:RobotRecord) -> list:
     ''' creates a list robot sensors'''
     sensor_list = []
     for _ in range(math.ceil(eye_eye.AWE / 4)):
-        sensor_list.append(please.get_table_result(table.robotic_sensor_types))
+        sensor_list.append(please.get_table_result(exp_tables.robotic_sensor_types))
     return sensor_list # changed by side effect
 
 
@@ -64,7 +64,7 @@ def list_eligible_robot_types(choosing: RobotRecord) -> list:
         f"{choosing.CON_Prime}{choosing.DEX_Prime}{choosing.INT_Prime}{choosing.PSTR_Prime}"
     )
 
-    return table.auto_prime_select_robot_type[auto_picker]
+    return exp_tables.auto_prime_select_robot_type[auto_picker]
 
 def robot_hite_wate_calc(sizer: RobotRecord) -> RobotRecord:
     """
@@ -77,13 +77,13 @@ def robot_hite_wate_calc(sizer: RobotRecord) -> RobotRecord:
     ### sizer.Size is determined by robot type
 
     ### get wate from size of robot
-    sizer.Wate = please.roll_this(table.robot_size_to_wate[sizer.Size_Cat]["wate"])
-    sizer.Wate_Suffix = table.robot_size_to_wate[sizer.Size_Cat]["suffix"]
+    sizer.Wate = please.roll_this(exp_tables.robot_size_to_wate[sizer.Size_Cat]["wate"])
+    sizer.Wate_Suffix = exp_tables.robot_size_to_wate[sizer.Size_Cat]["suffix"]
 
     ### get hite from wate to hite table
     kilo_conv = 1 if sizer.Size_Cat == "NaNo" else sizer.Wate
 
-    for hite_range, roll in table.robot_wate_to_hite.items():
+    for hite_range, roll in exp_tables.robot_wate_to_hite.items():
         if kilo_conv in range(*hite_range): # the * unpacks the tuple
             sizer.Hite = please.roll_this(roll)
             break
@@ -99,7 +99,7 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
 
     ### add the primary, less fancy, peripherals
     while len(peripheral_list) < number:
-        peripheral = please.get_table_result(table.primary_robotic_peripheral)
+        peripheral = please.get_table_result(exp_tables.primary_robotic_peripheral)
         peripheral_list.append(peripheral)
 
         if peripheral == "Extra Roll":
@@ -108,7 +108,7 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
 
         elif peripheral == "Choose":
             peripheral_list.pop()
-            choices = please.list_table_choices(table.primary_robotic_peripheral)
+            choices = please.list_table_choices(exp_tables.primary_robotic_peripheral)
             chosen = please.choose_this(choices, "Choose a primary peripheral")
             peripheral_list.append(chosen)
 
@@ -121,7 +121,7 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
 
     ### add the secondary, fancy, peripherals
     while secondary_number != 0:
-        peripheral = please.get_table_result(table.secondary_robotic_peripheral)
+        peripheral = please.get_table_result(exp_tables.secondary_robotic_peripheral)
         peripheral_list.append(peripheral)
         secondary_number -= 1
 
@@ -131,14 +131,14 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
 
         elif peripheral == "Choose":
             peripheral_list.pop()
-            choices = please.list_table_choices(table.secondary_robotic_peripheral)
+            choices = please.list_table_choices(exp_tables.secondary_robotic_peripheral)
             chosen = please.choose_this(choices, "Choose a secondary peripheral")
             peripheral_list.append(choice)
 
     for position, peripheral in enumerate(peripheral_list):
 
         if peripheral == "Vocation Computer":
-            all_vocations = [key for key in table.attributes_improve_by_vocation.keys()]
+            all_vocations = [key for key in exp_tables.attributes_improve_by_vocation.keys()]
             new_peripheral = f"{choice(all_vocations)} vocation computer"
             peripheral_list[position] = new_peripheral
 
@@ -150,7 +150,7 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
         elif peripheral == "Vocation":
             all_vocations = [
                 key
-                for key in table.attributes_improve_by_vocation.keys()
+                for key in exp_tables.attributes_improve_by_vocation.keys()
                 if key != "Knite"
             ]
             perry.Vocation = choice(all_vocations)
@@ -265,7 +265,7 @@ def robot_offensive_rolls(offenses: list) -> list:
 def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRecord:
     '''takes list of rolls for attack tables and adds to robot persona Attacks'''
 
-    attack_tables_pivot = [table.robot_ram_dam, table.attack_table_one, table.attack_table_two, table.attack_table_three, table.attack_table_four]
+    attack_tables_pivot = [exp_tables.robot_ram_dam, exp_tables.attack_table_one, exp_tables.attack_table_two, exp_tables.attack_table_three, exp_tables.attack_table_four]
     fancy_attacks = {"Electro":"+2d8 DMG, +100 attack vs robots","Inertia":"*3 DMG +10","Stun":"DMG = Intensity","Vibro":"+20 DMG, +100 attack"}
 
     
@@ -280,21 +280,21 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
             elif "Strike" in new_attack:
                 strike_break = new_attack.split(" ")
                 if len(strike_break) == 1:
-                    offender.Attacks.append(f'Strike: {please.get_table_result(table.strike_attacks)}')
+                    offender.Attacks.append(f'Strike: {please.get_table_result(exp_tables.strike_attacks)}')
                 else:
                     fancy_strike = strike_break[1]
-                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(table.strike_attacks)}, {fancy_attacks[fancy_strike]}')
+                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(exp_tables.strike_attacks)}, {fancy_attacks[fancy_strike]}')
                     
             elif "Fling" in new_attack:
                 strike_break = new_attack.split(" ")
                 if len(strike_break) == 1:
-                    offender.Attacks.append(f'Fling: {please.get_table_result(table.fling_attacks)}')
+                    offender.Attacks.append(f'Fling: {please.get_table_result(exp_tables.fling_attacks)}')
                 else:
                     fancy_strike = strike_break[1]
-                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(table.fling_attacks)}, {fancy_attacks[fancy_strike]}')
+                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(exp_tables.fling_attacks)}, {fancy_attacks[fancy_strike]}')
           
             elif "Defensive" in new_attack:
-                offender.Defences.append(please.get_table_result(table.robotic_defences))
+                offender.Defences.append(please.get_table_result(exp_tables.robotic_defences))
 
             elif new_attack in ["Gun", "Aerosol", "Bomb", "Grenade"]:
                 offender.Attacks.append(f'{new_attack}: {toy.toy_cat_type(new_attack)}')
@@ -321,7 +321,7 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
 
     ### defensive systems does not have extra roll or choose.
     for _ in range(number):
-        defense = please.get_table_result(table.robotic_defences)
+        defense = please.get_table_result(exp_tables.robotic_defences)
 
         if defense == "Aunty Missile":
             defence_list.append(f"Aunty Missile: AR +{please.roll_this('1d6')*50} vs missiles")
@@ -331,7 +331,7 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
             defender.AR += please.roll_this("1d6*50")
             defence_list.append(f"Hardened AR: new AR is {defender.AR}")
         elif defense == "Artifact Armour":
-            defence_list.append(f'Armoured: {please.get_table_result(table.armour_list)}')
+            defence_list.append(f'Armoured: {please.get_table_result(exp_tables.armour_list)}')
         elif defense == "Camouflage":
             defence_list.append(f"Camouflage vs: {', '.join(defender.Sensors)} detection")
         elif defense == "Detect Ambush":
@@ -358,7 +358,7 @@ def robotic_locomotion(move_it:RobotRecord) -> str:
 
     # bespoke locomotion skips fallthrough as fresh  is also a fallthrough
     if move_it.Bespoke:
-        locomo_tuples = please.list_table_choices(table.primary_robotic_locomotion)
+        locomo_tuples = please.list_table_choices(exp_tables.primary_robotic_locomotion)
         locomo_choices = [t[0] for t in locomo_tuples]
         chosen = please.choose_this(locomo_choices, "Choose LOCOMOTION type.", move_it)        
         for tuple in locomo_tuples:
@@ -367,7 +367,7 @@ def robotic_locomotion(move_it:RobotRecord) -> str:
                 break
 
     else:
-        chosen = please.get_table_result(table.primary_robotic_locomotion)
+        chosen = please.get_table_result(exp_tables.primary_robotic_locomotion)
 
 
     primary, secondary = chosen[0], chosen[1]
@@ -382,7 +382,7 @@ def robotic_locomotion(move_it:RobotRecord) -> str:
         return f'{please.roll_this(secondary)} {primary}'
 
     if secondary == "BackUp":
-       return f'{primary} {choice(["moving", "pushing","propelling"])} {please.get_table_result(table.secondary_robotic_locomotion).lower()}' 
+       return f'{primary} {choice(["moving", "pushing","propelling"])} {please.get_table_result(exp_tables.secondary_robotic_locomotion).lower()}' 
 
     return primary # [anti-grav, magnetic, chem slide, slog bag] 
 
@@ -403,15 +403,15 @@ def robot_description(looks_like: RobotRecord) -> str:
     sized = looks_like.Size_Cat if looks_like.Size_Cat not in ["Medium", "Nano", "Giga"] else f"{looks_like.Size_Cat} sized"
     
     ### COLOUR descriptor
-    colour = please.get_table_result(table.colour_bomb) if please.do_1d100_check(50) else f'{please.get_table_result(table.colour_bomb)} and {please.get_table_result(table.colour_bomb)}'
+    colour = please.get_table_result(exp_tables.colour_bomb) if please.do_1d100_check(50) else f'{please.get_table_result(exp_tables.colour_bomb)} and {please.get_table_result(exp_tables.colour_bomb)}'
 
     ### SHAPE descriptor
-    shaped = please.get_table_result(table.base_shape)
-    shaped = shaped if shaped != "Descriptive" else please.get_table_result(table.descriptive_shapes)
+    shaped = please.get_table_result(exp_tables.base_shape)
+    shaped = shaped if shaped != "Descriptive" else please.get_table_result(exp_tables.descriptive_shapes)
     # mangle shape?
-    shaped = shaped if please.do_1d100_check(40) else f'{please.get_table_result(table.shape_mangle)} {shaped}'
+    shaped = shaped if please.do_1d100_check(40) else f'{please.get_table_result(exp_tables.shape_mangle)} {shaped}'
     # adorn shape?
-    shaped = shaped if please.do_1d100_check(25) else f'{shaped} with {please.get_table_result(table.adornage)}'
+    shaped = shaped if please.do_1d100_check(25) else f'{shaped} with {please.get_table_result(exp_tables.adornage)}'
 
     ###  LOCOMOTION descriptor
     floating = False
@@ -500,7 +500,7 @@ def android(andy: RobotRecord) -> RobotRecord:
     ### vocation EXCEPTION for android
 
     comment = "Choose your vocation."
-    andy.Vocation  = please.choose_this([vocation for vocation in table.vocation_list if vocation != "Knite"], comment, andy)
+    andy.Vocation  = please.choose_this([vocation for vocation in exp_tables.vocation_list if vocation != "Knite"], comment, andy)
   
     ### building the spec sheet
     specs = [f"Built in the image of their maker ({andy.FAMILY_SUB})."]
@@ -620,7 +620,7 @@ def combot(comboy: RobotRecord) -> RobotRecord:
 
         ### integrated heavy weapon EXCEPTION  for Offensive-Heavy combot
         roll = please.roll_this("1d100") + comboy.PSTR
-        for spread, weapon in table.combot_heavy_weapons.items():
+        for spread, weapon in exp_tables.combot_heavy_weapons.items():
             if roll in range(*spread):
                 break
         
@@ -683,7 +683,7 @@ def datalyzer(nerdy: RobotRecord) -> RobotRecord:
 
     ### mental mutation EXCEPTION for datalyzer
     if please.do_1d100_check(
-        table.datalyzer_mental_chance[nerdy.Base_Family] + nerdy.INT
+        exp_tables.datalyzer_mental_chance[nerdy.Base_Family] + nerdy.INT
     ):
         mutations.single_random_mutation(nerdy, ['mental', 'no-defect'])
 
@@ -1423,12 +1423,12 @@ def fresh_robot(player_name:str) -> None:
     fresh.Player_Name = player_name
     please.setup_persona(fresh)
 
-    fresh.Base_Family = please.get_table_result(table.robot_base_family) # must be first for Android
+    fresh.Base_Family = please.get_table_result(exp_tables.robot_base_family) # must be first for Android
     core.initial_attributes(fresh)
     fresh.CF = control_factor(fresh)
     core.movement_rate(fresh)
     core.wate_allowance(fresh)
-    fresh.Power_Plant = please.get_table_result(table.robotic_power_plant)
+    fresh.Power_Plant = please.get_table_result(exp_tables.robotic_power_plant)
     fresh.Power_Reserve = fresh.CON
     fresh.Sensors = robotic_sensors(fresh)
     core.base_armour_rating(fresh)
@@ -1438,7 +1438,7 @@ def fresh_robot(player_name:str) -> None:
     robot_types_func_map[fresh.FAMILY_TYPE](fresh)
 
     if fresh.FAMILY_TYPE != "Android":
-        fresh.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
+        fresh.Attacks.append(f'Ram: {please.get_table_result(exp_tables.robot_ram_dam)}') # every robot can ram, except Androids
 
     ### requires bot_type
     fresh.Locomotion = robotic_locomotion(fresh)
@@ -1468,7 +1468,7 @@ def bespoke_robot(player_name:str) -> None:
     bespoke.Player_Name = player_name
     please.setup_persona(bespoke)
 
-    base_family_choices = please.list_table_choices(table.robot_base_family)
+    base_family_choices = please.list_table_choices(exp_tables.robot_base_family)
     bespoke.Base_Family = please.choose_this(base_family_choices, "Choose a base family", bespoke)
 
     core.initial_attributes(bespoke) # cannot use descriptive attributes until later
@@ -1480,14 +1480,14 @@ def bespoke_robot(player_name:str) -> None:
     if please.say_yes_to("Determine robot type by ATTRIBUTES? <- you don't choose."):
         bespoke.FAMILY_TYPE = please.choose_this(list_eligible_robot_types(bespoke), "Please choose a robot type.")
     else:
-        family_type_choices = please.list_table_choices(table.single_roll_robot_type)
+        family_type_choices = please.list_table_choices(exp_tables.single_roll_robot_type)
         bespoke.FAMILY_TYPE = please.choose_this(family_type_choices, "Choose robot type", bespoke)
 
 
-    power_plant_choices = please.list_table_choices(table.robotic_power_plant)
+    power_plant_choices = please.list_table_choices(exp_tables.robotic_power_plant)
     bespoke.Power_Plant = please.choose_this(power_plant_choices, "Choose a power plant", bespoke)
 
-    sensor_choices = please.list_table_choices(table.robotic_sensor_types)
+    sensor_choices = please.list_table_choices(exp_tables.robotic_sensor_types)
     sensor_amount = math.ceil(bespoke.AWE / 4)
     sensors = []
 
@@ -1503,7 +1503,7 @@ def bespoke_robot(player_name:str) -> None:
     robot_types_func_map[bespoke.FAMILY_TYPE](bespoke)
 
     if bespoke.FAMILY_TYPE != "Android":
-        bespoke.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
+        bespoke.Attacks.append(f'Ram: {please.get_table_result(exp_tables.robot_ram_dam)}') # every robot can ram, except Androids
 
     ### past this line requires bot_type
 
@@ -1550,7 +1550,7 @@ def rando_robot(player_name:str) -> None:
     rando.Player_Name = player_name
     please.setup_persona(rando)
 
-    base_family_choices = please.list_table_choices(table.robot_base_family)
+    base_family_choices = please.list_table_choices(exp_tables.robot_base_family)
     rando.Base_Family = please.choose_this(base_family_choices, "rando", rando)
 
     core.initial_attributes(rando)
@@ -1559,15 +1559,15 @@ def rando_robot(player_name:str) -> None:
     core.wate_allowance(rando)
     rando.Power_Reserve = rando.CON
     
-    power_plant_choices = please.list_table_choices(table.robotic_power_plant)
+    power_plant_choices = please.list_table_choices(exp_tables.robotic_power_plant)
     rando.Power_Plant = please.choose_this(power_plant_choices, "rando", rando)
     rando.Sensors = robotic_sensors(rando)
     core.base_armour_rating(rando)
-    rando.FAMILY_TYPE = choice(please.list_table_choices(table.single_roll_robot_type))
+    rando.FAMILY_TYPE = choice(please.list_table_choices(exp_tables.single_roll_robot_type))
     robot_types_func_map[rando.FAMILY_TYPE](rando)
 
     if rando.FAMILY_TYPE != "Android":
-        rando.Attacks.append(f'Ram: {please.get_table_result(table.robot_ram_dam)}') # every robot can ram, except Androids
+        rando.Attacks.append(f'Ram: {please.get_table_result(exp_tables.robot_ram_dam)}') # every robot can ram, except Androids
 
     ### past this line requires bot_type
 

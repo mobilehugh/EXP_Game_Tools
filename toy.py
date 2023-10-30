@@ -40,15 +40,15 @@ def toy_workflow() -> None:
         toy_workflow_map[plan_desired]()
 
 def toy_category():
-    return please.get_table_result(table.toy_categories)
+    return please.get_table_result(exp_tables.toy_categories)
 
 def toy_cat_type(toy_type: str = "any") -> str:
     ''' return str place holders for toys'''
     
     if "any" in toy_type:
-        toy_type = please.get_table_result(table.toy_categories)
+        toy_type = please.get_table_result(exp_tables.toy_categories)
 
-    return  please.get_table_result(table.toy_pivot[toy_type])
+    return  please.get_table_result(exp_tables.toy_pivot[toy_type])
 
 def fresh_toy() -> None:
     '''prints out toys till you get tired'''
@@ -57,18 +57,18 @@ def fresh_toy() -> None:
     give_me_more = True
 
     while give_me_more:
-        toy_cat = please.get_table_result(table.toy_categories)
+        toy_cat = please.get_table_result(exp_tables.toy_categories)
         toy_type = toy_cat_type(toy_cat)
 
         toy.FAMILY_TYPE = toy_cat
         toy.FAMILY_SUB = toy_type
     
-        shaped = please.get_table_result(table.base_shape)
-        shaped = shaped if shaped != "Descriptive" else please.get_table_result(table.descriptive_shapes)
+        shaped = please.get_table_result(exp_tables.base_shape)
+        shaped = shaped if shaped != "Descriptive" else please.get_table_result(exp_tables.descriptive_shapes)
         # mangle shape?
-        shaped = shaped if please.do_1d100_check(40) else f'{please.get_table_result(table.shape_mangle)} {shaped}'
+        shaped = shaped if please.do_1d100_check(40) else f'{please.get_table_result(exp_tables.shape_mangle)} {shaped}'
 
-        toy.Perms["Desc"] = f'{please.get_table_result(table.colour_bomb)} and {please.get_table_result(table.colour_bomb).lower()} {shaped}'
+        toy.Perms["Desc"] = f'{please.get_table_result(exp_tables.colour_bomb)} and {please.get_table_result(exp_tables.colour_bomb).lower()} {shaped}'
 
 
         if please.say_yes_to(f'SAVE THIS: {toy_cat}: {toy_type} ({toy.Perms["Desc"]}).'):

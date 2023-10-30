@@ -7,7 +7,7 @@ import alien
 import mutations
 
 @dataclass 
-class AllRecords(table.AllThings):
+class AllRecords(exp_tables.AllThings):
     pass
 
 def initial_attributes(attributes_creating:AllRecords) -> AllRecords:
@@ -17,7 +17,7 @@ def initial_attributes(attributes_creating:AllRecords) -> AllRecords:
     # ANTHRO core attributes DIE ROLLS dictionary comprehension
     attribute_die_rolls = {
         key: value["dice"]
-        for (key, value) in table.suggested_anthro_attributes.items()
+        for (key, value) in exp_tables.suggested_anthro_attributes.items()
         if key != "HPM"
     }
     
@@ -29,7 +29,7 @@ def initial_attributes(attributes_creating:AllRecords) -> AllRecords:
         # alien core attributes DIE ROLLS dictionary comprehension
         attribute_die_rolls = {
             key: value["dice"]
-            for (key, value) in table.alien_suggested_attributes.items()
+            for (key, value) in exp_tables.alien_suggested_attributes.items()
             if key != "HPM"
         }   
         for attribute in attribute_die_rolls:
@@ -44,10 +44,10 @@ def initial_attributes(attributes_creating:AllRecords) -> AllRecords:
         attributes_creating.PSTR_Prime = please.roll_this("1d4")
 
         # reassign die rolls based on primes
-        attributes_creating.CON = please.roll_this(table.robot_attributes[attributes_creating.CON_Prime]["CON"])
-        attributes_creating.DEX = please.roll_this(table.robot_attributes[attributes_creating.DEX_Prime]["DEX"])
-        attributes_creating.INT = please.roll_this(table.robot_attributes[attributes_creating.INT_Prime]["INT"]) 
-        attributes_creating.PSTR = please.roll_this(table.robot_attributes[attributes_creating.PSTR_Prime]["PSTR"])
+        attributes_creating.CON = please.roll_this(exp_tables.robot_attributes[attributes_creating.CON_Prime]["CON"])
+        attributes_creating.DEX = please.roll_this(exp_tables.robot_attributes[attributes_creating.DEX_Prime]["DEX"])
+        attributes_creating.INT = please.roll_this(exp_tables.robot_attributes[attributes_creating.INT_Prime]["INT"]) 
+        attributes_creating.PSTR = please.roll_this(exp_tables.robot_attributes[attributes_creating.PSTR_Prime]["PSTR"])
         attributes_creating.MSTR = 0
 
     return attributes_creating # modified by side effects
@@ -68,7 +68,7 @@ def hit_points_max(pointy:AllRecords) -> int:
     elif pointy.FAMILY == "Alien":
         size = pointy.Size_Cat
         con = str(pointy.CON)
-        hpm = please.roll_this(con + table.alien_HPM_size_and_dice[size])
+        hpm = please.roll_this(con + exp_tables.alien_HPM_size_and_dice[size])
 
         if pointy.Size_Cat == "Minute":
             hpm = math.ceil(pointy.HPM * ((pointy.Wate / 1000)))
@@ -83,11 +83,11 @@ def wate_allowance(wate_allowance:AllRecords) -> AllRecords:
     ''' determine wate allowance for alien, anthro and robot'''
 
     # anthro wate allowance is straight from table
-    wate_allowed = table.wate_allowance_and_PSTR[wate_allowance.PSTR]
+    wate_allowed = exp_tables.wate_allowance_and_PSTR[wate_allowance.PSTR]
     
     # alien modifies wate allowance by alien size
     if wate_allowance.FAMILY == "Alien":
-        size_mod = table.alien_size_and_WA[wate_allowance.Size_Cat]
+        size_mod = exp_tables.alien_size_and_WA[wate_allowance.Size_Cat]
         wate_allowed = round(float(wate_allowed * size_mod),1)
     
     # robot modifies wate allowance by PSTR prime
@@ -104,7 +104,7 @@ def movement_rate(moving_time: AllRecords) -> AllRecords:
     """
 
     # anthro movement is determined by DEX
-    moving_rate = table.anthro_movement_rate_and_DEX[moving_time.DEX]
+    moving_rate = exp_tables.anthro_movement_rate_and_DEX[moving_time.DEX]
 
     # robot movement is double anthro
     if moving_time.FAMILY == "Robot":
@@ -148,16 +148,16 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
     # todo descriptive knock on effects of PSTR -> WA, DEX -> Move, CON -> HPS
     # builds a combined table 
     if descriptive.FAMILY == "Alien":
-        upwards_table = {**table.descriptive_attributes_higher, **table.alien_descriptive_attributes}
+        upwards_table = {**exp_tables.descriptive_attributes_higher, **exp_tables.alien_descriptive_attributes}
 
     elif descriptive.FAMILY == "Robot":
-        upwards_table = {**table.descriptive_attributes_higher, **table.alien_descriptive_attributes}
+        upwards_table = {**exp_tables.descriptive_attributes_higher, **exp_tables.alien_descriptive_attributes}
         
     else:
-        upwards_table = table.descriptive_attributes_higher
+        upwards_table = exp_tables.descriptive_attributes_higher
 
-    upwards_list = list(upwards_table.keys())
-    downwards_list = list(table.descriptive_attributes_lower.keys())
+    upwards_list = list(upwards_exp_tables.keys())
+    downwards_list = list(exp_tables.descriptive_attributes_lower.keys())
     choices = sorted(upwards_list + downwards_list)
     choices.insert(0,"EXIT")
 
@@ -182,8 +182,8 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
                 setattr(descriptive, alter_attribute, new_attribute)
 
         if altering_descriptor in downwards_list:
-            alter_attribute = table.descriptive_attributes_lower[altering_descriptor][0]
-            alter_amount = table.descriptive_attributes_lower[altering_descriptor][1]
+            alter_attribute = exp_tables.descriptive_attributes_lower[altering_descriptor][0]
+            alter_amount = exp_tables.descriptive_attributes_lower[altering_descriptor][1]
             if altering_descriptor == "Slow":
                 descriptive.Move = math.floor(descriptive.Move/2)
             else:
@@ -252,9 +252,9 @@ def role_play_RP_arc() -> str:
     """
     return referee person arc in relation to expedition now
     """
-    past = please.get_table_result(table.role_play_RP_arc_past)
-    present = please.get_table_result(table.role_play_RP_arc_present)
-    goal = please.get_table_result(table.role_play_RP_arc_goal)
+    past = please.get_table_result(exp_tables.role_play_RP_arc_past)
+    present = please.get_table_result(exp_tables.role_play_RP_arc_present)
+    goal = please.get_table_result(exp_tables.role_play_RP_arc_goal)
 
     return f"Past: {past}, Present: {present}, Goal: {goal}."
 
@@ -262,22 +262,22 @@ def role_play_RP_beliefs() -> str:
     """
     add religion, philosophy, politics or not
     """
-    complexity = please.get_table_result(table.role_play_RP_belief_complexity)
+    complexity = please.get_table_result(exp_tables.role_play_RP_belief_complexity)
 
     if complexity[0]:
-        religious = f"Religion: {please.get_table_result(table.role_play_RP_religion)}"
+        religious = f"Religion: {please.get_table_result(exp_tables.role_play_RP_religion)}"
     else:
         religious = f"Religion: None"
 
     if complexity[1]:
         philosophy = (
-            f"Philosophy: {please.get_table_result(table.role_play_RP_philosophy)}"
+            f"Philosophy: {please.get_table_result(exp_tables.role_play_RP_philosophy)}"
         )
     else:
         philosophy = f"Philosophy: None"
 
     if complexity[2]:
-        politics = f"Politics: {please.get_table_result(table.role_play_RP_politics)}"
+        politics = f"Politics: {please.get_table_result(exp_tables.role_play_RP_politics)}"
     else:
         politics = f"Politics: None"
 
@@ -289,15 +289,15 @@ def role_play_RP_personality()->str:
     introvert, extrovert, insane
     """
 
-    personality = please.get_table_result(table.extroverted_personality)
+    personality = please.get_table_result(exp_tables.extroverted_personality)
 
     if personality == "Introverted":
         personality = (
-            please.get_table_result(table.introverted_personality) + ", Introverted"
+            please.get_table_result(exp_tables.introverted_personality) + ", Introverted"
         )
 
     elif personality == "Insane":
-        personality = please.get_table_result(table.insane_personality) + ", Insane"
+        personality = please.get_table_result(exp_tables.insane_personality) + ", Insane"
 
     else:
         personality = personality + ", Extroverted"
@@ -323,11 +323,11 @@ def build_RP_role_play(player:AllRecords) -> AllRecords:
     ## DRESS    
     if player.FAMILY in ["Anthro","Robot"]:
         player.RP_Fun.append(
-        f"Dress: {please.get_table_result(table.referee_persona_dress)}, Hygiene: {please.get_table_result(table.referee_persona_hygiene)}, Odor: {please.get_table_result(table.alien_biology_aroma)}")
+        f"Dress: {please.get_table_result(exp_tables.referee_persona_dress)}, Hygiene: {please.get_table_result(exp_tables.referee_persona_hygiene)}, Odor: {please.get_table_result(exp_tables.alien_biology_aroma)}")
     else:
         if player.Society["Tools"] != "Flora or Fauna":
             player.RP_Fun.append(
-            f"Dress: {please.get_table_result(table.referee_persona_dress)}, Hygiene: {please.get_table_result(table.referee_persona_hygiene)}")
+            f"Dress: {please.get_table_result(exp_tables.referee_persona_dress)}, Hygiene: {please.get_table_result(exp_tables.referee_persona_hygiene)}")
 
     if player.FAMILY in ["Anthro","Robot"]:
         player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
@@ -335,7 +335,7 @@ def build_RP_role_play(player:AllRecords) -> AllRecords:
         if player.Society["Tools"] != "Flora or Fauna":
             player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
 
-    player.RP_Fun.append(f'Laban: Voice: {please.get_table_result(table.laban)}, Move: { please.get_table_result(table.laban)}')
+    player.RP_Fun.append(f'Laban: Voice: {please.get_table_result(exp_tables.laban)}, Move: { please.get_table_result(exp_tables.laban)}')
 
     if player.FAMILY in ["Anthro","Robot"]:
         player.RP_Fun.append(f"{role_play_RP_beliefs()}")

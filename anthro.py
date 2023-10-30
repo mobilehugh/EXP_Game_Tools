@@ -12,7 +12,7 @@ import mutations
 
 # set up AnthroRecord
 @dataclass
-class AnthroRecord(table.Anthropic):
+class AnthroRecord(exp_tables.Anthropic):
     pass
 
 
@@ -48,7 +48,7 @@ def adjust_mstr_by_int(minding:AnthroRecord) -> AnthroRecord:
     """
     alters MSTR based on persona's INT
     """
-    adjusted_MSTR = minding.MSTR + table.mstr_adjusted_by_int[minding.INT]
+    adjusted_MSTR = minding.MSTR + exp_tables.mstr_adjusted_by_int[minding.INT]
     minding.MSTR = adjusted_MSTR if adjusted_MSTR > 0 else 1 
     return minding # altered by side effect
 
@@ -58,12 +58,12 @@ def anthro_type_by_attribute(making_anthro_list: AnthroRecord) -> list:
     """
     anthro_type_choices = []
 
-    for anthro_type in table.anthro_type_attribute_requirements:
+    for anthro_type in exp_tables.anthro_type_attribute_requirements:
         anthro_type_flag = True
 
-        for attribute_name in table.anthro_type_attribute_requirements[anthro_type]:
+        for attribute_name in exp_tables.anthro_type_attribute_requirements[anthro_type]:
             persona_attribute_value = getattr(making_anthro_list, attribute_name)
-            required_attribute_value = table.anthro_type_attribute_requirements[
+            required_attribute_value = exp_tables.anthro_type_attribute_requirements[
                 anthro_type
             ][attribute_name]
             if persona_attribute_value < required_attribute_value:
@@ -78,7 +78,7 @@ def anthro_type_choose(choosey: AnthroRecord) -> AnthroRecord:
     pick from the eligible anthro types
     """
     if choosey.Fallthrough or choosey.Bespoke:
-        choices = please.list_table_choices(table.anthro_types_list)
+        choices = please.list_table_choices(exp_tables.anthro_types_list)
     else:
         choices = anthro_type_by_attribute(choosey)
 
@@ -91,7 +91,7 @@ def anthro_sub_choose(subway: AnthroRecord) -> AnthroRecord:
     """
     select the sub_type for the anthro type
     """
-    choices = choices = table.anthro_sub_types[subway.FAMILY_TYPE]
+    choices = choices = exp_tables.anthro_sub_types[subway.FAMILY_TYPE]
 
     if subway.Fallthrough:
         subway.FAMILY_SUB = please.choose_this(choices,"Choose anthro SUB TYPE.", subway)
@@ -111,7 +111,7 @@ def adjust_attributes_by_anthro_type(anthro_type_attributes_adjust: AnthroRecord
     adjust the persona's attributes according to the persona type
     """
     anthro_type = anthro_type_attributes_adjust.FAMILY_TYPE
-    anthro_line = table.attribute_adjustment_by_anthro_type[anthro_type]
+    anthro_line = exp_tables.attribute_adjustment_by_anthro_type[anthro_type]
     changes_string = {attribute : change for attribute, change in anthro_line.items() if change != 0}
 
     for attribute,change in changes_string.items():
@@ -122,8 +122,8 @@ def adjust_attributes_by_anthro_type(anthro_type_attributes_adjust: AnthroRecord
 
         # INT special case, may adjust the MSTR
         elif attribute == "INT":
-            old_change = table.mstr_adjusted_by_int[anthro_type_attributes_adjust.INT]
-            new_change = table.mstr_adjusted_by_int[anthro_type_attributes_adjust.INT + change]
+            old_change = exp_tables.mstr_adjusted_by_int[anthro_type_attributes_adjust.INT]
+            new_change = exp_tables.mstr_adjusted_by_int[anthro_type_attributes_adjust.INT + change]
             new_MSTR = anthro_type_attributes_adjust.MSTR + (new_change - old_change)
             change_MSTR = (new_change - old_change) if (new_MSTR) > 0 else 0
             anthro_line["MSTR"] = change_MSTR
@@ -141,7 +141,7 @@ def anthro_hite_wate_calc(size_this:AnthroRecord, sizer: str) -> AnthroRecord:
     '''calculates hite and wate for persona based on smaller or larger '''
     anthro_type = size_this.FAMILY_TYPE
 
-    size_table_chosen = table.small_anthro_sizes if sizer == "Smaller" else table.large_anthro_sizes
+    size_table_chosen = exp_tables.small_anthro_sizes if sizer == "Smaller" else exp_tables.large_anthro_sizes
     base = size_table_chosen[anthro_type]["Base"]
     Hite = please.roll_this(size_table_chosen[anthro_type]["Hite"])
     Wate = math.ceil((Hite / base) * size_table_chosen[anthro_type]["Wate"])
@@ -167,8 +167,8 @@ def anthro_size_chooser(size_me:AnthroRecord) -> AnthroRecord:
 def anthro_age_calc(years_old: AnthroRecord, ager: str) -> AnthroRecord:
     '''add the anthro age and age_cat to the persona record'''
     anthro_type = years_old.FAMILY_TYPE
-    age_categories = [val for val  in table.anthro_random_age_category.values() if val != "1d100"]
-    die_roll = table.anthro_ages_by_category_and_type[anthro_type][age_categories.index(ager)]
+    age_categories = [val for val  in exp_tables.anthro_random_age_category.values() if val != "1d100"]
+    die_roll = exp_tables.anthro_ages_by_category_and_type[anthro_type][age_categories.index(ager)]
     age_years = please.roll_this(die_roll)
 
     years_old.Age = age_years
@@ -183,8 +183,8 @@ def anthro_mutations_rando(randomly_mutating: AnthroRecord) -> AnthroRecord:
 
     # determine the chance of mutations based on anthro type
     anthro_type = randomly_mutating.FAMILY_TYPE
-    mentchance = table.anthro_type_mutation_chance[anthro_type]["mentchance"]
-    physchance = table.anthro_type_mutation_chance[anthro_type]["physchance"]
+    mentchance = exp_tables.anthro_type_mutation_chance[anthro_type]["mentchance"]
+    physchance = exp_tables.anthro_type_mutation_chance[anthro_type]["physchance"]
 
     # create the mutations dict
     randomly_mutating.Mutations = {}
@@ -193,7 +193,7 @@ def anthro_mutations_rando(randomly_mutating: AnthroRecord) -> AnthroRecord:
     # percent chance mentchance
     if please.do_1d100_check(mentchance):
         mutation_number = please.roll_this(
-            table.anthro_type_mutation_chance[anthro_type]["mentnumber"]
+            exp_tables.anthro_type_mutation_chance[anthro_type]["mentnumber"]
         )
 
         fresh_amount = 0
@@ -213,7 +213,7 @@ def anthro_mutations_rando(randomly_mutating: AnthroRecord) -> AnthroRecord:
     # percent chance physchance
     if please.do_1d100_check(physchance):
         mutation_number = please.roll_this(
-            table.anthro_type_mutation_chance[anthro_type]["physnumber"]
+            exp_tables.anthro_type_mutation_chance[anthro_type]["physnumber"]
         )
 
         fresh_amount = 0
@@ -319,7 +319,7 @@ def bespoke_anthro(player_name:str) -> None:
     if please.say_yes_to("Do you want attribute selected VOCATION"):
         bespoke.Vocation = please.choose_this(vocation.attribute_determined(bespoke), "Choose a VOCATION")
     else:
-        bespoke.Vocation = please.choose_this(table.vocation_list, "Choose VOCATION type.",bespoke)
+        bespoke.Vocation = please.choose_this(exp_tables.vocation_list, "Choose VOCATION type.",bespoke)
  
     vocation.set_up_first_time(bespoke)
     vocation.exps_level_picker(bespoke)
@@ -336,7 +336,7 @@ def bespoke_anthro(player_name:str) -> None:
         core.descriptive_attributes(bespoke)
 
     if please.say_yes_to("Use table AGE CATEGORY?"):
-        bespoke.Age_Cat = please.get_table_result(table.anthro_random_age_category)
+        bespoke.Age_Cat = please.get_table_result(exp_tables.anthro_random_age_category)
     else:
         bespoke.Age_Cat = anthro_return_age_cat(bespoke)
 
@@ -365,24 +365,24 @@ def random_anthro(player_name:str) -> None:
     core.initial_attributes(rando)
     rando.HPM = core.hit_points_max(rando)
     adjust_mstr_by_int(rando)
-    rando.FAMILY_TYPE = choice(table.anthro_types_list)
-    rando.FAMILY_SUB = choice(table.anthro_sub_types[rando.FAMILY_TYPE])
+    rando.FAMILY_TYPE = choice(exp_tables.anthro_types_list)
+    rando.FAMILY_SUB = choice(exp_tables.anthro_sub_types[rando.FAMILY_TYPE])
     adjust_attributes_by_anthro_type(rando)
     anthro_size_chooser(rando)
     core.movement_rate(rando)
     core.base_armour_rating(rando)
     core.wate_allowance(rando)
     anthro_mutations_rando(rando)
-    rando.Vocation = choice(table.vocation_list)
+    rando.Vocation = choice(exp_tables.vocation_list)
     vocation.set_up_first_time(rando)
-    rando.Level = please.get_table_result(table.random_EXPS_levels_list)
+    rando.Level = please.get_table_result(exp_tables.random_EXPS_levels_list)
     rando.EXPS = vocation.convert_levels_to_exps(rando)
     if rando.Level > 1:
         rando.Interests.extend(vocation.update_interests(rando, (rando.Level - 1)))
         rando.Skills.extend(vocation.update_skills(rando, (rando.Level - 1)))
 
     vocation.attributes_to_vocation(rando)
-    rando.Age_Cat = please.get_table_result(table.anthro_random_age_category)    
+    rando.Age_Cat = please.get_table_result(exp_tables.anthro_random_age_category)    
     anthro_age_calc(rando, rando.Age_Cat)
 
     if rando.RP_Cues:

@@ -24,7 +24,7 @@ from anthro import anthro_nomenclature
 from robot import robot_nomenclature
 
 @dataclass 
-class AllRecords(table.AllThings):
+class AllRecords(exp_tables.AllThings):
     pass
 
 """ 
@@ -303,9 +303,9 @@ def get_table_result(table: dict) -> str:
 
     result = ""
 
-    table = {key: val for key, val in table.items() if key not in ["name","die_roll","number", "title"]}
+    table = {key: val for key, val in exp_tables.items() if key not in ["name","die_roll","number", "title"]}
 
-    for item_range in table.keys():
+    for item_range in exp_tables.keys():
         if random in range(item_range[0],item_range[1]+1): # correct for normal tables (90,100) -> (90,101)
             result = table[item_range]
             break
