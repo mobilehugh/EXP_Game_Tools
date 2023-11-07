@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 import a_persona_record
 import core
-import table
+import exp_tables
 import vocation
 import outputs
 import mutations
@@ -294,24 +294,24 @@ def show_me_your_dict(dinkie: AllRecords) -> None:
 
 
 # todo should be one function for table and list result
-def get_table_result(table: dict) -> str:
+def get_table_result(random_table: dict) -> str:
     """
     return a single result from a random table
     this is the deranged version using tuples that are more table like 
     """
-    random = roll_this(table["die_roll"])
+    roll_result = roll_this(random_table["die_roll"])
 
     result = ""
 
-    table = {key: val for key, val in exp_tables.items() if key not in ["name","die_roll","number", "title"]}
+    random_table = {key: val for key, val in random_table.items() if key not in ["name","die_roll","number", "title"]}
 
-    for item_range in exp_tables.keys():
-        if random in range(item_range[0],item_range[1]+1): # correct for normal tables (90,100) -> (90,101)
-            result = table[item_range]
+    for item_range in random_table.keys():
+        if roll_result in range(item_range[0],item_range[1]+1): # correct for normal tables (90,100) -> (90,101)
+            result = random_table[item_range]
             break
 
     if not result:
-        input(f'there is an error in the table {repr(table)}\n return to go on' )
+        input(f'there is an error in the table {repr(random_table)}\n return to go on' )
 
     return result
 

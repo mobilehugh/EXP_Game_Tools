@@ -1,7 +1,7 @@
 import math
 import secrets
 import please
-import table
+import exp_tables
 
 #########################################################
 #                                                       
@@ -264,13 +264,14 @@ def exps_level_picker(level_persona: exp_tables.PersonaRecord) -> exp_tables.Per
 def convert_levels_to_exps(get_a_job: exp_tables.PersonaRecord, new_level:int = 0) -> int:
     """
     Returns an EXPS total based on the experience Level of the get_a_job
+    primarily used by fallthrough or RPs 
     does not alter get_a_job.
     """
 
     vocation = get_a_job.Vocation
     exps_table = exp_tables.vocation_exps_levels[vocation]
 
-    exp_ranger = {l:x for x, l in exps_exp_tables.items() if isinstance(x, tuple)}
+    exp_ranger = {l:x for x, l in exps_table.items() if isinstance(x, tuple)}
     level = new_level if new_level > get_a_job.Level else get_a_job.Level
     top_level = exps_table["top_level"]
 
@@ -302,7 +303,7 @@ def convert_exps_to_levels(get_a_job: exp_tables.PersonaRecord, new_exps = 0) ->
     top_level = exps_table["top_level"]
     rate = exps_table["rate"]
 
-    level_ranger = {x:l for x, l in exps_exp_tables.items() if isinstance(x, tuple)} # reverses from level -> EXPS
+    level_ranger = {x:l for x, l in exps_table.items() if isinstance(x, tuple)} # reverses from level -> EXPS
 
     if exps_amount > top:
         new_level = top_level + math.ceil((exps_amount - top) / rate)
@@ -374,7 +375,7 @@ def fresh_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list:
     for skillist in exp_tables.vocation_skills_tables[get_a_job.Vocation]:
         for key, value in skillist.items():
             if key != "die_roll" and key != "name":
-                skills_exp_tables.append(value)
+                skills_table.append(value)
 
     skill_list = []
     while len(skill_list) < skill_rolls:

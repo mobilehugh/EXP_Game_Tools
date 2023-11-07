@@ -1,6 +1,6 @@
 import a_persona_record
 import please
-import table
+import exp_tables
 
 from secrets import choice
 from dataclasses import dataclass, field

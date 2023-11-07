@@ -4,7 +4,7 @@ from collections import Counter
 from dataclasses import dataclass
 
 import please
-import table
+import exp_tables
 import vocation
 import mutations
 import outputs
@@ -414,7 +414,7 @@ def alien_society(socialize: AlienRecord) -> AlienRecord:
 
     society = {}
     society["Tools"] = "Flora or Fauna" if exp_tables.alien_tool_score[tool_score] == "None" and not language else exp_tables.alien_tool_score[tool_score]
-    society["Language"] = "None" if not language else socialize.Sounds
+    society["Language"] = "None" if not language else "Yes"
     society["Culture"] = "None" if not culture else "Yes"
     society["Religion"] = "None" if not religion else please.get_table_result(exp_tables.role_play_RP_religion)
     society["Education"] = "None" if not education else "Yes"
@@ -563,6 +563,8 @@ def alien_hite_wate_calc(picking_sizes: AlienRecord) -> AlienRecord :
     ''' 
     return actual wate and wate_suffix based on size_cat
     '''
+
+    # working on wate and wate suffix
     picking_sizes.Wate = please.roll_this(exp_tables.alien_size_wate[picking_sizes.Size_Cat])
     
     if picking_sizes.Size_Cat == "Minute":
@@ -572,6 +574,24 @@ def alien_hite_wate_calc(picking_sizes: AlienRecord) -> AlienRecord :
 
     if picking_sizes.Size_Cat == "Humongous":
         picking_sizes.Wate_Suffix = "Tonnes"   
+
+    # working on size and size suffix
+    # todo should include a hex size explainer
+    kilo_conv = 1 if picking_sizes.Size_Cat == "Minute" else picking_sizes.Wate
+
+    for hite_range, roll in exp_tables.robot_wate_to_hite.items():
+        if kilo_conv in range(*hite_range): # the * unpacks the tuple
+            picking_sizes.Hite = please.roll_this(roll)
+            break
+
+    if picking_sizes.Size_Cat == "Minute":
+        picking_sizes.Hite_Suffix = "mm"
+        return
+
+    picking_sizes.Hite_Suffix = "cms" if picking_sizes.Wate < 10_000 else "meters"
+
+
+
 
     return picking_sizes # modified by side effects
 
@@ -707,9 +727,8 @@ def fresh_alien(player_name:str) -> None:
     attack_no = alien_attack_number(fresh)
     alien_attack_types(fresh, attack_no)
     alien_attack_description(fresh)
-
-
     core.base_armour_rating(fresh)
+
     alien_base_shape_random(fresh)
     alien_shape_adornments(fresh)
     core.movement_rate(fresh)

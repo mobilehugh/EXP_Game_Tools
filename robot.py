@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import anthro
 import outputs
 import please
-import table
+import exp_tables
 import vocation
 import core
 import mutations
@@ -81,12 +81,13 @@ def robot_hite_wate_calc(sizer: RobotRecord) -> RobotRecord:
     sizer.Wate_Suffix = exp_tables.robot_size_to_wate[sizer.Size_Cat]["suffix"]
 
     ### get hite from wate to hite table
-    kilo_conv = 1 if sizer.Size_Cat == "NaNo" else sizer.Wate
+    kilo_conv = 1 if sizer.Size_Cat == "Nano" else sizer.Wate
 
     for hite_range, roll in exp_tables.robot_wate_to_hite.items():
         if kilo_conv in range(*hite_range): # the * unpacks the tuple
             sizer.Hite = please.roll_this(roll)
             break
+
     sizer.Hite_Suffix = "cms" if sizer.Wate < 10_000 else "meters"
 
     return sizer # modified by side effect
@@ -312,6 +313,7 @@ def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
     """
     returns a list of defenses for the robot
     """
+    # does [] to defence list remove defences earned from attacks?
     defence_list = []
 
     if isinstance(number, int):

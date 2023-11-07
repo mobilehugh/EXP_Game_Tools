@@ -3,7 +3,7 @@ import secrets
 from typing import Sequence
 
 import please
-import table
+import exp_tables
 import toy
 
 

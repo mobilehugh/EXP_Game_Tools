@@ -1,7 +1,7 @@
 import math
 from dataclasses import asdict, dataclass
 
-import table
+import exp_tables
 import please
 import alien
 import mutations
@@ -156,7 +156,7 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
     else:
         upwards_table = exp_tables.descriptive_attributes_higher
 
-    upwards_list = list(upwards_exp_tables.keys())
+    upwards_list = list(upwards_table.keys())
     downwards_list = list(exp_tables.descriptive_attributes_lower.keys())
     choices = sorted(upwards_list + downwards_list)
     choices.insert(0,"EXIT")

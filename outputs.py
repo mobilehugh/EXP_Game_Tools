@@ -12,7 +12,7 @@ import alien
 import please
 import mutations
 import vocation
-import table
+import exp_tables
 
 # todo RP combat block: weak strong cannon fodder, canon fodder and canonical
 # todo proficiency slot with actual weapons
@@ -106,49 +106,7 @@ show_pdf()
 
 class PDF(FPDF):
 
-    def perimiter_box(self)->None:
-        '''
-        draws a rectangle around entire page 
-        MUST BE CALLED LAST FOR Z coverage
-        '''
-        self.set_draw_color(0, 0, 0) 
-        self.set_line_width(1.2)
-        self.rect(5, 13, (self.epw - 10), (self.eph - 20), "D")
-
-    def set_or_get(self, *args) -> tuple:
-        '''
-        takes args and prints variants x,y,location  
-        remove the 4 print statements for operations
-        ''' 
-        if len(args) == 3: # set and tell
-            x,y,verbose = args
-            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo turn off for operations 
-            self.set_y(y)
-            self.set_x(x)
-
-        elif len(args) == 2: # set and don't tell
-            x,y = args
-            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo turn off for operations 
-            self.set_y(y)
-            self.set_x(x)
-
-        elif len(args) == 1: # get and tell and return
-            verbose = args[0]
-            if verbose == "hide":
-                x = self.get_x()
-                y = self.get_y()
-                return x,y
-            else:
-                x = self.get_x()
-                y = self.get_y()
-                print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo  for operations find and remove all set_or_get(Locating:
-                return x,y
-            
-        elif len(args) == 0: # get and don't tell and return 
-            x = self.get_x()
-            y = self.get_y()
-            print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo  for operations find and remove all set_or_get(Locating:          
-            return x,y
+    ## persona output functions 
 
     def persona_title(self, blob: str = 'where da blob', font_size: int = 12)-> None:
         '''prints PERSONA NAME above perimiter box left justified'''
@@ -177,7 +135,7 @@ class PDF(FPDF):
             new_y="NEXT"
         )
 
-    def section_title(self,announce:str = "",drivel:str = "") -> None:
+    def section_title(self, announce:str = "", drivel:str = "") -> None:
         '''
         prints a pre formatted section title and drivel
         '''
@@ -208,9 +166,12 @@ class PDF(FPDF):
             txt=drivel,
         )
 
-    def markdown(self, blob: str = 'where da blob')-> None:
-    
-        self.set_font("Helvetica",size=14)
+    def markdown(self, blob: str = 'where da blob',font_size: int = 14)-> None:
+        '''
+        a cell modified for markdown with default font_size
+        '''
+
+        self.set_font("Helvetica",size=font_size)
         line_height = self.font_size * 1.6
         line_width = self.get_string_width(blob, markdown=True) + 2
 
@@ -224,8 +185,26 @@ class PDF(FPDF):
             new_y="LAST",
         )
 
+    def markdown_internal(self, blob: str = 'where da blob',font_size: int = 14)-> None:
+        '''
+        a cell modified for markdown with default font_size
+        '''
 
-    def attributes_table(self,persona:AllRecords) -> None:
+        self.set_font("Helvetica",size=font_size)
+        line_height = self.font_size * 1.6
+        line_width = self.get_string_width(blob, markdown=True) + 2
+
+        self.cell(
+            w=line_width,
+            h=line_height,
+            txt=blob,
+            align="L",
+            markdown=True,
+            new_x="LEFT",
+            new_y="NEXT",
+        )
+
+    def attributes_table(self, persona:AllRecords) -> None:
         """
         prints atttribute acronyms, values (+/- primes) and descriptions (+/-)
         """
@@ -270,301 +249,401 @@ class PDF(FPDF):
         returns the persona's vocation and level and exps goal
         '''
         exps_next = list(exp_tables.vocation_exps_levels[persona.Vocation].keys())[persona.Level][1]
-        return f'level {persona.Level} {persona.Vocation.lower()} exps {persona.EXPS}/{exps_next}'
+        return f'{persona.Vocation} level {persona.Level}  EXPS {persona.EXPS}/{exps_next}'
 
-
-    def move_and_AR(self, persona:AllRecords) -> None:
-        ''' may be redundant'''
-
-    ### movement
-        self.markdown(
-            self, 
-            blob = '**MOVE**',
-            font_size = 12,
-        )
-
-        if persona.FAMILY == 'Alien':
-            movit = f'land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'      
-        else:
-            movit = f'{persona.Move} h/u'
-
-        self.markdown(self, blob=movit,font_size=12)
-
-
-        ### armour rating
-        x+= 4 + pdf.get_string_width(blob)
-        pdf.print_MD_string("**ARMOUR RATING (AR)**",14,x,the_y)
-        x+= 1 + pdf.get_string_width("**ARMOUR RATING (AR)**", markdown=True)
-        pdf.print_MD_string(f'{persona.AR}   **____   ____**',14,x,the_y)
-
-        ### attack table header
-        the_y+=8
-        pdf.print_MD_string('**ATTACK TABLE**', 14,8,the_y)
-
-
-    def attack_table_tester(self, persona:AllRecords)->None:
+    def persona_bio_info(self, persona:AllRecords) -> str:
         '''
-        attack table composition and print out combined
-        A = Strike, B = Fling, C = Shoot
-        BP = Skilled, BNP = Raw, MR = Max, DB = Force
+        returns to persona's bio info
         '''
+        bio_line = f"FAMILY: {persona.FAMILY} "
+        bio_line += f"TYPE: {persona.FAMILY_TYPE} SUB: {persona.FAMILY_SUB}" if persona.FAMILY in ["Anthro", "Robot"] else f"SPECIES: {persona.FAMILY_SUB}"
 
-        print(dir(FPDF))
-
-        # collect needed data
-        awe = persona.AWE
-        dex = persona.DEX
-        intel = persona.INT
-        pstr = persona.PSTR
-        family = persona.FAMILY
-        vocation = persona.Vocation
-        level = persona.Level
-        table_level = (persona.Level - 1 if persona.Level < 11 else 9)  # no level bonus for level one
-        attacks = persona.Attacks if family=="Alien" else []
-
-        if family == "Robot":
-            con_prime = persona.CON_Prime 
-            dex_prime = persona.DEX_Prime
-            int_prime = persona.INT_Prime
-            pstr_prime = persona.PSTR_Prime
-       
-        # STRIKE line
-        if family == "Anthro": # Anthro = Vocation STRIKE row (type A)
-            ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
-            ABP = ABP + exp_tables.vocation_level_bonus[vocation]["A"] * level
-            ABNP = math.ceil(ABP * exp_tables.vocation_non_proficient[vocation]["A"] / 100)
-            AMR = 625 + ABP
-            ADB = math.ceil(pstr / 2)
-
-        elif family == "Robot": # Robot STRIKE row (Type A)
-            ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
-            ABNP = 0
-            AMR = "---"
-            ADB = pstr
-
-        elif family == "Alien" and "Strike" in attacks: # Alien STRIKE row *
-            ABP = ABNP = 10 * (pstr + level)
-            AMR = 700 + ABP
-            ADB = level
-
-        # FLING line
-        if family == "Anthro": # Vocation FLING row (Type B)
-            BBP = awe + (4 * dex) + intel + (2 * pstr)
-            BBP = BBP + exp_tables.vocation_level_bonus[vocation]["B"] * level
-            BBNP = math.ceil(BBP * (exp_tables.vocation_non_proficient[vocation]["B"] / 100))
-            BMR = 650 + BBP
-            BDB = math.ceil(pstr / 4)
-
-        elif family == "Robot": # Robot FLING row (Type B)
-            BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (level * dex)
-            BBNP = 0
-            BMR = "---"
-            BDB = math.ceil(pstr / 2)
-
-        elif family == "Alien" and "Fling" in attacks: # Alien FLING row (Type B)
-            BBP = BBNP = 10 * (dex + level)
-            BMR = 700 + BBP
-            BDB = level
-
-        # SHOOT line 
-        if family == "Anthro":  # Vocation SHOOT row (Type C)
-            CBP = awe + (9 * dex) + intel + pstr
-            CBP = CBP + exp_tables.vocation_level_bonus[vocation]["C"] * level
-            CBNP = math.ceil(CBP * (exp_tables.vocation_non_proficient[vocation]["C"] / 100))
-            CMR = 675 + CBP
-            CDB = 0
-
-        elif family == "Robot":  # Robot SHOOT row (Type C)
-            CBP = (5 * awe) + (5 * dex) + (int_prime * intel) + (level * intel)
-            CBNP = 0
-            CMR = "---"
-            CDB = 0
-
-        elif family == "Alien" and "Shoot" in attacks: # Alien SHOOT row (Type C)
-            CBP = CBNP = 10 * (intel + level)
-            CMR = 700 + CBP
-            CDB = level        
-
-
-        # attack header line
-        TABLE_DATA = (
-            ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills"),
-            ("Strike", ABP,ABNP, AMR, ADB,"______________"),
-            ("Fling", BBP, BBNP, BMR, BDB, "______________"),
-            ("Shoot", CBP,CBNP,CMR, CDB, "______________")
-        )
-
-        self.set_font("Times", size=16)
-        with self.table(width=180, col_widths=(30, 30, 30, 30, 30, 30)) as attack_table:
-            print("DORK")
-            for data_row in TABLE_DATA:
-                print("DICK")
-                row = attack_exp_tables.row()
-                for datum in data_row:
-                    print("DACK")
-                    row.cell(datum)
-
+        return bio_line
 
     def attack_table_pdf(self, persona:AllRecords)->None:
         '''
         attack table composition and print out combined
         A = Strike, B = Fling, C = Shoot
-        BP = Skilled, BNP = Raw, MR = Max, DB = Force
-        '''
-        # collect needed data
-        awe = persona.AWE
-        dex = persona.DEX
-        intel = persona.INT
-        pstr = persona.PSTR
-        family = persona.FAMILY
-        vocation = persona.Vocation
-        level = persona.Level
-        table_level = (persona.Level - 1 if persona.Level < 11 else 9)  # no level bonus for level one
-        attacks = persona.Attacks if family=="Alien" else []
+        BP = Skilled, BNP = Raw, MR = Max, DB = Force, PROF = Skills
 
-        if family == "Robot":
-            con_prime = persona.CON_Prime 
-            dex_prime = persona.DEX_Prime
-            int_prime = persona.INT_Prime
-            pstr_prime = persona.PSTR_Prime
-       
+        # assign STRIKE row(ABP, ABNP, AMR, ADB)
+        attack_table["A"]["BP"] = ABP
+        attack_table["A"]["BNP"] = ABNP
+        attack_table["A"]["MR"] = AMR
+        attack_table["A"]["ADB"] = ADB
+        attack_table["A"]["PROF"] = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
+
+        # assign FLING row (BBP, BBNP, BNR, BDB)
+        attack_table["B"]["BP"] = BBP
+        attack_table["B"]["BNP"] = BBNP
+        attack_table["B"]["MR"] = BMR
+        attack_table["B"]["BDB"] = BDB
+        attack_table["B"]["PROF"] = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
+
+        # assign SHOOT row (CBP, CBNP, CMR, CDB)
+        attack_table["C"]["BP"] = CBP
+        attack_table["C"]["BNP"] = CBNP
+        attack_table["C"]["MR"] = CMR
+        attack_table["C"]["CDB"] = CDB
+        attack_table["C"]["PROF"] = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
+
+        '''
+
+        attack_table = attack_table_composer(persona)     
+
         # attack header line
-        TABLE_DATA = [
-            ["TYPE", "SKILLED", "RAW", "MAX", "FORCE", ("Helvetica","B",12)],
-        ]
+        TABLE_DATA = (
+            ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills", f"Hit Points MAX = {persona.HPM}"),
+            ("Strike", attack_table["A"]["BP"],attack_table["A"]["BNP"], attack_table["A"]["MR"], attack_table["A"]["ADB"], attack_table["A"]["PROF"],""),
+            ("Fling", attack_table["B"]["BP"], attack_table["B"]["BNP"], attack_table["B"]["MR"], attack_table["B"]["BDB"], attack_table["B"]["PROF"],""),
+            ("Shoot", attack_table["C"]["BP"],attack_table["C"]["BNP"], attack_table["C"]["MR"], attack_table["C"]["CDB"], attack_table["C"]["PROF"],"")
+        )
 
-        # STRIKE line
-        if family == "Anthro": # Anthro = Vocation STRIKE row (type A)
-            ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
-            ABP = ABP + exp_tables.vocation_level_bonus[vocation]["A"] * level
-            ABNP = math.ceil(ABP * exp_tables.vocation_non_proficient[vocation]["A"] / 100)
-            AMR = 625 + ABP
-            ADB = math.ceil(pstr / 2)
-            TABLE_DATA.append(["Strike", str(ABP),str(ABNP),str(AMR),str(ADB), ("Helvetica","I",14)])
+        self.set_font("Helvetica", size=11)
+        self.set_fill_color(255)
+        with self.table(
+            align="LEFT",
+            width = 201,
+            col_widths=(16, 20, 20, 20, 20, 66, 49),
+            text_align=("LEFT", "CENTER", "CENTER", "CENTER", "CENTER", "LEFT","LEFT"),
+            borders_layout="MINIMAL"
+            ) as attack_table:
+            for data_row in TABLE_DATA:
+                row = attack_table.row()
+                for datum in data_row:
+                    row.cell(str(datum))
 
-        elif family == "Robot": # Robot STRIKE row (Type A)
-            ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
-            ABNP = 0
-            AMR = "---"
-            ADB = pstr
-            TABLE_DATA.append(["Strike", str(ABP),str(ABNP),str(AMR),str(ADB),  ("Helvetica","I",14)])
+    def attack_table_explainer(self) -> None:
+        '''
+        prints out explainer of attack table
+        '''
+        blob = f"**Strike:** fist, sword, club  **Fling:** bow, spear, spit **Shoot:** gun, lazer, fission **Sotto/Flotto:** = Shoot **Grenade:** = Fling, no Force\n**Skilled:** Add to Skilled Attacks **Raw:** Add to Unskilled Attacks **Max:**  Highest Roll **Force:** Add to damage"
+        self.set_font("Helvetica", size=10)
+        self.multi_cell(0,5,txt= blob, markdown=True,new_x="LEFT",new_y="NEXT",)
+        return
 
-        elif family == "Alien" and "Strike" in attacks: # Alien STRIKE row *
-            ABP = ABNP = 10 * (pstr + level)
-            AMR = 700 + ABP
-            ADB = level
-            TABLE_DATA.append(["Strike", str(ABP),str(ABNP),str(AMR),str(ADB), ("Helvetica","I",14)])
+    def task_info(self, persona:AllRecords)->None:
+        '''
+        prints task info for vocation, alien and robot
+        '''
 
-        # FLING line
-        if family == "Anthro": # Vocation FLING row (Type B)
-            BBP = awe + (4 * dex) + intel + (2 * pstr)
-            BBP = BBP + exp_tables.vocation_level_bonus[vocation]["B"] * level
-            BBNP = math.ceil(BBP * (exp_tables.vocation_non_proficient[vocation]["B"] / 100))
-            BMR = 650 + BBP
-            BDB = math.ceil(pstr / 4)
-            TABLE_DATA.append(["Fling", str(BBP), str(BBNP), str(BMR), str(BDB),("Helvetica","I",14)])
+        if persona.Vocation == "Alien":
+            if persona.Society["Tools"] == "Flora or Fauna":
+                self.markdown_internal('**Alien Tasks** Find sustenance and reproduce.', 12)
+            else:
+                self.markdown_internal(f'**Alien Tasks** Do what {persona.FAMILY_TYPE} are meant to do.', 12)
+            return  # leave task info early
+ 
+        if persona.Vocation == "Robot":
+            self.markdown_internal(f'**Robot Tasks** Do what {persona.FAMILY_TYPE} bots are meant to do.', 12)
+            return # leave task info early
 
-        elif family == "Robot": # Robot FLING row (Type B)
-            BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (level * dex)
-            BBNP = 0
-            BMR = "---"
-            BDB = math.ceil(pstr / 2)
-            TABLE_DATA.append(["Fling", str(BBP), str(BBNP), str(BMR), str(BDB), ("Helvetica","I",14)])
+        # if you are here you have a Vocation and Tasks
+        # uses the multicolumn table trick
 
-        elif family == "Alien" and "Fling" in attacks: # Alien FLING row (Type B)
-            BBP = BBNP = 10 * (dex + level)
-            BMR = 700 + BBP
-            BDB = level
-            TABLE_DATA.append(["Fling", str(BBP), str(BBNP), str(BMR), str(BDB), ("Helvetica","I",14)])
+        ### GIFTS column
+        gifts_column = ["GIFTS"]
+        gifts_column.extend(vocation.update_gifts(persona))
 
-        # SHOOT line 
-        if family == "Anthro":  # Vocation SHOOT row (Type C)
-            CBP = awe + (9 * dex) + intel + pstr
-            CBP = CBP + exp_tables.vocation_level_bonus[vocation]["C"] * level
-            CBNP = math.ceil(CBP * (exp_tables.vocation_non_proficient[vocation]["C"] / 100))
-            CMR = 675 + CBP
-            CDB = 0
-            TABLE_DATA.append(["Shoot", str(CBP),str(CBNP), str(CMR), str(CDB), ("Helvetica","I",14)])
+        ### INTERESTS column
+        interests_column = ["INTERESTS"]
+        interests_column.extend(please.collate_this(persona.Interests))
 
-        elif family == "Robot":  # Robot SHOOT row (Type C)
-            CBP = (5 * awe) + (5 * dex) + (int_prime * intel) + (level * intel)
-            CBNP = 0
-            CMR = "---"
-            CDB = 0
-            TABLE_DATA.append(["Shoot", str(CBP),str(CBNP), str(CMR), str(CDB), ("Helvetica","I",14)])
+        ### SKILLS column(s)
 
-        elif family == "Alien" and "Shoot" in attacks: # Alien SHOOT row (Type C)
-            CBP = CBNP = 10 * (intel + level)
-            CMR = 700 + CBP
-            CDB = level        
-            TABLE_DATA.append(["Shoot", str(CBP),str(CBNP), str(CMR), str(CDB), ("Helvetica","I",14)])
+        skills_list = please.collate_this(persona.Skills)
+        # how many columns of skills
+        # change header to more skills
+        skill_number = len(skills_list)
+        if skill_number < 4:
+            column_widths = (50, 50, 50)
+            skills_one = ["SKILLS"] + skills_list
+            zip_these = [gifts_column, interests_column, skills_one]
+        elif skill_number < 7:
+            column_widths = (50, 50, 50, 50)
+            skills_one = ["SKILLS"] + skills_list[:3]
+            skills_two = [" "] + skills_list[3:6] if skill_number >= 6 else [" "] + skills_list[3:]
+            zip_these = [gifts_column, interests_column, skills_one, skills_two]
+        elif skill_number < 10:
+            column_widths = (40, 40, 40, 40, 40)
+            skills_one = ["SKILLS"] + skills_list[:3]
+            skills_two = [" "] + skills_list[3:6]
+            skills_three = [" "] + skills_list[6:9] if skill_number >= 9 else [" "] + skills_list[6:]
+            zip_these = [gifts_column, interests_column, skills_one, skills_two, skills_three]
+        elif skill_number < 13:
+            column_widths = (35, 35, 35, 35, 35, 35)
+            skills_one = ["SKILLS"] + skills_list[:3]
+            skills_two = [" "] + skills_list[3:6]
+            skills_three = [' '] + skills_list[6:9]
+            skills_four = [' '] + skills_list[9:12] if skill_number >= 12 else [" "] + skills_list[9:]
+            zip_these = [gifts_column, interests_column, skills_one, skills_two, skills_three, skills_four]
+        elif skill_number < 16:
+            column_widths = (30, 30, 30, 30, 30, 30, 30)
+            skills_one = ["SKILLS"] + skills_list[:3]
+            skills_two = [" "] + skills_list[3:6]
+            skills_three = [' '] + skills_list[6:9]
+            skills_four = [' '] + skills_list[9:12]
+            skills_five = [' '] + skills_list[12:15] if skill_number >= 15 else [" "] + skills_list[12:]
+            zip_these = [gifts_column, interests_column, skills_one, skills_two, skills_three, skills_four,skills_five]
+        elif skill_number < 19:
+            column_widths = (25, 25, 25, 25, 25, 25, 25, 25)
+            skills_one = ["SKILLS"] + skills_list[:3]
+            skills_two = [" "] + skills_list[3:6]
+            skills_three = [' '] + skills_list[6:9]
+            skills_four = [' '] + skills_list[9:12]
+            skills_five = [' '] + skills_list[12:15]
+            skills_six = [' '] + skills_list[15:18] if skill_number >= 18 else [" "] + skills_list[15:]
+            zip_these = [gifts_column, interests_column, skills_one, skills_two, skills_three, skills_four,skills_five, skills_six]
 
-        col_width = 18
-        row_height = 5
-        start_right,top = self.set_or_get("inside attack table")
-        for data_row in TABLE_DATA:
-            for datum in data_row[:-1]: # sliced to hide format tuple
-                font,style,size = data_row[-1] # format tuple
-                self.set_font(font,style=style,size=size)
-                datum = str(datum) if isinstance(datum, int) else datum
-                self.cell(
-                    w=col_width, 
-                    h=row_height, 
-                    txt=datum, 
-                    border=True, 
-                    align='C',    
-                    new_x="RIGHT",
-                    new_y="LAST",
-                    )
-            top += row_height
-            self.set_or_get(start_right,top,"new line")
-
-
+        else: 
+            print(f'{skill_number} is too many damn skills. \nwrite them out your self')
+            sys.exit()
         
-    """ 
-    those fucking proficiencies
-    ANTHROS assigned by
-        APROF = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
-        if APROF = 42:
-            if vocation == "Mercenary":
-                APROF = "All weapons"
-            else: # this would be Nothing
-                APROF = "One weapon only"
+        # column balancing
+        max_len = len(max(zip_these, key=lambda x: len(x))) 
+        min_len = len(min(zip_these, key=lambda x: len(x))) 
+        delta = max_len - min_len
 
-        BPROF = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
-        CPROF = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
+        for columns in [*zip_these]:
+            if len(columns) < max_len:
+                columns += " " * (delta)
 
-    ROBOTS 
-        APROF = BPROF = CPROF = "Robots have no weapon skills."
+        # create the thing
+        TABLE_DATA = zip(*zip_these)
 
-    ALIENS 
-        APROF = BPROF = CPROF = "Natural."
-    """
+        # todo calculate the column widths based on longest line in each column
+        self.set_font("Helvetica", size=10)
+        self.set_fill_color(255)
+        with self.table(
+            align="LEFT",
+            width = sum(column_widths),
+            col_widths=column_widths,
+            text_align="LEFT",
+            borders_layout="NONE",
+            line_height = 1.2 * self.font_size
+            ) as attack_table:
+            for data_row in TABLE_DATA:
+                row = attack_table.row()
+                for datum in data_row:
+                    row.cell(str(datum))
 
-    def combat_table_explainer(self, persona, x:float = 0, y:float = 0) -> float:
+        return
+
+    def task_info_addendum(self, persona:AllRecords)-> None:
+        '''task explainer plus nothing or spie stuff'''
+
+        if persona.Vocation in ["Robot", "Alien"]:
+            return # abort addendum if no vocation 
+
+        # core explainer for tasks
+        blob = f'**Gifts:** Specific task. Auto success. **Interests:** General knowledge (+1) **Skills:** Specific knowledge/task (+2)'
+
+        # special addendum for spie and nothing
+        if persona.Vocation == "Spie":
+            blob += f"\n**Spie Fu**: {vocation.spie_martial_arts(persona)}"
+
+        if persona.Vocation == "Nothing":
+            exps, goal = persona.EXPS, persona.Vocay_Aspiration_EXPS
+            achievation = "Completed!" if exps > goal else f"{int((exps / goal) * 100)}% achieved."
+            blob += f"\nNothing aspiration: **{persona.Vocay_Aspiration}** Objective: {achievation}"
+
+        self.set_font("Helvetica", size=10)
+        self.multi_cell(0,5,txt= blob, markdown=True,new_x="LEFT",new_y="NEXT",)
+
+        return
+
+    def mutation_header(self, persona:AllRecords)->None:
+        ''' 
+        prints mutation status and existing mutations 
         '''
-        prints an explainer and proficiency information
+
+        pivot_mutation_name = {"Anthro":"**Mutations: ", "Alien":"**Evolutations: ", "Robot":"**Malfunctations: "}
+        mutation_heading = pivot_mutation_name[persona.FAMILY]
+        mutation_heading += "None**" if len(persona.Mutations) == 0 else "**"
+        self.markdown_internal(mutation_heading, 12)
+        return
+        
+    def mutation_list(self, persona:AllRecords):
         '''
-        attack_table = attack_table_composer(persona)
-        y_bump = 5.4
-        self.print_MD_string(f"**Raw:** Add to Unskilled Attack Rolls  **Skilled:** Add to Skilled Attack Rolls **Max:**  Maximum Attack Roll **Force:** Add to damage roll",10,x,y)
-        y+=y_bump
-        self.print_MD_string(f"**Strike:** fist, sword, club  **Fling:** bow, spear, spit **Shoot:** gun, lazer, fission **Sotto/Flotto:** = Shoot **Grenade:** = Fling, no Force",10,x,y)
-        y+=y_bump
-        if persona.Vocation in ["Alien","Robot"]:
-            blob = f'**Skilled Attacks**: {attack_table["A"]["PROF"]}'
-        elif persona.Vocation in ["Mercenary", "Nothing"]:
-            blob = f'**Skilled Attacks**: {attack_table["A"]["PROF"]}'
+        list the mutations, evolutations or malfunctations
+        '''
+        all_mutations = mutations.mutation_list_builder()
+        for mutation_name in sorted(persona.Mutations.keys()):
+            mutuple = next((t for t in all_mutations if t[0] == mutation_name), None)
+            working_mutation = mutuple[1](persona)
+            header, details, param = working_mutation.return_details(
+                working_mutation.__class__
+            )
+       
+            blob = f"**{header}** - {details}\n{param}"       
+            self.set_font("Helvetica", size=9)
+            self.multi_cell(0,5,txt= blob, markdown=True,new_x="LEFT",new_y="NEXT",)
+
+        return 
+
+    def anthro_biologic_info(self, persona:AllRecords)->None:
+        '''
+        prints anthro bio info (NOT mutations)
+        '''
+        blob = f"**Age:** {persona.Age} years, ({persona.Age_Cat}) **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} kgs ({persona.Size_Cat})"
+        self.markdown_internal(blob,11)
+        return 
+
+    def alien_biologic_info(self, persona:AllRecords)->None:
+        '''
+        prints the alien xenologic info 
+        '''
+        blob = f"**Age:** {persona.Age} {persona.Age_Suffix}, ({persona.Age_Cat}) **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} {persona.Wate_Suffix} ({persona.Size_Cat})"
+        self.markdown_internal(blob,11)
+
+        ### Build description column
+        desc_column =['Description, detailed '] # heading
+
+        desc_parts = [
+            f"Head: {persona.Head} {persona.Head_Adorn}",
+            f"Body: {persona.Body} {persona.Body_Adorn}",
+            f"Arms: {persona.Arms} {persona.Arms_Adorn}",
+            f"Legs: {persona.Legs}",
+            " ",
+            "Movement legend:",
+            f"l=land, a=air, w=water, s=sessile, n=none"
+        ]
+        desc_column.extend(desc_parts)
+
+        ### build xenobiology column
+        xeno_column =['Xenobiology'] # heading
+        xeno_column.extend(persona.Biology)
+
+        ### build life cycle column
+        life_column = [f"Life Cycle ({persona.Age_Suffix})"] # heading
+        for stage_name, values in persona.Life_Stages.items():
+            life_column.append(f"{stage_name}: {values[0]} - {values[1]}")
+
+        ### build society column
+        soc_column = ["Society"]
+        if persona.Society["Tools"] == "Flora or Fauna":
+            soc_column.extend(["None:", "Flora / Fauna"])
         else:
-            blob = f'**Skilled Attacks**: Strike - {attack_table["A"]["PROF"]}, Fling - {attack_table["B"]["PROF"]}, Shoot - {attack_table["C"]["PROF"]}.'
+            for society_aspect, value in persona.Society.items():
+                if value != "None":
+                    soc_column.append(f'{society_aspect}: {value}')
 
-        self.print_MD_string(blob,10,x,y)
-        y+=y_bump
+        # column balancing
+        max_len = max([len(desc_column),len(xeno_column),len(life_column),len(soc_column)]) 
+        min_len = min([len(desc_column),len(xeno_column),len(life_column),len(soc_column)]) 
+        delta = max_len - min_len
+
+        for columns in [desc_column,xeno_column,life_column,soc_column]:
+            if len(columns) < max_len:
+                columns += " " * (delta)
+
+        # attack header line
+        TABLE_DATA = zip(desc_column,xeno_column,life_column,soc_column)
+
+        # todo calculate the column widths based on longest line in each column
+        self.set_font("Helvetica", size=9)
+        self.set_fill_color(255)
+        with self.table(
+            align="LEFT",
+            width = 200,
+            col_widths=(80, 45, 35, 30),
+            text_align="LEFT",
+            borders_layout="MINIMAL",
+            line_height = 1.2 * self.font_size
+            ) as attack_table:
+            for data_row in TABLE_DATA:
+                row = attack_table.row()
+                for datum in data_row:
+                    row.cell(str(datum))
+
+        return
+
+    def robot_biologic_info(self, persona:AllRecords)->None:
+        '''
+        prints the robotic mechanical data
+        '''
+        blob = f"**Age:** {persona.Age} {persona.Age_Suffix}, ({persona.Age_Cat}) **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} {persona.Wate_Suffix} ({persona.Size_Cat})"
+        self.markdown_internal(blob,11)    
+
+        ### build tech spec column
+        tech_column = ["Tech Specs"] # title
+        tech_column.extend(persona.Spec_Sheet) # from the robot
+        tech_column.extend([
+            f'Fabricator: {persona.Fabricator}',
+            f'Model Name: {persona.Model}',
+            f"Base Type: {persona.Base_Family}",
+            f"Adaptability: {persona.Adapt}",
+            f'Power Plant: {persona.Power_Plant}',
+            f'Power Reserve: {persona.Power_Reserve}',
+            f"Sensors: {persona.Sensors}",
+            f'Value: {persona.Value}',])
+
+        ### build combat column
+        combat_column = ["Combat Peripherals"]
+        combat_column.append(f'Ram - {exp_tables.ramming_freedom[persona.Ramming]}')
+        combat_column.extend(persona.Attacks)
+        if persona.Defences:
+            combat_column.extend(persona.Defences)
+
+
+        ### build peripherals column
+        peripherals_column = ["Peripherals"]
+        if persona.Peripherals:
+            peripherals_column.extend(persona.Peripherals)
+        else:
+            peripherals_column.append("None")
+
+        ### column balancing
+        max_len = max([len(tech_column),len(combat_column),len(peripherals_column)]) 
+        min_len = min([len(tech_column),len(combat_column),len(peripherals_column)]) 
+        delta = max_len - min_len
+
+        for columns in [tech_column,combat_column,peripherals_column]:
+            if len(columns) < max_len:
+                columns += " " * (delta)   
+
+
+        # create by zipping
+        TABLE_DATA = zip(tech_column,combat_column,peripherals_column)
+
+        # todo calculate the column widths based on longest line in each column
+        self.set_font("Helvetica", size=10)
+        self.set_fill_color(255)
+        with self.table(
+            align="LEFT",
+            width = 200,
+            col_widths=(70, 70, 60),
+            text_align="LEFT",
+            borders_layout="NONE",
+            line_height = 1.2 * self.font_size
+            ) as attack_table:
+            for data_row in TABLE_DATA:
+                row = attack_table.row()
+                for datum in data_row:
+                    row.cell(str(datum))
+
+        return 
+
+    def family_bio_data(self, persona:AllRecords)-> None:
+        ''' pick the family for biuo op'''
+        bio_data_pivot = {"Anthro":self.anthro_biologic_info, "Alien":self.alien_biologic_info, "Robot":self.robot_biologic_info}
+        bio_data_pivot[persona.FAMILY](persona)
+        return
+
+    def referee_persona_fun(self,persona,x:float=0,y:float=0)-> float:
+        '''
+        prints referee persona role playing suggestions
+        '''
+        y_bump = 5.6
+        self.grey_box_title("ROLE PLAY FUN",x,y)
+        y += 2+y_bump
+        for fun in persona.RP_Fun:
+            self.print_MD_string(fun,12,8,y)
+            y += y_bump
         return y
 
-
-
-
+    ## sheet support functions
+     
     def center_grid(self, radius=25)-> None:
         '''
         draws a center circle and grid lines
@@ -598,8 +677,6 @@ class PDF(FPDF):
         for x in range(0,int(self.epw),10):
             self.line(x,0,x,self.eph)
 
-
-
     def locutus(self)->None:
         """
         draws an target at x and y on page
@@ -623,230 +700,58 @@ class PDF(FPDF):
         self.line(x-centering,y-centering, x+centering, y+centering)
         self.line(x-centering,y+centering,x+centering,y-centering)
 
-
-    def task_info(self, persona,x:float=0,y:float=0)->float:
+    def perimiter_box(self)->None:
         '''
-        prints task info for vocation, alien and robot
+        draws a rectangle around entire page 
+        MUST BE CALLED LAST FOR Z coverage
         '''
-        y_bump = 5.4
-        x_bump = 40
-        task_title_top = y
+        self.set_draw_color(0, 0, 0) 
+        self.set_line_width(1.2)
+        self.rect(5, 13, (self.epw - 10), (self.eph - 20), "D")
 
-        if persona.Vocation == "Alien":
-            self.print_MD_string('**Alien Tasks** Find sustenance and reproduce.', 12, x,task_title_top)
-            y+=y_bump
-            return y
- 
-        if persona.Vocation == "Robot":
-            self.print_MD_string('**Robot Tasks** Do what they are meant to do.', 12, x,task_title_top)
-            y+=y_bump
-            return y
+    def set_or_get(self, *args) -> tuple:
+        '''
+        takes args and prints variants x,y,location  
+        remove the 4 print statements for operations
+        ''' 
+        if len(args) == 3: # set and tell
+            x,y,verbose = args
+            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo turn off for operations 
+            self.set_y(y)
+            self.set_x(x)
 
-        ### vocation GIFTS
-        self.print_MD_string('**GIFTS**', 12, x,task_title_top)
-        y+=y_bump
-        gift_list = vocation.update_gifts(persona)
-        for number,gift in enumerate(gift_list,1):
-            self.print_MD_string(f"{number}) {gift}",12,x,y)
-            y+=y_bump
+        elif len(args) == 2: # set and don't tell
+            x,y = args
+            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo turn off for operations 
+            self.set_y(y)
+            self.set_x(x)
 
-        ### vocation INTERESTS
-        x+=x_bump
-        y=task_title_top
-        self.print_MD_string('**INTERESTS**',12,x,y)
-        y+=y_bump
-        collated_interests = please.collate_this(persona.Interests)
-        for number, interest in enumerate(collated_interests,1):
-            self.print_MD_string(f"{number}) {interest}",12,x,y)
-            y+=y_bump
-
-        ### vocation  SKILLS
-        ### skills are 3 column
-        x+=x_bump
-        y=task_title_top
-        self.print_MD_string("**SKILLS**",12,x,y)
-        y+=y_bump
-
-        collated_skills = please.collate_this(persona.Skills)
-        for number, skill in enumerate(collated_skills,1):
-            if number == 4: #shift to row 2
-                x+=x_bump 
-                y=task_title_top + y_bump
-            if number == 7: # shift to row 3
-                x+=x_bump
-                y=task_title_top + y_bump
-            if number == 10: # shift to row 4
-                x+=x_bump
-                y=task_title_top + y_bump
-            self.print_MD_string(f"{number}) {skill}",12,x,y)
-            y+=y_bump
-
-        line_amount = [len(gift_list), len(collated_interests),len(collated_skills)]
-        one2three = max(line_amount)
-        y = 3+task_title_top + y_bump*(3 if one2three > 2 else one2three)
-
-        ### additional skill explainer
-        x=8
-        y+=3 
-        blob = f'**Gifts:** Auto success. **Interests:** General knowledge (+1) **Skills:** Specific knowledge (+2)'
-        if persona.Vocation == "Spie":
-            blob = vocation.spie_martial_arts(persona)
-
-        if persona.Vocation == "Nothing":
-            if persona.EXPS > persona.Vocay_Aspiration_EXPS:
-                achievation = "Achieved!"
+        elif len(args) == 1: # get and tell and return
+            verbose = args[0]
+            if verbose == "hide":
+                x = self.get_x()
+                y = self.get_y()
+                return x,y
             else:
-                fraction = int((persona.EXPS / persona.Vocay_Aspiration_EXPS) * 100)
-                achievation = f"{fraction}% achieved"
-            blob = f"Aspiration: {persona.Vocay_Aspiration} Objective: {achievation}"
-        self.print_MD_string(blob,10,x,y)
-        y+= y_bump
-
-        return y
-
-    def mutation_to_pdf(self,persona,x:float=0,y:float=0)->float:
-        '''
-        prints mutation status and existing mutations 
-        '''
-
-        if persona.FAMILY == "Anthro":
-            family_header = "Mutations:"
-        elif persona.FAMILY == "Alien":
-            family_header = "Powers:"
-        elif persona.FAMILY == "Robot":
-            family_header = "Malfunctations:"
-        else:
-            family_header = "Oops wrong family header"
-        
-        y_bump = 5.6
-
-        if len(persona.Mutations) == 0:
-            self.print_MD_string(f"**{family_header}** None", 12, x, y)
-            y+=y_bump
+                x = self.get_x()
+                y = self.get_y()
+                print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo  for operations find and remove all set_or_get(Locating:
+                return x,y
             
-        else:
-            self.print_MD_string(f"**{family_header}**", 12, x, y)
-            y+=y_bump            
-            tiny_bump = 3.4
+        elif len(args) == 0: # get and don't tell and return 
+            x = self.get_x()
+            y = self.get_y()
+            print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo  for operations find and remove all set_or_get(Locating:          
+            return x,y
 
-            all_mutations = mutations.mutation_list_builder()
-            for mutation_name in sorted(persona.Mutations.keys()):
-                mutuple = next((t for t in all_mutations if t[0] == mutation_name), None)
-
-                working_mutation = mutuple[1](persona)
-
-                header, details, param = working_mutation.return_details(
-                    working_mutation.__class__
-                )
-                self.print_MD_string(f"**{header}**",10,x,y)
-                x+=4 + self.get_string_width(f"**{header}**",markdown=True)
-                self.print_MD_string(f"{details}",8,x,y+.5)
-                y+=tiny_bump
-                x=8
-                self.print_MD_string(f"{param}",8,x,y)
-                y+=tiny_bump
-        return y
-
-    def anthro_biologic_info(self, persona,x:float=0,y:float=0)->float:
-        '''
-        prints anthro bio info (physical attributes and mutations)
-        '''
-        y_bump = 5.3
-
-        self.grey_box_title('BIO INFO',5,y)
-
-        ### heading bio data
-        # x = 7 + self.get_string_width('BIO INFO')
-        self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,(x+9+self.get_string_width('BIO INFO')),y+.5)
-        y+= 3 + y_bump
-
-        blob = f"**Family** {persona.FAMILY} **Type:** {persona.FAMILY_TYPE} **Sub Type:** {persona.FAMILY_SUB} **Age:** {persona.Age} years **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} kgs"
-        self.print_MD_string(blob,12,x,y)
-        y+=y_bump
-
-        # print out Mutations
-        y = self.mutation_to_pdf(persona, 8,y)
-
-        return y
-
-
-    def alien_biologic_info(self, persona,x:float=0,y:float=0)->float:
-        '''
-        prints the alien xenologic info 
-        '''
-        y_bump = 5.3
-
-        self.grey_box_title('XENO INFO',5,y)
-        x = 8 + self.get_string_width('XENO INFO')
-        self.print_MD_string(f'{persona.FAMILY} {persona.FAMILY_TYPE} {persona.FAMILY_SUB if persona.FAMILY_SUB else " "}',12,x,y+.5)
-        y+= 3+y_bump
-        x=8
-
-        # specific person age hite and wate
-        blob = f"**Specific Alien:** {persona.Persona_Name} **Age:** {persona.Age} {persona.Alien_Age_Suffix} old. **Hite:** {persona.Size} **Wate:** {persona.Wate} {persona.Wate_Suffix}."
-        self.print_MD_string(blob,12,x,y)
-        y+=y_bump
-
-        ### assign the y for Description
-        top_y = y
-        x = 8
-        x_bump = 90
-
-        ### Build left column list
-        left_column =['**Detailed Desc**']
-
-        desc_parts = [
-            f"Head: {persona.Head.split(' (')[0]}{persona.Head_Adorn}",
-            f"Body: {persona.Body.split(' (')[0]}{persona.Body_Adorn}",
-            f"Arms: {persona.Arms.split(' (')[0]}{persona.Arms_Adorn}",
-            f"Legs: {persona.Legs.split(' (')[0]}",
-        ]
-        left_column.extend(desc_parts)
-
-        ### adding xenobiology
-        left_column.append('**Xenobiology**')
-
-        ### adding list of Biology
-        left_column.extend(persona.Biology)
-
-        ### right column
-        right_column = ["**Life Cycle**"]
-        right_column.extend(persona.Life_Stages)
-        right_column.append("**Society**")
-        right_column.extend(persona.Society)
-
-        print(f'alien biologic info {left_column = }')
-        print()
-        print(f'alien biologic info {right_column = }')
-        
-        for element in left_column:
-            self.print_MD_string(element,11,x,y)
-            y+=y_bump
-
-        left_bottom = y #store bottom y
-        y = top_y
-        x += x_bump # move column
-
-        for element in right_column:
-            self.print_MD_string(element,11,x,y)
-            y+=y_bump
-
-        y = left_bottom if left_bottom>y else y
-        x = 8
-
-        ### mutations are called Abilities or Powers for aliens
-
-        return y
-
-    def note_lines(self, lines:int, x:float = 0, y:float =0)-> None:
+    def note_lines(self)-> None:
         '''
         draws a chosen number of lines
         '''
         y_bump = 8
-
-        self.grey_box_title('NOTES',5,y)
-        y+= y_bump
-
+        x,y = self.get_x(), self.get_y()
+        y += y_bump
+        lines = round((279.4 - y)/y_bump)
         self.set_draw_color(120) #dark grey 
         self.set_line_width(0.1)
 
@@ -881,18 +786,6 @@ class PDF(FPDF):
             
         return more_y
     
-    def referee_persona_fun(self,persona,x:float=0,y:float=0)-> float:
-        '''
-        prints referee persona role playing suggestions
-        '''
-        y_bump = 5.6
-        self.grey_box_title("ROLE PLAY FUN",x,y)
-        y += 2+y_bump
-        for fun in persona.RP_Fun:
-            self.print_MD_string(fun,12,8,y)
-            y += y_bump
-        return y
-
     def trackers(self,x:float=0,y:float=0):
         y_bump = 8
         self.grey_box_title('TRACKERS',5,y)
@@ -920,8 +813,6 @@ class PDF(FPDF):
             txt=blob,
             align="C",
         )
-
-
 
 ##############################################
 #
@@ -953,6 +844,7 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     except Exception as e:
         print(f"An error occurred: {e}")
 
+# fix test all PROFs
 def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
     '''
     creates an attack table dictionary based on FAMILY 
@@ -968,25 +860,23 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
     table_level = (
         attack_tabler.Level - 1 if attack_tabler.Level < 11 else 9
     )  # no level bonus for level one
+    alien_attacks = attack_tabler.Attacks if attack_tabler.FAMILY == "Alien" else []
 
     ### define the empty combat dictionary
     attack_table = {
         "A": {"BP": 0, "BNP": 0, "MR": 0, "DB": 0, "PROF": 0},
         "B": {"BP": 0, "BNP": 0, "MR": 0, "DB": 0, "PROF": 0},
-        "C": {"BP": 0, "BNP": 0, "MR": 0, "DB": 0, "PROF": 0},
-        #"TITLE": f"{vocation} LVL {level}",
-        #"ARMOVE": f"Armour Rating (AR): {calc.AR}      Move: {calc.Move} h/u",
-    }
+        "C": {"BP": 0, "BNP": 0, "MR": 0, "DB": 0, "PROF": 0}
+        }
 
     ### determine which attack table info is applicable
-    if vocation not in ["Alien","Robot"]: 
+    if vocation not in ["Alien","Robot"]: # persona has an actual vocation
         # Vocation STRIKE row (Type A)
         ABP = math.ceil((1.5 * awe) + (2 * dex) + (1.5 * intel) + (5 * pstr))
         ABP = ABP + exp_tables.vocation_level_bonus[vocation]["A"] * level
         ABNP = math.ceil(ABP * exp_tables.vocation_non_proficient[vocation]["A"] / 100)
         AMR = 625 + ABP
         ADB = math.ceil(pstr / 2)
-        APROF = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
 
         # Vocation FLING row (Type B)
         BBP = awe + (4 * dex) + intel + (2 * pstr)
@@ -994,7 +884,6 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
         BBNP = math.ceil(BBP * (exp_tables.vocation_non_proficient[vocation]["B"] / 100))
         BMR = 650 + BBP
         BDB = math.ceil(pstr / 4)
-        BPROF = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
 
         # Vocation SHOOT row (Type C)
         CBP = awe + (9 * dex) + intel + pstr
@@ -1002,46 +891,33 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
         CBNP = math.ceil(CBP * (exp_tables.vocation_non_proficient[vocation]["C"] / 100))
         CMR = 675 + CBP
         CDB = 0
-        CPROF = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
 
-        # Vocation PROF assignment
-        if APROF == 42 and vocation == "Mercenary":
-            APROF = BPROF = CPROF = "All weapons."
-
-        elif APROF == 42 and vocation == "Nothing":
-            APROF = BPROF = CPROF = "There can be only one."
-
-    # todo calculate alien movement on the fly
     elif vocation == "Alien":
-        # specific alien attributes
-        attacks = attack_tabler.Attacks
-
         # Alien STRIKE row (Type A)
-        if "Strike" in attacks:
+        if "Strike" in alien_attacks:
             ABP = ABNP = 10 * (pstr + level)
             AMR = 700 + ABP
             ADB = level
         else:
-            ABP = ABNP = AMR = ADB = 0
+            ABP = ABNP = AMR = ADB = "---"
 
         # Alien FLING row (Type B)
-        if "Fling" in attacks:
+        if "Fling" in alien_attacks:
             BBP = BBNP = 10 * (dex + level)
             BMR = 700 + BBP
             BDB = level
         else:
-            BBP = BBNP = BMR = BDB = 0
+            BBP = BBNP = BMR = BDB = "---"
 
         # Alien SHOOT row (Type C)
-        if "Shoot" in attacks:
+        if "Shoot" in alien_attacks:
             CBP = CBNP = 10 * (intel + level)
             CMR = 700 + CBP
             CDB = level
         else:
-            CBP = CBNP = CMR = CDB = 0
+            CBP = CBNP = CMR = CDB = "---"
         
         # populate the PROF column
-
 
     elif family == "Robot":
         # specific robot attributes
@@ -1066,9 +942,6 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
         CBNP = 0
         CMR = "---"
         CDB = 0
-        
-        # populate the PROF column
-        APROF = BPROF = CPROF = "Robots have no weapon skills."
 
     ### build the attack table to return
     # assign STRIKE row(ABP, ABNP, AMR, ADB)
@@ -1076,26 +949,23 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
     attack_table["A"]["BNP"] = ABNP
     attack_table["A"]["MR"] = AMR
     attack_table["A"]["ADB"] = ADB
+    attack_table["A"]["PROF"] = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
 
     # assign FLING row (BBP, BBNP, BNR, BDB)
     attack_table["B"]["BP"] = BBP
     attack_table["B"]["BNP"] = BBNP
     attack_table["B"]["MR"] = BMR
     attack_table["B"]["BDB"] = BDB
+    attack_table["B"]["PROF"] = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
 
     # assign SHOOT row (CBP, CBNP, CMR, CDB)
     attack_table["C"]["BP"] = CBP
     attack_table["C"]["BNP"] = CBNP
     attack_table["C"]["MR"] = CMR
     attack_table["C"]["CDB"] = CDB
-
-    # assign the Proficiency Column
-    attack_table["A"]["PROF"] = APROF
-    attack_table["B"]["PROF"] = BPROF
-    attack_table["C"]["PROF"] = CPROF
+    attack_table["C"]["PROF"] = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
 
     return attack_table
-
 
 def screen_attack_table(persona) -> None:
     '''
@@ -1123,55 +993,27 @@ def screen_attack_table(persona) -> None:
     CDB = attack_table["C"]["CDB"]
     CPROF = attack_table["C"]["PROF"]
 
-    ### sort between different PROF types.
-    # mercenary all profs
-    # nothing blank, one weapon only, blank
-    # all other vocations have an int
-    # aliens evolved attacks only
-    # robots baked in attacks only
-
-    # manipulate the proficiency sentence for screen output
-
-    '''    if str(BPROF) in ["All weapons.", "One single proficiency."]:
-        # if mercenary or nothing
-        pass
-    elif str(APROF).split("-")[0] in ["Baked in attacks only.", "Natural "]:
-        # if alien or robot
-        pass
-    else:
-        # has int for PROF == Vocation
-        for proficiency in ["APROF", "BPROF", "CPROF"]:
-            nummer_profs = attack_table[proficiency[0]][proficiency[1:]]
-            attack_table[proficiency[0]][
-                proficiency[1:]
-            ] = f"{exp_tables.numbers_2_words[int(nummer_profs)].capitalize()} {exp_tables.attack_type_words[proficiency]} weapons."
-    '''
-
     # assign proficiencies 
+    # todo pull proficiencies from proficiencies list in persona record
     APROF = exp_tables.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
-    BPROF = exp_tables.numbers_2_words[APROF] if isinstance(APROF,int) else APROF
+    BPROF = exp_tables.numbers_2_words[BPROF] if isinstance(APROF,int) else BPROF
     CPROF = exp_tables.numbers_2_words[CPROF] if isinstance(CPROF,int) else CPROF
 
     # print out the combat table
     print(f'\nATTACK TABLE: -- {persona.Vocation} Level {persona.Level}')
     print(f'{" ":>6} {"Skill":>6} {"Raw":>6} {"Max":>6} {"Force":>6} {"PROF":>5}')
-    if ABP > 0:
-        print(f"Strike {ABP:>6} {ABNP:>6} {AMR:>6} {ADB:>6}  {APROF}")
-    if BBP > 0:
-        print(f"Fling  {BBP:>6} {BBNP:>6} {BMR:>6} {BDB:>6}  {BPROF}")
-    if CBP > 0:
-        print(f"Shoot  {CBP:>6} {CBNP:>6} {CMR:>6} {CDB:>6}  {CPROF}")
+    print(f"Strike {ABP:>6} {ABNP:>6} {AMR:>6} {ADB:>6}  {APROF}")
+    print(f"Fling  {BBP:>6} {BBNP:>6} {BMR:>6} {BDB:>6}  {BPROF}")
+    print(f"Shoot  {CBP:>6} {CBNP:>6} {CMR:>6} {CDB:>6}  {CPROF}")
 
     if persona.FAMILY == 'Alien':
-        blob = f'MOVE:  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u. ARMOUR RATING: {persona.AR}'      
+        blob = f'Attack Description: {persona.Attack_Desc} \nMOVE:  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u. ARMOUR RATING: {persona.AR}'      
     else:
         blob = f'MOVE:  {persona.Move} h/u  ARMOUR RATING: {persona.AR}'
 
     print(blob)    
 
     return
-
-
 
 #####################################
 #  PDF print outs
@@ -1376,12 +1218,13 @@ def alien_screen(screenery:exp_tables.PersonaRecord) -> None:
         f"Age: {screenery.Age} {screenery.Age_Suffix} Size: {screenery.Size_Cat} Wate: {screenery.Wate} {screenery.Wate_Suffix}"
     )
 
+    # vocation, level, EXPS
     if screenery.Vocation == "Alien":
         print(f"{screenery.FAMILY_SUB} Level: {screenery.Level} EXPS: {screenery.EXPS}")
     else:    
         print(f"Vocation: {screenery.Vocation} Level: {screenery.Level} EXPS: {screenery.EXPS}")
 
-    print("\nDESCRIPTION: " + screenery.Quick_Description)
+    print(f"\nDESCRIPTION: {screenery.Quick_Description}")
 
     # four part description
     # the split removes the (l,a,w) movement info
@@ -1390,9 +1233,8 @@ def alien_screen(screenery:exp_tables.PersonaRecord) -> None:
     print(f"{screenery.Arms.split(' (')[0]} arms {screenery.Arms_Adorn}")
     print(f"{screenery.Legs.split(' (')[0]} legs")
 
-    # show the combat table
+    # show the attack table
     screen_attack_table(screenery)
-    print(f'{screenery.Attack_Desc}')
 
     if screenery.Vocation != "Alien":
         # alien  Interest list
@@ -1623,7 +1465,6 @@ def anthro_screen(persona) -> None:
         for fun in persona.RP_Fun:
             print(f"{fun}")
 
-
 #####################################
 # TOY output to screen
 #####################################
@@ -1632,7 +1473,6 @@ def toy_screen(blank:any) -> None:
     '''prints out a toy to the screen'''
     pass
     
-
 #####################################
 #
 # PDF testing
@@ -1640,3 +1480,22 @@ def toy_screen(blank:any) -> None:
 #####################################
 
 
+""" 
+those fucking proficiencies
+ANTHROS assigned by
+    APROF = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
+    if APROF = 42:
+        if vocation == "Mercenary":
+            APROF = "All weapons"
+        else: # this would be Nothing
+            APROF = "One weapon only"
+
+    BPROF = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
+    CPROF = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
+
+ROBOTS 
+    APROF = BPROF = CPROF = "Robots have no weapon skills."
+
+ALIENS 
+    APROF = BPROF = CPROF = "Natural."
+"""

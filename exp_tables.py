@@ -2723,13 +2723,13 @@ alien_biology_energy_procurement = {
 
 alien_biology_reproduction = {
     (1, 1): "Mitotic",
-    (2, 2): "Oviparous (hatched) ",
+    (2, 2): "Oviparous-egg ",
     (3, 3): "Spores",
-    (4, 4): "Viviparous (marsupial)",
-    (5, 5): "Viviparous (placental)",
+    (4, 4): "Viviparous-pouch",
+    (5, 5): "Viviparous-live",
     (6, 6): "Parasitic",
     (7, 7): "Fusion",
-    (8, 8): "Oviparous (hatched)",
+    (8, 8): "Oviparous-egg",
     "name": "Alien Reproductive",
     "die_roll": "1d8",
 }
@@ -2911,13 +2911,13 @@ society_options = ["Yes", "None"]
 
 core_biology = {
     "Biome": biome_base_list,
-    "Biome Characteristic": biome_sub_list,
-    "Energy Source": alien_biology_energy_source,
-    "Energy Procurement": alien_biology_energy_procurement,
+    "Biome Type": biome_sub_list,
+    "Energy Type": alien_biology_energy_source,
+    "Energy Proc": alien_biology_energy_procurement,
     "Reproduction": alien_biology_reproduction,
     "Domicile": alien_biology_domicile,
     "Aroma": alien_biology_aroma,
-    "Group Size":alien_biology_group_size,}
+    "Grouping":alien_biology_group_size,}
 
 core_society = {
     "Tools": alien_tool_score,
@@ -2930,6 +2930,8 @@ core_society = {
     "Philosophy": role_play_RP_philosophy,
 }
 
+
+### Attack Table elements (BNP and MR and Damage Bonus are derived )
 
 vocation_non_proficient = {
     "Biologist": {"A": 10, "B": 10, "C": 25},
@@ -2990,9 +2992,9 @@ vocation_proficiencies = {
         "C": [1, 2, 2, 3, 3, 4, 4, 5, 5, 5],
     },
     "Mercenary": {
-        "A": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
-        "B": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
-        "C": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
+        "A": ["All personal weapons", "All personal weapons", "All personal weapons", "All personal weapons", "All personal weapons", "All personal weapons", "All personal weapons", "All personal weapons", "All personal weapons", "All personal weapons"],
+        "B": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        "C": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
     },
     "Nomad": {
         "A": [1, 1, 2, 2, 2, 3, 3, 3, 4, 4],
@@ -3000,9 +3002,9 @@ vocation_proficiencies = {
         "C": [1, 1, 1, 1, 2, 2, 2, 3, 3, 3],
     },
     "Nothing": {
-        "A": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
-        "B": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
-        "C": [42, 42, 42, 42, 42, 42, 42, 42, 42, 42],
+        "A": ["One single weapon only.", "One single weapon only.", "One single weapon only.", "One single weapon only.", "One single weapon only.", "One single weapon only.", "One single weapon only.", "One single weapon only.", "One single weapon only.", "One single weapon only."],
+        "B": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        "C": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
     },
     "Spie": {
         "A": [1, 2, 2, 3, 3, 4, 4, 5, 5, 5],
@@ -3014,10 +3016,21 @@ vocation_proficiencies = {
         "B": [1, 1, 1, 1, 2, 2, 2, 3, 3, 3],
         "C": [1, 1, 1, 3, 3, 3, 4, 4, 4, 5],
     },
+    "Robot": {
+        "A": ["No weapon skills.", "No weapon skills.", "No weapon skills.", "No weapon skills.", "No weapon skills.", "No weapon skills.", "No weapon skills.", "No weapon skills.", "No weapon skills.", "No weapon skills."],
+        "B": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        "C": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+    },
+        "Alien": {
+        "A": ["See attack desc below.", "See attack desc below.", "See attack desc below.", "See attack desc below.", "See attack desc below.", "See attack desc below.", "See attack desc below.", "See attack desc below.", "See attack desc below.", "See attack desc below."],
+        "B": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+        "C": [" ", " ", " ", " ", " ", " ", " ", " ", " ", " "],
+    },
+
 }
 
 
-###############################################
+############################################### 
 # ROBOT TABLES
 ###############################################
 
@@ -3028,7 +3041,6 @@ robot_attributes = {
     4: {"CON": "1d6+19", "DEX": "1d6+19", "INT": "1d6+19", "PSTR": "1d10+19"},
     "name": "Robotic Attributes",
 }
-
 
 robot_base_family = {
     (1, 3):"Aquarian",
@@ -3591,6 +3603,13 @@ robot_ram_dam = {
     "name":"Robotic Ramming Damage",
     "die_roll":"1d100",
 } 
+
+ramming_freedom = [
+    "Win CF, Take DMG",
+    "No CF, Take DMG",
+    "No CF, NO DMG",
+    "No CF, No DMG, +30@lvl"
+]
 
 
 ### the following four tables are stretched to remove the other table rolls 

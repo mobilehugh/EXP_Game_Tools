@@ -3,7 +3,7 @@ from secrets import choice
 from dataclasses import dataclass
 
 import please
-import table
+import exp_tables
 import vocation
 import core
 
