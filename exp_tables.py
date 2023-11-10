@@ -74,6 +74,11 @@ class Robotic(PersonaRecord):
     Model: str = "No-Name-Model"
     Fabricator: str = "ACME"
 
+    Age_Spans: list[str] = field(default_factory=list) 
+    Age_Cat: str = "Moderate"
+    Age: int = 1 # will convert to scientific on outputs
+    Age_Suffix: str = "seconds"
+
     Date_Created: str = "Unmade"
     Date_Updated: str = "Unmade"
     CON_Prime: int = 1
@@ -3061,6 +3066,21 @@ robot_base_family = {
     "die_roll":"1d100",
 } 
  
+# robot life span uses 'alien_life_span_data' 
+
+
+
+robot_age_cat = {
+    (1,10):"Pristine",
+    (11,20):"Worn in",
+    (21,70):"Worn",
+    (71,90):"Worn out",
+    (91,100):"Decrepit",
+    "name":"Robotic Age Category",
+    "die_roll":"1d100",
+}
+
+
 robotic_power_plant = {
     (1, 10):"Chemical Solid",
     (11, 19):"Chemical Liquid",
@@ -3077,7 +3097,6 @@ robotic_power_plant = {
     "name":"Robotic Power Plant",
     "die_roll":"1d100",
 } 
-
 
 robotic_sensor_types = {
     (1, 71):"Video",
@@ -3444,9 +3463,6 @@ single_roll_robot_type = {
     "die_roll":"1d1000"
 }
 
-
-
-
 single_roll_robot_exact = {
     (1, 5): "Android",
     (6, 55): "Expendable Combot",
@@ -3558,7 +3574,6 @@ secondary_robotic_peripheral = {
     "die_roll":"1d100",
 } 
 
-
 strike_attacks = {
     (1, 8):"Battle Axe (1d12)",
     (9, 15):"Flail (1d8)",
@@ -3577,7 +3592,6 @@ strike_attacks = {
     "name":"Attack Type Strike",
     "die_roll":"1d100",
 } 
-
 
 fling_attacks = {
     (1, 11):"Arrow (1d6)",

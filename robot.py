@@ -2,7 +2,9 @@ import math
 from secrets import choice
 from dataclasses import dataclass
 
+
 import anthro
+import alien
 import outputs
 import please
 import exp_tables
@@ -54,7 +56,6 @@ def robotic_sensors(eye_eye:RobotRecord) -> list:
     for _ in range(math.ceil(eye_eye.AWE / 4)):
         sensor_list.append(please.get_table_result(exp_tables.robotic_sensor_types))
     return sensor_list # changed by side effect
-
 
 def list_eligible_robot_types(choosing: RobotRecord) -> list:
     """
@@ -183,7 +184,6 @@ def robotic_peripherals(perry: RobotRecord, number: int) -> list:
 
     return peripheral_list # also side effects on perry
 
-
 ### robot offensive systems
 
 def attack_one_rolls(rolls_list:list) -> list:
@@ -308,7 +308,6 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
     offender.Attacks.sort()
     return offender # is altered by side effect
 
-
 def robot_defensive_systems(defender: RobotRecord, number: int) -> list:
     """
     returns a list of defenses for the robot
@@ -387,7 +386,6 @@ def robotic_locomotion(move_it:RobotRecord) -> str:
        return f'{primary} {choice(["moving", "pushing","propelling"])} {please.get_table_result(exp_tables.secondary_robotic_locomotion).lower()}' 
 
     return primary # [anti-grav, magnetic, chem slide, slog bag] 
-
 
 def robot_description(looks_like: RobotRecord) -> str:
     """
@@ -478,7 +476,6 @@ def robot_nomenclature(name_it: RobotRecord) -> RobotRecord:
 #
 ####################################################
 
-
 def android(andy: RobotRecord) -> RobotRecord:
     """
     inject the android attributes into the andy
@@ -511,7 +508,6 @@ def android(andy: RobotRecord) -> RobotRecord:
     andy.Spec_Sheet = specs
 
     return andy # modified by side effect
-
 
 def combot(comboy: RobotRecord) -> RobotRecord:
     """
@@ -656,7 +652,6 @@ def combot(comboy: RobotRecord) -> RobotRecord:
 
     return
 
-
 def datalyzer(nerdy: RobotRecord) -> RobotRecord:
     """
     inject the datalyzer attributes into the nerdy
@@ -694,7 +689,6 @@ def datalyzer(nerdy: RobotRecord) -> RobotRecord:
     nerdy.Spec_Sheet = specs
 
     return nerdy # is modified by side effect
-
 
 def explorations(expoh:RobotRecord) -> RobotRecord:
     '''inject explorations bot '''
@@ -786,7 +780,6 @@ def hobbot(hobby:RobotRecord) -> RobotRecord:
     hobby.Spec_Sheet = specs
 
     return hobby # adjusted by side effect
-
 
 def industrial(indy: RobotRecord) -> RobotRecord:
     '''insert industrial robot into persona record'''
@@ -949,7 +942,6 @@ def janitorial(maid: RobotRecord) -> RobotRecord:
 
     return maid # altered by side effect
 
-
 def maintenance(wrench:RobotRecord) -> RobotRecord:
     '''insert maintenance bot stuff'''
 
@@ -987,7 +979,6 @@ def maintenance(wrench:RobotRecord) -> RobotRecord:
     wrench.Spec_Sheet = specs
 
     return wrench # altered by side effect
-
 
 def Policing(copper: RobotRecord) -> RobotRecord:
     '''insert policing robot data into record'''
@@ -1202,7 +1193,6 @@ def rescue(saviour: RobotRecord) -> RobotRecord:
 
         return saviour # modified by side effects
 
-
 def social(friend: RobotRecord) -> RobotRecord:
     '''insert social bot into record'''
 
@@ -1248,7 +1238,6 @@ def social(friend: RobotRecord) -> RobotRecord:
     friend.Spec_Sheet = specs
 
     return friend # adjusted by side effect
-
 
 def transport(taxi: RobotRecord) -> RobotRecord:
     '''insert transport options into record'''
@@ -1332,7 +1321,6 @@ def transport(taxi: RobotRecord) -> RobotRecord:
 
     return
 
-
 def veterinarian(doc: RobotRecord) -> RobotRecord:
     '''insert veterinarian data into record'''
 
@@ -1411,7 +1399,6 @@ def veterinarian(doc: RobotRecord) -> RobotRecord:
 
     return doc # is manipulated by side effect
 
-
 #####################################
 # build a FRESH robot persona
 #####################################
@@ -1442,6 +1429,10 @@ def fresh_robot(player_name:str) -> None:
     if fresh.FAMILY_TYPE != "Android":
         fresh.Attacks.append(f'Ram: {please.get_table_result(exp_tables.robot_ram_dam)}') # every robot can ram, except Androids
 
+    ### robot age 
+    fresh.Age = alien_life_span() * 31536000
+    fresh.Age_Cat = please.get_table_result(robot_age_cat)
+
     ### requires bot_type
     fresh.Locomotion = robotic_locomotion(fresh)
     robot_hite_wate_calc(fresh)
@@ -1454,8 +1445,6 @@ def fresh_robot(player_name:str) -> None:
         core.build_RP_role_play(fresh) 
 
     please.wrap_up_persona(fresh)
-
-
 
 #####################################
 # build a BESPOKE robot persona
@@ -1538,7 +1527,6 @@ def bespoke_robot(player_name:str) -> None:
 
     please.wrap_up_persona(bespoke)
 
-
 #####################################
 # build a RANDO robot persona
 #####################################
@@ -1560,6 +1548,10 @@ def rando_robot(player_name:str) -> None:
     core.movement_rate(rando)
     core.wate_allowance(rando)
     rando.Power_Reserve = rando.CON
+
+    ### robot age 
+    rando.Age = alien.alien_life_span()
+    rando.Age_Cat = please.get_table_result(exp_tables.robot_age_cat)
     
     power_plant_choices = please.list_table_choices(exp_tables.robotic_power_plant)
     rando.Power_Plant = please.choose_this(power_plant_choices, "rando", rando)

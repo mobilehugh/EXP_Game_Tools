@@ -28,8 +28,6 @@ SKILLS are added to the Skills [] as strings
 
 '''
 
-
-
 def biologist(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     Set up the biologist vocation.
@@ -40,7 +38,6 @@ def biologist(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
     return get_a_job # modified by side effects
-
 
 def knite(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
@@ -53,7 +50,6 @@ def knite(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
 
     return get_a_job # modified by side effects
 
-
 def mechanic(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     Set up the mechanic vocation.
@@ -64,7 +60,6 @@ def mechanic(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
     return get_a_job # modified by side effects
-
 
 def mercenary(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
@@ -77,7 +72,6 @@ def mercenary(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
 
     return get_a_job # modified by side effects
 
-
 def nomad(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """ 
     set up the nomad vocation.
@@ -88,7 +82,6 @@ def nomad(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
     return get_a_job # modified by side effects
-
 
 def nothing(nothing_happening: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
@@ -105,14 +98,13 @@ def nothing(nothing_happening: exp_tables.PersonaRecord) -> exp_tables.PersonaRe
 
     else:
         choices = list(exp_tables.vocation_aspiration_exps.keys())
-        comment = "A nomad needs a VOCATIONAL ASPIRATION. Please pick one. "
+        comment = "A nothing needs a VOCATIONAL ASPIRATION. Please pick one. "
         vocation_desired = please.choose_this(choices, comment)
 
     nothing_happening.Vocay_Aspiration = vocation_desired
     nothing_happening.Vocay_Aspiration_EXPS = exp_tables.vocation_aspiration_exps[vocation_desired]
 
     return nothing_happening # modified by side effects
-
 
 def spie(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
@@ -124,7 +116,6 @@ def spie(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
     return get_a_job # modified by side effects
-
 
 def spie_martial_arts(spie_fu_record: exp_tables.PersonaRecord) -> str:
     """
@@ -151,7 +142,6 @@ def veterinarian(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecor
     get_a_job.Skills = fresh_skills(get_a_job, skill_rolls)
 
     return get_a_job # modified by side effects
-
 
 def attribute_determined(get_a_job: exp_tables.PersonaRecord) -> list:
     """
@@ -190,7 +180,6 @@ def attribute_determined(get_a_job: exp_tables.PersonaRecord) -> list:
 
     return vocation_list
 
-
 def attributes_to_vocation(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     bestow improved attributes by vocation type
@@ -220,7 +209,6 @@ def attributes_to_vocation(get_a_job: exp_tables.PersonaRecord) -> exp_tables.Pe
         setattr(get_a_job, attribute, new_attribute)
 
     return get_a_job # is adjusted by side effect
-
 
 def set_up_first_time(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
@@ -260,7 +248,6 @@ def exps_level_picker(level_persona: exp_tables.PersonaRecord) -> exp_tables.Per
 
     return level_persona # is adjusted by side effect
 
-
 def convert_levels_to_exps(get_a_job: exp_tables.PersonaRecord, new_level:int = 0) -> int:
     """
     Returns an EXPS total based on the experience Level of the get_a_job
@@ -290,7 +277,6 @@ def convert_levels_to_exps(get_a_job: exp_tables.PersonaRecord, new_level:int = 
 
     return exps_amount
 
-
 # todo double check that exps in is related to get_a_job.EXPS
 def convert_exps_to_levels(get_a_job: exp_tables.PersonaRecord, new_exps = 0) -> int:
     """
@@ -315,6 +301,48 @@ def convert_exps_to_levels(get_a_job: exp_tables.PersonaRecord, new_exps = 0) ->
 
     return new_level
 
+def level_goal(promotions:exp_tables.PersonaRecord) -> int:
+    '''returns next amt of EXPS needed for a new level'''
+
+    vocation = promotions.Vocation
+    exps_level = promotions.Level 
+    top_level = exp_tables.vocation_exps_levels[vocation]["top_level"]
+    top_amount = exp_tables.vocation_exps_levels[vocation]["top_amount"]
+
+    if vocation == "Nothing" and promotions.Vocay_Aspiration != "Nothing": # check if aspirating
+        return exp_tables.vocation_aspiration_exps[promotions.Vocay_Aspiration]
+
+    if exps_level > exp_tables.vocation_exps_levels[vocation]["top_level"]:
+        return (exps_level - top_level)*top_amount
+
+    ## you are hear if you are a boring exps level
+    for ranges,level in exp_tables.vocation_exps_levels[vocation].items():
+        if exps_level == level:
+            return ranges[1]
+        if ranges == "name":
+            input("upper level exps finder is broke")
+
+    return 
+
+        
+
+    
+
+    
+        
+
+
+
+   
+
+   
+
+
+
+
+
+
+
 #########################################################
 #                                                       
 #        gifts, interests, skills management                
@@ -336,7 +364,6 @@ def update_gifts(returning_gifts: exp_tables.PersonaRecord) -> list:
         gift_list.append(gift_table[2])
 
     return gift_list
-
 
 def fresh_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) -> list:
     """

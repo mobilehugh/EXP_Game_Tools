@@ -57,12 +57,7 @@ there are 25.4 mm in 1 inch
 12 point font is 4.23 mm
 arial 12 space = 1.8 mm 
 
-
-WARNINGS:
-1) set_y(y) resets x to 0 
-must use set_xy(x,y) to work as expected
-
-2) circle(x,y,radius)
+1) circle(x,y,radius)
 to center a circle x,y represent the bounding box not x,y center of circle
 self.circle(
     (x - radius / 2),
@@ -71,14 +66,6 @@ self.circle(
     "D",
         )
 
-3) getting cross
-Parameters for line: (x1, y1, x2, y2) where (x1, y1) is start point and (x2, y2) is end point
-line(start_left,start_top, end_left, end_top)
-line(50, 50, 70, 70)  # Line 1: from point (50, 50) to point (70, 70)
-line(50, 70, 70, 50)  # Line 2: from point (50, 70) to point (70, 50)
-
-4) fontery
-font_size() changes width(x) and height(y) called line_height
 
 TOOLS:
 def convert_points_to_mm(font_size_points):
@@ -215,7 +202,6 @@ class PDF(FPDF):
         if not persona.RP:
              TABLE_DATA.append(["Awareness", "Charisma", "Constitution", "Dexterity", "Intelligence", "Mind", "Strength", "Privilege", "Damagability", ("Helvetica","B", 7)])
 
-
         if persona.FAMILY == "Robot":
             prime_con = f'({persona.CON_Prime})'            
             prime_dex = f'({persona.DEX_Prime})'
@@ -248,8 +234,7 @@ class PDF(FPDF):
         '''
         returns the persona's vocation and level and exps goal
         '''
-        exps_next = list(exp_tables.vocation_exps_levels[persona.Vocation].keys())[persona.Level][1]
-        return f'{persona.Vocation} level {persona.Level}  EXPS {persona.EXPS}/{exps_next}'
+        return f'{persona.Vocation} level {persona.Level}  EXPS {persona.EXPS}/{vocation.level_goal(persona)}'
 
     def persona_bio_info(self, persona:AllRecords) -> str:
         '''
@@ -562,12 +547,15 @@ class PDF(FPDF):
         '''
         prints the robotic mechanical data
         '''
-        blob = f"**Age:** {persona.Age} {persona.Age_Suffix}, ({persona.Age_Cat}) **Hite:** {persona.Hite} cms **Wate:** {persona.Wate} {persona.Wate_Suffix} ({persona.Size_Cat})"
+        blob = f"**Age:** {persona.Age:.3e} {persona.Age_Suffix}, ({persona.Age_Cat}) **Hite:** {persona.Hite} {persona.Hite_Suffix} **Wate:** {persona.Wate} {persona.Wate_Suffix} ({persona.Size_Cat})"
         self.markdown_internal(blob,11)    
+
+        ### build usage spec column
+        user_column = ["Usage Specs"]
+        user_column.extend(persona.Spec_Sheet) # from the robot
 
         ### build tech spec column
         tech_column = ["Tech Specs"] # title
-        tech_column.extend(persona.Spec_Sheet) # from the robot
         tech_column.extend([
             f'Fabricator: {persona.Fabricator}',
             f'Model Name: {persona.Model}',
@@ -580,11 +568,11 @@ class PDF(FPDF):
 
         ### build combat column
         combat_column = ["Combat Peripherals"]
-        combat_column.append(f'Ram - {exp_tables.ramming_freedom[persona.Ramming]}')
+        combat_column.append(f'Ramming Level ({persona.Ramming}):')
+        combat_column.append(f'--{exp_tables.ramming_freedom[persona.Ramming]}')
         combat_column.extend(persona.Attacks)
         if persona.Defences:
             combat_column.extend(persona.Defences)
-
 
         ### build peripherals column
         peripherals_column = ["Peripherals"]
@@ -594,25 +582,25 @@ class PDF(FPDF):
             peripherals_column.append("None")
 
         ### column balancing
-        max_len = max([len(tech_column),len(combat_column),len(peripherals_column)]) 
-        min_len = min([len(tech_column),len(combat_column),len(peripherals_column)]) 
+        max_len = max([len(user_column),len(tech_column),len(combat_column),len(peripherals_column)]) 
+        min_len = min([len(user_column),len(tech_column),len(combat_column),len(peripherals_column)]) 
         delta = max_len - min_len
 
-        for columns in [tech_column,combat_column,peripherals_column]:
+        for columns in [user_column, tech_column, combat_column, peripherals_column]:
             if len(columns) < max_len:
                 columns += " " * (delta)   
 
-
         # create by zipping
-        TABLE_DATA = zip(tech_column,combat_column,peripherals_column)
+        TABLE_DATA = zip(user_column,tech_column,combat_column,peripherals_column)
 
         # todo calculate the column widths based on longest line in each column
         self.set_font("Helvetica", size=10)
         self.set_fill_color(255)
+        set_columns = (65, 65, 45, 35)
         with self.table(
             align="LEFT",
-            width = 200,
-            col_widths=(70, 70, 60),
+            width = sum(set_columns),
+            col_widths=set_columns,
             text_align="LEFT",
             borders_layout="NONE",
             line_height = 1.2 * self.font_size
@@ -1480,22 +1468,3 @@ def toy_screen(blank:any) -> None:
 #####################################
 
 
-""" 
-those fucking proficiencies
-ANTHROS assigned by
-    APROF = exp_tables.vocation_proficiencies[vocation]["A"][table_level]
-    if APROF = 42:
-        if vocation == "Mercenary":
-            APROF = "All weapons"
-        else: # this would be Nothing
-            APROF = "One weapon only"
-
-    BPROF = exp_tables.vocation_proficiencies[vocation]["B"][table_level]
-    CPROF = exp_tables.vocation_proficiencies[vocation]["C"][table_level]
-
-ROBOTS 
-    APROF = BPROF = CPROF = "Robots have no weapon skills."
-
-ALIENS 
-    APROF = BPROF = CPROF = "Natural."
-"""

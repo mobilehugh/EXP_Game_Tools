@@ -206,7 +206,6 @@ def alien_shape_adornments(adornable:AlienRecord) -> AlienRecord:
         
     return adornable # is altered by side effect
 
-# todo move terrain movements to calculated in outputs, and not stored
 def assign_terrain_movements(moving_time: AlienRecord) -> AlienRecord:
     '''assigns alien movements (head, body, arms, legs) -> land, air, water (l,a,w)'''
     four_quarter_parts = ["Head", "Body", "Arms", "Legs"]
@@ -224,7 +223,8 @@ def assign_terrain_movements(moving_time: AlienRecord) -> AlienRecord:
     moving_time.Move_Land = math.ceil(moving_time.DEX * (movements.count("l") / 4))
     moving_time.Move_Air = math.ceil(moving_time.DEX * (movements.count("a") / 4))
     moving_time.Move_Water = math.ceil(moving_time.DEX * (movements.count("w") / 4))
-
+    # todo move terrain movements to calculated in outputs, and not stored
+    
     return moving_time # is altered by side effect
 
 def alien_quick_description_builder(describing: AlienRecord) -> AlienRecord:
@@ -299,7 +299,7 @@ def alien_life_stages(staging:AlienRecord, life_span:int = 42) -> dict:
     return life_cycle # also aging modified by side effect
 
 def alien_life_span() -> int:
-    '''build the alien life pan dictionary'''
+    '''build the alien life span dictionary'''
     die_roll, multi = please.get_table_result(exp_tables.alien_life_span_data)
     life_span = please.roll_this(die_roll) * multi
 
@@ -615,7 +615,6 @@ def alien_size_cat_bespoke(sizer: AlienRecord) -> AlienRecord:  # side effects
         sizer.Size_Cat = please.choose_this(methods, choice_comment)
         return
 
-
 def alien_attributes_bespoke(attributions: AlienRecord) -> AlienRecord:
     """
     determine alien attributes
@@ -639,7 +638,6 @@ def alien_attributes_bespoke(attributions: AlienRecord) -> AlienRecord:
         core.descriptive_attributes(attributions)
 
     return attributions # altered by side effect
-
 
 def alien_life_span_bespoke(lifer: AlienRecord) -> AlienRecord:
     """
@@ -792,7 +790,6 @@ def bespoke_alien(player_name:str) -> None:
             vocation.update_skills(bespoke, (bespoke.Level - 1))
 
     please.wrap_up_persona(bespoke)
-
 
 ### build a RANDO alien persona
 def rando_alien(player_name:str) -> None:
