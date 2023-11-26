@@ -60,7 +60,6 @@ def roll_this(die_roll_string: str) -> int:
     # in a type violation returns a string instead of an integer when there  is a dice error
     dice_error = f"Oops! {die_roll_string} Does not compute. \nparams = [1-99]d[1-1000][+|-|*|D][0-9999] \nExamples: 2d6+2, 1d1000, 6d6E (explode on 6), 4d6D1 (drop lowest)"
 
-
     # pulling die parts 1 d 6 + 1 ect from the die_roll_string string
     die_parts = re.compile(r"(\d{1,4})d(\d{1,5})(\+|\-|\*|D|E)*(\d{1,5})*").search(
         die_roll_string

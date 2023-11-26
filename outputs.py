@@ -37,50 +37,34 @@ def outputs_workflow(outputter:AllRecords, out_type: str) -> None:
 
 ################################################
 #
-# laws of fpdf
+# (f)laws of fpdf
 #
 ################################################
 '''
-US LETTER:  
-width (x) 215.9 mm, height (y) = 279.4 mm
-origin point = (0, 0) = Left, Top corner
-x-coordinate increases moves right =  width = 215.9 = epw() = effective page width
-y-coordinate increases moves down  = height = 279.4 = eph() = effective page height
-
 UNITS:
-numbers are  mm (millimeters) NOT pixels and are FLOATS
-font size is in points 1/72 of an inch
-on a 72 ppi screen a point = a pixel 
-BUT 72 ppi screen is not guaranteed so must use millimeters
+    x,y and lengths are FLOATS in mm (millimeters)
+    font sizes are in POINTS not mm or pixels
 
-there are 25.4 mm in 1 inch
-12 point font is 4.23 mm
-arial 12 space = 1.8 mm 
+    PostScript typographical measurement system
+    a POINT is 1/72 of an inch not mm or pixels
+    1 point = 1pt = 1/72in (cala) = 0.3528 mm
 
-1) circle(x,y,radius)
-to center a circle x,y represent the bounding box not x,y center of circle
-self.circle(
-    (x - radius / 2),
-    (y - radius / 2),
-    radius,
-    "D",
-        )
+    there are 25.4016 mm in 1 inch
+    12 point font is 4.23 mm
+    arial 12 space = 1.8 mm 
 
+US LETTER:  
+    width (x) 215.9 mm, height (y) = 279.4 mm
+    epw() = effective page width = 215.9 mm
+    eph() = effective page hite = 279.4 mm
+ 
+COORDS
+    origin point = (0, 0) = Left, Top corner
+    x-coordinate increases moves RIGHT
+    y-coordinate increases moves DOWN 
 
-TOOLS:
-def convert_points_to_mm(font_size_points):
-    inches = font_size_points / 72  # convert points to inches
-    mm = inches * 25.4  # convert inches to mm
-    return mm
-
-locutus() # puts a target where xy is 
-center_grid() # puts full page center target on a grid
-
-pdf.output(
-    name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
-    dest="F",
-)
-show_pdf()
+    x,y are top left of BOUNDING BOX not center of polygons/lines
+    bounding box is NOT square and changes with polygon orientation
 '''
 
 ################################################
@@ -195,20 +179,30 @@ class PDF(FPDF):
         """
         prints atttribute acronyms, values (+/- primes) and descriptions (+/-)
         """
-        TABLE_DATA = [
-            ["AWE", "CHA", "CON", "DEX", "INT", "MSTR", "PSTR", "SOC", "HPM", ("Helvetica", "B", 14)],
-            [persona.AWE, persona.CHA, persona.CON, persona.DEX, persona.INT, persona.MSTR, persona.PSTR, persona.SOC, persona.HPM,("Helvetica", "I",18)]
-        ]
-        if not persona.RP:
-             TABLE_DATA.append(["Awareness", "Charisma", "Constitution", "Dexterity", "Intelligence", "Mind", "Strength", "Privilege", "Damagability", ("Helvetica","B", 7)])
+
+        # for the pain
+        awe, cha, con, dex, intel, mstr, pstr, soc, hpm = persona.AWE, persona.CHA,  persona.CON, persona.DEX, persona.INT, persona.MSTR, persona.PSTR, persona.SOC, persona.HPM
+       
+        # prep for Alien and Anthro, Robot is different
+        not_bot = True if persona.FAMILY in ["Alien", "Anthro"] else False
+
+
+        con_footer = "Constitution" if not_bot else f"Constitution-P{persona.CON_Prime}"
+        dex_footer = "Dexterity" if not_bot else f"Dexterity-P{persona.DEX_Prime}"
+        intel_footer = "Intelligence" if not_bot else f"Intelligence-P{persona.INT_Prime}"
+        pstr_footer = "Strength" if not_bot else f"Strength-P{persona.PSTR_Prime}"
+        mstr_title, mstr_value, mstr_footer = "MSTR", mstr, "Psionics"
 
         if persona.FAMILY == "Robot":
-            prime_con = f'({persona.CON_Prime})'            
-            prime_dex = f'({persona.DEX_Prime})'
-            prime_int = f'({persona.INT_Prime})'
-            prime_pstr = f'({persona.PSTR_Prime})'
+            mstr_title = "CF"
+            mstr_value = persona.CF
+            mstr_footer = "Autonomy"
 
-            TABLE_DATA.append(["ROBOT", "PRIMES", prime_con, prime_dex, prime_int, "", prime_pstr, "", "",("Helvetica", "I",10)])
+        TABLE_DATA = [
+            ["AWE", "CHA", "CON", "DEX", "INT", mstr_title, "PSTR", "SOC", "HPM", ("Helvetica", "B", 14)],
+            [awe, cha,  con, dex, intel, mstr_value, pstr, soc, hpm,("Helvetica", "",18)],
+            ["Awareness", "Charisma", con_footer, dex_footer, intel_footer, mstr_footer, pstr_footer, "Privilege", "Damagability", ("Helvetica","B", 7)]
+        ]
 
         col_width = 22.1
         row_height = 7
@@ -217,10 +211,12 @@ class PDF(FPDF):
             for datum in data_row[:-1]: # sliced to hide format tuple
                 font,style,size = data_row[-1] # format tuple
                 self.set_font(font,style=style,size=size)
+                print(f"{font} \u2074")
                 datum = str(datum) if isinstance(datum, int) else datum
                 self.cell(
                     w=col_width, 
                     h=row_height, 
+                    markdown=True,
                     txt=datum, 
                     border=False, 
                     align='C',    
@@ -581,7 +577,11 @@ class PDF(FPDF):
         else:
             peripherals_column.append("None")
 
-        ### column balancing
+
+
+        # fix width robot info width balance in APPENDS
+
+        ### column Height balancing
         max_len = max([len(user_column),len(tech_column),len(combat_column),len(peripherals_column)]) 
         min_len = min([len(user_column),len(tech_column),len(combat_column),len(peripherals_column)]) 
         delta = max_len - min_len
@@ -593,10 +593,9 @@ class PDF(FPDF):
         # create by zipping
         TABLE_DATA = zip(user_column,tech_column,combat_column,peripherals_column)
 
-        # todo calculate the column widths based on longest line in each column
         self.set_font("Helvetica", size=10)
-        self.set_fill_color(255)
-        set_columns = (65, 65, 45, 35)
+        self.set_fill_color(0)
+        set_columns = (50,50,50,50)
         with self.table(
             align="LEFT",
             width = sum(set_columns),
@@ -631,7 +630,6 @@ class PDF(FPDF):
         return y
 
     ## sheet support functions
-     
     def center_grid(self, radius=25)-> None:
         '''
         draws a center circle and grid lines
@@ -802,6 +800,33 @@ class PDF(FPDF):
             align="C",
         )
 
+    def hexagons(self, size=10, width=210, hite=260) -> None:
+        ''' fill it with sexagons
+            actual width=216, hite=279
+            modified for inner border
+        
+        '''
+        polywanna = size
+        apothem = polywanna * math.sqrt(3) / 2
+        col_number = round(width/apothem) - 1
+        row_number = round(hite/(apothem*(apothem/polywanna)))
+
+        # todo are offsets for real
+        y = polywanna + 15
+        x_off = 6
+
+        self.set_line_width(0.45)
+        self.set_draw_color(80)
+
+        for row in range(1,row_number):
+            x = (apothem/2)+x_off if row % 2 == 0 else x_off #start value x: odd at page, even offset 
+            for col in range(0,col_number):
+                self.regular_polygon(x, y, polyWidth=polywanna, rotateDegrees=270, numSides=6, style="D")
+                x += apothem
+            y += apothem*(apothem/polywanna)
+        print(f"{row = } {col = } {hite = } {width = }")
+
+
 ##############################################
 #
 # functions to support outputs
@@ -832,7 +857,6 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# fix test all PROFs
 def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
     '''
     creates an attack table dictionary based on FAMILY 
@@ -962,7 +986,9 @@ def screen_attack_table(persona) -> None:
 
     attack_table = attack_table_composer(persona)
 
-    # prep the combat table
+    # these lines are for ease of reading and debugging 
+    # A = strike B = fling C = shoot
+    # BP = Skilled BNP = Raw MR = Max DB = Force PROF = Skills
     ABP = attack_table["A"]["BP"]
     ABNP = attack_table["A"]["BNP"]
     AMR = attack_table["A"]["MR"]

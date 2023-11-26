@@ -499,8 +499,6 @@ def alien_speciesizer_list(naming: AlienRecord) -> list:
         tableau = exp_tables.latinicize_shapes[faux]
         latini.append(choice(tableau))
 
-
-
     return latini
 
 def alien_culturizer(naming: AlienRecord) -> list:

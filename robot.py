@@ -14,6 +14,7 @@ import mutations
 import toy
 
 # todo consider minimum HPM for robot 
+# todo decay table calculator RP vs P
 
 # set up RobotRecord
 @dataclass
@@ -267,7 +268,11 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
     '''takes list of rolls for attack tables and adds to robot persona Attacks'''
 
     attack_tables_pivot = [exp_tables.robot_ram_dam, exp_tables.attack_table_one, exp_tables.attack_table_two, exp_tables.attack_table_three, exp_tables.attack_table_four]
-    fancy_attacks = {"Electro":"+2d8 DMG, +100 attack vs robots","Inertia":"*3 DMG +10","Stun":"DMG = Intensity","Vibro":"+20 DMG, +100 attack"}
+    fancy_attacks = {
+        "Electro":"+2d8 DMG, +100 vs robots",
+        "Inertia":"*3 DMG +10",
+        "Stun":"DMG = Intensity",
+        "Vibro":"+20 DMG, +100 attack"}
 
     
     for index, attack_table in enumerate(attack_tables_pivot):
@@ -531,7 +536,7 @@ def combot(comboy: RobotRecord) -> RobotRecord:
     comboy.FAMILY_SUB = please.choose_this(choices, "Please choose COMBOT sub-type.", comboy)
 
     ### generic spec sheet
-    specs = [f"Unconcerned about base family ({comboy.Base_Family})."]
+    specs = [f"Ignore base ({comboy.Base_Family})."]
 
     if comboy.FAMILY_SUB == "Expendable":
         ### expendable core values
@@ -568,11 +573,11 @@ def combot(comboy: RobotRecord) -> RobotRecord:
 
         ### defensive spec sheet
         specs.pop() # removes disregard for base_family
-        specs.append("Demoralize with pithy comments.")
-        specs.append(f"Fortify against an attack {comboy.INT * 4}%.")
-        specs.append(f"Intruder detection {comboy.AWE * 10} hex radius.")
+        specs.append("Demoralize with wit.")
+        specs.append(f"Fortify vs attack {comboy.INT * 4}%.")
+        specs.append(f"Detection {comboy.AWE * 10}h rad.")
         specs.append(f"Anti-detection detection {comboy.AWE + comboy.INT}%")
-        specs.append(f"Identify weapon that inflicts damage {comboy.INT * 2}%")
+        specs.append(f"ID weapon by damage {comboy.INT * 2}%")
         comboy.Spec_Sheet = specs
 
         return comboy # modified by side effects
@@ -591,7 +596,7 @@ def combot(comboy: RobotRecord) -> RobotRecord:
         comboy.Peripherals.extend(robotic_peripherals(comboy, 1))
 
         ### Offensive-Light spec sheet
-        specs.append("Violent solutions are preferable.")
+        specs.append("Violent solutions.")
         lesser_bots = please.roll_this("1d4-1")
         commanding = "Command: Nil" if lesser_bots == 0 else f"Command: {lesser_bots} expendable combot(s)"
         specs.append(commanding)
@@ -645,7 +650,7 @@ def combot(comboy: RobotRecord) -> RobotRecord:
         
         comboy.Attacks.sort()
         ### Offensive-Heavy spec sheet
-        specs.append("Mass destruction is preferred solution")
+        specs.append("Mass destruction solutions")
         comboy.Spec_Sheet = specs
 
         return comboy # modified by side effects
@@ -695,7 +700,7 @@ def explorations(expoh:RobotRecord) -> RobotRecord:
 
     ### explorations info
     expoh.FAMILY_TYPE = "Explorations"
-    specs = ["Designed to explore, learn and report."]
+    specs = ["Explore, learn and report."]
 
     # build subtype choices
     choices = ["Planetary"]
@@ -737,17 +742,17 @@ def explorations(expoh:RobotRecord) -> RobotRecord:
 
         expoh.Peripherals.extend(robotic_peripherals(expoh, 1))
 
-        specs.append("Created to explore unknown planets.")
-        specs.append("Comprehend languages and alien intelligence.")
+        specs.append("Explore unknown planets.")
+        specs.append("Decode alien comms and int.")
         specs.append("Exatmo hardened.")
         expoh.Spec_Sheet = specs
 
     specs.append("Atmospheric analysis.")
     specs.append("Communications.")
-    specs.append("Mineral identification.")
-    specs.append("Detect Toxins. Rads, poison etc.")
+    specs.append("Mineral id.")
+    specs.append("Detect Toxins.")
     specs.append("Terrain mapping.")
-    specs.append("Obsessed with collecting samples.")
+    specs.append("Obsessive sample collection.")
 
     expoh.Spec_Sheet = specs
     return
@@ -774,7 +779,7 @@ def hobbot(hobby:RobotRecord) -> RobotRecord:
     hobby.Peripherals.extend(robotic_peripherals(hobby, number))
     hobby.Value = 10000 + 20000 * number
 
-    specs = ["Highly modified hobbyist machines."]
+    specs = ["Highly modded hobby bots."]
     specs.append("+25 bonus for mechanics.")
     specs.append("No two are the same.")
     hobby.Spec_Sheet = specs
@@ -788,7 +793,7 @@ def industrial(indy: RobotRecord) -> RobotRecord:
     indy.Adapt = 5
     indy.HPM = please.roll_this("1d4+8") * indy.CON
     indy.Size_Cat =  "Medium"
-    specs = ["Capacitors of industry."]
+    specs = ["Electric labour."]
 
     # build subtype choices
     choices = []
@@ -817,11 +822,11 @@ def industrial(indy: RobotRecord) -> RobotRecord:
 
         indy.Peripherals.extend(robotic_peripherals(indy, 2))
 
-        specs.append("Likes to build things.")
-        if indy.INT >= 22: specs.append("Can design simple things.")
-        specs.append("Cannot fabricate complex TOYS.")
-        specs.append("Programmable by a mechanic.")
-        specs.append(f"Raw materials for {indy.CON} months.")
+        specs.append("Builds things.")
+        if indy.INT >= 22: specs.append("Designs simple things.")
+        specs.append("NOT complex TOYS.")
+        specs.append("Mech programmable.")
+        specs.append(f"{indy.CON} month raw materiel.")
         indy.Spec_Sheet = specs
 
     elif chosen == "Lifting":
@@ -839,10 +844,10 @@ def industrial(indy: RobotRecord) -> RobotRecord:
 
         indy.Peripherals.extend(robotic_peripherals(indy, 1))
 
-        specs.append("Likes to lift and organize.")
-        specs.append(f"Has {math.ceil(indy.DEX / 3)} lifting articulations.")
-        specs.append(f"Can lift {indy.WA * 3} kgs up to {indy.PSTR_Prime + indy.DEX_Prime} hexes.")
-        specs.append(f"Must roll vs CF ({indy.CF}) to drop things.")
+        specs.append("Lifts and organizes.")
+        specs.append(f"{math.ceil(indy.DEX / 3)} lifting arms.")
+        specs.append(f"{indy.WA * 3} kgs up to {indy.PSTR_Prime + indy.DEX_Prime} hexes.")
+        specs.append(f"CF roll ({indy.CF}) to drop things.")
         indy.Spec_Sheet = specs
 
     elif chosen == "Moving":
@@ -865,13 +870,12 @@ def industrial(indy: RobotRecord) -> RobotRecord:
 
 
         indy.Move = math.ceil(indy.Move * 1.5)
-        specs.append(f"Increased move to {indy.Move} h/u.")
-        specs.append(f"Can deliver {indy.WA * 3} kgs at {indy.Move} h/u.")
-        specs.append(f"Deliver range is {indy.AWE * 100} kilometers.")
+        specs.append(f"Deliver {indy.WA * 3} kgs at {indy.Move} h/u.")
+        specs.append(f"Range is {indy.AWE * 100} kms.")
         specs.append("Can read maps.")
         loading = ((indy.INT + indy.DEX) * 3) >= please.roll_this("1d100")
         if loading:
-            specs.append("This bot is self loading (not loathing).")
+            specs.append("Self loading, not loathing.")
         indy.Spec_Sheet = specs
 
     return
@@ -880,7 +884,7 @@ def janitorial(maid: RobotRecord) -> RobotRecord:
     ''' insert janitorial elements into record'''
 
     maid.FAMILY_TYPE = "Janitorial"
-    specs = ["Cleaning mopping and moping."]
+    specs = ["Clean, mop, mope."]
 
     # build subtype choices
     choices = ["Industrial"]
@@ -914,7 +918,7 @@ def janitorial(maid: RobotRecord) -> RobotRecord:
 
         maid.Peripherals.extend(robotic_peripherals(maid, 1))
 
-        specs.append("Combating entropy in the workplace.")
+        specs.append("Combat workplace entropy.")
         maid.Spec_Sheet = specs
 
     elif chosen == "Domestic":
@@ -937,7 +941,7 @@ def janitorial(maid: RobotRecord) -> RobotRecord:
 
         maid.Peripherals.extend(robotic_peripherals(maid, 1))
 
-        specs.append("Combating entropy in the home.")
+        specs.append("Combat domestic entropy.")
         maid.Spec_Sheet = specs
 
     return maid # altered by side effect
@@ -974,8 +978,8 @@ def maintenance(wrench:RobotRecord) -> RobotRecord:
 
 
     specs.append("Not a janitorial bot.")
-    specs.append("Has Mechanic specs for repairs.")
-    specs.append(f"Add {intel} (INT) to PT rolls.")
+    specs.append("Repairs as a mechanic.")
+    specs.append(f"Add ({intel}) to task rolls.")
     wrench.Spec_Sheet = specs
 
     return wrench # altered by side effect
@@ -1011,20 +1015,21 @@ def Policing(copper: RobotRecord) -> RobotRecord:
         copper.Size_Cat =  "Medium"
 
         # civil_offensive_systems
-        copper.Attacks.append("Stun 4d4 intensity for 1d4 units.")
+        copper.Attacks.append("Stun 4d4 int for 1d4 u.")
         offenses = robot_offensive_rolls([(attack_one_rolls, 1)])
         robot_offensive_systems(copper, offenses)
         copper.Defences.extend(robot_defensive_systems(copper, 1))
         copper.Peripherals.extend(robotic_peripherals(copper, 1))
-        specs.append(f"Make loud commands at double CHA ({copper.CHA * 2}.")
-        specs.append("Grapple and disarm with a successful to hit roll.")
+        specs.append(f"Loud commands bonus ({copper.CHA * 2}.")
+        specs.append("Grapple/disarm with attack roll.")
         copper.Spec_Sheet = specs
 
     elif chosen == "Riot":
 
         # riot policing
         copper.FAMILY_SUB = "Riot"
-        specs.append("Less lethal mob control. AKA riobot.")
+        specs.append("AKA Riobot")
+        specs.append("Less lethal mob control.")
         copper.Adapt = 10
         copper.Value = 300000
         copper.HPM = please.roll_this("1d4+9") * copper.CON
@@ -1033,15 +1038,15 @@ def Policing(copper: RobotRecord) -> RobotRecord:
         # no offensive systems
         copper.Defences.extend(robot_defensive_systems(copper, 1))
         copper.Peripherals.extend(robotic_peripherals(copper, 1))
-
-        specs.append(f"Grapple, disarm and detain up to {copper.PSTR} unruly targets.")
+        specs.append("Grapple/disarm with attack roll.")
+        specs.append(f"Detain {copper.PSTR} unruly targets.")
         specs.append(f"Crowd control devices:")
 
         # generate crowd control tools
 
         riot_policing_items = {
-            (1, 20): f"Water Cannon. {copper.PSTR} targets. Hit = knocked down.",
-            (21, 40): f"Tear Gas. {copper.CON} hex radius. {copper.CON} intensity. Blind for 1d8 units.",
+            (1, 20): f"Water Cannon. {copper.PSTR} Hit = knock down.",
+            (21, 40): f"Tear Gas. {copper.CON} h rad. {copper.CON} intensity. Blind for 1d8 units.",
             (41, 50): f"Stun Ray. {copper.PSTR} targets. {copper.CON} intensity. Stunned for 1d8 units.",
             (51, 60): f"Grav Disruptor.  {math.ceil(copper.CON / 2)} hex radius. {copper.CON} intensity or knocked down.",
             (61, 70): f"Force Beam {copper.PSTR} targets. {copper.PSTR} intensity. Tossed 1d4 hexes.",
@@ -1430,8 +1435,9 @@ def fresh_robot(player_name:str) -> None:
         fresh.Attacks.append(f'Ram: {please.get_table_result(exp_tables.robot_ram_dam)}') # every robot can ram, except Androids
 
     ### robot age 
-    fresh.Age = alien_life_span() * 31536000
-    fresh.Age_Cat = please.get_table_result(robot_age_cat)
+    # age cat and age are completely disassociated in robots
+    fresh.Age = alien.alien_life_span() * 31536000
+    fresh.Age_Cat = please.get_table_result(exp_tables.robot_age_cat)
 
     ### requires bot_type
     fresh.Locomotion = robotic_locomotion(fresh)
@@ -1499,6 +1505,11 @@ def bespoke_robot(player_name:str) -> None:
     ### past this line requires bot_type
 
     bespoke.Locomotion = robotic_locomotion(bespoke)
+
+
+        ### robot age 
+    bespoke.Age = alien.alien_life_span()
+    bespoke.Age_Cat = please.get_table_result(exp_tables.robot_age_cat)
 
     robot_hite_wate_calc(bespoke)
   

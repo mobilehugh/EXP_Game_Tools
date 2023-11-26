@@ -2688,7 +2688,7 @@ alien_life_span_descriptors = {
     "Progeny": ('1d6', 10),
     "Prodigal": ('1d6', 100),
     "Prodigal - Long": ('1d12', 100),
-    "Celestial":('1d10000', 100),
+    "Celestial":('1d9999', 100),
 }
 
 alien_life_stages = {
@@ -3068,8 +3068,6 @@ robot_base_family = {
  
 # robot life span uses 'alien_life_span_data' 
 
-
-
 robot_age_cat = {
     (1,10):"Pristine",
     (11,20):"Worn in",
@@ -3079,7 +3077,6 @@ robot_age_cat = {
     "name":"Robotic Age Category",
     "die_roll":"1d100",
 }
-
 
 robotic_power_plant = {
     (1, 10):"Chemical Solid",
