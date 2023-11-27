@@ -269,10 +269,10 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
 
     attack_tables_pivot = [exp_tables.robot_ram_dam, exp_tables.attack_table_one, exp_tables.attack_table_two, exp_tables.attack_table_three, exp_tables.attack_table_four]
     fancy_attacks = {
-        "Electro":"+2d8 DMG, +100 vs robots",
-        "Inertia":"*3 DMG +10",
-        "Stun":"DMG = Intensity",
-        "Vibro":"+20 DMG, +100 attack"}
+        "Electro":"+100 vs bots, +2d8 DMG",
+        "Inertia":"10+3xDMG",
+        "Stun":"Intensity=DMG",
+        "Vibro":"+100,+20 DMG"}
 
     
     for index, attack_table in enumerate(attack_tables_pivot):
@@ -289,7 +289,7 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
                     offender.Attacks.append(f'Strike: {please.get_table_result(exp_tables.strike_attacks)}')
                 else:
                     fancy_strike = strike_break[1]
-                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(exp_tables.strike_attacks)}, {fancy_attacks[fancy_strike]}')
+                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(exp_tables.strike_attacks)}; {fancy_attacks[fancy_strike]}')
                     
             elif "Fling" in new_attack:
                 strike_break = new_attack.split(" ")
@@ -297,7 +297,7 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
                     offender.Attacks.append(f'Fling: {please.get_table_result(exp_tables.fling_attacks)}')
                 else:
                     fancy_strike = strike_break[1]
-                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(exp_tables.fling_attacks)}, {fancy_attacks[fancy_strike]}')
+                    offender.Attacks.append(f'{new_attack}: {please.get_table_result(exp_tables.fling_attacks)}; {fancy_attacks[fancy_strike]}')
           
             elif "Defensive" in new_attack:
                 offender.Defences.append(please.get_table_result(exp_tables.robotic_defences))
@@ -622,6 +622,8 @@ def combot(comboy: RobotRecord) -> RobotRecord:
         comboy.AR = 775 if comboy.AR < 775 else comboy.AR
 
         ### integrated heavy weapon EXCEPTION  for Offensive-Heavy combot
+
+        # todo there is an occasional out of range error here ack
         roll = please.roll_this("1d100") + comboy.PSTR
         for spread, weapon in exp_tables.combot_heavy_weapons.items():
             if roll in range(*spread):
@@ -629,19 +631,19 @@ def combot(comboy: RobotRecord) -> RobotRecord:
         
         bombay = artay = ""
         if "Pop" in weapon:
-            comboy.Peripherals.append("Integrated Popcorn Maker")
+            comboy.Peripherals.append("Popcorn Maker")
 
         if "Bomb" in weapon:
-            bombay = f'Integrated bomb: {toy.toy_cat_type("Bomb")}'
+            bombay = f'Bomb: {toy.toy_cat_type("Bomb")}'
 
         if "Missile" in weapon:
-            bombay = f'Integrated Missile: delivers {toy.toy_cat_type("Bomb")} bomb.'
+            bombay = f'Missile: delivers {toy.toy_cat_type("Bomb")} bomb.'
        
         if "Art" in weapon:
-            artay = f'Integrated artillery: {toy.toy_cat_type("Artillery")}'
+            artay = f'Artillery: {toy.toy_cat_type("Artillery")}'
 
         if "Naval" in weapon:
-            artay = f'Integrated naval artillery: base {toy.toy_cat_type("Artillery")}'
+            artay = f'Naval artillery: base {toy.toy_cat_type("Artillery")}'
 
         if bombay:
             comboy.Attacks.append(bombay)

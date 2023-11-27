@@ -135,10 +135,6 @@ def base_armour_rating(armourize: AllRecords) -> AllRecords:
 
     return armourize # is altered by side effects
 
-
-
-
-
 def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
     """
     persona attribute shifts based on descriptive words
@@ -195,7 +191,6 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
 
     return descriptive # is altered by side effect
 
-
 # fix manual update needs subcategories based attributes, on FAMILY, etc
 def manual_persona_update(updating: AllRecords) -> AllRecords:
     ''' painfully update every element in persona record'''
@@ -219,7 +214,6 @@ def manual_persona_update(updating: AllRecords) -> AllRecords:
             print(f'{attr} = {value}')
 
     return updating # altered by side effects in this function
-
 
 def mutations_bespoke(mutate_RP: AllRecords) -> AllRecords:
 
@@ -245,7 +239,6 @@ def mutations_bespoke(mutate_RP: AllRecords) -> AllRecords:
                 break
 
     return mutate_RP # altered by side effect at functions outside this function
-
 
 # todo code review this mess
 def role_play_RP_arc() -> str:

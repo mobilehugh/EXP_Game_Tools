@@ -3,10 +3,12 @@ import os
 import time
 import webbrowser
 import sys
+import re
 
 from fpdf import FPDF
 from dataclasses import dataclass
 from typing import Tuple, Union
+from collections import Counter
 
 import alien
 import please
@@ -543,7 +545,7 @@ class PDF(FPDF):
         '''
         prints the robotic mechanical data
         '''
-        blob = f"**Age:** {persona.Age:.3e} {persona.Age_Suffix}, ({persona.Age_Cat}) **Hite:** {persona.Hite} {persona.Hite_Suffix} **Wate:** {persona.Wate} {persona.Wate_Suffix} ({persona.Size_Cat})"
+        blob = f"**Age:** {persona.Age:.2e} {persona.Age_Suffix}, ({persona.Age_Cat}) **Hite:** {persona.Hite} {persona.Hite_Suffix} **Wate:** {persona.Wate} {persona.Wate_Suffix} ({persona.Size_Cat})"
         self.markdown_internal(blob,11)    
 
         ### build usage spec column
@@ -551,22 +553,59 @@ class PDF(FPDF):
         user_column.extend(persona.Spec_Sheet) # from the robot
 
         ### build tech spec column
+
+        ### prebuild sensors string
+        # todo i dare you to make this into a comprehension
+        sensors_dict = Counter(persona.Sensors)
+        sensors_list = "  "
+        for sens,amt in sensors_dict.items():
+            sensors_list += f'{sens}-{amt} '
+
         tech_column = ["Tech Specs"] # title
         tech_column.extend([
-            f'Fabricator: {persona.Fabricator}',
-            f'Model Name: {persona.Model}',
-            f"Base Type: {persona.Base_Family}",
+            f'Fabricator: ',
+            f'  {persona.Fabricator}',
+            f'Model Name:',
+            f'  {persona.Model}',
+            f"Base Type",
+            f"  {persona.Base_Family}",
             f"Adaptability: {persona.Adapt}",
             f'Power Plant: {persona.Power_Plant}',
-            f'Power Reserve: {persona.Power_Reserve}',
-            f"Sensors: {persona.Sensors}",
+            f'Power Reserve: {persona.Power_Reserve} months',
+            f"Sensors:",
+            f"{sensors_list}",
             f'Value: {persona.Value}',])
 
         ### build combat column
-        combat_column = ["Combat Peripherals"]
-        combat_column.append(f'Ramming Level ({persona.Ramming}):')
-        combat_column.append(f'--{exp_tables.ramming_freedom[persona.Ramming]}')
+        combat_column = ["Combat Specs"]
+        combat_column.append(f'Ramming Lvl ({persona.Ramming}):')
+        combat_column.append(f'  {exp_tables.ramming_freedom[persona.Ramming]}')
         combat_column.extend(persona.Attacks)
+
+        ### splitting certain weapons that are too long
+        split_dict={}
+        print(f"\n{combat_column = }\n")
+
+        for splittable in combat_column:
+            for split_target in ["Vibro", "Inertia", "Electro", "Stun"]:
+                if re.search(r'\b' + re.escape(split_target) + r'\b', splittable, re.IGNORECASE): 
+                    print(f'\n{splittable = }, {split_target = }\n')
+                    fancy_1,fancy_2 = splittable.split(';')
+                    fancy_index = combat_column.index(splittable)
+                    split_dict[fancy_index] = [fancy_1, fancy_2]
+                    print(f'\n{fancy_index = } {fancy_1 = } {fancy_2 = }')
+                    print(f'{split_dict[fancy_index] = }\n')
+
+        if split_dict:
+            print(f"\nPRE -- {combat_column = }\n")
+            for fancy_index,fancy_things in split_dict.items():
+                combat_column[fancy_index] = fancy_things[0]
+                combat_column.insert(fancy_index+1,fancy_things[1])
+                print(f"POST -- {combat_column = }\n")
+
+
+        
+
         if persona.Defences:
             combat_column.extend(persona.Defences)
 
@@ -595,7 +634,7 @@ class PDF(FPDF):
 
         self.set_font("Helvetica", size=10)
         self.set_fill_color(0)
-        set_columns = (50,50,50,50)
+        set_columns = (50,50,60,40)
         with self.table(
             align="LEFT",
             width = sum(set_columns),
@@ -911,7 +950,7 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
             AMR = 700 + ABP
             ADB = level
         else:
-            ABP = ABNP = AMR = ADB = "---"
+            ABP = ABNP = AMR = ADB = "  -"
 
         # Alien FLING row (Type B)
         if "Fling" in alien_attacks:
@@ -919,7 +958,7 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
             BMR = 700 + BBP
             BDB = level
         else:
-            BBP = BBNP = BMR = BDB = "---"
+            BBP = BBNP = BMR = BDB = "  -"
 
         # Alien SHOOT row (Type C)
         if "Shoot" in alien_attacks:
@@ -927,7 +966,7 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
             CMR = 700 + CBP
             CDB = level
         else:
-            CBP = CBNP = CMR = CDB = "---"
+            CBP = CBNP = CMR = CDB = "  -"
         
         # populate the PROF column
 
@@ -940,19 +979,19 @@ def attack_table_composer(attack_tabler:exp_tables.PersonaRecord)-> dict:
         # Robot STRIKE row (Type A)
         ABP = (5 * dex) + (5 * intel) + (pstr_prime * pstr) + (level * pstr)
         ABNP = 0
-        AMR = "---"
+        AMR = "  -"
         ADB = pstr
 
         # Robot FLING row (Type B)
         BBP = (5 * awe) + (5 * pstr) + (dex_prime * dex) + (level * dex)
         BBNP = 0
-        BMR = "---"
+        BMR = "  -"
         BDB = math.ceil(pstr / 2)
 
         # Robot SHOOT row (Type C)
         CBP = (5 * awe) + (5 * dex) + (intel_prime * intel) + (level * intel)
         CBNP = 0
-        CMR = "---"
+        CMR = "  -"
         CDB = 0
 
     ### build the attack table to return
@@ -1014,7 +1053,7 @@ def screen_attack_table(persona) -> None:
     CPROF = exp_tables.numbers_2_words[CPROF] if isinstance(CPROF,int) else CPROF
 
     # print out the combat table
-    print(f'\nATTACK TABLE: -- {persona.Vocation} Level {persona.Level}')
+    print(f'\nATTACK TABLE:    {persona.Vocation} Level {persona.Level}')
     print(f'{" ":>6} {"Skill":>6} {"Raw":>6} {"Max":>6} {"Force":>6} {"PROF":>5}')
     print(f"Strike {ABP:>6} {ABNP:>6} {AMR:>6} {ADB:>6}  {APROF}")
     print(f"Fling  {BBP:>6} {BBNP:>6} {BMR:>6} {BDB:>6}  {BPROF}")

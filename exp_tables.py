@@ -2935,7 +2935,6 @@ core_society = {
     "Philosophy": role_play_RP_philosophy,
 }
 
-
 ### Attack Table elements (BNP and MR and Damage Bonus are derived )
 
 vocation_non_proficient = {
@@ -3608,18 +3607,18 @@ fling_attacks = {
 
 robot_ram_dam = {
     (1, 46):"Blunt Flat (1d4)",
-    (47, 76):"Blunt Protuberance (1d6)",
+    (47, 76):"Blunt Point (1d6)",
     (77, 91):"Edge (1d8)",
-    (92, 100):"Sharp Protuberance (1d10)",
+    (92, 100):"Sharp Point (1d10)",
     "name":"Robotic Ramming Damage",
     "die_roll":"1d100",
 } 
 
 ramming_freedom = [
-    "Win CF, Take DMG",
-    "No CF, Take DMG",
-    "No CF, NO DMG",
-    "No CF, No DMG, +30@lvl"
+    "CF and DMG",
+    "No CF, DMG",
+    "No CF, no DMG",
+    "+30@lvl"
 ]
 
 
@@ -3844,7 +3843,6 @@ combot_heavy_weapons = {
     (111, 120): "Artillery Bomb",
     (121, 150): "Artillery Missile",
     (151, 666): "Naval",
-    "name": "Combot Heavy Weapons",
 }
 
 datalyzer_mental_chance = {
