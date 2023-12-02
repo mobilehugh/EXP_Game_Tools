@@ -529,7 +529,7 @@ def do_referee_maintenance():
     "EXPS": vocation.update_persona_exps,
     "Level": vocation.update_persona_exps,
     "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
-    "PDF <- off service": lambda persona: outputs.outputs_workflow(persona, "screen"), # todo change back when PDF working
+    "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"), # todo change back when PDF working
     "Attributes": lambda persona: core.manual_persona_update(persona),
     "Change Record": lambda persona: do_referee_maintenance(),}
     

@@ -213,7 +213,6 @@ class PDF(FPDF):
             for datum in data_row[:-1]: # sliced to hide format tuple
                 font,style,size = data_row[-1] # format tuple
                 self.set_font(font,style=style,size=size)
-                print(f"{font} \u2074")
                 datum = str(datum) if isinstance(datum, int) else datum
                 self.cell(
                     w=col_width, 
@@ -584,27 +583,24 @@ class PDF(FPDF):
 
         ### splitting certain weapons that are too long
         split_dict={}
-        print(f"\n{combat_column = }\n")
+        #print(f"\n{combat_column = }\n")
 
         for splittable in combat_column:
             for split_target in ["Vibro", "Inertia", "Electro", "Stun"]:
                 if re.search(r'\b' + re.escape(split_target) + r'\b', splittable, re.IGNORECASE): 
-                    print(f'\n{splittable = }, {split_target = }\n')
+                    #print(f'\n{splittable = }, {split_target = }\n')
                     fancy_1,fancy_2 = splittable.split(';')
                     fancy_index = combat_column.index(splittable)
                     split_dict[fancy_index] = [fancy_1, fancy_2]
-                    print(f'\n{fancy_index = } {fancy_1 = } {fancy_2 = }')
-                    print(f'{split_dict[fancy_index] = }\n')
+                    #print(f'\n{fancy_index = } {fancy_1 = } {fancy_2 = }')
+                    #print(f'{split_dict[fancy_index] = }\n')
 
         if split_dict:
-            print(f"\nPRE -- {combat_column = }\n")
+            #print(f"\nPRE -- {combat_column = }\n")
             for fancy_index,fancy_things in split_dict.items():
                 combat_column[fancy_index] = fancy_things[0]
                 combat_column.insert(fancy_index+1,fancy_things[1])
-                print(f"POST -- {combat_column = }\n")
-
-
-        
+                #print(f"POST -- {combat_column = }\n")
 
         if persona.Defences:
             combat_column.extend(persona.Defences)
@@ -615,10 +611,6 @@ class PDF(FPDF):
             peripherals_column.extend(persona.Peripherals)
         else:
             peripherals_column.append("None")
-
-
-
-        # fix width robot info width balance in APPENDS
 
         ### column Height balancing
         max_len = max([len(user_column),len(tech_column),len(combat_column),len(peripherals_column)]) 
@@ -656,19 +648,16 @@ class PDF(FPDF):
         bio_data_pivot[persona.FAMILY](persona)
         return
 
-    def referee_persona_fun(self,persona,x:float=0,y:float=0)-> float:
+    def referee_persona_fun(self,persona)-> None:
         '''
         prints referee persona role playing suggestions
         '''
-        y_bump = 5.6
-        self.grey_box_title("ROLE PLAY FUN",x,y)
-        y += 2+y_bump
         for fun in persona.RP_Fun:
-            self.print_MD_string(fun,12,8,y)
-            y += y_bump
-        return y
+            self.markdown_internal(fun,11)
 
-    ## sheet support functions
+        return
+
+    ### sheet support functions
     def center_grid(self, radius=25)-> None:
         '''
         draws a center circle and grid lines
@@ -775,6 +764,10 @@ class PDF(FPDF):
         '''
         y_bump = 8
         x,y = self.get_x(), self.get_y()
+        top,left = self.set_or_get("inside note lines")
+        print(f'\nin note lines {x = } and {y = } \n')
+
+
         y += y_bump
         lines = round((279.4 - y)/y_bump)
         self.set_draw_color(120) #dark grey 
@@ -783,45 +776,40 @@ class PDF(FPDF):
         for more_y in range(int(y),int(y+y_bump*lines),8):
             self.line(8, more_y, 210, more_y)
 
-    def equipment_lines(self, persona, lines:int, x:float = 0, y:float = 0)->float:
+    def equipment_lines(self, persona)->None:
         '''
         prints weight allowance and equipment title lines
         draws split lines for equipment
         '''
-        
-        y_bump = 8
-        self.grey_box_title('TOYS',5,y)
-        x+= 3 + self.get_string_width("TOYS")
-        self.print_MD_string(f"**Carry:** up to {persona.WA*1.5} kg = {persona.Move} h/u. **Sprint:** <{persona.WA/4} kg = {persona.Move*2} h/u. **Lift:** {persona.WA*2.5} kg = 0 h/u.",12,x,y)
-        y+= 3 + y_bump
 
-        ### item wate info header
-        self.print_MD_string(f'**ITEM**{" "*48}**WT**{" "*7}**TTL**{" "*7}**INFO**',12,8,y)
-        y+= y_bump*1.5
 
-        # equipment lines to PDF
+        if persona.FAMILY == "Alien" and persona.Society["Tools"] == "Flora or Fauna":
+            return
+
+        left,top = self.set_or_get()
+        self.set_or_get(5.4,top)
+        self.section_title(f"TOYS", "Technological Object Yield System")
+        left,top = self.set_or_get("after TOYS  stripe")
+
+        # equipment list header
+        self.set_or_get(6.4,top+6.5, "before equipment lines ")
+        self.markdown_internal(f'**ITEM**{" "*40}**WT**{" "*7}**TTL**{" "*7}**INFO**')
+        left,top = self.set_or_get()
+        # prepare equipment lines
         self.set_draw_color(120) #dark grey 
         self.set_line_width(0.1)
-
-        for more_y in range(int(y),int(y+y_bump*lines),8):
-            self.line(8, more_y, 69,more_y) # item
-            self.line(73,more_y, 86,more_y) #wt
-            self.line(90,more_y, 103,more_y) #ttl
-            self.line(107,more_y, 208,more_y) #info
-            
-        return more_y
+        
+        # output equipment lines
+        lines = 15
+        bump = 8
+        for top in range(int(top+bump),int(top+bump*lines),bump):
+            self.line(8, top, 69,top) # item
+            self.line(73,top, 86,top) # wt
+            self.line(90,top, 103,top) # ttl
+            self.line(107,top, 208,top) # info
+        self.set_or_get(6.4,top,"reset inside equipment lines")
+        return 
     
-    def trackers(self,x:float=0,y:float=0):
-        y_bump = 8
-        self.grey_box_title('TRACKERS',5,y)
-        y+=y_bump*1.5
-        self.set_xy(8,y)
-        self.set_font('ZapfDingbats','',18)
-        self.cell(txt=f'{"m"*5}  {"m"*5} {"m"*5}     {"m"*5}  {"m"*5} {"m"*5}', align='L')
-        y += y_bump
-        self.set_xy(8,y)
-        self.cell(txt=f'{"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}  {"o"*5} {"o"*5}', align='L')
-
     def sheet_footer(self, persona:AllRecords) -> None:
         '''
         prints the info at page bottom outside perimeter box
@@ -863,8 +851,7 @@ class PDF(FPDF):
                 self.regular_polygon(x, y, polyWidth=polywanna, rotateDegrees=270, numSides=6, style="D")
                 x += apothem
             y += apothem*(apothem/polywanna)
-        print(f"{row = } {col = } {hite = } {width = }")
-
+        #print(f"{row = } {col = } {hite = } {width = }")
 
 ##############################################
 #
@@ -879,13 +866,13 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
     then shows it in the default browser
     """
     file_dos = r'C:\Users\mobil\Documents\EXP_Game_Tools\Records\Bin\37bf560f9d0916a5467d7909.pdf'
-
+    print(f"Attempting to show {file_dos}")
     try:
         for root, _, files in os.walk(search_path):
             if file_name in files:
                 found_file = os.path.join(root, file_name)
                 browser_file = "file:///" + found_file.replace('\\','/')
-                print(f'{file_name = } {browser_file = }')
+                #print(f'{file_name = } {browser_file = }')
                 webbrowser.get('windows-default').open_new('file:///C:/Users/mobil/Documents/EXP_Game_Tools/Records/Bin/37bf560f9d0916a5467d7909.pdf')
                 #webbrowser.get('brave').open_new(browser_file)
                 #webbrowser.open_new(browser_file)
@@ -1076,180 +1063,246 @@ def pdf_output_chooser(persona) -> None:
     '''
     choose between pdf styles
     '''
-    function_map = {
-        "One Shot - One sheet": pdf_one_shot,
-        "Campaign - Two sheets": pdf_campaign,
-    }
-    choice_list = [key for key in function_map]
-    function_chosen  = please.choose_this(choice_list, "PDF type needed? ")
-    function_map[function_chosen](persona)
+    choice_list = [
+        "Face Sheet One Shot",
+        "Face Sheet Campaign",
+        "Back Sheet Campaign",
+    ]
+    pdf_chosen  = please.choose_this(choice_list, "PDF type needed? ")
+
+    ###  PDF page prep
+    pdf = PDF(orientation="P", unit="mm", format=(215.9, 279.4))
+    pdf.set_margin(0)
+    pdf.set_auto_page_break(False)
+    pdf.add_page()
+
+    ### PDF output 
+    if pdf_chosen == "Face Sheet One Shot":
+        persona_pdf(pdf, persona, one_shot=True)
+    elif pdf_chosen == "Face Sheet Campaign":
+        persona_pdf(pdf, persona, one_shot=False)
+    elif pdf_chosen == "Back Sheet Campaign":
+        campaign_pdf(pdf,person)
+    else:
+        print("what the hell dude")
+
+    ### PDF store and output
+    pdf.output(
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+        dest="F",
+    )
+    show_pdf()
+
+def persona_pdf(pdf, persona,one_shot)->None:
+    '''
+    organizes print out of all persona data on one page
+    '''
+
+    # persona title left justified
+    pdf.set_or_get(3.3, 5.7,"persona title")
+    pdf.persona_title(f"**PERSONA RECORD** for {persona.Persona_Name}",18)
+
+    # player title right justified
+    right_text = f"**Player:** {persona.Player_Name}"
+    pdf.set_or_get(216, 7.5, "player title")
+    pdf.player_title(right_text,12)
+
+    # attributes stripe
+    pdf.set_or_get(5.4,17.5, "attribute stripe")
+    pdf.section_title("ATTRIBUTES", persona.Quick_Description)
+    left,top = pdf.set_or_get("after attribute stripe")
+
+    # attributes table
+    pdf.set_or_get(6.4,top+8,"before attributes table")
+    pdf.attributes_table(persona)
+    left, top = pdf.set_or_get("after attributes table")
+
+    # combat info stripe
+    pdf.set_or_get(5.4, top + 2.3,"before combat into title")
+    pdf.section_title("COMBAT INFO", pdf.persona_level_info(persona))
+    left,top = pdf.set_or_get("after combat table info")
+
+    # movement and AR line
+    pdf.set_or_get(6.4,top +7.2, "before move AR line")
+    moving = f'{persona.Move} h/u' if persona.FAMILY in ["Anthro", "Robot"] else f'land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'
+    pdf.markdown(f'**MOVEMENT** {moving}  **ARMOUR RATING (AR)** {persona.AR}  **____  ____**')
+    left,top = pdf.set_or_get("after move AR line")
+
+    # attack table title
+    pdf.set_or_get(6.4, top + 6.8, "before attack table title")
+    pdf.markdown("**ATTACK TABLE**")
+    left,top = pdf.set_or_get("after attack table title")
+
+    # attack table, skills, HPS
+    pdf.set_or_get(7.2,top + 7, "before attack table") # correct left for centering of table elements
+    pdf.attack_table_pdf(persona)
+    left,top = pdf.set_or_get("after attack table")
+
+    # if alien show attack description
+    if persona.FAMILY == "Alien":
+        pdf.set_or_get(6.4,top + 2.6, "before alien attack desc") # correct left for centering of table elements
+        pdf.markdown_internal(f'**Attack Description: {persona.Attack_Desc}**', 11)
+        left,top = pdf.set_or_get("after alien attack desc")
+
+    # if player show attack table explainer
+    if not persona.RP:
+        pdf.set_or_get(6.4, top+1, "before attack table explainer")
+        pdf.attack_table_explainer()
+        left,top = pdf.set_or_get("after attack table explainer")
+
+    # bio info stripe
+    pdf.set_or_get(5.4, top + 2.3,"before bio info title")
+    bio_title = "BIO INFO" if persona.FAMILY in ["Anthro","Alien"] else "MECH INFO"
+    pdf.section_title(bio_title, pdf.persona_bio_info(persona))
+    left,top = pdf.set_or_get("after bio info info title")
+
+    # persona bio data
+    pdf.set_or_get(6.2,top+6.5,f"before {persona.FAMILY} bio list")
+    pdf.family_bio_data(persona)
+    left,top = pdf.set_or_get(f"after {persona.FAMILY} bio list")
+
+    # mutations header
+    pdf.set_or_get(6.2, top,"before mutation header")
+    pdf.mutation_header(persona)
+    left,top = pdf.set_or_get("after mutation header")
+
+    # mutations list
+    if len(persona.Mutations) > 0:
+        pdf.set_or_get(6.4,top+0.3,"before mutation list")
+        pdf.mutation_list(persona)
+        left,top = pdf.set_or_get("after mutation list")
+
+    # task info stripe
+    pdf.set_or_get(5.4, top + 2.3,"before task info title")
+    pdf.section_title("TASK INFO", pdf.persona_level_info(persona))
+    left,top = pdf.set_or_get("after task info title")
+
+    # persona task info
+    pdf.set_or_get(5.4, top + 7.0,"before task info ")
+    pdf.task_info(persona)
+    left,top = pdf.set_or_get("after task info ")
+
+    # persona task addendum
+    pdf.set_or_get(5.4, top,"before task addendum ")
+    pdf.task_info_addendum(persona)
+    left,top = pdf.set_or_get("after task addendum ")
+
+    # space for notes check
+    '''if enough space for notes and lines print notes and lines '''
+
+    if persona.RP_Cues:
+        # RP Fun stripe
+        pdf.set_or_get(5.4, top + 2.3,"before RP Fun Stripe")
+        pdf.section_title("REFEREE PERSONA CUES", persona.Persona_Name)
+        left,top = pdf.set_or_get("after RP Fun Stripe")
+
+        # RP Cues
+        pdf.set_or_get(5.4, top + 7.0,"before RP Fun")
+        pdf.referee_persona_fun(persona)
+        left,top = pdf.set_or_get("after RP Fun")
+
+
+    if 280 - top > 40 and one_shot:
+        # notes info stripe
+        pdf.set_or_get(5.4, top,"before NOTE stripe")
+        pdf.section_title("NOTES", f"for {persona.Player_Name} and {persona.Persona_Name}")
+        left,top = pdf.set_or_get("after NOTE stripe ")
+
+        # make some lines
+        pdf.set_or_get(5.4, top +8,"before lines")
+        pdf.note_lines()
+        left,top = pdf.set_or_get("after note lines ")
+
+    pdf.sheet_footer(persona)
+    pdf.perimiter_box() # must go last for z level
+
+    if one_shot:
+        backsheet_one_shot(pdf,persona)
+    else:
+        backsheet_campaign(pdf,persona) 
+
+def wate_allowance(pdf,persona)->None:
+    '''
+    wate allowance output for personas
+    robot and anthros are standard
+    aliens have feral and different movement types
+    '''
+
+    # wate allowance title stripe
+    pdf.set_or_get(5.4,17.5, "before WA Stripe")
+    pdf.section_title(f"WATE ALLOWANCE", f"{persona.WA} kg for {persona.FAMILY} with move {persona.Move} h/u")
+    left,top = pdf.set_or_get("after WA stripe")
+
+    pdf.set_or_get(6.4,top+6.5, "before WA comment")
+    if persona.FAMILY == "Anthro":
+        pdf.markdown_internal(f"Sprint ({persona.Move*2} h/u): **<{persona.WA/4} kg** Carry ({persona.Move} h/u): **<{persona.WA*1.5} kg.  Lift Max (0 h/u): **{persona.WA*2.5}kg.**")
+        left,top = pdf.set_or_get("after WA comment")
+        pdf.set_or_get(left,top+3,"before possible TOYS")
+        pdf.equipment_lines(persona)
+  
+
     
-def pdf_campaign(persona) -> None:
+    if persona.FAMILY == "Alien" and persona.Society["Tools"] == "Flora or Fauna":
+        WA_comment = "Flora and Fauna can only push or pull up to lift."
+
+    left,top = pdf.set_or_get("after possible TOYS in wate allowance")
+    return
+
+def backsheet_one_shot(pdf, persona)->None:
+    '''
+    full page of equip and notes for one shot
+    '''
+
+    pdf.add_page()
+    print(f"\n new page added")
+
+    # persona title left justified
+    pdf.set_or_get(3.3, 5.7,"persona title")
+    pdf.persona_title(f"**PERSONA RECORD** for {persona.Persona_Name}",18)
+
+    # player title right justified
+    right_text = f"**Player:** {persona.Player_Name}"
+    pdf.set_or_get(216, 7.5, "player title")
+    pdf.player_title(right_text,12)
+
+    wate_allowance(pdf,persona)
+    left,top = pdf.set_or_get("after possible TOYS in backsheet")
+
+    # notes info stripe
+    pdf.set_or_get(5.4, top+3,"before NOTE stripe")
+    pdf.section_title("NOTES", f"for {persona.Player_Name} and {persona.Persona_Name}")
+    left,top = pdf.set_or_get("after NOTE stripe ")
+
+    # make some lines
+    pdf.set_or_get(5.4, top +8,"before note lines")
+    pdf.note_lines()
+    left,top = pdf.set_or_get("after note lines ")
+
+    pdf.sheet_footer(persona)
+    pdf.perimiter_box()
+
+def backsheet_campaign(persona) -> None:
     '''
     generates a campaign PDF 2 PAGES 4 sided
     allows for equipment and notes to be preserved between front_sheet updates 
     '''
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    pdf.set_margin(0)  # set margins to 0
+
+    pdf.add_page()
 
     ### PAGE ONE front
-    persona_front_sheet(pdf,persona)
-
-    ### PAGE ONE back
-    pdf.add_page() # back page 1
-    pdf.pdf_do_not_use() # here for lowest z
-    pdf.title_line(persona,'Campaign')
-    pdf.data_footer(persona)
-    pdf.perimiter_box()
-
-    ### PAGE TWO front
     pdf.add_page()
     pdf.title_line(persona,'Campaign')
     pdf.equipment_lines(persona, 28,8,16)
     pdf.data_footer(persona)
     pdf.perimiter_box()
 
-    ### PAGE TWO back
+    ### PAGE ONE back
     pdf.add_page()
     pdf.title_line(persona,'Campaign')
     pdf.note_lines(28,8,16)
     pdf.data_footer(persona)
     pdf.perimiter_box()
-
     
-    pdf.output(
-        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
-        dest="F",
-    )
-    show_pdf()
-
-def pdf_one_shot(persona) -> None:
-    '''
-    generates a one_shot PDF 1 sheet 2 pages
-    used for RPs or minimal note personas
-    '''
-    pdf = PDF(orientation="P", unit="mm", format=(216, 279))
-    persona_front_sheet(pdf, persona)
-    equip_notes_one_shot(pdf,persona)
-
-    pdf.output(
-        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
-        dest="F",
-    )
-    show_pdf()
-
-def persona_front_sheet(pdf, persona)->None:
-    '''
-    organizes print out of all persona data on one page
-    '''
-    pdf.set_margin(0)
-    the_y = 18
-    
-    pdf.add_page()
-    pdf.title_line(persona)
-    pdf.data_footer(persona)
-
-    ### attributes 3 line all calculated
-    pdf.attributes_lines(persona,8,the_y)   
-
-    ### combat heading
-    the_y+=32
-    pdf.grey_box_title('COMBAT INFO',5,the_y)
-
-    ### combat info
-    x=9 + pdf.get_string_width('COMBAT INFO')
-    pdf.persona_level_info(persona,x,the_y+.5)
-    
-    ### building move, AR, line 
-    x=8
-    the_y+=8
-    
-    ### movement
-    blob = '**MOVE**'
-
-    if persona.FAMILY == 'Alien':
-        blob += f'  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'      
-    else:
-        blob += f'  {persona.Move} h/u'
-
-    pdf.print_MD_string(blob, 14,x,the_y)
-
-    ### armour rating
-    x+= 4 + pdf.get_string_width(blob)
-    pdf.print_MD_string("**ARMOUR RATING (AR)**",14,x,the_y)
-    x+= 1 + pdf.get_string_width("**ARMOUR RATING (AR)**", markdown=True)
-    pdf.print_MD_string(f'{persona.AR}   **____   ____**',14,x,the_y)
-
-    ### attack table header
-    the_y+=8
-    pdf.print_MD_string('**ATTACK TABLE**', 14,8,the_y)
-    
-    ### hit points header
-    pdf.print_MD_string(f'**HIT POINTS (MAX = {persona.HPM})**', 14,105,the_y)
-
-    ### proficiencies header
-    pdf.print_MD_string('**Conditions**',14,162,the_y)
-
-    ### hit points box
-    the_y +=8
-    pdf.set_line_width(.3)
-    pdf.rect(106, the_y, 54, 29.6, "D")
-
-    ### skilled weapon lines
-    pdf.set_line_width(.2)
-    pdf.set_draw_color(80)
-    for y in range(the_y,the_y+36,6):
-        pdf.line(162,y,208,y)
-
-    ### combat table output
-    # for now aliens only get vocation table if they have a vocation
-    pdf.pdf_attack_table(persona,8,the_y)
-
-    ### combat table explainer
-    the_y += 30
-    the_y = pdf.combat_table_explainer(persona,8,the_y)
-
-    ### task info plus level info
-    pdf.grey_box_title('TASK INFO',5,the_y)
-    x = 9 + pdf.get_string_width('TASK INFO')
-    pdf.persona_level_info(persona,x,the_y+.5)
-
-    ### output multicolumn gifts, interests, skills
-    the_y+=8
-    the_y = 2+pdf.task_info(persona,8,the_y)
-
-    ### bio (xeno and tech ) data
-    if persona.FAMILY == 'Anthro':
-        the_y = 3 + pdf.anthro_biologic_info(persona,8,the_y)
-    elif persona.FAMILY == 'Alien':
-        the_y = 3 + pdf.alien_biologic_info(persona,8,the_y)
-
-    if persona.RP:
-        pdf.referee_persona_fun(persona,5,the_y)
-        the_y+=32
-
-    if persona.RP and persona.FAMILY == "Alien":
-        pdf.referee_combat_block(persona)
-
-    if the_y < 250:
-        pdf.trackers(8,the_y)
-
-    pdf.perimiter_box() #placed here for z cover
-
-def equip_notes_one_shot(pdf, persona)->None:
-    '''
-    full page of equip and notes for one shot
-    '''
-
-    # todo should aliens NOT have equipment if feral?
-    pdf.add_page()
-    pdf.title_line(persona)
-    the_y = pdf.equipment_lines(persona, 14,8,16)
-    the_y += 3
-    pdf.note_lines(13,5,the_y)
-    pdf.data_footer(persona)
-    pdf.perimiter_box()
-
 #####################################
 # ALIEN output to screen
 #####################################
@@ -1526,10 +1579,6 @@ def toy_screen(blank:any) -> None:
     '''prints out a toy to the screen'''
     pass
     
-#####################################
-#
-# PDF testing
-#
-#####################################
+
 
 

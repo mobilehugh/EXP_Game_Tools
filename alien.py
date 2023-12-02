@@ -738,6 +738,10 @@ def fresh_alien(player_name:str) -> None:
 
     alien_biology(fresh)
     alien_society(fresh)
+
+    if fresh.RP_Cues:
+        core.build_RP_role_play(fresh) 
+
     alien_vocation_check(fresh)
     please.wrap_up_persona(fresh)
 

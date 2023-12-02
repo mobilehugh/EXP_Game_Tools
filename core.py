@@ -251,6 +251,7 @@ def role_play_RP_arc() -> str:
 
     return f"Past: {past}, Present: {present}, Goal: {goal}."
 
+
 def role_play_RP_beliefs() -> str:
     """
     add religion, philosophy, politics or not
@@ -300,41 +301,43 @@ def role_play_RP_personality()->str:
 def build_RP_role_play(player:AllRecords) -> AllRecords:
     """
     create all the fun role_play elements for a referee persona
+    because it is a list family replacements must be pop()ed out before new one added
     """
 
     player.RP_Fun = []
 
     ## ARC:
-    if player.FAMILY in ["Anthro","Robot"]:
-        player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
-    else: 
-        if player.Society["Tools"] == "Flora or Fauna":
+    player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
+    if player.FAMILY == "Alien" and player.Society["Tools"] == "Flora or Fauna" :
+            player.RP_Fun.pop()
             player.RP_Fun.append("Arc: Past: Reproducing, Present: Not Dying, Goal: Eating.")
-        else:
-            player.RP_Fun.append(f"Arc: {role_play_RP_arc()}")
 
-    ## DRESS    
-    if player.FAMILY in ["Anthro","Robot"]:
-        player.RP_Fun.append(
+    ## DRESS 
+    player.RP_Fun.append(
         f"Dress: {please.get_table_result(exp_tables.referee_persona_dress)}, Hygiene: {please.get_table_result(exp_tables.referee_persona_hygiene)}, Odor: {please.get_table_result(exp_tables.alien_biology_aroma)}")
-    else:
-        if player.Society["Tools"] != "Flora or Fauna":
-            player.RP_Fun.append(
-            f"Dress: {please.get_table_result(exp_tables.referee_persona_dress)}, Hygiene: {please.get_table_result(exp_tables.referee_persona_hygiene)}")
+    if player.FAMILY == "Robot":
+        player.RP_Fun.pop()
+        player.RP_Fun.append(
+            f"Design Accents: {please.get_table_result(exp_tables.referee_persona_dress)}, Hygiene: {player.Age_Cat}, Odor: Plastic and metal")
+   
+    if player.FAMILY == "Alien" and player.Society["Tools"] == "Flora or Fauna":
+        player.RP_Fun.pop()
+        player.RP_Fun.append(f"Dress: Natural coat, Hygiene: {please.get_table_result(exp_tables.referee_persona_hygiene)}")
 
-    if player.FAMILY in ["Anthro","Robot"]:
-        player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
-    else:
-        if player.Society["Tools"] != "Flora or Fauna":
-            player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
+    ## PERSONALITY
+    player.RP_Fun.append(f"Personality: {role_play_RP_personality()}")
+    if player.FAMILY == "Alien" and player.Society["Tools"] == "Flora or Fauna":
+        player.RP_Fun.pop()
+        player.RP_Fun.append(f"Personality: {please.get_table_result(exp_tables.introverted_personality)} tendencies")
 
-    player.RP_Fun.append(f'Laban: Voice: {please.get_table_result(exp_tables.laban)}, Move: { please.get_table_result(exp_tables.laban)}')
+    player.RP_Fun.append(f'Labanations: Voice: {please.get_table_result(exp_tables.laban)}, Move: { please.get_table_result(exp_tables.laban)}')
 
-    if player.FAMILY in ["Anthro","Robot"]:
-        player.RP_Fun.append(f"{role_play_RP_beliefs()}")
-    else:
-        if player.Society["Tools"] != "Flora or Fauna":
-            player.RP_Fun.append(f"{role_play_RP_beliefs()}")
+    player.RP_Fun.append(f"{role_play_RP_beliefs()}")
+    if player.FAMILY == "Alien":
+        bee_leafs = player.RP_Fun.pop()
+        player.RP_Fun.append(f"Divergent {role_play_RP_beliefs()}")
+        if player.Society["Tools"] == "Flora or Fauna":
+            player.RP_Fun.pop()
 
     return player # modified by side effects
 
