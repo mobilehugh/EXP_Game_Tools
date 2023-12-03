@@ -223,8 +223,7 @@ def assign_terrain_movements(moving_time: AlienRecord) -> AlienRecord:
     moving_time.Move_Land = math.ceil(moving_time.DEX * (movements.count("l") / 4))
     moving_time.Move_Air = math.ceil(moving_time.DEX * (movements.count("a") / 4))
     moving_time.Move_Water = math.ceil(moving_time.DEX * (movements.count("w") / 4))
-    # todo move terrain movements to calculated in outputs, and not stored
-    
+
     return moving_time # is altered by side effect
 
 def alien_quick_description_builder(describing: AlienRecord) -> AlienRecord:
@@ -662,7 +661,6 @@ def alien_life_span_bespoke(lifer: AlienRecord) -> AlienRecord:
         elif chosen == "Progeny":
             lifer.Age_Suffix = choice(["Days","Weeks","Months"])
 
-        # todo test progenic rationalization
         if chosen in ["Progeny - Short", "Progeny"] and please.say_yes_to(f"Rationalize size for short life span? "):
                 ''' major fix for short lived'''
                 if lifer.Size_Cat not in ["Tiny","Minute"]:

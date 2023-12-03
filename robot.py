@@ -15,6 +15,7 @@ import toy
 
 # todo consider minimum HPM for robot 
 # todo decay table calculator RP vs P
+# fix many robot specs are too long
 
 # set up RobotRecord
 @dataclass
