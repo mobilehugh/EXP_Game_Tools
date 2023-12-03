@@ -191,7 +191,7 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
 
     return descriptive # is altered by side effect
 
-# fix manual update needs subcategories based attributes, on FAMILY, etc
+# fix updating needs categories like attributes, age, and FAMILY type
 def manual_persona_update(updating: AllRecords) -> AllRecords:
     ''' painfully update every element in persona record'''
     FORBIDDEN = ["Player_Name", "FAMILY", "FAMILY_TYPE", "Fallthrough", "RP", "Show", "Bin", "Date_Created", "Date_Updated", "ID", "File_Name"]

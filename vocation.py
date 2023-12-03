@@ -277,7 +277,6 @@ def convert_levels_to_exps(get_a_job: exp_tables.PersonaRecord, new_level:int = 
 
     return exps_amount
 
-# todo double check that exps in is related to get_a_job.EXPS
 def convert_exps_to_levels(get_a_job: exp_tables.PersonaRecord, new_exps = 0) -> int:
     """
     Generates an experience Level based on the EXPS of the get_a_job

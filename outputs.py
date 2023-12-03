@@ -17,7 +17,6 @@ import vocation
 import exp_tables
 
 # todo RP combat block: weak strong cannon fodder, canon fodder and canonical
-# todo proficiency slot with actual weapons
 
 @dataclass 
 class AllRecords(exp_tables.AllThings):
@@ -74,8 +73,6 @@ COORDS
 # classes for pdf creation
 #
 ################################################
-
-# todo corrections for x axis (left to right) work using get_string_width, NOT line height
 
 class PDF(FPDF):
 
@@ -393,7 +390,6 @@ class PDF(FPDF):
         # create the thing
         TABLE_DATA = zip(*zip_these)
 
-        # todo calculate the column widths based on longest line in each column
         self.set_font("Helvetica", size=10)
         self.set_fill_color(255)
         with self.table(
@@ -522,7 +518,6 @@ class PDF(FPDF):
         # attack header line
         TABLE_DATA = zip(desc_column,xeno_column,life_column,soc_column)
 
-        # todo calculate the column widths based on longest line in each column
         self.set_font("Helvetica", size=9)
         self.set_fill_color(255)
         with self.table(
@@ -554,7 +549,6 @@ class PDF(FPDF):
         ### build tech spec column
 
         ### prebuild sensors string
-        # todo i dare you to make this into a comprehension
         sensors_dict = Counter(persona.Sensors)
         sensors_list = "  "
         for sens,amt in sensors_dict.items():
@@ -728,34 +722,41 @@ class PDF(FPDF):
         takes args and prints variants x,y,location  
         remove the 4 print statements for operations
         ''' 
+        # show values prints x and y data to screen as pdf gets built
+        show_values = False # change to false for operations
+
         if len(args) == 3: # set and tell
             x,y,verbose = args
-            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo turn off for operations 
+            if show_values:
+                print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') 
             self.set_y(y)
             self.set_x(x)
 
         elif len(args) == 2: # set and don't tell
             x,y = args
-            print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo turn off for operations 
+            if show_values:
+                print(f'Setting: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') 
             self.set_y(y)
             self.set_x(x)
 
         elif len(args) == 1: # get and tell and return
             verbose = args[0]
-            if verbose == "hide":
+            if show_values == "hide":
                 x = self.get_x()
                 y = self.get_y()
                 return x,y
             else:
                 x = self.get_x()
                 y = self.get_y()
-                print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') # todo  for operations find and remove all set_or_get(Locating:
+                if show_values:
+                    print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f} at {verbose}') 
                 return x,y
             
         elif len(args) == 0: # get and don't tell and return 
             x = self.get_x()
             y = self.get_y()
-            print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}') # todo  for operations find and remove all set_or_get(Locating:          
+            if show_values: 
+                print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}')           
             return x,y
 
     def note_lines(self)-> None:
@@ -765,42 +766,26 @@ class PDF(FPDF):
         y_bump = 8
         x,y = self.get_x(), self.get_y()
         top,left = self.set_or_get("inside note lines")
-        print(f'\nin note lines {x = } and {y = } \n')
-
 
         y += y_bump
-        lines = round((279.4 - y)/y_bump)
+        lines = round((278 - y)/y_bump)
         self.set_draw_color(120) #dark grey 
         self.set_line_width(0.1)
 
         for more_y in range(int(y),int(y+y_bump*lines),8):
             self.line(8, more_y, 210, more_y)
 
-    def equipment_lines(self, persona)->None:
+    def equipment_lines(self, persona, lines)->None:
         '''
         prints weight allowance and equipment title lines
         draws split lines for equipment
         '''
-
-
-        if persona.FAMILY == "Alien" and persona.Society["Tools"] == "Flora or Fauna":
-            return
-
-        left,top = self.set_or_get()
-        self.set_or_get(5.4,top)
-        self.section_title(f"TOYS", "Technological Object Yield System")
-        left,top = self.set_or_get("after TOYS  stripe")
-
-        # equipment list header
-        self.set_or_get(6.4,top+6.5, "before equipment lines ")
-        self.markdown_internal(f'**ITEM**{" "*40}**WT**{" "*7}**TTL**{" "*7}**INFO**')
-        left,top = self.set_or_get()
+        left,top = self.set_or_get("inside equipment lines")
         # prepare equipment lines
         self.set_draw_color(120) #dark grey 
         self.set_line_width(0.1)
         
         # output equipment lines
-        lines = 15
         bump = 8
         for top in range(int(top+bump),int(top+bump*lines),bump):
             self.line(8, top, 69,top) # item
@@ -838,7 +823,6 @@ class PDF(FPDF):
         col_number = round(width/apothem) - 1
         row_number = round(hite/(apothem*(apothem/polywanna)))
 
-        # todo are offsets for real
         y = polywanna + 15
         x_off = 6
 
@@ -859,14 +843,14 @@ class PDF(FPDF):
 #
 ##############################################
 
-# fix broken pdf to browser 
+
 def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str = "C:/") -> None:
     """
     finds the specified file on computer
     then shows it in the default browser
     """
     file_dos = r'C:\Users\mobil\Documents\EXP_Game_Tools\Records\Bin\37bf560f9d0916a5467d7909.pdf'
-    print(f"Attempting to show {file_dos}")
+    print(f"\nPlease wait. Composing PDF and sending to browser\nTemp file is at: {file_dos}")
     try:
         for root, _, files in os.walk(search_path):
             if file_name in files:
@@ -1064,9 +1048,9 @@ def pdf_output_chooser(persona) -> None:
     choose between pdf styles
     '''
     choice_list = [
-        "Face Sheet One Shot",
-        "Face Sheet Campaign",
-        "Back Sheet Campaign",
+        "Persona One Shot",
+        "Persona Campaign",
+        "Campaign Sheet",
     ]
     pdf_chosen  = please.choose_this(choice_list, "PDF type needed? ")
 
@@ -1077,12 +1061,12 @@ def pdf_output_chooser(persona) -> None:
     pdf.add_page()
 
     ### PDF output 
-    if pdf_chosen == "Face Sheet One Shot":
-        persona_pdf(pdf, persona, one_shot=True)
-    elif pdf_chosen == "Face Sheet Campaign":
-        persona_pdf(pdf, persona, one_shot=False)
-    elif pdf_chosen == "Back Sheet Campaign":
-        campaign_pdf(pdf,person)
+    if pdf_chosen == "Persona One Shot":
+        record_front(pdf, persona, one_shot=True)
+    elif pdf_chosen == "Persona Campaign":
+        record_front(pdf, persona, one_shot=False)
+    elif pdf_chosen == "Campaign Sheet":
+        campaign_sheet(pdf,persona, one_shot=False)
     else:
         print("what the hell dude")
 
@@ -1093,7 +1077,62 @@ def pdf_output_chooser(persona) -> None:
     )
     show_pdf()
 
-def persona_pdf(pdf, persona,one_shot)->None:
+def wate_allowance(pdf,persona)->None:
+    '''
+    wate allowance output for personas
+    robot and anthros are standard
+    aliens have feral and different movement types
+    '''
+
+    # wate allowance title stripe
+    pdf.set_or_get(5.4,17.5, "before WA Stripe")
+    pdf.section_title(f"WATE ALLOWANCE", f"{persona.WA} kg for {persona.FAMILY} with move {persona.Move} h/u")
+    left,top = pdf.set_or_get("after WA stripe")
+
+    pdf.set_or_get(6.4,top+6.5, "before WA comment")
+    if persona.FAMILY == "Anthro":
+        pdf.markdown_internal(f"Sprint ({persona.Move*2} h/u): **<{persona.WA/4} kg** Carry ({persona.Move} h/u): **<{persona.WA*1.5} kg.  Lift Max (0 h/u): **{persona.WA*2.5}kg.**")
+  
+    elif persona.FAMILY == "Alien":
+        WA_comment = "Flora and Fauna can only push or pull up to lift."
+
+    elif person.Family == "Robot":
+        WA_comment  = " "
+
+    left,top = pdf.set_or_get("after wate allowance") # todo is this needed?
+    return
+
+def toy_output(pdf,persona,lines=15)->None:
+    '''
+    output the TOYS stripe and follow with toy lines 
+    '''
+    left,top = pdf.set_or_get()
+    pdf.set_or_get(5.4,top)
+    pdf.section_title(f"TOYS", "Technological Object Yield System")
+    left,top = pdf.set_or_get("after TOYS  stripe")
+
+    # equipment list header
+    pdf.set_or_get(6.4,top+6.5, "before equipment lines ")
+    pdf.markdown_internal(f'**ITEM**{" "*40}**WT**{" "*7}**TTL**{" "*7}**INFO**')
+    left,top = pdf.set_or_get()
+    pdf.equipment_lines(persona,lines)
+
+def notes_output(pdf,persona)->None:
+    '''
+    output the NOTES stripe and follow with lines to bottom
+    '''
+    # notes info stripe
+    left,top = pdf.set_or_get("arriving at notes_output")
+    pdf.set_or_get(5.4, top,"before NOTE stripe")
+    pdf.section_title("NOTES", f"for {persona.Player_Name} and {persona.Persona_Name}")
+    left,top = pdf.set_or_get("after NOTE stripe ")
+
+    # make some lines
+    pdf.set_or_get(5.4, top +8,"before lines")
+    pdf.note_lines()
+    left,top = pdf.set_or_get("after note lines ")
+
+def record_front(pdf, persona, one_shot)->None:
     '''
     organizes print out of all persona data on one page
     '''
@@ -1203,58 +1242,20 @@ def persona_pdf(pdf, persona,one_shot)->None:
 
 
     if 280 - top > 40 and one_shot:
-        # notes info stripe
-        pdf.set_or_get(5.4, top,"before NOTE stripe")
-        pdf.section_title("NOTES", f"for {persona.Player_Name} and {persona.Persona_Name}")
-        left,top = pdf.set_or_get("after NOTE stripe ")
-
-        # make some lines
-        pdf.set_or_get(5.4, top +8,"before lines")
-        pdf.note_lines()
-        left,top = pdf.set_or_get("after note lines ")
+        notes_output(pdf,persona)
 
     pdf.sheet_footer(persona)
     pdf.perimiter_box() # must go last for z level
 
-    if one_shot:
-        backsheet_one_shot(pdf,persona)
-    else:
-        backsheet_campaign(pdf,persona) 
+    record_back(pdf, persona, one_shot)
 
-def wate_allowance(pdf,persona)->None:
-    '''
-    wate allowance output for personas
-    robot and anthros are standard
-    aliens have feral and different movement types
-    '''
-
-    # wate allowance title stripe
-    pdf.set_or_get(5.4,17.5, "before WA Stripe")
-    pdf.section_title(f"WATE ALLOWANCE", f"{persona.WA} kg for {persona.FAMILY} with move {persona.Move} h/u")
-    left,top = pdf.set_or_get("after WA stripe")
-
-    pdf.set_or_get(6.4,top+6.5, "before WA comment")
-    if persona.FAMILY == "Anthro":
-        pdf.markdown_internal(f"Sprint ({persona.Move*2} h/u): **<{persona.WA/4} kg** Carry ({persona.Move} h/u): **<{persona.WA*1.5} kg.  Lift Max (0 h/u): **{persona.WA*2.5}kg.**")
-        left,top = pdf.set_or_get("after WA comment")
-        pdf.set_or_get(left,top+3,"before possible TOYS")
-        pdf.equipment_lines(persona)
-  
-
-    
-    if persona.FAMILY == "Alien" and persona.Society["Tools"] == "Flora or Fauna":
-        WA_comment = "Flora and Fauna can only push or pull up to lift."
-
-    left,top = pdf.set_or_get("after possible TOYS in wate allowance")
-    return
-
-def backsheet_one_shot(pdf, persona)->None:
+def record_back(pdf, persona, one_shot)->None:
     '''
     full page of equip and notes for one shot
     '''
 
     pdf.add_page()
-    print(f"\n new page added")
+
 
     # persona title left justified
     pdf.set_or_get(3.3, 5.7,"persona title")
@@ -1265,43 +1266,84 @@ def backsheet_one_shot(pdf, persona)->None:
     pdf.set_or_get(216, 7.5, "player title")
     pdf.player_title(right_text,12)
 
+    # to hex or not to hex
+    if not one_shot:
+        pdf.hexagons()
+        pdf.sheet_footer(persona)
+        pdf.perimiter_box()
+        return
+
+    # wate allowance is different for each family
     wate_allowance(pdf,persona)
-    left,top = pdf.set_or_get("after possible TOYS in backsheet")
+    left,top = pdf.set_or_get("after wate allowance ? double")
 
-    # notes info stripe
-    pdf.set_or_get(5.4, top+3,"before NOTE stripe")
-    pdf.section_title("NOTES", f"for {persona.Player_Name} and {persona.Persona_Name}")
-    left,top = pdf.set_or_get("after NOTE stripe ")
+    # 2 toy or not 2 toy
+    if persona.FAMILY == "Alien" and persona.society["Tools"] != "Flora or Fauna":
+        toy_output(pdf,persona,lines=15)
+    elif persona.FAMILY in ["Anthro","Robot"]:
+        toy_output(pdf,persona,lines=15)
+    left,top = pdf.set_or_get("after toy and lines")
 
-    # make some lines
-    pdf.set_or_get(5.4, top +8,"before note lines")
-    pdf.note_lines()
-    left,top = pdf.set_or_get("after note lines ")
+    # notes
+    notes_output(pdf,persona)
 
     pdf.sheet_footer(persona)
     pdf.perimiter_box()
 
-def backsheet_campaign(persona) -> None:
+def campaign_sheet(pdf, persona, one_shot) -> None:
     '''
-    generates a campaign PDF 2 PAGES 4 sided
-    allows for equipment and notes to be preserved between front_sheet updates 
+    outputs one side  TOYS and possible Notes. 
+    other side is notes 
     '''
 
-    pdf.add_page()
+    ### side one front WA and TOYS?
 
-    ### PAGE ONE front
-    pdf.add_page()
-    pdf.title_line(persona,'Campaign')
-    pdf.equipment_lines(persona, 28,8,16)
-    pdf.data_footer(persona)
+    # persona title left justified
+    pdf.set_or_get(3.3, 5.7,"persona title")
+    pdf.persona_title(f"**PERSONA RECORD** for {persona.Persona_Name}",18)
+
+    # player title right justified
+    right_text = f"**Player:** {persona.Player_Name}"
+    pdf.set_or_get(216, 7.5, "player title")
+    pdf.player_title(right_text,12)
+
+    # needs to fill with TOYS or Notes
+    wate_allowance(pdf,persona)
+    left,top = pdf.set_or_get("after possible TOYS in backsheet")  
+
+    # wate allowance is different for each family
+    wate_allowance(pdf,persona)
+    left,top = pdf.set_or_get("after wate allowance ? double")
+
+    # 2 toy or not 2 toy full sheet
+    if persona.FAMILY == "Alien" and persona.society["Tools"] != "Flora or Fauna":
+        toy_output(pdf,persona,lines=30)
+    elif persona.FAMILY in ["Anthro","Robot"]:
+        toy_output(pdf,persona,lines=30)
+    left,top = pdf.set_or_get("after toy and lines")
+
+    pdf.sheet_footer(persona)
     pdf.perimiter_box()
 
-    ### PAGE ONE back
+    ### side  two  back NOTES
     pdf.add_page()
-    pdf.title_line(persona,'Campaign')
-    pdf.note_lines(28,8,16)
-    pdf.data_footer(persona)
+
+    # persona title left justified
+    pdf.set_or_get(3.3, 5.7,"persona title")
+    pdf.persona_title(f"**PERSONA RECORD** for {persona.Persona_Name}",18)
+
+    # player title right justified
+    right_text = f"**Player:** {persona.Player_Name}"
+    pdf.set_or_get(216, 7.5, "player title")
+    pdf.player_title(right_text,12)
+
+    # notes
+    pdf.set_or_get(5.4,17.5, "before notes on campaign")
+    notes_output(pdf,persona)
+    pdf.sheet_footer(persona)
     pdf.perimiter_box()
+
+
     
 #####################################
 # ALIEN output to screen
