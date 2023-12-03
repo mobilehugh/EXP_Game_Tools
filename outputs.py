@@ -161,7 +161,7 @@ class PDF(FPDF):
         '''
 
         self.set_font("Helvetica",size=font_size)
-        line_height = self.font_size * 1.6
+        line_height = self.font_size * 1.4
         line_width = self.get_string_width(blob, markdown=True) + 2
 
         self.cell(
@@ -843,7 +843,6 @@ class PDF(FPDF):
 #
 ##############################################
 
-
 def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str = "C:/") -> None:
     """
     finds the specified file on computer
@@ -856,11 +855,7 @@ def show_pdf(file_name: str = "37bf560f9d0916a5467d7909.pdf", search_path: str =
             if file_name in files:
                 found_file = os.path.join(root, file_name)
                 browser_file = "file:///" + found_file.replace('\\','/')
-                #print(f'{file_name = } {browser_file = }')
                 webbrowser.get('windows-default').open_new('file:///C:/Users/mobil/Documents/EXP_Game_Tools/Records/Bin/37bf560f9d0916a5467d7909.pdf')
-                #webbrowser.get('brave').open_new(browser_file)
-                #webbrowser.open_new(browser_file)
-                #webbrowser.open(browser_file)
                 break
     except PermissionError:
         print(f"Permission denied for directory {root}. Continuing search...")
@@ -1080,8 +1075,7 @@ def pdf_output_chooser(persona) -> None:
 def wate_allowance(pdf,persona)->None:
     '''
     wate allowance output for personas
-    robot and anthros are standard
-    aliens have feral and different movement types
+    four settings: anthro, robot, alien, and feral
     '''
 
     # wate allowance title stripe
@@ -1093,11 +1087,22 @@ def wate_allowance(pdf,persona)->None:
     if persona.FAMILY == "Anthro":
         pdf.markdown_internal(f"Sprint ({persona.Move*2} h/u): **<{persona.WA/4} kg** Carry ({persona.Move} h/u): **<{persona.WA*1.5} kg.  Lift Max (0 h/u): **{persona.WA*2.5}kg.**")
   
-    elif persona.FAMILY == "Alien":
-        WA_comment = "Flora and Fauna can only push or pull up to lift."
+    elif persona.FAMILY == "Robot":
+        pdf.markdown_internal(f"Full ({persona.Move} h/u): **<{persona.WA} kg** Stopped (0 h/u): **{persona.WA}kg.**")
 
-    elif person.Family == "Robot":
-        WA_comment  = " "
+    elif persona.FAMILY == "Alien":
+        # "Move_Land": 7, "Move_Air": 4, "Move_Water": 4 "Move":14
+        WA, base_move, land_move, air_move, water_move = persona.WA, persona.Move, persona.Move_Land, persona.Move_Air, persona.Move_Water
+
+        if persona.Society["Tools"] == "Flora or Fauna":
+            pdf.markdown_internal(f"Flora or Fauna can carry, push or pull objects. They cannot use them.",12)
+
+        if land_move > 0:
+            pdf.markdown_internal(f"**Land:** Free {land_move} h/u: **<{round(WA*land_move/base_move/2)} kg**  Carry {land_move/2} h/u: **<{round(WA*land_move/base_move)} kg** Lift 0 h/u: **{round(WA*land_move/base_move)} kg**",12)
+        if air_move > 0:   
+            pdf.markdown_internal(f"**Air:** Free {air_move} h/u: **<{round(WA*air_move/base_move/2)} kg**  Carry {air_move/2} h/u: **<{round(WA*air_move/base_move)} kg** Lift 0 h/u: **{round(WA*air_move/base_move)} kg**",12)
+        if water_move > 0:   
+            pdf.markdown_internal(f"**Water:** Free {water_move} h/u: **<{round(WA*water_move/base_move/2)} kg**  Carry {water_move/2} h/u: **<{round(WA*water_move/base_move)} kg** Lift 0 h/u: **{round(WA*water_move/base_move)} kg**",12)
 
     left,top = pdf.set_or_get("after wate allowance") # todo is this needed?
     return
@@ -1278,7 +1283,7 @@ def record_back(pdf, persona, one_shot)->None:
     left,top = pdf.set_or_get("after wate allowance ? double")
 
     # 2 toy or not 2 toy
-    if persona.FAMILY == "Alien" and persona.society["Tools"] != "Flora or Fauna":
+    if persona.FAMILY == "Alien" and persona.Society["Tools"] != "Flora or Fauna":
         toy_output(pdf,persona,lines=15)
     elif persona.FAMILY in ["Anthro","Robot"]:
         toy_output(pdf,persona,lines=15)
@@ -1316,7 +1321,7 @@ def campaign_sheet(pdf, persona, one_shot) -> None:
     left,top = pdf.set_or_get("after wate allowance ? double")
 
     # 2 toy or not 2 toy full sheet
-    if persona.FAMILY == "Alien" and persona.society["Tools"] != "Flora or Fauna":
+    if persona.FAMILY == "Alien" and persona.Society["Tools"] != "Flora or Fauna":
         toy_output(pdf,persona,lines=30)
     elif persona.FAMILY in ["Anthro","Robot"]:
         toy_output(pdf,persona,lines=30)
@@ -1343,8 +1348,6 @@ def campaign_sheet(pdf, persona, one_shot) -> None:
     pdf.sheet_footer(persona)
     pdf.perimiter_box()
 
-
-    
 #####################################
 # ALIEN output to screen
 #####################################
