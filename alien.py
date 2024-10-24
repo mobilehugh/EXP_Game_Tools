@@ -199,7 +199,7 @@ def alien_shape_adornments(adornable:AlienRecord) -> AlienRecord:
         if adornable.Fallthrough:
             drop = True if please.do_1d100_check(50) else False
         else:
-            drop = False if please.say_yes_to(f'Would you like your {body_part} {part} {adornment.lower()}? ') else True
+            drop = False if please.say_no_to(f'Would you like your {body_part} {part} {adornment.lower()}? ') else True
 
         if drop:
             setattr(adornable, f'{part}_Adorn', "" )

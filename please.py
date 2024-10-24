@@ -309,8 +309,8 @@ def get_table_result(random_table: dict) -> str:
             result = random_table[item_range]
             break
 
-    if not result:
-        input(f'there is an error in the table {repr(random_table)}\n return to go on' )
+    if result is None: # replaced not with none to keep 0 from being falsely and tripping this error
+        input(f'{roll_result} created an error in the table {repr(random_table)}\n return to go on' )
 
     return result
 
@@ -526,10 +526,10 @@ def do_referee_maintenance():
     persona = collect_desired_record()
 
     operations = {
+    "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"),
     "EXPS": vocation.update_persona_exps,
     "Level": vocation.update_persona_exps,
     "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
-    "PDF": lambda persona: outputs.outputs_workflow(persona, "pdf"), # todo change back when PDF working
     "Attributes": lambda persona: core.manual_persona_update(persona),
     "Change Record": lambda persona: do_referee_maintenance(),}
     

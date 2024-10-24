@@ -176,7 +176,7 @@ class PDF(FPDF):
 
     def attributes_table(self, persona:AllRecords) -> None:
         """
-        prints atttribute acronyms, values (+/- primes) and descriptions (+/-)
+        prints attribute acronyms, values (+/- primes) and descriptions (+/-)
         """
 
         # for the pain
@@ -190,7 +190,7 @@ class PDF(FPDF):
         dex_footer = "Dexterity" if not_bot else f"Dexterity-P{persona.DEX_Prime}"
         intel_footer = "Intelligence" if not_bot else f"Intelligence-P{persona.INT_Prime}"
         pstr_footer = "Strength" if not_bot else f"Strength-P{persona.PSTR_Prime}"
-        mstr_title, mstr_value, mstr_footer = "MSTR", mstr, "Psionics"
+        mstr_title, mstr_value, mstr_footer = "MND", mstr, "Mind"
 
         if persona.FAMILY == "Robot":
             mstr_title = "CF"
@@ -198,9 +198,9 @@ class PDF(FPDF):
             mstr_footer = "Autonomy"
 
         TABLE_DATA = [
-            ["AWE", "CHA", "CON", "DEX", "INT", mstr_title, "PSTR", "SOC", "HPM", ("Helvetica", "B", 14)],
+            ["AWE", "CHA", "CON", "DEX", "INT", mstr_title, "STR", "SOC", "HPM", ("Helvetica", "B", 14)],
             [awe, cha,  con, dex, intel, mstr_value, pstr, soc, hpm,("Helvetica", "",18)],
-            ["Awareness", "Charisma", con_footer, dex_footer, intel_footer, mstr_footer, pstr_footer, "Privilege", "Damagability", ("Helvetica","B", 7)]
+            ["Awareness", "Charisma", con_footer, dex_footer, intel_footer, mstr_footer, pstr_footer, "Privilege", "Resilience", ("Helvetica","B", 7)]
         ]
 
         col_width = 22.1
@@ -272,7 +272,7 @@ class PDF(FPDF):
 
         # attack header line
         TABLE_DATA = (
-            ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills", f"Hit Points MAX = {persona.HPM}"),
+            ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills", f"HIT POINTS  (max = {persona.HPM})"),
             ("Strike", attack_table["A"]["BP"],attack_table["A"]["BNP"], attack_table["A"]["MR"], attack_table["A"]["ADB"], attack_table["A"]["PROF"],""),
             ("Fling", attack_table["B"]["BP"], attack_table["B"]["BNP"], attack_table["B"]["MR"], attack_table["B"]["BDB"], attack_table["B"]["PROF"],""),
             ("Shoot", attack_table["C"]["BP"],attack_table["C"]["BNP"], attack_table["C"]["MR"], attack_table["C"]["CDB"], attack_table["C"]["PROF"],"")
@@ -1026,9 +1026,9 @@ def screen_attack_table(persona) -> None:
     print(f"Shoot  {CBP:>6} {CBNP:>6} {CMR:>6} {CDB:>6}  {CPROF}")
 
     if persona.FAMILY == 'Alien':
-        blob = f'Attack Description: {persona.Attack_Desc} \nMOVE:  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u. ARMOUR RATING: {persona.AR}'      
+        blob = f'Attack Description: {persona.Attack_Desc} \nMOVE:  land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u. DEFENCE RATING: {persona.AR}'      
     else:
-        blob = f'MOVE:  {persona.Move} h/u  ARMOUR RATING: {persona.AR}'
+        blob = f'MOVE:  {persona.Move} h/u  DEFENCE RATING: {persona.AR}'
 
     print(blob)    
 
@@ -1169,7 +1169,7 @@ def record_front(pdf, persona, one_shot)->None:
     # movement and AR line
     pdf.set_or_get(6.4,top +7.2, "before move AR line")
     moving = f'{persona.Move} h/u' if persona.FAMILY in ["Anthro", "Robot"] else f'land {persona.Move_Land} h/u, air {persona.Move_Air} h/u, water {persona.Move_Water} h/u.'
-    pdf.markdown(f'**MOVEMENT** {moving}  **ARMOUR RATING (AR)** {persona.AR}  **____  ____**')
+    pdf.markdown(f'**MOVE RATE** {moving}  **DEFENCE RATING (DEF)** {persona.AR}  **____  ____**')
     left,top = pdf.set_or_get("after move AR line")
 
     # attack table title
@@ -1364,7 +1364,7 @@ def alien_screen(screenery:exp_tables.PersonaRecord) -> None:
         f"\nALIEN PERSONA RECORD\n"
         f"Persona: {screenery.Persona_Name} \t\tPlayer Name: {screenery.Player_Name} \tCreated: {screenery.Date_Created}\n"
         f"AWE: {screenery.AWE} CHA: {screenery.CHA} CON: {screenery.CON} DEX: {screenery.DEX} "
-        f"INT: {screenery.INT} MSTR: {screenery.MSTR} PSTR: {screenery.PSTR} HPS: {screenery.HPM} SOC: {screenery.SOC} WA: {screenery.WA}\n"
+        f"INT: {screenery.INT} MND: {screenery.MSTR} STR: {screenery.PSTR} HPS: {screenery.HPM} SOC: {screenery.SOC} WA: {screenery.WA}\n"
         f"Family: {screenery.FAMILY} Species: {screenery.FAMILY_TYPE}\n"
         f"Age: {screenery.Age} {screenery.Age_Suffix} Size: {screenery.Size_Cat} Wate: {screenery.Wate} {screenery.Wate_Suffix}"
     )
@@ -1468,7 +1468,7 @@ def robot_screen(bot_screen: exp_tables.PersonaRecord) -> None:
         f"Name: {bot_screen.Persona_Name} \t\tPlayer Name: {bot_screen.Player_Name} Created: {bot_screen.Date_Created}\n"
         f"AWE: {bot_screen.AWE} CHA: {bot_screen.CHA} CON: {bot_screen.CON}({bot_screen.CON_Prime}) "
         f"DEX: {bot_screen.DEX}({bot_screen.DEX_Prime}) INT: {bot_screen.INT}({bot_screen.INT_Prime}) "
-        f"MSTR: {bot_screen.MSTR} PSTR: {bot_screen.PSTR}({bot_screen.PSTR_Prime}) HPS: {bot_screen.HPM}\n"
+        f"MND: {bot_screen.MSTR} STR: {bot_screen.PSTR}({bot_screen.PSTR_Prime}) HPS: {bot_screen.HPM}\n"
     )
 
     print("APPEARANCE:")
@@ -1556,7 +1556,7 @@ def anthro_screen(persona) -> None:
         f"\n\nANTHRO PERSONA RECORD\n"
         f"Persona: {persona.Persona_Name} \t\t\tPlayer: {persona.Player_Name} \tCreated: {persona.Date_Created}\n"
         f"AWE: {persona.AWE} CHA: {persona.CHA} CON: {persona.CON} DEX: {persona.DEX} "
-        f"INT: {persona.INT} MSTR: {persona.MSTR} PSTR: {persona.PSTR} HPS: {persona.HPM} SOC: {persona.SOC} WA: {persona.WA}\n"
+        f"INT: {persona.INT} MND: {persona.MSTR} STR: {persona.PSTR} HPM: {persona.HPM} SOC: {persona.SOC} WA: {persona.WA}\n"
         f"Family: {persona.FAMILY} Type: {persona.FAMILY_TYPE} SubType: {persona.FAMILY_SUB}\n"
         f"Age: {persona.Age} years Hite: {persona.Hite} cms Wate: {persona.Wate} kgs\n"
         f"Vocation: {persona.Vocation} Level: {persona.Level} EXPS: {persona.EXPS}"

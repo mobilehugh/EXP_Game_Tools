@@ -50,9 +50,9 @@ class Mutation:
 
     def headline(self) -> str:
         '''
-        returns the title of the mutation in upper case plus mental vs physical
+        returns the title of the mutation in upper case plus psionic vs phenomic
         '''
-        return f"{self.name.upper()} {'mental mutation' if self.is_mental else 'physical mutation'}"
+        return f"{self.name.upper()} {'psionic mutation' if self.is_mental else 'phenomic mutation'}"
 
     def param_line(self) -> str:
         '''
