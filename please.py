@@ -198,13 +198,19 @@ def choose_this(choices: list, comment: str, choosy: AllRecords = None) -> str:
     # [0] is default, sort, reinsert default and add directions
     default = choices.pop(0)
     choices.sort()
-    choices.insert(0,default)
+
+    # if [0] is no_default_srt_nly then just return sorted, no default
+    if default != "no_default_srt_nly":
+        choices.insert(0,default)
 
     while True:
         # if only one choice on list return that choice automatically
         # the option to reset or quit is no given 
 
         # present the comment and options
+
+        # print(choices)
+
         print(f"\n{comment}")
 
         if "Yes" in choices and len(choices) < 3: # keeps yes/no to a one line list
@@ -253,6 +259,7 @@ def say_yes_to(question: str) -> bool:
 def say_no_to(question: str) -> bool:
     """
     question string with boolean return
+    remember to reverse the ternary!!!
     """
     chosen = choose_this(["No", "Yes"], question)
     return True if chosen == "No" else False    
@@ -504,6 +511,10 @@ def collect_desired_record() -> AllRecords:
             say_goodnight_marsha()
 
     list_comment = "Choose the desired record."
+
+    ### set no default first choice flag ( aka only show alpha sort)
+    list_of_files.insert(0,"no_default_srt_nly")
+
     persona_record = choose_this(list_of_files, list_comment)
 
     # get latest record on persona (AKA last line of file)
