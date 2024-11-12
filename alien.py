@@ -28,8 +28,7 @@ def alien_workflow() -> None:
     option_function_map = {
         "Fresh Alien (New Player)":lambda: fresh_alien(nom_de_bom), 
         "Bespoke Alien":lambda:bespoke_alien(nom_de_bom), 
-        "Random Alien":lambda:rando_alien(nom_de_bom),
-        "Maintenance":please.do_referee_maintenance
+        "Random Alien":lambda:rando_alien(nom_de_bom)
     }
     please.clear_console()
     option_list = list(option_function_map.keys())

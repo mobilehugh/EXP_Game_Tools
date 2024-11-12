@@ -29,7 +29,6 @@ def toy_workflow() -> None:
     toy_workflow_map = {
         "Fresh Toy":fresh_toy, 
         "Bespoke Toy":fresh_toy,
-        "Maintenance":please.do_referee_maintenance, 
         }
 
     list_comment = "Choose a TOY workflow:"

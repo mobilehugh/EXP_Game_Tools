@@ -29,7 +29,7 @@ def outputs_workflow(outputter:AllRecords, out_type: str) -> None:
     out_type = "screen" if out_type not in ["pdf","screen"] else out_type
 
     if out_type == "pdf":
-        pdf_output_chooser(outputter)
+        bespoke_pdf_chooser(outputter)
 
     elif out_type == "screen":
         please.screen_this(outputter)
@@ -48,7 +48,7 @@ UNITS:
 
     PostScript typographical measurement system
     a POINT is 1/72 of an inch not mm or pixels
-    1 point = 1pt = 1/72in (cala) = 0.3528 mm
+    1 point = 1pt = 1/72in (calc) = 0.3528 mm
 
     there are 25.4016 mm in 1 inch
     12 point font is 4.23 mm
@@ -79,7 +79,7 @@ class PDF(FPDF):
     ## persona output functions 
 
     def persona_title(self, blob: str = 'where da blob', font_size: int = 12)-> None:
-        '''prints PERSONA NAME above perimiter box left justified'''
+        '''prints PERSONA NAME above perimeter box left justified'''
         self.set_font("Helvetica", "", font_size)
         self.set_draw_color(0)
         line_height = self.font_size * 1.6
@@ -181,7 +181,7 @@ class PDF(FPDF):
 
         # for the pain
         awe, cha, con, dex, intel, mstr, pstr, soc, hpm = persona.AWE, persona.CHA,  persona.CON, persona.DEX, persona.INT, persona.MSTR, persona.PSTR, persona.SOC, persona.HPM
-       
+
         # prep for Alien and Anthro, Robot is different
         not_bot = True if persona.FAMILY in ["Alien", "Anthro"] else False
 
@@ -223,6 +223,45 @@ class PDF(FPDF):
                     )
             top += row_height
             self.set_or_get(start_right,top,"new line")
+
+    def attributes_table_blank(self) -> None:
+        """
+        prints attribute acronyms, and blanks only works for anthro
+        """
+
+    
+        # prep for Alien and Anthro, Robot is different
+
+
+
+
+        TABLE_DATA = [
+            ["AWE", "CHA", "CON", "DEX", "INT", "MND", "STR", "SOC", "HPM", ("Helvetica", "B", 14)],
+            ["___", "___",  "___", "___", "___", "___", "___", "___", "___",("Helvetica", "",18)],
+            ["Awareness", "Charisma", "Constitution", "Dexterity", "Intelligence", "Mind", "Strength", "Privilege", "Resilience", ("Helvetica","B", 7)]
+        ]
+
+        col_width = 22.1
+        row_height = 7
+        start_right,top = self.set_or_get("top of attribute table")
+        for data_row in TABLE_DATA:
+            for datum in data_row[:-1]: # sliced to hide format tuple
+                font,style,size = data_row[-1] # format tuple
+                self.set_font(font,style=style,size=size)
+                datum = str(datum) if isinstance(datum, int) else datum
+                self.cell(
+                    w=col_width, 
+                    h=row_height, 
+                    markdown=True,
+                    txt=datum, 
+                    border=False, 
+                    align='C',    
+                    new_x="RIGHT",
+                    new_y="LAST",
+                    )
+            top += row_height
+            self.set_or_get(start_right,top,"new line")
+
 
     def persona_level_info(self, persona:AllRecords) -> str:
         '''
@@ -312,7 +351,7 @@ class PDF(FPDF):
             else:
                 self.markdown_internal(f'**Alien Tasks** Do what {persona.FAMILY_TYPE} are meant to do.', 12)
             return  # leave task info early
- 
+
         if persona.Vocation == "Robot":
             self.markdown_internal(f'**Robot Tasks** Do what {persona.FAMILY_TYPE} bots are meant to do.', 12)
             return # leave task info early
@@ -452,7 +491,7 @@ class PDF(FPDF):
             header, details, param = working_mutation.return_details(
                 working_mutation.__class__
             )
-       
+
             blob = f"**{header}** - {details}\n{param}"       
             self.set_font("Helvetica", size=9)
             self.multi_cell(0,5,txt= blob, markdown=True,new_x="LEFT",new_y="NEXT",)
@@ -637,7 +676,7 @@ class PDF(FPDF):
         return 
 
     def family_bio_data(self, persona:AllRecords)-> None:
-        ''' pick the family for biuo op'''
+        ''' pick the family for bio op'''
         bio_data_pivot = {"Anthro":self.anthro_biologic_info, "Alien":self.alien_biologic_info, "Robot":self.robot_biologic_info}
         bio_data_pivot[persona.FAMILY](persona)
         return
@@ -685,28 +724,30 @@ class PDF(FPDF):
         for x in range(0,int(self.epw),10):
             self.line(x,0,x,self.eph)
 
-    def locutus(self)->None:
+    def locutus(self) -> None:
         """
-        draws an target at x and y on page
+        Draws a target at x and y on the page.
         """
         x = self.get_x()
         y = self.get_y()
         self.set_line_width(0.3)  # Set line width.
 
-        # make a green circle around locutus
-        self.set_draw_color(0, 255, 0) # green
+        # Make a green circle around locutus
+        self.set_draw_color(0, 255, 0)  # Green
         radius = 15
         self.circle(
-            (x - radius / 2),
-            (y - radius / 2),
-            radius,
+            x,       # Use x directly as the center
+            y,       # Use y directly as the center
+            radius,  # Radius of the circle
             "D",
         )
 
-        centering = radius/2
-        self.set_draw_color(0,0,255) # blue     
-        self.line(x-centering,y-centering, x+centering, y+centering)
-        self.line(x-centering,y+centering,x+centering,y-centering)
+        # Draw a blue cross centered at (x, y)
+        centering = radius / 2
+        self.set_draw_color(0, 0, 255)  # Blue
+        self.line(x - centering, y - centering, x + centering, y + centering)  # Diagonal line 1
+        self.line(x - centering, y + centering, x + centering, y - centering)  # Diagonal line 2
+
 
     def perimiter_box(self)->None:
         '''
@@ -758,6 +799,25 @@ class PDF(FPDF):
             if show_values: 
                 print(f'Locating: LEFT(x) = {x:.1f}, TOP(y) = {y:.1f}')           
             return x,y
+
+    def note_lines_specific(self,lines)-> None:
+        '''
+        draws a chosen number of lines
+        '''
+
+        x,lines_y = self.get_x(), self.get_y()
+        top,left = self.set_or_get("inside note lines specific")
+
+        y_bump = 8
+        lines_y += y_bump
+        max_y = lines_y + y_bump * lines
+        self.set_draw_color(120) #dark grey 
+        self.set_line_width(0.1)
+        while lines_y < max_y:
+            self.line(8,lines_y, 210, lines_y)
+            self.set_or_get(8,lines_y,"new line")
+
+            lines_y += y_bump
 
     def note_lines(self)-> None:
         '''
@@ -1038,7 +1098,38 @@ def screen_attack_table(persona) -> None:
 #  PDF print outs
 #####################################
 
-def pdf_output_chooser(persona) -> None:
+def blank_pdf_chooser() -> None:
+    """
+    choose from blank PDFs for printint purposes
+    """
+
+    blank_pdf_function_map = {
+        "Anthro Player":anthro_blank_pdf,
+        "Alien Player":anthro_blank_pdf,
+        "Robot Player":anthro_blank_pdf
+    }
+
+    please.clear_console()
+    choice_comment = "Choose a blank PDF"
+    choices = list(blank_pdf_function_map.keys())
+    blank_pdf_choice = please.choose_this(choices,choice_comment)
+
+    ###  PDF page prep
+    pdf = PDF(orientation="P", unit="mm", format=(215.9, 279.4))
+    pdf.set_margin(0)
+    pdf.set_auto_page_break(False)
+    pdf.add_page()
+    
+    if blank_pdf_choice in blank_pdf_function_map:
+        blank_pdf_function_map[blank_pdf_choice](pdf)
+
+    pdf.output(
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+        dest="F",
+    )
+
+
+def bespoke_pdf_chooser(persona) -> None:
     '''
     choose between pdf styles
     '''
@@ -1059,9 +1150,9 @@ def pdf_output_chooser(persona) -> None:
     if pdf_chosen == "Persona One Shot":
         record_front(pdf, persona, one_shot=True)
     elif pdf_chosen == "Persona Campaign":
-        record_front(pdf, persona, one_shot=False)
+        record_front(pdf,persona,one_shot=False)
     elif pdf_chosen == "Campaign Sheet":
-        campaign_sheet(pdf,persona, one_shot=False)
+        campaign_sheet(pdf, persona, one_shot=False)
     else:
         print("what the hell dude")
 
@@ -1086,7 +1177,7 @@ def wate_allowance(pdf,persona)->None:
     pdf.set_or_get(6.4,top+6.5, "before WA comment")
     if persona.FAMILY == "Anthro":
         pdf.markdown_internal(f"Sprint ({persona.Move*2} h/u): **<{persona.WA/4} kg** Carry ({persona.Move} h/u): **<{persona.WA*1.5} kg.  Lift Max (0 h/u): **{persona.WA*2.5}kg.**")
-  
+
     elif persona.FAMILY == "Robot":
         pdf.markdown_internal(f"Full ({persona.Move} h/u): **<{persona.WA} kg** Stopped (0 h/u): **{persona.WA}kg.**")
 
@@ -1122,14 +1213,14 @@ def toy_output(pdf,persona,lines=15)->None:
     left,top = pdf.set_or_get()
     pdf.equipment_lines(persona,lines)
 
-def notes_output(pdf,persona)->None:
+def notes_output(pdf)->None:
     '''
     output the NOTES stripe and follow with lines to bottom
     '''
     # notes info stripe
     left,top = pdf.set_or_get("arriving at notes_output")
     pdf.set_or_get(5.4, top,"before NOTE stripe")
-    pdf.section_title("NOTES", f"for {persona.Player_Name} and {persona.Persona_Name}")
+    pdf.section_title("NOTES", f" ")
     left,top = pdf.set_or_get("after NOTE stripe ")
 
     # make some lines
@@ -1254,13 +1345,148 @@ def record_front(pdf, persona, one_shot)->None:
 
     record_back(pdf, persona, one_shot)
 
+def anthro_blank_pdf(pdf)->None:
+    '''
+    organizes print out of a  blank anthro persona record
+    '''
+
+    # persona title left justified
+    pdf.set_or_get(3.3, 5.7,"persona title")
+    pdf.persona_title(f"**PERSONA RECORD**",18)
+
+    # player title right justified
+    right_text = f"**Player:** _________________"
+    pdf.set_or_get(216, 7.5, "player title")
+    pdf.player_title(right_text,12)
+
+    # attributes stripe
+    pdf.set_or_get(5.4,17.5, "attribute stripe")
+    pdf.section_title("ATTRIBUTES", " ")
+    left,top = pdf.set_or_get("after attribute stripe")
+
+    # attributes table
+    pdf.set_or_get(6.4,top+8,"before attributes table")
+    pdf.attributes_table_blank()
+    left, top = pdf.set_or_get("after attributes table")
+
+
+    # bio info stripe
+    pdf.set_or_get(5.4, top + 2.3,"before bio info stripe")
+    bio_title = "BIO INFO"
+    pdf.section_title(bio_title, "FAMILY:                GENUS:                     GENERA:")
+    left,top = pdf.set_or_get(f"after bio info stripe\n")
+
+    # persona bio data
+    pdf.set_or_get(6.2,top+8,f"before Anthro bio info")
+    blob = f"**Age:** ______ **Hite:** ______  **Wate:** ______"
+    pdf.markdown_internal(blob,12)
+    left,top = pdf.set_or_get(f"after Anthro bio info\n")
+
+    pdf.set_or_get(8,top,f"before the specific lines")
+    pdf.note_lines_specific(4)
+    left,top = pdf.set_or_get(f"after specific lines\n")
+
+    # task info stripe
+    pdf.set_or_get(5.4, top + 2.3,"before task info stripe")
+    pdf.section_title("TASK INFO", "VOCATION:  ")
+    left,top = pdf.set_or_get(f"after task info stripe\n")
+
+    # persona task info
+    pdf.set_or_get(8, top + 7.0,"before task info ")
+
+    blob = f"**GIFTS                        INTERESTS                   SKILLS**"
+    pdf.markdown_internal(blob,12)
+    left,top = pdf.set_or_get(f"after task info\n")
+
+    pdf.set_or_get(8,top,f"before the specific lines")
+    pdf.note_lines_specific(3)
+    left,top = pdf.set_or_get(f"after specific lines\n")
+
+    # persona task addendum
+    pdf.set_or_get(5.4, top,"before task addendum ")
+
+    blob = f'**Gifts:** Specific task. Auto success. **Interests:** General knowledge (+1) **Skills:** Specific knowledge/task (+2)'
+    pdf.set_font("Helvetica", size=10)
+    pdf.multi_cell(0,5,txt= blob, markdown=True,new_x="LEFT",new_y="NEXT",)
+
+    left,top = pdf.set_or_get(f"after task addendum\n")
+
+    # combat info stripe
+    pdf.set_or_get(5.4, top + 2.3,"before combat into title")
+    pdf.section_title("COMBAT INFO", " ")
+    left,top = pdf.set_or_get("after combat table info")
+
+    # movement and AR line
+    pdf.set_or_get(6.4,top +7.2, "before move AR line")
+    pdf.markdown(f'**MOVE RATE** ____ h/u  **DEFENCE RATING (DEF)** ____ ____  ____**')
+    left,top = pdf.set_or_get("after move AR line")
+
+    # attack table title
+    pdf.set_or_get(6.4, top + 6.8, "before attack table title")
+    pdf.markdown("**ATTACK TABLE**")
+    left,top = pdf.set_or_get("after attack table title")
+
+    # attack table, skills, HPS
+    pdf.set_or_get(7.2,top + 7, "before attack table") # correct left for centering of table elements
+
+
+
+    # attack header line
+    TABLE_DATA = (
+        ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills", f"HIT POINTS"),
+        ("Strike", "______","______", "______", "___","__________________________",""),
+        ("Fling", "______","______", "______", "___","__________________________",""),
+        ("Shoot", "______","______", "______", "___","__________________________","")
+    )
+
+    pdf.set_font("Helvetica", size=11)
+    pdf.set_fill_color(255)
+    with pdf.table(
+        align="LEFT",
+        width = 201,
+        col_widths=(16, 20, 20, 20, 20, 66, 49),
+        text_align=("LEFT", "CENTER", "CENTER", "CENTER", "CENTER", "LEFT","LEFT"),
+        borders_layout="MINIMAL"
+        ) as attack_table:
+        for data_row in TABLE_DATA:
+            row = attack_table.row()
+            for datum in data_row:
+                row.cell(str(datum))
+
+    left,top = pdf.set_or_get("after attack table")
+
+
+
+
+
+    # space for notes check
+    '''if enough space for notes and lines print notes and lines '''
+
+    if 280 - top > 40:
+        notes_output(pdf)
+
+    pdf.perimiter_box() # must go last for z level
+
+    pdf.add_page()
+
+    # persona title left justified
+    pdf.set_or_get(3.3, 5.7,"persona title")
+    pdf.persona_title(f"**PERSONA RECORD**",18)
+
+    # player title right justified
+    right_text = f"**Player:** _________________"
+    pdf.set_or_get(216, 7.5, "player title")
+    pdf.player_title(right_text,12)
+    
+    pdf.hexagons()
+    pdf.perimiter_box()
+
 def record_back(pdf, persona, one_shot)->None:
     '''
     full page of equip and notes for one shot
     '''
 
     pdf.add_page()
-
 
     # persona title left justified
     pdf.set_or_get(3.3, 5.7,"persona title")

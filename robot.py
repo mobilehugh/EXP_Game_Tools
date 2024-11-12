@@ -35,8 +35,7 @@ def robot_workflow():
     workflow_function_map = {
         "Fresh Robot (New Player)":lambda: fresh_robot(nom_de_bom),
         "Bespoke Robot":lambda: bespoke_robot(nom_de_bom),
-        "Random Robot":lambda: rando_robot((nom_de_bom)),
-        "Maintenance":please.do_referee_maintenance,
+        "Random Robot":lambda: rando_robot((nom_de_bom))
     }
 
     comment = "Choose a ROBOT workflow:"

@@ -29,8 +29,7 @@ def anthro_workflow() -> None:
     workflow_function_map = {
         "Fresh Anthro (new player)":lambda: fresh_anthro(nom_de_bom),
         "Bespoke Anthro":lambda: bespoke_anthro(nom_de_bom),
-        "Random Anthro":lambda:random_anthro(nom_de_bom),
-        "Maintenance":please.do_referee_maintenance
+        "Random Anthro":lambda:random_anthro(nom_de_bom)
     }
     please.clear_console()
     choice_comment = "Choose ANTHRO workflow? "

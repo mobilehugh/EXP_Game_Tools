@@ -4,7 +4,7 @@ EXP The game of technological chaos is a table top role playing game.
 This package creates persona records for players and referees. 
 The persona records are stored as <mangled> JSON, can be updated and printed out as PDFs
 Yet to come: full robots, TOYs and isolated mutations. 
-exp.sciencyfiction.com
+rules.expgame.com
 """
 
 import  alien
@@ -32,7 +32,7 @@ def record_chooser()->None:
             "Robots": robot.robot_workflow,
             "Toys": toy.toy_workflow,
             "Mutations": mutations.mutation_workflow,
-            "Maintenance": please.do_referee_maintenance,
+            "Maintenance": please.maintenance_workflow,
         }
 
         choices_comment = "What are you exploring? "

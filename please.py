@@ -101,7 +101,7 @@ def roll_this(die_roll_string: str) -> int:
         if die_type not in all_dice:
             return sum(all_dice)
         else:
-           return explode_this(all_dice, die_type)
+            return explode_this(all_dice, die_type)
 
     elif die_mod is None:
         result = sum(all_dice)
@@ -529,8 +529,25 @@ def collect_desired_record() -> AllRecords:
     return record_to_return
 
 
+def maintenance_workflow() -> None:
+    """
+    direct user to desired maintenance choice
+    """ 
+    workflow_function_map = {
+        "Record Maintenance": record_maintenance,
+        "PDFs (blank)": outputs.blank_pdf_chooser}
+    
+    clear_console()
+    choice_comment = "Choose MAINTENANCE workflow"
+    choices = list(workflow_function_map.keys())
+    workflow_choice = choose_this(choices, choice_comment)
+
+    if workflow_choice in workflow_function_map:
+        workflow_function_map[workflow_choice]()
+
+
 # todo add move file to maintenance 
-def do_referee_maintenance():
+def record_maintenance():
     """
     things that referee's need to access and do
     """
@@ -542,7 +559,7 @@ def do_referee_maintenance():
     "Level": vocation.update_persona_exps,
     "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
     "Attributes": lambda persona: core.manual_persona_update(persona),
-    "Change Record": lambda persona: do_referee_maintenance(),}
+    "Change Record": lambda persona: maintenance_workflow(),}
     
     operation_list = [key for key in operations]
 
