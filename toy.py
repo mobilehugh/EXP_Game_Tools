@@ -70,12 +70,9 @@ def fresh_toy() -> None:
         toy.Perms["Desc"] = f'{please.get_table_result(exp_tables.colour_bomb)} and {please.get_table_result(exp_tables.colour_bomb).lower()} {shaped}'
 
 
-        if please.say_yes_to(f'SAVE THIS: {toy_cat}: {toy_type} ({toy.Perms["Desc"]}).'):
-            please.assign_file_name(toy)
-            please.record_storage(toy)
+        if please.say_yes_to(f'LAST TOY?: {toy_cat}: {toy_type} ({toy.Perms["Desc"]}).'):
+            a_persona_record.record_chooser()
 
-            if please.say_yes_to(f'No more Toys. I am done.'):
-                give_me_more = False
 
     return
 

@@ -3561,7 +3561,7 @@ mental_mutation_random = {
     "name": "Mental Mutations",
     "die_roll": "1d100",
 } 
- 
+
 physical_mutation_random = {
     (1, 3):('Acidic Enzymes', AcidicEnzymes),
     (4, 4):('Adaptation', Adaptation),
