@@ -10,7 +10,7 @@ Now built on VSCodium
 . pip install fpdf2 (for viewing printable and browser readable persona record)
 . clone this repo
 . in the repo folder add the folder Records, and in Records add the folders Bin, Players, Referee and Toys
-. py a_persona_record.py 
+. python3 a_persona_record.py 
 
 .*Folders should look like*
 * /Repo Folder 
