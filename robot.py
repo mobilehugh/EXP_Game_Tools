@@ -1299,7 +1299,7 @@ def transport(taxi: RobotRecord) -> RobotRecord:
 
         # extra planetary transport bot
         taxi.FAMILY_SUB = "Extra-Planetary"
-        specs.append("Space vehicle pilot.")
+        specs.append("Spacecraft pilot.")
         taxi.Adapt = 22
         taxi.Value = 450000
         taxi.HPM = please.roll_this("1d4+8") * taxi.CON
@@ -1321,7 +1321,7 @@ def transport(taxi: RobotRecord) -> RobotRecord:
             f"Can only pilot exatmo vehicles. {taxi.INT * 4}% chance to drive vehicles within space ship."
         )
         specs.append(f"Driving an unknown vessel {taxi.INT * 4}%")
-        specs.append("Not skilled in space vehicle combat.")
+        specs.append("Not skilled in Spacecraft combat.")
         specs.append("Has a steward skill for ships with organics.")
 
         taxi.Spec_Sheet = specs

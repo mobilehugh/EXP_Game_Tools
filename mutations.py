@@ -27,7 +27,7 @@ def mutation_workflow() -> None:
         more_random = True
         while more_random:
             single_random_mutation(fake_record, ['any'])
-            if not please.say_yes_to("Give me another mutation! "):
+            if not please.say_yes_to("Give me another mutation? "):
                 break
 
     elif plan_desired == "Bespoke Mutations":

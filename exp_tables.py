@@ -1068,7 +1068,7 @@ mercenary_combat_skills = {
     (86, 88):"General Bonus",
     (89, 89):"Altered Gravity",
     (90, 90):"Naval Artillery",
-    (91, 91):"Powered Armour",
+    (91, 91):"Biomech",
     (92, 92):"Under Liquid",
     (93, 93):"Zero Gravity",
     (94, 95):"Choose",
@@ -3556,7 +3556,7 @@ secondary_robotic_peripheral = {
     (50, 54):"Languages",
     (55, 57):"Medical Device",
     (58, 60):"Mental Mutation",
-    (61, 73):"Miscellaneous Eq",
+    (61, 73):"Devices",
     (74, 76):"Multi-bot",
     (77, 79):"Navigation",
     (80, 82):"Pharma Effect",
@@ -3977,20 +3977,20 @@ heightened_vision = {
 mechanical_insertions = {
     (1, 5):"Aerosol",
     (6, 11):"Armour - under skin",
-    (12, 12):"Powered Armour - under skin",
+    (12, 12):"Biomech - under skin",
     (13, 16):"Grenade",
     (17, 17):"Bomb",
     (18, 29):"Gun",
     (30, 30):"Artillery - key",
-    (31, 42):"Miscellaneous Equipment",
+    (31, 42):"Devices",
     (43, 43):"Robot",
-    (44, 53):"Miscellaneous Weapon",
+    (44, 53):"Armament",
     (54, 65):"Pharma dispenser",
-    (66, 75):"Random Junque",
+    (66, 75):"Junque",
     (76, 85):"Treasure - high value",
     (86, 89):"Vehicle - key",
-    (90, 90):"Space Vehicle - key",
-    (91, 100):"Vet Equipment",
+    (90, 90):"Spacecraft - key",
+    (91, 100):"Biorepair",
     "die_roll":"1d100",
 } 
  
@@ -4089,20 +4089,20 @@ undersized_body_part = {
 toy_categories = {
     (1, 5):"Aerosol",
     (6, 11):"Armour",
-    (12, 12):"Powered Armour",
+    (12, 12):"Biomech",
     (13, 16):"Grenade",
     (17, 17):"Bomb",
     (18, 29):"Gun",
     (30, 30):"Artillery",
-    (31, 42):"Miscellaneous Equipment",
+    (31, 42):"Devices",
     (43, 43):"Robot",
-    (44, 53):"Miscellaneous Weapon",
+    (44, 53):"Armament",
     (54, 65):"Pharma",
-    (66, 75):"Random Junque",
+    (66, 75):"Junque",
     (76, 85):"Treasure",
     (86, 89):"Vehicle",
-    (90, 90):"Space Vehicle",
-    (91, 100):"Vet Equipment",
+    (90, 90):"Spacecraft",
+    (91, 100):"Biorepair",
     "die_roll":"1d100",
 } 
 
@@ -4457,7 +4457,7 @@ vehicle_list = {
     }
 
 rocketeer_list = {
-    (1,100): "No space vehicles yet buddy",
+    (1,100): "No Spacecraft yet buddy",
     "die_roll":"1d100"
     }
 
@@ -4516,20 +4516,20 @@ vet_eq_list = {
 toy_pivot = {
     "Aerosol": aerosol_list,
     "Armour": armour_list,
-    "Powered Armour": armour_list,
+    "Biomech": armour_list,
     "Grenade": grenade_list,
     "Bomb": bomb_list,
     "Gun": gun_list,
     "Artillery": artillery_list,
-    "Miscellaneous Equipment": misc_eq_list,
+    "Devices": misc_eq_list,
     "Robot": robot_list,
-    "Miscellaneous Weapon": misc_wep_list,
+    "Armament": misc_wep_list,
     "Pharma": pharma_list,
-    "Random Junque": le_exquisite_junque_list,
+    "Junque": le_exquisite_junque_list,
     "Treasure": treasure_list,
     "Vehicle": vehicle_list,
-    "Space Vehicle": rocketeer_list,
-    "Vet Equipment": vet_eq_list,
+    "Spacecraft": rocketeer_list,
+    "Biorepair": vet_eq_list,
 }
 
 
