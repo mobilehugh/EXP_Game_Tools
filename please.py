@@ -1,5 +1,6 @@
 import json
 import math
+import time
 import os
 import sys
 import re
@@ -132,66 +133,90 @@ def do_1d100_check(number: int) -> bool:
 #
 ###########################################
 
-def toxic(safer:str) -> bool:
-    '''bad letters or too short letters '''
+def toxic(user_input:str) -> bool:
+    '''
+    bad words or too long inputs returns toxic = true
+    SQL included to future proof if SQL added
+    '''
 
-    def evil_characters(is_input_evil:str) -> bool:
-        '''are there any evil characters in the str? '''
-        special_chars = ["%", "@", "#", "$", "(", ")", "<", ">", "&", "/", ";", "|"]
+    evil_patterns = [
+        r"(\b(select|union|insert|delete|update|drop|alter)\b)",  # SQL keywords
+        r"(--|;|--|/\*|\*/|\|)",  # SQL injection symbols
+        r"[<>{}()]",             # HTML or script tags
+        r"(javascript:|vbscript:|data:)",  # Script protocols
+        r"(\bexec\b|\bsystem\b|\bpassthru\b|\bpopen\b|\bopen\b)"  # Command injection functions
+    ]
+    evil_found = False
 
-        if isinstance(is_input_evil, int):
-            return False
-
-        for char in special_chars:
-            if char in is_input_evil:
-                return True
-        return False
+    # Check for evil patterns
+    for pattern in evil_patterns:
+        if re.search(pattern, user_input, re.IGNORECASE):
+            evil_found = True
     
-    def too_short_word(is_too_short:str) -> bool:
-        ''' allows for short digits for input but not short words'''
-        if isinstance(is_too_short, int):
-            return False
-        if len(is_too_short) in range(3,30):
-            return False
-        else:
-            return True
-
-    if too_short_word(safer) or evil_characters(safer):
-        return True
-    else:
-        return False
+ 
+    return True if len(user_input) > 30  or evil_found else False
+ 
     
 def input_this(message: str) -> str:
     ''' protects input data and returns str '''
+    clear_console()
     safer = input(message)
-    safer = int(safer) if safer.isdigit() else safer
 
     while toxic(safer):
-        print(f'Too short, too long, or knotty characters.')
+        print(f'Input too long, or has dangerous patterns')
         safer = input(message)
-        safer = int(safer) if safer.isdigit() else safer
 
-    if say_yes_to(f'Are you okay with {safer}:'):
+    if safer == "Q":
+        if say_yes_to("Do you want really want to Quit? "):
+            say_goodnight_marsha()
+
+    if safer == "R":
+        if say_yes_to("Do you want really want to Reset? "):
+            a_persona_record.record_chooser()
+
+    # confirm input is okay.       
+    clear_console()
+    if say_yes_to(f'{input_checker(message,safer)}'):
         return safer
     else:
-        # clear_console()
         return input_this(message)
 
-def choose_this(choices: list, comment: str, choosy: AllRecords = None) -> str:
+
+def input_checker(message:str,check_this) -> str:
+    """
+    possibly a nice way to check if the input is desired
+    """
+    message = ''.join([char for char in message if char.isupper() or char.isspace()]).strip()
+    return f"{message} --> {check_this}"
+
+def show_error_message(message:str) -> None:
+    """
+    prints out the error message, disappears and moves on
+    """
+    clear_console()
+    print(message)
+    time.sleep(2)
+    clear_console()
+
+
+
+def choose_this(choices: list, comment: str, choosy: AllRecords = None, check_choice: bool = True) -> str:
     """
     Choose from a list of choices and return the chosen item
     [default] element for list choices[0]
     quit or restart or chastise the user
     also auto return if Fallthrough is true
     """
+    clear_console()
+
     # if fallthrough skip choosing part
 
     if choosy:
-        if choosy.Fallthrough:
+        if choosy.Fallthrough: # if random then return random from choices
             return choice(choices)
     
     if choosy:
-        if choosy.Bespoke:
+        if choosy.Bespoke: # if bespoke give choice to randomize
             if say_yes_to(f'Would you like randomize -> {comment.upper()}'):   
                 return choice(choices)
 
@@ -246,8 +271,10 @@ def choose_this(choices: list, comment: str, choosy: AllRecords = None) -> str:
         if chosen not in choices:
             print("\nPlease select a valid choice.", end="")
             continue
-
+        
     return chosen
+
+
 
 def say_yes_to(question: str) -> bool:
     """
@@ -635,6 +662,7 @@ def get_kind_of(kindy:AllRecords) -> str:
     return kindof
 
 
+# fix screen output is broken 
 def screen_this(screeny:AllRecords) -> None:
     ''' directs person to correct screening type based on FAMILY'''
     ## determine show on screen function by FAMILY

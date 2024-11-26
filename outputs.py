@@ -1338,7 +1338,7 @@ def record_front(pdf, persona, one_shot)->None:
 
 
     if 280 - top > 40 and one_shot:
-        notes_output(pdf,persona)
+        notes_output(pdf)
 
     pdf.sheet_footer(persona)
     pdf.perimiter_box() # must go last for z level
@@ -1349,6 +1349,8 @@ def anthro_blank_pdf(pdf)->None:
     '''
     organizes print out of a  blank anthro persona record
     '''
+
+    input(f"you are at anthro_blank_pdf")
 
     # persona title left justified
     pdf.set_or_get(3.3, 5.7,"persona title")
@@ -1376,7 +1378,7 @@ def anthro_blank_pdf(pdf)->None:
     pdf.section_title(bio_title, "FAMILY:                GENUS:                     GENERA:")
     left,top = pdf.set_or_get(f"after bio info stripe\n")
 
-    # persona bio data
+    # persona bio datahttps://sciencyfiction.com/wp-admin/admin.php?page=participants-database-manage_fields
     pdf.set_or_get(6.2,top+8,f"before Anthro bio info")
     blob = f"**Age:** ______ **Hite:** ______  **Wate:** ______"
     pdf.markdown_internal(blob,12)
@@ -1429,8 +1431,6 @@ def anthro_blank_pdf(pdf)->None:
     # attack table, skills, HPS
     pdf.set_or_get(7.2,top + 7, "before attack table") # correct left for centering of table elements
 
-
-
     # attack header line
     TABLE_DATA = (
         ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills", f"HIT POINTS"),
@@ -1455,8 +1455,10 @@ def anthro_blank_pdf(pdf)->None:
 
     left,top = pdf.set_or_get("after attack table")
 
-
-
+    # attack table explainer
+    pdf.set_or_get(6.4, top+1, "before attack table explainer")
+    pdf.attack_table_explainer()
+    left,top = pdf.set_or_get("after attack table explainer")
 
 
     # space for notes check
@@ -1516,7 +1518,7 @@ def record_back(pdf, persona, one_shot)->None:
     left,top = pdf.set_or_get("after toy and lines")
 
     # notes
-    notes_output(pdf,persona)
+    notes_output(pdf)
 
     pdf.sheet_footer(persona)
     pdf.perimiter_box()
@@ -1570,7 +1572,7 @@ def campaign_sheet(pdf, persona, one_shot) -> None:
 
     # notes
     pdf.set_or_get(5.4,17.5, "before notes on campaign")
-    notes_output(pdf,persona)
+    notes_output(pdf)
     pdf.sheet_footer(persona)
     pdf.perimiter_box()
 

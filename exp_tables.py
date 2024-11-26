@@ -64,7 +64,7 @@ class PersonaRecord:
 @dataclass
 class Anthropic(PersonaRecord):
     FAMILY: str = "Anthro"
-   
+
 @dataclass
 class Robotic(PersonaRecord):
     FAMILY: str = "Robot"
@@ -1077,6 +1077,8 @@ mercenary_combat_skills = {
     "die_roll":"1d100",
 } 
  
+
+# todo update mercenary skills to match rules
 mercenary_tactical_skills = {
     (1, 13):"Aircraft",
     (14, 25):"Buildings",

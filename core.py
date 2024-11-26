@@ -10,6 +10,16 @@ import mutations
 class AllRecords(exp_tables.AllThings):
     pass
 
+def acquire_player_name() -> str:
+    """
+    get the player's mundane name, make it safe and return it
+    """
+
+    name_player = please.input_this("please input your MUNDANE TERRAN NAME: ")
+    return name_player # altered by side effect
+
+
+
 def initial_attributes(attributes_creating:AllRecords) -> AllRecords:
     """
     generates initial attributes for anthro, alien and robot personae 
@@ -73,6 +83,7 @@ def hit_points_max(pointy:AllRecords) -> int:
         if pointy.Size_Cat == "Minute":
             hpm = math.ceil(pointy.HPM * ((pointy.Wate / 1000)))
             
+    # robot HPM is determined by robot type and CON
     elif pointy.FAMILY == "Robot":
         hpm = -1
         
@@ -170,7 +181,7 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
                 setattr(descriptive, alter_attribute, before*int(alter_amount))
                 if altering_descriptor == "Resilient":
                     descriptive.HPM = descriptive.HPM if descriptive.HPM > 70 else 70
-                   
+
             else:
                 old_attribute = getattr(descriptive, alter_attribute)
                 new_attribute = please.roll_this(alter_amount)
@@ -185,7 +196,7 @@ def descriptive_attributes(descriptive: AllRecords) -> AllRecords:
             else:
                 new_attribute = please.roll_this(alter_amount)
                 setattr(descriptive, alter_attribute, new_attribute)
-               
+
         if altering_descriptor == "Exit":
             exit
 

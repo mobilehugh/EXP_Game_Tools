@@ -23,13 +23,19 @@ def anthro_workflow() -> None:
     # clearance for Clarence
     please.clear_console()
 
-    print('You are about to embark on an ANTHRO Build')
-    nom_de_bom = please.input_this("\nPlease input your MUNDANE TERRAN NAME: ")
+    """
+    "Fresh Anthro (new player)":lambda: fresh_anthro(nom_de_bom),
+    "Bespoke Anthro":lambda: bespoke_anthro(nom_de_bom),
+    "Random Anthro":lambda:random_anthro(nom_de_bom),
+    """
+
 
     workflow_function_map = {
-        "Fresh Anthro (new player)":lambda: fresh_anthro(nom_de_bom),
-        "Bespoke Anthro":lambda: bespoke_anthro(nom_de_bom),
-        "Random Anthro":lambda:random_anthro(nom_de_bom)
+        "Fresh Anthro (new player)":fresh_anthro,
+        "Bespoke Anthro":bespoke_anthro,
+        "Random Anthro":random_anthro,
+        "Maintain Existing Record":please.record_maintenance,
+        "Input Paper Record":input_paper_record
     }
     please.clear_console()
     choice_comment = "Choose ANTHRO workflow? "
@@ -38,6 +44,9 @@ def anthro_workflow() -> None:
 
     if anthro_record_type in workflow_function_map:
         workflow_function_map[anthro_record_type]()
+
+    else:
+        input("not ready for this")
 
 ####################################
 # FRESH ANTHRO FUNCTIONS
@@ -81,7 +90,7 @@ def anthro_type_choose(choosey: AnthroRecord) -> AnthroRecord:
     else:
         choices = anthro_type_by_attribute(choosey)
 
-    choosey.FAMILY_TYPE = please.choose_this(choices, "Choose an anthro TYPE.", choosey)
+    choosey.FAMILY_TYPE = please.choose_this(choices, "choose an ANTHRO GENUS.", choosey)
 
     return choosey # altered by side effect
 
@@ -93,13 +102,13 @@ def anthro_sub_choose(subway: AnthroRecord) -> AnthroRecord:
     choices = choices = exp_tables.anthro_sub_types[subway.FAMILY_TYPE]
 
     if subway.Fallthrough:
-        subway.FAMILY_SUB = please.choose_this(choices,"Choose anthro SUB TYPE.", subway)
+        subway.FAMILY_SUB = please.choose_this(choices,"choose ANTHRO GENERA.", subway)
         return subway # modified by side effect
 
-    if please.say_yes_to("Do you want to create your own SUB TYPE"):
-        sub_type = please.input_this(f"Carefully input a SUB TYPE for the family {subway.FAMILY_TYPE}: ")
+    if please.say_yes_to(f"do you want to create your own ANTHRO GENERA for the genus {subway.FAMILY_TYPE.lower()} "):
+        sub_type = please.input_this(f"carefully input an ANTHRO GENERA for the genus {subway.FAMILY_TYPE.lower()} ")
     else:
-        sub_type = please.choose_this(choices,"Choose anthro SUB TYPE.", subway)
+        sub_type = please.choose_this(choices,"choose ANTHRO GENERA ", subway)
 
     subway.FAMILY_SUB = sub_type
 
@@ -164,7 +173,10 @@ def anthro_size_chooser(size_me:AnthroRecord) -> AnthroRecord:
 
 # todo crappy aging logic
 def anthro_age_calc(years_old: AnthroRecord, ager: str) -> AnthroRecord:
-    '''add the anthro age and age_cat to the persona record'''
+    '''
+    add the anthro age and age_cat to the persona record
+    '''
+    
     anthro_type = years_old.FAMILY_TYPE
     age_categories = [val for val  in exp_tables.anthro_random_age_category.values() if val != "1d100"]
     die_roll = exp_tables.anthro_ages_by_category_and_type[anthro_type][age_categories.index(ager)]
@@ -232,7 +244,7 @@ def anthro_return_age_cat(years_old: AnthroRecord) -> str:
     """
     allow user to select an anthro age category
     """
-    option_list = ["Child", "Adolescent", "Adult", "Elder", "Aged"]
+    option_list = ["Child", "Adolescent", "Adult", "Older", "Aged"]
     list_comment = "Choose a bespoke age range."
     age_cat = please.choose_this(option_list, list_comment, years_old)
 
@@ -243,24 +255,20 @@ def anthro_nomenclature(avatar:AnthroRecord) -> AnthroRecord:
     please.clear_console()
     print(f'\n{avatar.Player_Name} you are NAMING a {please.get_kind_of(avatar)} {avatar.FAMILY.upper()} persona.')
     print(f'The persona looks like: {avatar.Quick_Description}')
-    avatar.Persona_Name = please.input_this(f"\nPlease input the PERSONA NAME: ")
+    avatar.Persona_Name = please.input_this(f"please input the PERSONA NAME: ")
     return avatar # altered by side effects 
-
-
-
-
 
 
 #####################################
 # build a FRESH anthro persona
 #####################################
 
-def fresh_anthro(player_name:str) -> None:
+def fresh_anthro() -> None:
     """
     builds the anthro record for a fresh persona
     """
     fresh = AnthroRecord()
-    fresh.Player_Name = player_name
+    fresh.Player_Name = core.acquire_player_name()
     please.setup_persona(fresh)
 
     core.initial_attributes(fresh)
@@ -291,13 +299,13 @@ def fresh_anthro(player_name:str) -> None:
 # build a BESPOKE anthro persona
 #####################################
 
-def bespoke_anthro(player_name:str) -> None:
+def bespoke_anthro() -> None:
     """
     building a bespoke anthro persona typically a referee persona
     """
     bespoke = AnthroRecord()
     bespoke.Bespoke = True
-    bespoke.Player_Name = player_name
+    bespoke.Player_Name = core.acquire_player_name()
     please.setup_persona(bespoke)
 
     core.initial_attributes(bespoke)
@@ -352,13 +360,13 @@ def bespoke_anthro(player_name:str) -> None:
 # build a RANDOM anthro persona
 #####################################
 
-def random_anthro(player_name:str) -> None:
+def random_anthro() -> None:
     """
     building a RANDOM anthro persona, typically a referee persona
     """
     rando = AnthroRecord()
     rando.Fallthrough = True
-    rando.Player_Name = player_name
+    rando.Player_Name = core.acquire_player_name()
     please.setup_persona(rando)
 
     core.initial_attributes(rando)
@@ -390,3 +398,153 @@ def random_anthro(player_name:str) -> None:
     rando.Quick_Description = f'A {rando.Age} {rando.Age_Suffix.lower()} old {rando.FAMILY_SUB.lower()} {rando.FAMILY_TYPE.lower()} {rando.Vocation.lower()}'
 
     please.wrap_up_persona(rando)
+
+
+#####################################
+# INPUT an anthro persona
+#####################################
+
+def input_paper_record() -> None:
+    """
+    input a paper record by hand
+    """
+
+
+    # set up the persona record class
+    paper = AnthroRecord()
+
+    # get names
+    paper.Player_Name = please.input_this(f"please input your MUNDANE TERRAN NAME ")
+    paper.Persona_Name = please.input_this(f"please input the PERSONA NAME ")
+
+
+    # input the attributes from top stripe
+
+    for (attribute) in exp_tables.suggested_anthro_attributes:
+        please.clear_console()
+        cant_move_on = True
+        
+        while cant_move_on:
+            please.clear_console()
+            print(f'inputting {paper.Persona_Name}\'s {exp_tables.suggested_anthro_attributes[attribute]["long_name"]}')
+            # input(f"{exp_tables.suggested_anthro_attributes[attribute]["long_name"]} is typically {exp_tables.suggested_anthro_attributes[attribute]["start_min"]} to {exp_tables.suggested_anthro_attributes[attribute]["start_max"]} [Return to continue] ")
+            attribute_value = please.input_this(f"input {paper.Persona_Name.lower()}'s {attribute} (usu {exp_tables.suggested_anthro_attributes[attribute]["start_min"]}-{exp_tables.suggested_anthro_attributes[attribute]["start_max"]}) ")
+
+            try: 
+                int(attribute_value)
+                attribute_value = int(attribute_value)
+            except ValueError:
+                please.show_error_message(f"attributes must be integers")
+                continue
+
+            if attribute_value < 1 and attribute != "CHA":
+                please.show_error_message(f"not compatible with life")
+                continue
+
+            if attribute_value > exp_tables.suggested_anthro_attributes[attribute]["start_max"]:
+                if please.say_yes_to(f"is a {attribute} of {attribute_value} for real? "):
+                    cant_move_on = False
+            else:
+                cant_move_on = False
+
+            setattr(paper,attribute, attribute_value)
+
+    # choose the family
+    family_choices = ["Anthro", "Alien","Robot", "AI"]
+    comment = f"input {paper.Persona_Name.lower()}'s FAMILY "
+    family_choice = please.choose_this(family_choices,comment,paper)
+    paper.FAMILY = family_choice
+
+    # choose the family_type
+
+    if paper.FAMILY == "Anthro":
+        comment = f"input {paper.Persona_Name.lower()}'s GENUS"
+        genus_choice = please.choose_this(exp_tables.anthro_types_list,comment,paper)
+        setattr(paper,"FAMILY_TYPE", genus_choice)
+
+    else:
+        print('not here yet')
+
+ 
+    # choose the family sub type
+    if paper.FAMILY == "Anthro":
+        anthro_sub_choose(paper)
+    else:
+        print('not here yet')
+
+    # age and suffix
+    age_suffixes = ["years","seconds","minutes","hours", "weeks", "months"]
+    comment = f"input {paper.Persona_Name.lower()}'s AGE SUFFIX"
+    age_suffix = please.choose_this(age_suffixes, comment, paper)
+    paper.Age_Suffix = age_suffix
+
+    age = please.input_this(f"what is {paper.Persona_Name.lower()}'s AGE in {paper.Age_Suffix} ")
+    paper.Age = int(age)
+
+    # HITE and WATE
+    paper.Size_Cat = "Medium"
+    paper.Hite_Suffix = "cms"
+    paper.Wate_Suffix = "kgs"   
+
+    hite = please.input_this(f"what is {paper.Persona_Name.lower()}'s HITE in {paper.Hite_Suffix} ")
+    paper.Hite = int(hite)
+
+    wate = please.input_this(f"what is {paper.Persona_Name.lower()}'s WATE in {paper.Wate_Suffix} ")
+    paper.Wate = int(wate)
+
+    # mutations
+    mutations.pick_bespoke_mutation(paper)
+
+    # vocation
+    paper.Vocation = please.choose_this(exp_tables.vocation_list, "choose VOCATION type.",paper)
+    level = please.input_this(f"what is {paper.Persona_Name.lower()}'s EXPS LEVEL ")
+    paper.Level = int(level)
+
+    # special case of Nothing
+    if paper.Vocation == "Nothing":
+        choices = list(exp_tables.vocation_aspiration_exps.keys())
+        comment = "a nothing needs a VOCATIONAL ASPIRATION. Please pick one. "
+        vocation_desired = please.choose_this(choices, comment)
+        paper.Vocay_Aspiration = vocation_desired
+        paper.Vocay_Aspiration_EXPS = exp_tables.vocation_aspiration_exps[vocation_desired]
+
+    # interests
+    interest_table = exp_tables.vocations_interests_pivot[paper.Vocation]
+    choices = please.list_table_choices(interest_table)
+
+    interest_amount = please.input_this(f"how many INTERESTS does {paper.Persona_Name.lower()} have ")
+    for index in range(int(interest_amount)):
+        paper.Interests.append(please.choose_this(choices, f"choose {paper.Vocation} interest #{index + 1}/{interest_amount}"))
+
+    # skills
+    skill_amount = int(please.input_this(f"how many SKILLS does {paper.Persona_Name.lower()} have "))
+
+    skills_table = []
+    for skillist in exp_tables.vocation_skills_tables[paper.Vocation]:
+        for key, value in skillist.items():
+            if key != "die_roll" and key != "name":
+                skills_table.append(value)
+
+    for index in range(int(skill_amount)):
+        paper.Skills.append(please.choose_this(skills_table, f"choose {paper.Vocation} skill #{index + 1}/{skill_amount}"))         
+
+    # add the calculated stuff to the paper record
+    core.movement_rate(paper)
+    core.base_armour_rating(paper)
+    core.wate_allowance(paper)    
+
+    # create the quick description for the attributes stripe
+    paper.Quick_Description = f'A {paper.Age} {paper.Age_Suffix.lower()} old {paper.FAMILY_SUB.lower()} {paper.FAMILY_TYPE.lower()} {paper.Vocation.lower()}'
+
+    # wrap up the paper persona 
+    please.clear_console()
+    input(f'\n{paper.Player_Name} has created a {please.get_kind_of(paper)} {paper.FAMILY.upper()} persona.\nHit RETURN to review..')
+    please.screen_this(paper)
+    print(f'\nYou may need to SCROLL UP to fully review...')
+    please.assign_file_name(paper)
+    please.clear_console()
+    please.screen_this(paper)
+    print(f'\nYou may need to SCROLL UP to fully review...')
+    please.record_storage(paper)
+
+    return

@@ -3462,8 +3462,8 @@ def pick_bespoke_mutation(bespoke_mutating:exp_tables.PersonaRecord) -> exp_tabl
     build_directions = []
     chosen = ""
     ALLOWED_LIST.insert(0, "EXIT")
-    while chosen!= "EXIT":
-        chosen = please.choose_this(ALLOWED_LIST, "Choose mutation kinds. ")
+    while chosen != "EXIT":
+        chosen = please.choose_this(ALLOWED_LIST, "Choose mutation kinds (then EXIT). ")
         if chosen == "EXIT":
             break
         build_directions.append(chosen)
