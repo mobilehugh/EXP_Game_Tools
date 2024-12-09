@@ -922,22 +922,24 @@ knite_gifts = {
 }
 
 knite_interests = {
-    (1, 41):"Physical Space",
-    (42, 61):"Think Space",
-    (62, 95):"Culture Space",
+    (1, 41):"Physicum",
+    (42, 61):"Cerebrum",
+    (62, 95):"Culturum",
     (96, 99):"Choose",
     (100, 100):"Extra Roll",
     "name":"Knite Interests",
     "die_roll":"1d100",
 } 
- 
+
 knite_kirlian_skills = {
-    (1, 15):"Detect Hidden",
-    (16, 30):"Detect Danger",
-    (31, 45):"Detect Life",
-    (46, 60):"Detect Intent",
-    (61, 75):"Detect Fate",
-    (76, 95):"Kirlian Defence",
+    (1, 10):"Kirlian Defence",
+    (11, 20):"Pressure",
+    (21, 30):"False Rest",
+    (31, 41):"See Danger",
+    (42, 42):"See Fate",
+    (43, 60):"See Intent",
+    (61, 78):"See hidden",
+    (79, 95):"See life",
     (96, 100):"Extra Roll",
     "name":"Knite Kirlian Skills",
     "die_roll":"1d100",
@@ -957,10 +959,11 @@ knite_physical_skills = {
     "die_roll":"1d100",
 } 
 
+# note that the culture skills is shared between knite and biologist
 knite_interest_skills_pivot = {
-    "Physical Space": knite_physical_skills,
-    "Think Space": knite_kirlian_skills,
-    "Culture Space": culture_skills,
+    "Physicum": knite_physical_skills,
+    "Cerebrum": knite_kirlian_skills,
+    "Culturum": culture_skills,
 }
 
 # MECHANIC Gifts, Interests and Skills
@@ -1022,8 +1025,8 @@ mechanic_skills = {
     (83, 84):"Shipmanship",
     (85, 86):"Piloting",
     (87, 88):"Vehicles",
-    (89, 90):"Non-powered Weapons",
-    (91, 92):"Powered Weapons",
+    (89, 90):"Weapons non-powered",
+    (91, 92):"Weapons powered",
     (93, 93):"Choose",
     (94, 100):"Extra Roll",
     "name":"Mechanic Skills",
@@ -1047,7 +1050,7 @@ mercenary_gifts = {
 mercenary_interests = {
     (1, 41):"Combat",
     (42, 61):"Tactical",
-    (62, 95):"Research",
+    (62, 95):"Specials",
     (96, 99):"Choose",
     (100, 100):"Extra Roll",
     "name":"Mercenary Interests",
@@ -1055,48 +1058,90 @@ mercenary_interests = {
 }  
 
 mercenary_combat_skills = {
-    (1, 24):"Hand to Hand",
-    (25, 36):"Pistols",
-    (37, 48):"Pistols Energized",
-    (49, 60):"Rifles",
-    (61, 72):"Rifles Energized",
-    (73, 79):"Grenades",
-    (80, 82):"Aerosols",
-    (83, 83):"Artillery",
-    (84, 84):"Bombs",
-    (85, 85):"Demolitions",
-    (86, 88):"General Bonus",
-    (89, 89):"Altered Gravity",
-    (90, 90):"Naval Artillery",
-    (91, 91):"Biomech",
-    (92, 92):"Under Liquid",
-    (93, 93):"Zero Gravity",
-    (94, 95):"Choose",
-    (96, 100):"Extra Roll",
-    "name":"Mercenary Skills",
-    "die_roll":"1d100",
-} 
- 
+    (1, 5): "Hand to Hand Bare",
+    (6, 10): "Hand to Hand Strike",
+    (11, 15): "Hand to Hand Thrust",
+    (16, 20): "Hand to Hand Fling",
+    (21, 24): "Pistols Revolver",
+    (25, 28): "Pistols Sotto",
+    (29, 32): "Pistols Flotto",
+    (33, 36): "Pistols Energy",
+    (37, 40): "Pistols Energy Flotto",
+    (41, 44): "Pistols Energy Sotto",
+    (45, 48): "Rifles Pump",
+    (49, 52): "Rifles Sotto",
+    (53, 56): "Rifles Flotto",
+    (57, 58): "Rifles Energy",
+    (59, 62): "Rifles Energy Sotto",
+    (63, 66): "Rifles Energy Flotto",
+    (67, 72): "Aerosols",
+    (73, 75): "Ambidextrous",
+    (76, 78): "Bolster",
+    (79, 81): "Divide Attacks",
+    (82, 87): "General Mayhem",
+    (88, 93): "Grenades",
+    (94, 96): "Snap Reload",
+    (97, 98): "Extra Roll",
+    (99, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name": "Mercenary Combat Skills",
+    "die_roll":"1d100"
+}
 
-# todo update mercenary skills to match rules
 mercenary_tactical_skills = {
-    (1, 13):"Aircraft",
-    (14, 25):"Buildings",
-    (26, 37):"Extra Planetary Vehicles",
-    (38, 49):"Ground Vehicles",
-    (50, 61):"Personnel",
-    (62, 73):"Sub Liquid Vehicles",
-    (74, 85):"Water Vehicles",
-    (86, 96):"Extra Roll",
-    (97, 100):"Choose",
-    "name":"Weaponry Specializations",
-    "die_roll":"1d100",
-} 
+    (1, 5): "Ambush",
+    (6, 10): "Artillery",
+    (11, 15): "Artillery Naval",
+    (16, 20): "Biome",
+    (21, 25): "Bombs",
+    (26, 30): "Buildings Civilian",
+    (31, 35): "Buildings Industrial",
+    (36, 40): "Comms",
+    (41, 45): "Defence",
+    (46, 50): "Drones",
+    (51, 55): "Extrication",
+    (56, 60): "Logistics",
+    (61, 65): "Personnel",
+    (66, 70): "Prevarication",
+    (71, 75): "Quartermaster",
+    (76, 80): "Surveillance",
+    (81, 83): "Vehicles Inatmo",
+    (84, 85): "Vehicles Exatmo",
+    (86, 94): "Vehicles Naval",
+    (95, 96): "Vehicles Submerged",
+    (97, 98): "Extra Roll",
+    (99, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name": 'Mercenary Tactical Skills Table',
+    "die_roll":"1d100"
+}
+
+mercenary_special_skills = {
+    (1, 7): "Ambush",
+    (7, 14): "Biome",
+    (14, 21): "Demolitions",
+    (21, 25): "Exatmo",
+    (26, 38): "Field mech",
+    (39, 53): "Field vet",
+    (54, 61): "Force entry",
+    (62, 65): "Hi Gravity ",
+    (66, 69): "Low Gravity ",
+    (70, 72): "Powered Armour",
+    (73, 80): "Sapper",
+    (81, 88): "Submersed",
+    (89, 96): "Zero Gravity ",
+    (97, 98): "Extra Roll",
+    (99, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name": 'Mercenary Special Skills Table',
+
+    "die_roll":"1d100"
+}
 
 merc_interest_skills_pivot = {
     "Combat": mercenary_combat_skills,
     "Tactical": mercenary_tactical_skills,
-    "Research": mercenary_combat_skills,
+    "Specials": mercenary_special_skills,
 }
 
 # NOMAD Gifts, Interests and Skills
