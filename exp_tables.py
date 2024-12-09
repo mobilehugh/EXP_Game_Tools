@@ -893,8 +893,8 @@ culture_skills = {
     (1, 9): "Communities",
     (10, 17): "Economics",
     (18, 25): "Families",
-    (26, 33): "Languages",
-    (34, 41): "Languages",
+    (26, 33): "Languages-Verbal",
+    (34, 41): "Languages-Written",
     (42, 49): "Mass Media",
     (50, 58): "Militarization",
     (59, 70): "Politics",
@@ -1126,7 +1126,7 @@ mercenary_special_skills = {
     (54, 61): "Force entry",
     (62, 65): "Hi Gravity ",
     (66, 69): "Low Gravity ",
-    (70, 72): "Powered Armour",
+    (70, 72): "Biomech",
     (73, 80): "Sapper",
     (81, 88): "Submersed",
     (89, 96): "Zero Gravity ",
@@ -1152,9 +1152,8 @@ nomad_gifts = {
     (7, 99): "Tracking",
 }
 
-
 nomad_interests = {
-    (1, 40):"Biomes",
+    (1, 40):"Biome",
     (41, 60):"Domestication",
     (61, 95):"Survival",
     (96, 99):"Choose",
@@ -1162,7 +1161,24 @@ nomad_interests = {
     "name":"Nomad Interests",
     "die_roll":"1d100",
 } 
- 
+
+# should be deprecated with new biome function
+biome_sub_list = {
+    (1, 11):"Normal",
+    (12, 21):"Toxic",
+    (22, 31):"High Gravity",
+    (32, 41):"Low Gravity",
+    (42, 51):"Thin Atmosphere",
+    (52, 61):"Dense Atmosphere",
+    (62, 71):"Underground",
+    (72, 81):"Aboveground",
+    (82, 91):"Mountainous",
+    (92, 100):"Extraplanetary",
+    "name":"Biome Characteristic",
+    "die_roll":"1d100",
+} 
+
+# should be deprecated with new biome function
 biome_base_list = {
     (1, 9):"Coniferous",
     (10, 17):"Deciduous",
@@ -1179,21 +1195,118 @@ biome_base_list = {
     "name":"Biome Base",
     "die_roll":"1d100",
 } 
- 
-biome_sub_list = {
-    (1, 11):"Normal",
-    (12, 21):"Toxic",
-    (22, 31):"High Gravity",
-    (32, 41):"Low Gravity",
-    (42, 51):"Thin Atmosphere",
-    (52, 61):"Dense Atmosphere",
-    (62, 71):"Underground",
-    (72, 81):"Aboveground",
-    (82, 91):"Mountainous",
-    (92, 100):"Extraplanetary",
-    "name":"Biome Characteristic",
+
+nomad_survival_skills = {
+    (1, 4): "Alien Communications",
+    (5, 8): "Alien Danger Sense",
+    (9, 12): "Fire Camp",
+    (13, 16): "Fire Camp Out",
+    (17, 20): "Fire Camp Hide",
+    (21, 24): "Food Find",
+    (25, 28): "Food Prepare",
+    (29, 32): "Food Yummy",
+    (33, 36): "Passage Backtrack",
+    (37, 40): "Passage Deception",
+    (41, 44): "Passage Hidden",
+    (45, 48): "Passage Safe",
+    (49, 52): "Poison Arrest",
+    (53, 56): "Poison Cure",
+    (57, 60): "Shelter Find",
+    (61, 64): "Shelter Safe",
+    (65, 68): "Shelter Clothing",
+    (69, 72): "Tracking",
+    (73, 76): "Tracking Air",
+    (77, 80): "Tracking Exatmo",
+    (81, 84): "Tracking Find",
+    (85, 88): "Tracking Follow",
+    (89, 92): "Tracking Reverse",
+    (93, 96): "Tracking Water",
+    (97, 98): "Extra Roll",
+    (99, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name":"Nomad Survival Skills Table",
     "die_roll":"1d100",
-} 
+}
+
+
+
+##################################
+# todo biome tables not being used
+
+biome_moisture_list = {
+    (1,5):"Arid",
+    (6,20):"Dry",
+    (21,45):"Moist",
+    (46,70):"Wet",
+    (71,95):"Rainy",
+    (96,99):"Torrential",
+    (100,100):"Choose",
+    "name":"Biome Moisture",
+    "die_roll":"1d100",
+}
+
+biome_temperature_list = {
+    (1,15):"Freezing",
+    (16,30):"Cold",
+    (31,50):"Cool",
+    (51,70):"Warm",
+    (71,85):"Hot",
+    (86,99):"Scorching",
+    (100,100):"Choose",
+    "name":"Biome Temperature",
+    "die_roll":"1d100",
+}
+
+biome_vegetation_list = {
+    (1,5):"Denuded",
+    (6,15):"Desert",
+    (16,30):"Tundra Grasses",
+    (31,45):"Tundra Plants",
+    (46,60):"Steppe",
+    (61,75):"Copse",
+    (76,95):"Forest",
+    (96,99):"Jungle",
+    (100,100):"Choose",
+    "name":"Biome Vegetation",
+    "die_roll":"1d100"
+}
+
+biome_characteristic_list = {
+    (1, 4): "Atmosphere Heavy",
+    (5, 8): "Atmosphere Thin",
+    (9, 12): "Boggy",
+    (13, 16): "Bright",
+    (17, 20): "City",
+    (21, 24): "Dark",
+    (25, 28): "Farm",
+    (29, 32): "Flat",
+    (33, 34): "Gaseous",
+    (35, 36): "Gravity Absent",
+    (37, 40): "Gravity High",
+    (41, 44): "Gravity Low",
+    (45, 48): "Hilly",
+    (49, 52): "Lentic ",
+    (53, 54): "Megalopolis",
+    (55, 58): "Mountainous",
+    (59, 60): "Oceanic",
+    (61, 64): "Ruin",
+    (65, 68): "Sandy",
+    (69, 61): "Steep",
+    (62, 63): "Stormy",
+    (64, 74): "Standard",
+    (75, 75): "Subterranean",
+    (76, 79): "Swampy",
+    (80, 83): "Toxic Air",
+    (84, 87): "Toxic Land",
+    (88, 91): "Toxic Flora",
+    (92, 95): "Toxic Water",
+    (96, 99): "Village",
+    (100, 100): "Choose",
+    "die_roll":"1d100",
+}
+
+# unused biome lists
+###################################
 
 list_of_life_forms = {
     (1, 7):"Ambushers",
@@ -1217,10 +1330,58 @@ list_of_life_forms = {
     "die_roll":"1d100",
 } 
 
+nomad_domestication_skills = {
+    (1, 2): "Burrowers",
+    (3, 4): "Camouflagers",
+    (5, 8): "Carnivores",
+    (9, 10): "Cavers",
+    (11, 12): "Chaser",
+    (13, 14): "Dam Makers",
+    (15, 18): "Detritovores",
+    (19, 21): "Domesticate Befriend",
+    (22, 24): "Domesticate Tame",
+    (25, 27): "Domesticate Train",
+    (28, 29): "Foliage Dwellers",
+    (30, 33): "Herbivores",
+    (34, 35): "Hibernators",
+    (36, 37): "Hivers",
+    (38, 39): "Hoarders",
+    (40, 41): "Infecters",
+    (42, 43): "Infesters",
+    (44, 45): "Lifespan Long",
+    (46, 47): "Lifespan Short",
+    (48, 49): "Microbiologic",
+    (50, 51): "Mitotic Reproduction",
+    (52, 53): "Move Air",
+    (54, 55): "Move Land",
+    (56, 57): "Move Water",
+    (58, 59): "Multiple Attacks",
+    (60, 61): "Mutated",
+    (62, 65): "Omnivores",
+    (66, 67): "Oviparous",
+    (68, 69): "Parasitic",
+    (70, 75): "Photosynthetic",
+    (76, 77): "Poisonous",
+    (78, 79): "Psionic",
+    (80, 81): "Ranged attacks",
+    (82, 83): "Robotic",
+    (84, 86): "Size Gigantic",
+    (87, 87): "Size Minute",
+    (88, 89): "Spores",
+    (90, 91): "Trappers",
+    (92, 93): "Viviparous",
+    (94, 95): "Web Makers",
+    (96, 99): "Choose",
+    (99, 99): "Roll Again",
+    (100, 100): "Ref's Own Table",
+    "name":"Nomad Domestication Skills Table",
+    "die_roll":"1d100",
+}
+
 nomad_interest_skills_pivot = {
-    "Biomes": biome_base_list,
-    "Domestication": list_of_life_forms,
-    "Survival": biome_sub_list,
+    "Biome": biome_base_list,
+    "Domestication": nomad_domestication_skills,
+    "Survival": nomad_survival_skills,
 }
 
 # NOTHING Gifts, Interests, and Skills
@@ -1231,7 +1392,6 @@ nothing_gifts = {
     (7, 99): "Privilege",
 }
 
-
 nothing_interests = {
     (1, 41):"Career",
     (42, 61):"Homes",
@@ -1241,7 +1401,7 @@ nothing_interests = {
     "name":"Nothing Interests",
     "die_roll":"1d100",
 } 
- 
+
 city_type_list = {
     (1, 11):"City",
     (12, 21):"Complex",
@@ -1311,6 +1471,50 @@ nothing_career_list = {
     "die_roll":"1d100",
 } 
 
+nothing_home_list = {
+    (1, 5): "Nomadic",
+    (6, 10): "Camping",
+    (11, 20): "Village",
+    (21, 30): "Town",
+    (31, 40): "City",
+    (41, 50): "Big City",
+    (51, 60): "Megalopolis",
+    (61, 65): "Complex",
+    (66, 70): "Institute",
+    (71, 75): "Farm",
+    (76, 80): "Commune",
+    (81, 85): "Ruin",
+    (86, 87): "Corporation",
+    (88, 93): "Suburbia",
+    (94, 95): "Mall",
+    (96, 98): "Choose",
+    (99, 100): "Ref's Own Table",
+    "name":"Nothing Home Type Table",
+    "die_roll":"1d100",
+}
+
+nothing_privilege_skills = {
+    (1, 8): "Compliment other",
+    (9, 16): "Dress for Success",
+    (17, 24): "Drop a name",
+    (25, 32): "Eat Fast",
+    (33, 40): "Fall Asleep",
+    (41, 48): "Find a deal",
+    (49, 56): "Get into a club",
+    (57, 64): "Jump a queue",
+    (65, 72): "Recall a persona name",
+    (73, 80): "Recall trivia",
+    (81, 88): "Righteous Indignation",
+    (89, 95): "Wake on time",
+    (96, 98): "Choose",
+    (98, 99): "Extra Roll ",
+    (100, 100): "Ref's Own Table",
+    "name":"Nothing Privilege Skills Table",
+    "die_roll":"1d100",
+}
+
+
+
 vocation_aspiration_exps = {
     "Biologist": 10042,
     "Mechanic": 24042,
@@ -1323,8 +1527,8 @@ vocation_aspiration_exps = {
 
 nothing_interest_skills_pivot = {
     "Career": nothing_career_list,
-    "Homes": city_type_list,
-    "Privilege": city_type_list,
+    "Homes": nothing_home_list,
+    "Privilege": nothing_privilege_skills,
 }
 
 
@@ -1340,8 +1544,8 @@ spie_gifts = {
 
 spie_interests = {
     (1, 41):"Infiltration",
-    (42, 61):"Manipulation",
-    (62, 95):"Combat",
+    (42, 61):"Deception",
+    (62, 95):"Destruction",
     (96, 99):"Choose",
     (100, 100):"Extra Roll",
     "name":"Spie Interests",
@@ -1373,6 +1577,90 @@ spie_skills = {
     "die_roll":"1d100",
 } 
 
+spie_infiltration_skills = {
+    (1, 4): "Casing",
+    (5, 9): "Climbing",
+    (10, 14): "Create Distraction",
+    (15, 19): "Cryptography",
+    (20, 24): "Deceive surveillance",
+    (25, 29): "Disable surveillance",
+    (30, 34): "Escape",
+    (35, 39): "Find power plant",
+    (40, 44): "Find service entrance",
+    (45, 49): "Find surveillance",
+    (50, 54): "Find traps",
+    (55, 59): "Find vent shaft",
+    (60, 64): "Memorize Map",
+    (65, 69): "Pick mech lock",
+    (70, 74): "Pick tech lock",
+    (75, 79): "Repelling",
+    (80, 84): "Stealth",
+    (85, 95): "Trap Defusing",
+    (96, 97): "Extra Roll",
+    (98, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name":"Spie Infiltration Skills",
+    "die_roll":"1d100",
+}
+
+spie_deception_skills = {
+    (1, 4): "Blackmail",
+    (5, 9): "Bribery",
+    (10, 14): "Bully",
+    (15, 19): "Concealment",
+    (20, 24): "Cryptography",
+    (25, 29): "Disguise",
+    (30, 34): "Distract",
+    (35, 39): "Feign death",
+    (40, 44): "Feign emotion",
+    (45, 49): "Forgery",
+    (50, 54): "Forgery Electronic",
+    (55, 59): "Hide on Body",
+    (60, 64): "Impersonation",
+    (65, 69): "Interrogation",
+    (70, 74): "Lying",
+    (75, 79): "Pick Pocket",
+    (80, 84): "Search Avoidance",
+    (85, 89): "Sleight of Hand",
+    (90, 95): "Stealth Movement",
+    (96, 97): "Extra Roll",
+    (98, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name":"Spie Deception Skills",
+    "die_roll":"1d100",
+}
+
+spie_destruction_skills = {
+    (1, 4): "Assassination",
+    (5, 8): "Bomb Creation",
+    (9, 12): "Bomb Hiding",
+    (13, 16): "Bomb Placement",
+    (17, 20): "Hand to Hand",
+    (21, 24): "Hand to Hand",
+    (25, 28): "Hand to Hand",
+    (29, 32): "Improvise Weapon",
+    (33, 36): "Incapacitation",
+    (37, 40): "Martial Arts",
+    (41, 44): "Stun",
+    (45, 48): "Stun Ambush",
+    (49, 52): "Stun Combat",
+    (53, 56): "Trap Set",
+    (57, 60): "Vehicle Disable",
+    (61, 64): "Pistols",
+    (65, 68): "Pistols",
+    (69, 72): "Pistols",
+    (73, 76): "Pistols",
+    (77, 84): "Rifles",
+    (85, 92): "Rifles",
+    (93, 94): "Rifles",
+    (95, 95): "Rifles",
+    (97, 98): "Extra Roll",
+    (99, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name":"Spie Destruction Skills",
+    "die_roll":"1d100",
+}
+
 spie_martial_arts = {
     1: {"AR": 40, "freq": 1, "Damage": "1d4", "order": "Normal"},
     2: {"AR": 80, "freq": 2, "Damage": "1d4", "order": "Normal"},
@@ -1388,9 +1676,9 @@ spie_martial_arts = {
 }
 
 spie_interest_skill_pivot = {
-    "Infiltration": spie_skills,
-    "Manipulation": spie_skills,
-    "Combat": mercenary_combat_skills,
+    "Infiltration": spie_infiltration_skills,
+    "Deception": spie_deception_skills,
+    "Destruction": spie_destruction_skills,
 }
 
 # VETERINARIAN Gifts, Interests, and Skills
@@ -1403,52 +1691,109 @@ veterinarian_gifts = {
 
 
 veterinarian_interests = {
-    (1, 41):"Enhance",
-    (42, 61):"Repair",
-    (62, 95):"Research",
-    (96, 99):"Choose",
-    (100, 100):"Extra Roll",
+    (1, 41):"Diagnosis",
+    (42, 80):"Treatment",
+    (81, 89):"Research",
+    (90, 95):"Choose",
+    (96, 100):"Extra Roll",
     "name":"Veterinarian Interests",
     "die_roll":"1d100",
 } 
- 
-veterinarian_skills = {
-    (1, 4):"Aging",
-    (5, 7):"Anesthesia ",
-    (8, 10):"Auditory ",
-    (11, 13):"Burns",
-    (14, 16):"Chiropractic",
-    (17, 19):"Cosmetics",
-    (20, 22):"Dentistry",
-    (23, 25):"Epidemiology ",
-    (26, 28):"Forensics",
-    (29, 31):"Genetics",
-    (32, 34):"Infections",
-    (35, 37):"Internal ",
-    (38, 40):"Mental Mutations",
-    (41, 43):"Neurologic ",
-    (44, 46):"Optics ",
-    (47, 52):"Pediatrics ",
-    (53, 55):"Pharmaceuticals",
-    (56, 58):"Pharmacology",
-    (59, 61):"Physical Mutations",
-    (62, 64):"Podiatry ",
-    (65, 67):"Psionics",
-    (68, 70):"Psychiatry",
-    (71, 73):"Radiation",
-    (74, 76):"Rehab",
-    (77, 84):"Surgery",
-    (85, 96):"Trauma",
-    (97, 98):"Choose",
-    (99, 100):"Extra Roll",
-    "name":"Veterinarian Skills",
+
+veterinarian_diagnostic_skills = {
+    (1, 4): "Aging",
+    (5, 8): "Auditory",
+    (9, 12): "Cardiac",
+    (13, 16): "Gastro",
+    (17, 20): "Genetics",
+    (21, 24): "Infections",
+    (25, 35): "Internal ",
+    (36, 38): "Kirlian Energy",
+    (39, 41): "Mutations",
+    (41, 43): "Phenomics",
+    (44, 48): "Neurologic",
+    (49, 53): "Optics",
+    (54, 60): "Pediatrics",
+    (60, 64): "Physiologic",
+    (62, 65): "Psionics",
+    (66, 70): "Psychiatric",
+    (71, 75): "Radiation",
+    (76, 80): "Resp",
+    (81, 85): "Toxins",
+    (86, 90): "Toxin Poison",
+    (91, 95): "Toxin Rads",
+    (96, 97): "Extra Roll",
+    (98, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name":"Veterinarian Diagnostic Skills",
     "die_roll":"1d100",
-} 
+}
+
+veterinarian_treatment_skills = {
+    (1, 3): "Anesthesia ",
+    (4, 6): "Chiropractic ",
+    (7, 9): "Cryogenics",
+    (10, 12): "Disconnect Kirlian",
+    (13, 15): "Disconnect Psionic",
+    (16, 18): "Embalming",
+    (19, 21): "Pharma",
+    (22, 22): "Pinch Death",
+    (23, 25): "Pinch Paralysis",
+    (26, 30): "Psychiatry",
+    (31, 40): "Quick Fix",
+    (41, 43): "Rehab",
+    (44, 50): "Resuscitation",
+    (51, 53): "Reverse Nausea",
+    (54, 56): "Reverse Poison",
+    (57, 59): "Reverse Radiation",
+    (60, 62): "Suggestion",
+    (63, 65): "Surgery Cosmetic",
+    (66, 68): "Surgery External",
+    (69, 71): "Surgery Internal",
+    (72, 75): "Suspension",
+    (76, 85): "Trauma",
+    (86, 88): "Trauma Blunt",
+    (89, 91): "Trauma Burns",
+    (92, 95): "Trauma Penetrating",
+    (96, 97): "Extra Roll",
+    (98, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name":"Veterinarian Treatment Skills",
+    "die_roll":"1d100",
+}
+
+veterinarian_research_skills = {
+    (1, 5): "Aging",
+    (6, 10): "Cloning",
+    (11, 15): "Cybernetics",
+    (16, 20): "Enhancements",
+    (21, 25): "Epidemiology",
+    (26, 30): "Forensics",
+    (31, 35): "Genetics",
+    (36, 38): "Kirlian Energies",
+    (39, 41): "Psionics",
+    (42, 44): "Phenomics",
+    (45, 60): "Pharma ID",
+    (61, 65): "Pharma Create",
+    (66, 70): "Psychiatry",
+    (61, 65): "Rejuvenation",
+    (66, 70): "Resuscitation",
+    (71, 75): "Robotics",
+    (76, 80): "Surgical ",
+    (81, 85): "Biorepair Combine ",
+    (86, 90): "Biorepair Enhance ",
+    (91, 95): "Biorepair ID ",
+    (96, 97): "Extra Roll",
+    (98, 99): "Choose",
+    (100, 100): "Ref's Own Table",
+    "name":"Veterinarian Research Skills",
+    "die_roll":"1d100",
+}
 
 vet_interest_skill_pivot = {
-    "Enhance": veterinarian_skills,
-    "Repair": veterinarian_skills,
-    "Research": veterinarian_skills,
+    "Diagnosis": veterinarian_diagnostic_skills,
+    "Treatment": veterinarian_treatment_skills,
+    "Research": veterinarian_research_skills,
 }
 
 
@@ -1480,13 +1825,12 @@ vocation_skills_tables = {
     "Biologist": [taxonomy_skills, culture_skills, research_skills],
     "Knite": [knite_physical_skills, knite_kirlian_skills, culture_skills],
     "Mechanic": [mechanic_skills],
-    "Mercenary": [mercenary_combat_skills, mercenary_tactical_skills],
-    "Nomad": [biome_base_list, list_of_life_forms, biome_sub_list],
-    "Nothing": [nothing_career_list, city_type_list],
-    "Spie": [spie_skills, mercenary_combat_skills],
-    "Veterinarian": [veterinarian_skills],
+    "Mercenary": [mercenary_combat_skills, mercenary_tactical_skills, mercenary_special_skills],
+    "Nomad": [biome_base_list, nomad_domestication_skills, nomad_survival_skills],
+    "Nothing": [nothing_career_list, nothing_home_list, nothing_privilege_skills],
+    "Spie": [spie_infiltration_skills, spie_deception_skills, spie_destruction_skills],
+    "Veterinarian": [veterinarian_diagnostic_skills, veterinarian_treatment_skills, veterinarian_research_skills],
 }
-
 
 vocation_exps_levels = {
     "Biologist": {

@@ -89,6 +89,7 @@ def hit_points_max(pointy:AllRecords) -> int:
         
     return hpm
 
+# fix biome generator is needed in core
 
 def wate_allowance(wate_allowance:AllRecords) -> AllRecords:
     ''' determine wate allowance for alien, anthro and robot'''
