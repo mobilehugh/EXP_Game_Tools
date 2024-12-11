@@ -2045,7 +2045,7 @@ suggested_anthro_attributes = {
         "comment": "Please roll 3d6",
     },
     "MSTR": {
-        "long_name": "Mental Strength",
+        "long_name": "Mind",
         "minimum": 1,
         "start_min": 4,
         "start_max": 16,
@@ -2053,7 +2053,7 @@ suggested_anthro_attributes = {
         "comment": "Please roll 4d4",
     },
     "PSTR": {
-        "long_name": "Physical Strength",
+        "long_name": "Strength",
         "minimum": 1,
         "start_min": 3,
         "start_max": 18,

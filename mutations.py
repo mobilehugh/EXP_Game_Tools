@@ -2862,7 +2862,7 @@ class Regeneration(Mutation):
         '''returns mutation description and side effect via add_mutation()'''
         perm = super().return_perm(self.name, self.table_name) # perm part
         base_heal = self.object.CON + self.object.Level
-        description = f"Heal {math.ceil(base_heal/5)} HPS per unit. Massive regen {math.ceil(base_heal/2)} HPS once a day"
+        description = f"Heal {math.ceil(base_heal/5)} HPS per unit. Massive regen {math.ceil(base_heal*2)} HPS once a day"
         super().add_mutation(self.name, perm, description) # check to add
         return description
 
@@ -3304,8 +3304,12 @@ class Wings(Mutation):
 #
 #######################################
 
-def biologic_mutations_number(mutation_number: exp_tables.PersonaRecord) -> int:
-    '''returns the number of mental and physical mutations for anthros and aliens'''
+def biologic_mutations_number(mutation_number: exp_tables.PersonaRecord) -> tuple:
+    '''
+    returns the number of mental mutations aka PSIONIC
+    and physical mutations aka PHENOMIC 
+    for anthros and aliens hence biologic
+    '''
 
     ## anthros get mutations 
     if mutation_number.FAMILY == "Anthro":
@@ -3315,6 +3319,7 @@ def biologic_mutations_number(mutation_number: exp_tables.PersonaRecord) -> int:
         mentchance = exp_tables.anthro_type_mutation_chance[anthro_type]["mentchance"]
         physchance = exp_tables.anthro_type_mutation_chance[anthro_type]["physchance"]
 
+        # humanoids automatically mutate if the player wants to mutated 
         if not mutation_number.Fallthrough:
             if please.say_yes_to("Do you want to mutate? "):
                 mentchance = mentchance * 2 if anthro_type != "Humanoid" else 100
@@ -3329,7 +3334,7 @@ def biologic_mutations_number(mutation_number: exp_tables.PersonaRecord) -> int:
         if not please.do_1d100_check(physchance):
             physical_amount =  0 
 
-    ## aliens get powers 
+    ## aliens get evolutations 
     if mutation_number.FAMILY == "Alien":
         mental_amount = 0
         while please.do_1d100_check(mutation_number.MSTR):
@@ -3355,6 +3360,7 @@ def mutation_assignment(mutating_persona: exp_tables.PersonaRecord, mental_amoun
         "defect":["defect"]
     }
 
+    # todo new rule limiting personas to ONE DEFECT
     ##### all  Mutation generation
     counter_number_added = 1
     counter_total_amount = mental_amount + physical_amount

@@ -83,7 +83,7 @@ def anthro_type_by_attribute(making_anthro_list: AnthroRecord) -> list:
 
 def anthro_type_choose(choosey: AnthroRecord) -> AnthroRecord:
     """
-    pick from the eligible anthro types
+    pick from the eligible anthro types aka GENUS
     """
     if choosey.Fallthrough or choosey.Bespoke:
         choices = please.list_table_choices(exp_tables.anthro_types_list)
@@ -97,7 +97,7 @@ def anthro_type_choose(choosey: AnthroRecord) -> AnthroRecord:
 # todo there is some sloppy stuff here 
 def anthro_sub_choose(subway: AnthroRecord) -> AnthroRecord:
     """
-    select the sub_type for the anthro type
+    select the sub_type aka GENERA for the anthro type aka GENUS
     """
     choices = choices = exp_tables.anthro_sub_types[subway.FAMILY_TYPE]
 
@@ -114,15 +114,16 @@ def anthro_sub_choose(subway: AnthroRecord) -> AnthroRecord:
 
     return subway # altered by side effect
 
-def adjust_attributes_by_anthro_type(anthro_type_attributes_adjust: AnthroRecord) -> AnthroRecord:
+def adjust_attributes_by_anthro_type(anthro_adjusting: AnthroRecord) -> AnthroRecord:
     """
-    adjust the persona's attributes according to the persona type
+    each ANTHRO GENUS has attribute adjustments for "reasons"
+    adjust the persona's attributes according to the persona type aka GENUS
     """
-    anthro_type = anthro_type_attributes_adjust.FAMILY_TYPE
+    anthro_type = anthro_adjusting.FAMILY_TYPE
     anthro_line = exp_tables.attribute_adjustment_by_anthro_type[anthro_type]
-    changes_string = {attribute : change for attribute, change in anthro_line.items() if change != 0}
+    attributes_to_change = {attribute : change for attribute, change in anthro_line.items() if change != 0}
 
-    for attribute,change in changes_string.items():
+    for attribute,change in attributes_to_change.items():
 
         # CON special case, adjusts the HPM
         if attribute == "CON":
@@ -130,20 +131,20 @@ def adjust_attributes_by_anthro_type(anthro_type_attributes_adjust: AnthroRecord
 
         # INT special case, may adjust the MSTR
         elif attribute == "INT":
-            old_change = exp_tables.mstr_adjusted_by_int[anthro_type_attributes_adjust.INT]
-            new_change = exp_tables.mstr_adjusted_by_int[anthro_type_attributes_adjust.INT + change]
-            new_MSTR = anthro_type_attributes_adjust.MSTR + (new_change - old_change)
+            old_change = exp_tables.mstr_adjusted_by_int[anthro_adjusting.INT]
+            new_change = exp_tables.mstr_adjusted_by_int[anthro_adjusting.INT + change]
+            new_MSTR = anthro_adjusting.MSTR + (new_change - old_change)
             change_MSTR = (new_change - old_change) if (new_MSTR) > 0 else 0
             anthro_line["MSTR"] = change_MSTR
 
     for attribute,change in anthro_line.items():
-        old_attribute = getattr(anthro_type_attributes_adjust, attribute)
-        change = 0 if change<0 and not anthro_type_attributes_adjust.RP and attribute != "CHA"else change # protects players from -ve adjustments
+        old_attribute = getattr(anthro_adjusting, attribute)
+        change = 0 if change < 0 and not anthro_adjusting.RP and attribute != "CHA"else change # protects players from -ve adjustments
         new_attribute = (old_attribute + change)
         new_attribute = 1 if new_attribute < 1 and attribute != "CHA" else new_attribute
-        setattr(anthro_type_attributes_adjust, attribute, new_attribute)
+        setattr(anthro_adjusting, attribute, new_attribute)
 
-    return anthro_type_attributes_adjust # adjusted by side effect
+    return anthro_adjusting # adjusted by side effect
 
 def anthro_hite_wate_calc(size_this:AnthroRecord, sizer: str) -> AnthroRecord:
     '''calculates hite and wate for persona based on smaller or larger '''

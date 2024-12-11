@@ -648,22 +648,23 @@ def setup_persona(choosy:AllRecords)-> AllRecords:
 
     if choosy.Bespoke or choosy.Fallthrough:
         choosy.RP = True if say_yes_to("Are you generating a REFEREE PERSONA?") else False
+
     choosy.RP_Cues = True if say_yes_to("Would you like role-playing cues? ") else False
     return choosy # altered by side effects
 
 def get_kind_of(kindy:AllRecords) -> str:
-    ''' returns FRESH, BESPOKE or RANDO for wrap up'''
+    ''' 
+    converts the booleans of Bespoke, Fallthrough, and (Fresh) into a string
+    note Fresh is only returned if Bespoke and Fallthrough are False
+    '''
+    
     if kindy.Bespoke:
-        kindof = "BESPOKE"
-    elif kindy.Fallthrough:
-        kindof = "RANDOM"
-    else:
-        kindof = "FRESH"
-        
-    return kindof
+        return "BESPOKE"
+    if kindy.Fallthrough:
+        return "RANDOM"  
+    return "FRESH"
 
 
-# fix screen output is broken 
 def screen_this(screeny:AllRecords) -> None:
     ''' directs person to correct screening type based on FAMILY'''
     ## determine show on screen function by FAMILY
@@ -677,7 +678,7 @@ def screen_this(screeny:AllRecords) -> None:
 
     screen_func = function_map_reviews[screeny.FAMILY]
     screen_func(screeny)
-    input(f'\nYou done reading?')
+    input(f'\nYou done reading? <ret>')
 
 
 def persona_nomenclature(avatar_name: AllRecords) -> None:
