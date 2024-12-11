@@ -4,6 +4,7 @@ import time
 import webbrowser
 import sys
 import re
+import inspect
 
 from fpdf import FPDF
 from dataclasses import dataclass
@@ -27,6 +28,7 @@ def outputs_workflow(outputter:AllRecords, out_type: str) -> None:
     divides outputs between screen and pdf
     '''
     out_type = "screen" if out_type not in ["pdf","screen"] else out_type
+
 
     if out_type == "pdf":
         bespoke_pdf_chooser(outputter)
@@ -614,19 +616,25 @@ class PDF(FPDF):
         combat_column.append(f'  {exp_tables.ramming_freedom[persona.Ramming]}')
         combat_column.extend(persona.Attacks)
 
+        input(f'func = {inspect.currentframe().f_code.co_name} // {combat_column = }')
+
         ### splitting certain weapons that are too long
         split_dict={}
         #print(f"\n{combat_column = }\n")
 
         for splittable in combat_column:
+
+            input(f'func = {inspect.currentframe().f_code.co_name} loop // {combat_column = } {splittable = }')
+
+
             for split_target in ["Vibro", "Inertia", "Electro", "Stun"]:
                 if re.search(r'\b' + re.escape(split_target) + r'\b', splittable, re.IGNORECASE): 
-                    #print(f'\n{splittable = }, {split_target = }\n')
-                    fancy_1,fancy_2 = splittable.split(';')
+                    input(f'\n{splittable = }, {split_target = }\n')
+                    fancy_1,fancy_2 = splittable.split('')
                     fancy_index = combat_column.index(splittable)
                     split_dict[fancy_index] = [fancy_1, fancy_2]
-                    #print(f'\n{fancy_index = } {fancy_1 = } {fancy_2 = }')
-                    #print(f'{split_dict[fancy_index] = }\n')
+                    input(f'\n{fancy_index = } {fancy_1 = } {fancy_2 = }')
+                    input(f'{split_dict[fancy_index] = }\n')
 
         if split_dict:
             #print(f"\nPRE -- {combat_column = }\n")

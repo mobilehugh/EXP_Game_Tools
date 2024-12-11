@@ -959,7 +959,7 @@ knite_physical_skills = {
     "die_roll":"1d100",
 } 
 
-# note that the culture skills is shared between knite and biologist
+# remember that the culture skills is shared between knite and biologist
 knite_interest_skills_pivot = {
     "Physicum": knite_physical_skills,
     "Cerebrum": knite_kirlian_skills,

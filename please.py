@@ -5,6 +5,7 @@ import os
 import sys
 import re
 import subprocess
+import inspect
 from secrets import choice, randbelow
 import time
 from typing import Union, List
@@ -672,8 +673,11 @@ def screen_this(screeny:AllRecords) -> None:
         "Robot": outputs.robot_screen,
         "Toy": outputs.toy_screen,
     }
+
+
     screen_func = function_map_reviews[screeny.FAMILY]
     screen_func(screeny)
+    input(f'\nYou done reading?')
 
 
 def persona_nomenclature(avatar_name: AllRecords) -> None:

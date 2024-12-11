@@ -115,7 +115,7 @@ def alien_attack_description(descriptor: AlienRecord) -> list:
         alternating = "alternating units." if descriptor.Alternating else "every unit."
         attack_type = descriptor.Attacks[0]
         attack_desc += f'{exp_tables.numbers_2_words[attack_no]} {attack_type} attack{"s" if attack_no > 1 else ""} ({damages[0]}) {alternating} '
-       
+
     elif breadth > 1:
         for i, (attack_type, attack_no) in enumerate(attacks_counted.items()):
             attack_desc += f'{exp_tables.numbers_2_words[attack_no]} {attack_type} attack{"s" if attack_no > 1 else ""} ({damages[i]}), '
@@ -585,10 +585,6 @@ def alien_hite_wate_calc(picking_sizes: AlienRecord) -> AlienRecord :
         return
 
     picking_sizes.Hite_Suffix = "cms" if picking_sizes.Wate < 10_000 else "meters"
-
-
-
-
     return picking_sizes # modified by side effects
 
 def alien_size_cat_rando(sizer:AlienRecord) -> AlienRecord:

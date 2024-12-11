@@ -89,7 +89,23 @@ def hit_points_max(pointy:AllRecords) -> int:
         
     return hpm
 
-# fix biome generator is needed in core
+def biome_generator() -> str:
+    """
+    returns a biome using the updated biome rules 
+    """
+    biome_moisture = please.get_table_result(biome_moisture_list)
+    biome_temp = please.get_table_result(biome_temperature_list)
+    biome_veg = please.get_table_result(biome_vegetation_list)
+    biome_char = please.get_table_result(biome_characteristic_list)
+
+    # todo add some checks for characteristic and alien society
+
+    return f('{biome_moisture} {biome_temperature} {biome_veg} ({biome_char})')
+
+
+
+
+
 
 def wate_allowance(wate_allowance:AllRecords) -> AllRecords:
     ''' determine wate allowance for alien, anthro and robot'''
