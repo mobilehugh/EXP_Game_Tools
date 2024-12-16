@@ -1383,7 +1383,7 @@ def anthro_blank_pdf(pdf)->None:
     # bio info stripe
     pdf.set_or_get(5.4, top + 2.3,"before bio info stripe")
     bio_title = "BIO INFO"
-    pdf.section_title(bio_title, "FAMILY:                GENUS:                     GENERA:")
+    pdf.section_title(bio_title, "FAMILY:                GENUS:                     SPECIES:")
     left,top = pdf.set_or_get(f"after bio info stripe\n")
 
     # persona bio datahttps://sciencyfiction.com/wp-admin/admin.php?page=participants-database-manage_fields

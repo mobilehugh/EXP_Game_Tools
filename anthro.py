@@ -97,18 +97,18 @@ def anthro_type_choose(choosey: AnthroRecord) -> AnthroRecord:
 # todo there is some sloppy stuff here 
 def anthro_sub_choose(subway: AnthroRecord) -> AnthroRecord:
     """
-    select the sub_type aka GENERA for the anthro type aka GENUS
+    select the sub_type aka SPECIES for the anthro type aka GENUS
     """
     choices = choices = exp_tables.anthro_sub_types[subway.FAMILY_TYPE]
 
     if subway.Fallthrough:
-        subway.FAMILY_SUB = please.choose_this(choices,"choose ANTHRO GENERA.", subway)
+        subway.FAMILY_SUB = please.choose_this(choices,"choose ANTHRO SPECIES.", subway)
         return subway # modified by side effect
 
-    if please.say_yes_to(f"do you want to create your own ANTHRO GENERA for the genus {subway.FAMILY_TYPE.lower()} "):
-        sub_type = please.input_this(f"carefully input an ANTHRO GENERA for the genus {subway.FAMILY_TYPE.lower()} ")
+    if please.say_yes_to(f"do you want to create your own ANTHRO SPECIES for the genus {subway.FAMILY_TYPE.lower()} "):
+        sub_type = please.input_this(f"carefully input an ANTHRO SPECIES for the genus {subway.FAMILY_TYPE.lower()} ")
     else:
-        sub_type = please.choose_this(choices,"choose ANTHRO GENERA ", subway)
+        sub_type = please.choose_this(choices,"choose ANTHRO SPECIES ", subway)
 
     subway.FAMILY_SUB = sub_type
 
