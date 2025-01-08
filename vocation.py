@@ -83,6 +83,8 @@ def nomad(get_a_job: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
 
     return get_a_job # modified by side effects
 
+    # fix nomad biomes are not working
+
 def nothing(nothing_happening: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:
     """
     set up the nothing vocation.
@@ -301,20 +303,25 @@ def convert_exps_to_levels(get_a_job: exp_tables.PersonaRecord, new_exps = 0) ->
     return new_level
 
 def level_goal(promotions:exp_tables.PersonaRecord) -> int:
-    '''returns next amt of EXPS needed for a new level'''
+    '''
+    returns next amt of EXPS needed for next level
+    '''
 
     vocation = promotions.Vocation
     exps_level = promotions.Level 
     top_level = exp_tables.vocation_exps_levels[vocation]["top_level"]
     top_amount = exp_tables.vocation_exps_levels[vocation]["top_amount"]
+    rate_over_top = exp_tables.vocation_exps_levels[vocation]["rate"]
 
+    # Nothing persona aspiring is a special case
     if vocation == "Nothing" and promotions.Vocay_Aspiration != "Nothing": # check if aspirating
         return exp_tables.vocation_aspiration_exps[promotions.Vocay_Aspiration]
 
+    # EXPS level > max level on table must calc
     if exps_level > exp_tables.vocation_exps_levels[vocation]["top_level"]:
-        return (exps_level - top_level)*top_amount
+        return (exps_level - top_level) * rate_over_top + top_amount
 
-    ## you are hear if you are a boring exps level
+    # EXPS level not > max level 
     for ranges,level in exp_tables.vocation_exps_levels[vocation].items():
         if exps_level == level:
             return ranges[1]
@@ -554,7 +561,7 @@ def update_persona_exps(record_to_update: exp_tables.PersonaRecord) -> exp_table
     elif experience == "Change LEVEL":
         new_level = int(
             please.input_this(
-                f"Present Level is {vocation} level {initial_level}. What is the NEW LEVEL? "
+                f"present level is {vocation.lower()} level {initial_level}. what is the NEW LEVEL? "
             )
         )
         new_level = initial_level if new_level < 1 else new_level #protects from negative LVL

@@ -1,6 +1,6 @@
 import math
 from secrets import choice
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 
 import anthro
@@ -16,6 +16,7 @@ import toy
 # todo consider minimum HPM for robot 
 # todo decay table calculator RP vs P
 # fix many robot specs are too long
+# fix there are broken elements using random table (combot, industrial)
 
 # set up RobotRecord
 @dataclass
@@ -298,7 +299,7 @@ def robot_offensive_systems(offender: RobotRecord, rolls_list: list) -> RobotRec
                 else:
                     fancy_strike = strike_break[1]
                     offender.Attacks.append(f'{new_attack}: {please.get_table_result(exp_tables.fling_attacks)}; {fancy_attacks[fancy_strike]}')
-          
+
             elif "Defensive" in new_attack:
                 offender.Defences.append(please.get_table_result(exp_tables.robotic_defences))
 
@@ -467,13 +468,126 @@ def robot_nomenclature(name_it: RobotRecord) -> RobotRecord:
 
     if please.say_no_to(f"Your robot model is {name_it.Model}. Is this okay?"):
         name_it.Model = please.input_this("What your robot's MODEL name? ")
-           
+
     if please.say_no_to(f"Your robot fabricator is {name_it.Fabricator}. Is this okay?"):
         name_it.Fabricator = please.input_this("What your robot's FABRICATOR name? ")
 
     name_it.Persona_Name = please.input_this("What is your robot's PERSONA name? ")
 
     return name_it # modified by side effects
+
+def dead_robot(this_dead:RobotRecord) -> bool:
+    '''
+    return true is robot dead 
+    only used in decay_table function
+    this means AWE, CHA, CON, DEX, INT, PSTR, or HPM == 0
+    '''
+    check_zero = ['AWE', 'CHA', 'DEX', 'CON', 'INT', 'PSTR', 'HPM'] 
+
+    for attribute in check_zero:
+        if getattr(this_dead, attribute) < 1: 
+            return True
+    return False
+
+def make_slower(this_slower:RobotRecord, dex_damage:int) -> None: 
+    '''
+    only used by decay_table func
+    alters the move of the decaying object
+    needed due to edge cases where Move has been jacked
+    '''
+    present_move = this_slower.Move
+    present_dex = this_slower.DEX
+    present_dex_move = exp_tables.anthro_movement_rate_and_DEX[present_dex] * 2
+    damaged_dex_move = exp_tables.anthro_movement_rate_and_DEX[max(present_dex - dex_damage,1)] * 2
+    delta_move = present_dex_move - damaged_dex_move
+
+    setattr(this_slower, "Move", max(present_move - delta_move,0))
+
+
+def decay_table(robotnick: RobotRecord) -> dict: 
+    '''
+    creates a decay table where dmg leads to failing robot
+    creates a whole new object copy of robot persona called decayer
+    decayer is destroyed and never saved
+    '''
+    decayer = replace(robotnick) # this should allow decayer to not affect persona
+    system_damaged = "None"
+    decayer.DMG = 0
+    pdf_this = []
+
+    # first attack table
+    attack_table_dict = outputs.attack_table_composer(decayer)
+    striking = attack_table_dict["A"]["BP"]
+    flinging = attack_table_dict["B"]["BP"]
+    shooting = attack_table_dict["C"]["BP"]
+
+    please.clear_console()
+
+    # robot ID header for the decay table
+    print_line = f'{decayer.Persona_Name} the {decayer.FAMILY_SUB} Robot Decay Table'
+    print(print_line)
+    pdf_this.append(print_line)
+
+    # title line for decay table
+    print_line = f'{"System Damaged":<15}{"DMG":>5}{"HPM":>5}{"AWE":>5}{"CHA":>5}{"CON":>5}{"DEX":>5}{"INT":>5}{"CF":>5}{"STR":>5}{"Move":>5}{'Strike':>7}{'Fling':>7}{'Shoot':>7}'
+    print(print_line)
+    pdf_this.append(print_line)
+
+    # robot starting parameters
+    print_line = f"{system_damaged:<15}{decayer.DMG:>5}{decayer.HPM:>5}{decayer.AWE:>5}{decayer.CHA:>5}{decayer.CON:>5}{decayer.DEX:>5}{decayer.INT:>5}{decayer.CF:>5}{decayer.PSTR:>5}{decayer.Move:>5}{striking:>7}{flinging:>7}{shooting:>7}"
+    print(print_line)
+    pdf_this.append(print_line)
+
+    while not dead_robot(decayer):
+        # determine strike, fling, shoot
+        attack_table_dict = outputs.attack_table_composer(decayer)
+        striking = attack_table_dict["A"]["BP"]
+        flinging = attack_table_dict["B"]["BP"]
+        shooting = attack_table_dict["C"]["BP"]
+
+        # always increase the DMG counter
+        decayer.DMG += decayer.HPM
+
+        # always reduce the HPM by 10%
+        decayer.HPM = math.floor(decayer.HPM * 0.9)
+
+        # determine what done gets broke
+        # list prevents mutation of dictionary 
+        damage_line = list(please.get_table_result(exp_tables.robotic_demolition))
+        system_damaged = damage_line.pop(0)
+
+        # system damaged special case peripheral, no attribute changes but loses peripheral
+        if system_damaged == "Peripheral":
+            print_line = f'{system_damaged:<15}{decayer.DMG:>5}{decayer.HPM:>5} {"Destroyed: __________________  (attributes as above)":<37}'
+            print(print_line)
+            pdf_this.append(print_line)       
+            continue
+
+        for attribute in damage_line:
+            damage_amount = please.get_table_result(exp_tables.robotic_demo_amount)
+            # attribute damage special case for DEX, must also alter Move
+            if attribute == "DEX":
+                make_slower(decayer, damage_amount)
+
+            setattr(decayer, attribute, getattr(decayer, attribute) - damage_amount)
+
+        print_line = f"{system_damaged:<15}{decayer.DMG:>5}{decayer.HPM:>5}{decayer.AWE:>5}{decayer.CHA:>5}{decayer.CON:>5}{decayer.DEX:>5}{decayer.INT:>5}{decayer.CF:>5}{decayer.PSTR:>5}{decayer.Move:>5}{striking:>7}{flinging:>7}{shooting:>7}"
+        print(print_line)
+        pdf_this.append(print_line)
+
+    # bottom title line for decay table
+    print_line = f'{"System Damaged":<15}{"DMG":>5}{"HPM":>5}{"AWE":>5}{"CHA":>5}{"CON":>5}{"DEX":>5}{"INT":>5}{"CF":>5}{"STR":>5}{"Move":>5}{'Strike':>7}{'Fling':>7}{'Shoot':>7}'
+    print(print_line)
+    pdf_this.append(print_line)
+
+    print(f'{decayer.Persona_Name} the {decayer.FAMILY_SUB} Robot is DESTROYED')
+    input(f"\nAre you done with {decayer.Persona_Name} decay table? <ret>")
+
+
+    comment = "Would like a pdf of this decay table?"
+    if please.say_yes_to(comment):
+        outputs.robot_decay(decayer, pdf_this)
+
 
 ####################################################
 #

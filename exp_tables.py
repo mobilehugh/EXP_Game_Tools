@@ -88,6 +88,7 @@ class Robotic(PersonaRecord):
     Adapt: int = 0
     Value: int = 42
     Base_Family:str = "Debased"
+    DMG: int = 0
     CF: int = 0
     Ramming: int = 0
     Attacks: list[str] = field(default_factory=list) 
@@ -131,6 +132,7 @@ class AllThings(PersonaRecord):
     Value: int = 42
     Base_Family:str = "Debased"
     CF: int = 0
+    DMG: int = 0
     Ramming: int = 0
     Attacks: list[str] = field(default_factory=list) 
     Defences: list[str] = field(default_factory=list)
@@ -676,9 +678,9 @@ large_anthro_sizes = {
 
 anthro_type_mutation_chance = {
     "Aquarian": {
-        "mentchance": 10,
+        "mentchance": 3,
         "mentnumber": "1d2",
-        "physchance": 3,
+        "physchance": 10,
         "physnumber": "1d1",
     },
     "Avarian": {
@@ -4056,6 +4058,8 @@ attack_table_three = {
     "name":"Robotic Attack Three",
     "die_roll":"1d100",
 } 
+# fix this table breaks pdf outputs for splittable shittable
+
 
 # stretched table
 attack_table_four = {
@@ -4224,6 +4228,26 @@ robot_wate_to_hite = {
     (4001, 6000): "12d10+300",
     (6001, 9999): "4d20+500",
     (10_000, 1_000_000): "2d12+4",
+}
+
+robotic_demolition = {
+    (1, 15): ["Articulations","AWE","DEX"],
+    (16, 25): ["Brain","INT"],
+    (26, 40): ["Control Unit", "AWE", "CHA", "CON", "DEX", "INT", "PSTR"],
+    (41, 55): ["Locomotion","DEX","PSTR"],
+    (56, 69): ["Peripheral","PERIPH"],
+    (70, 75): ["Power Plant","CON", "PSTR"],
+    (76, 100): ["Sensors", "AWE", "INT"],
+    "name":"Robotic System Malfunction Location",
+    "die_roll":"1d100",
+}
+
+robotic_demo_amount = {
+    (1,1): 1,
+    (2,5): 1,
+    (6,6): 2,
+    "name":"Robotic System Malfunction Severity",
+    "die_roll":"1d6",
 }
 
 combot_heavy_weapons = {

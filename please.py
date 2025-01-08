@@ -20,6 +20,7 @@ import vocation
 import outputs
 import mutations
 import toy
+import robot
 
 import alien
 from anthro import anthro_nomenclature
@@ -208,6 +209,8 @@ def choose_this(choices: list, comment: str, choosy: AllRecords = None, check_ch
     quit or restart or chastise the user
     also auto return if Fallthrough is true
     """
+
+
     clear_console()
 
     # if fallthrough skip choosing part
@@ -336,8 +339,8 @@ def get_table_result(random_table: dict) -> str:
     roll_result = roll_this(random_table["die_roll"])
 
     result = ""
-
     random_table = {key: val for key, val in random_table.items() if key not in ["name","die_roll","number", "title"]}
+
 
     for item_range in random_table.keys():
         if roll_result in range(item_range[0],item_range[1]+1): # correct for normal tables (90,100) -> (90,101)
@@ -587,7 +590,8 @@ def record_maintenance():
     "Level": vocation.update_persona_exps,
     "Screen": lambda persona: outputs.outputs_workflow(persona, "screen"),
     "Attributes": lambda persona: core.manual_persona_update(persona),
-    "Change Record": lambda persona: maintenance_workflow(),}
+    "Change Record": lambda persona: maintenance_workflow(),
+    "Robot Decay Table": lambda persona: robot.decay_table(persona)}
     
     operation_list = [key for key in operations]
 

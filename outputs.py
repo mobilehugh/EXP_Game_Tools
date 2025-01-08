@@ -176,6 +176,26 @@ class PDF(FPDF):
             new_y="NEXT",
         )
 
+
+    def markdown_robot_decay(self, blob: str = 'where da blob',font_size: int = 14)-> None:
+        '''
+        a cell modified for markdown with default font_size
+        '''
+
+        self.set_font("courier",size=font_size)
+        line_height = self.font_size * 1.4
+        line_width = self.get_string_width(blob, markdown=True) + 2
+
+        self.cell(
+            w=line_width,
+            h=line_height,
+            txt=blob,
+            align="L",
+            markdown=True,
+            new_x="LEFT",
+            new_y="NEXT",
+        )
+
     def attributes_table(self, persona:AllRecords) -> None:
         """
         prints attribute acronyms, values (+/- primes) and descriptions (+/-)
@@ -313,7 +333,7 @@ class PDF(FPDF):
 
         # attack header line
         TABLE_DATA = (
-            ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills", f"HIT POINTS  (max = {persona.HPM})"),
+            ("TYPE", "SKILLED", "RAW", "MAX", "FORCE", "Skills", f"HIT POINTS  ({persona.HPM})"),
             ("Strike", attack_table["A"]["BP"],attack_table["A"]["BNP"], attack_table["A"]["MR"], attack_table["A"]["ADB"], attack_table["A"]["PROF"],""),
             ("Fling", attack_table["B"]["BP"], attack_table["B"]["BNP"], attack_table["B"]["MR"], attack_table["B"]["BDB"], attack_table["B"]["PROF"],""),
             ("Shoot", attack_table["C"]["BP"],attack_table["C"]["BNP"], attack_table["C"]["MR"], attack_table["C"]["CDB"], attack_table["C"]["PROF"],"")
@@ -618,30 +638,14 @@ class PDF(FPDF):
 
         input(f'func = {inspect.currentframe().f_code.co_name} // {combat_column = }')
 
-        ### splitting certain weapons that are too long
-        split_dict={}
-        #print(f"\n{combat_column = }\n")
+        # weapons that too long need to be split for pdf op
+        # these are ["Vibro", "Inertia", "Electro", "Stun"] attacks
 
-        for splittable in combat_column:
-
-            input(f'func = {inspect.currentframe().f_code.co_name} loop // {combat_column = } {splittable = }')
-
-
-            for split_target in ["Vibro", "Inertia", "Electro", "Stun"]:
-                if re.search(r'\b' + re.escape(split_target) + r'\b', splittable, re.IGNORECASE): 
-                    input(f'\n{splittable = }, {split_target = }\n')
-                    fancy_1,fancy_2 = splittable.split('')
-                    fancy_index = combat_column.index(splittable)
-                    split_dict[fancy_index] = [fancy_1, fancy_2]
-                    input(f'\n{fancy_index = } {fancy_1 = } {fancy_2 = }')
-                    input(f'{split_dict[fancy_index] = }\n')
-
-        if split_dict:
-            #print(f"\nPRE -- {combat_column = }\n")
-            for fancy_index,fancy_things in split_dict.items():
-                combat_column[fancy_index] = fancy_things[0]
-                combat_column.insert(fancy_index+1,fancy_things[1])
-                #print(f"POST -- {combat_column = }\n")
+        for index, splitter in enumerate(combat_column):
+            if any(target in splitter for target in ["Vibro", "Inertia", "Electro", "Stun"]):
+                attack_name, attack_specs = splitter.split(";",1) # splint the too long element
+                combat_column[index] = attack_name + ";"
+                combat_column.insert(index + 1, f'  {attack_specs}')
 
         if persona.Defences:
             combat_column.extend(persona.Defences)
@@ -1386,7 +1390,7 @@ def anthro_blank_pdf(pdf)->None:
     pdf.section_title(bio_title, "FAMILY:                GENUS:                     SPECIES:")
     left,top = pdf.set_or_get(f"after bio info stripe\n")
 
-    # persona bio datahttps://sciencyfiction.com/wp-admin/admin.php?page=participants-database-manage_fields
+    # persona bio data
     pdf.set_or_get(6.2,top+8,f"before Anthro bio info")
     blob = f"**Age:** ______ **Hite:** ______  **Wate:** ______"
     pdf.markdown_internal(blob,12)
@@ -1583,6 +1587,40 @@ def campaign_sheet(pdf, persona, one_shot) -> None:
     notes_output(pdf)
     pdf.sheet_footer(persona)
     pdf.perimiter_box()
+
+def robot_decay(persona, decay_table) -> None:
+    '''
+    pdf out a decay table for chosen robot
+    '''    
+
+    
+    ###  PDF page prep
+    pdf = PDF(orientation="P", unit="mm", format=(215.9, 279.4))
+    pdf.set_margin(0)
+    pdf.set_auto_page_break(False)
+    pdf.add_page()
+
+    # persona title left justified
+    pdf.set_or_get(3.3, 5.7,"persona title")
+    pdf.persona_title(f"**DEMOLITION TABLE** for {persona.Persona_Name}",18)
+
+    # player title right justified
+    right_text = f"**Player:** {persona.Player_Name}"
+    pdf.set_or_get(216, 7.5, "player title")
+    pdf.player_title(right_text,12)
+
+    # put the decay table here
+    pdf.set_or_get(5.8,17.5, "decay table line one")
+    for decay_line in decay_table:
+        pdf.markdown_robot_decay(decay_line, 10)
+
+    pdf.sheet_footer(persona)
+    pdf.perimiter_box() # must go last for z level    
+
+    pdf.output(
+        name="./Records/Bin/37bf560f9d0916a5467d7909.pdf",
+        dest="F",
+    )
 
 #####################################
 # ALIEN output to screen
