@@ -296,8 +296,19 @@ class PDF(FPDF):
         returns to persona's bio info
         '''
         bio_line = f"FAMILY: {persona.FAMILY} "
-        bio_line += f"TYPE: {persona.FAMILY_TYPE} SUB: {persona.FAMILY_SUB}" if persona.FAMILY in ["Anthro", "Robot"] else f"SPECIES: {persona.FAMILY_SUB}"
 
+        if persona.FAMILY == "Anthro":
+            bio_line += f"GENUS: {persona.FAMILY_TYPE} SPECIES: {persona.FAMILY_SUB}" if persona.FAMILY in ["Anthro", "Robot"] else f"SPECIES: {persona.FAMILY_SUB}"
+        elif persona.FAMILY == "Alien":
+            genus, species = persona.FAMILY_SUB.split()
+            bio_line += f'GENUS: {genus} SPECIES: {species}'
+        elif persona.FAMILY == "Robot":
+            bio_line += f'SERIES: {persona.FAMILY_TYPE} '
+            if persona.FAMILY_SUB == "":
+                bio_line += f"MODEL: {persona.Model}"
+            else:
+                bio_line += f"MODEL: {persona.FAMILY_SUB}"
+            
         return bio_line
 
     def attack_table_pdf(self, persona:AllRecords)->None:
@@ -477,14 +488,24 @@ class PDF(FPDF):
         # core explainer for tasks
         blob = f'**Gifts:** Specific task. Auto success. **Interests:** General knowledge (+1) **Skills:** Specific knowledge/task (+2)'
 
-        # special addendum for spie and nothing
+        # special addendum for spie vocation 
         if persona.Vocation == "Spie":
             blob += f"\n**Spie Fu**: {vocation.spie_martial_arts(persona)}"
 
+        # special addendum for Nothing
         if persona.Vocation == "Nothing":
             exps, goal = persona.EXPS, persona.Vocay_Aspiration_EXPS
             achievation = "Completed!" if exps > goal else f"{int((exps / goal) * 100)}% achieved."
             blob += f"\nNothing aspiration: **{persona.Vocay_Aspiration}** Objective: {achievation}"
+
+        # special addendum for Biome_skill list, add biomes
+        if hasattr(persona,'Biome_skill'):
+            if len(persona.Biome_skill)>0:
+                blob += f'\n**Biomes**: '
+                for index, biome in enumerate(persona.Biome_skill):
+                    if index in [3, 6, 9]: 
+                        blob += f'\n            '
+                    blob += f'{biome}; '
 
         self.set_font("Helvetica", size=10)
         self.multi_cell(0,5,txt= blob, markdown=True,new_x="LEFT",new_y="NEXT",)
@@ -635,8 +656,6 @@ class PDF(FPDF):
         combat_column.append(f'Ramming Lvl ({persona.Ramming}):')
         combat_column.append(f'  {exp_tables.ramming_freedom[persona.Ramming]}')
         combat_column.extend(persona.Attacks)
-
-        input(f'func = {inspect.currentframe().f_code.co_name} // {combat_column = }')
 
         # weapons that too long need to be split for pdf op
         # these are ["Vibro", "Inertia", "Electro", "Stun"] attacks

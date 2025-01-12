@@ -1,5 +1,5 @@
 import math
-import secrets
+import random
 import please
 import exp_tables
 
@@ -96,7 +96,7 @@ def nothing(nothing_happening: exp_tables.PersonaRecord) -> exp_tables.PersonaRe
 
     ### Vocation aspiration is specific to the nothing vocation
     if nothing_happening.Fallthrough:
-        vocation_desired = secrets.choice(list(exp_tables.vocation_aspiration_exps.keys()))
+        vocation_desired = random.choice(list(exp_tables.vocation_aspiration_exps.keys()))
 
     else:
         choices = list(exp_tables.vocation_aspiration_exps.keys())
@@ -330,23 +330,6 @@ def level_goal(promotions:exp_tables.PersonaRecord) -> int:
 
     return 
 
-        
-
-    
-
-    
-        
-
-
-
-   
-
-   
-
-
-
-
-
 
 
 #########################################################
@@ -355,6 +338,7 @@ def level_goal(promotions:exp_tables.PersonaRecord) -> int:
 #                                                       
 #########################################################
 
+# note Biome replacement is found in fresh and update of interests and skills 
 
 def update_gifts(returning_gifts: exp_tables.PersonaRecord) -> list:
     """
@@ -396,6 +380,11 @@ def fresh_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) ->
         elif interest == "Choose" and get_a_job.Fallthrough:
             interest_list.pop()
 
+    # check for special case of biomes, adds to Biome_skill (too long for skills)
+    for biomes_check in interest_list:
+        if biomes_check == "Biomes":
+            get_a_job.Biome_skill.append(build_a_biome())
+
     return interest_list
 
 def fresh_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list:
@@ -412,7 +401,7 @@ def fresh_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list:
 
     skill_list = []
     while len(skill_list) < skill_rolls:
-        skill = secrets.choice(skills_table)
+        skill = random.choice(skills_table)
         skill_list.append(skill)
 
         if skill == "Extra Roll":
@@ -429,6 +418,12 @@ def fresh_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list:
         elif skill == "Choose" and get_a_job.Fallthrough:
             skill_list.pop()
 
+    # check for special case of biomes, adds to Biome_skill (too long for skills)
+    for index, biomes_check in enumerate(skill_list):
+        if biomes_check == "Biomes":
+            skill_list.pop(index)
+            get_a_job.Biome_skill.append(build_a_biome())
+        
     return skill_list
 
 
@@ -441,7 +436,7 @@ def update_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) -
         return []
 
 
-    ### create a list of all interests
+    # create a list of all interests
     do_not_include = ["Choose", "name", "die_roll"]
 
     all_interests = [
@@ -450,7 +445,7 @@ def update_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) -
             if lose not in do_not_include and  val not in do_not_include
         ]
     
-    ### check to see if any extra rolls
+    # check to see if any extra rolls
     initial_number_of_rolls = interest_rolls
     for _ in range(initial_number_of_rolls):
         if (
@@ -459,15 +454,15 @@ def update_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) -
         ):
             interest_rolls += 1
 
-        ### strip Extra Roll from all_skills
+    # strip Extra Roll from all_skills
     all_interests = [x for x in all_interests if x != "Extra Roll"]
 
-    ### create interest list to return
+    # create interest list to return
     interest_list = []
 
     if get_a_job.Fallthrough:
         for _ in range(interest_rolls):
-            interest_list.append(secrets.choice(all_interests))
+            interest_list.append(random.choice(all_interests))
         return interest_list
 
     if please.say_yes_to(f"Would you like to pick the ({interest_rolls}) INTEREST(s)? "):
@@ -479,7 +474,12 @@ def update_interests(get_a_job: exp_tables.PersonaRecord, interest_rolls: int) -
 
     else:
         for _ in range(interest_rolls):
-            interest_list.append(secrets.choice(all_interests))
+            interest_list.append(random.choice(all_interests))
+
+    # check for special case of biomes, adds to Biome_skill (too long for skills)
+    for biomes_check in interest_list:
+        if biomes_check == "Biomes":
+            get_a_job.Biome_skill.append(build_a_biome())
 
     return interest_list
 
@@ -496,13 +496,13 @@ def update_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list
     all_skills = []
     for sub_list in exp_tables.vocation_skills_tables[get_a_job.Vocation]:
         for key, value in sub_list.items():
-            if key not in ["name", "die_roll"] and value != "Choose":
+            if key not in ["name", "die_roll"] and value not in ["Choose","Ref's Own Table"]:
                 all_skills.append(value)
 
     ### check to see if any extra rolls, this is a hack for skills 2% chance of extra
     base_number = skill_rolls
     for _ in range(base_number):
-        if secrets.choice(all_skills) == "Extra Roll":
+        if random.choice(all_skills) == "Extra Roll":
             skill_rolls += 1
 
     ### strip Extra Roll from all_skills
@@ -516,7 +516,7 @@ def update_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list
 
     if get_a_job.Fallthrough:
         for _ in range(skill_rolls):
-            skills_list.append(secrets.choice(all_skills))
+            skills_list.append(random.choice(all_skills))
         return skills_list
 
     if please.say_yes_to(f"Would you like to pick each ({skill_rolls}) skill?"):
@@ -528,9 +528,27 @@ def update_skills(get_a_job: exp_tables.PersonaRecord, skill_rolls: int) -> list
 
     else:
         for _ in range(skill_rolls):
-            skills_list.append(secrets.choice(all_skills))
+            skills_list.append(random.choice(all_skills))
+
+    # check for special case of biomes, adds to Biome_skill (too long for skills)
+    for index, biomes_check in enumerate(skills_list):
+        if biomes_check == "Biomes":
+            skill_list.pop(index)
+            get_a_job.Biome_skill.append(build_a_biome())
 
     return skills_list
+
+def build_a_biome() -> str:
+    '''
+    returns a biome type as a string with spaces
+    '''
+    # add the elements of a biome to the skills list
+    biome = random.choice(please.list_table_choices(exp_tables.biome_moisture_list)) + ", "
+    biome += random.choice(please.list_table_choices(exp_tables.biome_temperature_list)) + ", "
+    biome += random.choice(please.list_table_choices(exp_tables.biome_vegetation_list)) + ", "
+    biome += random.choice(please.list_table_choices(exp_tables.biome_characteristic_list))
+
+    return biome
 
 
 def update_persona_exps(record_to_update: exp_tables.PersonaRecord) -> exp_tables.PersonaRecord:

@@ -55,6 +55,7 @@ class PersonaRecord:
     Mutations: dict = field(default_factory=dict)
     Interests: list[str] = field(default_factory=list) 
     Skills: list[str] = field(default_factory=list)
+    Biome_skill: list[str] = field(default_factory=list)
     Proficiencies: list[str] = field(default_factory=list)
     Equipment: list[str] = field(default_factory=list)
     Date_Created: str = "Unborn"
@@ -850,7 +851,7 @@ taxonomy_skills = {
     (57, 58): "Move on Land",
     (59, 60): "Multiple Attacks",
     (61, 61): "Mutated",
-    (62, 71): "Nomadic Biome",
+    (62, 71): "Biomes",
     (72, 76): "Omnivores",
     (77, 78): "Oviparous",
     (79, 80): "Parasitic",
@@ -1094,7 +1095,7 @@ mercenary_tactical_skills = {
     (1, 5): "Ambush",
     (6, 10): "Artillery",
     (11, 15): "Artillery Naval",
-    (16, 20): "Biome",
+    (16, 20): "Biomes",
     (21, 25): "Bombs",
     (26, 30): "Buildings Civilian",
     (31, 35): "Buildings Industrial",
@@ -1118,9 +1119,11 @@ mercenary_tactical_skills = {
     "die_roll":"1d100"
 }
 
+# todo replace vehicle exatmo with spacecraft
+
 mercenary_special_skills = {
     (1, 7): "Ambush",
-    (7, 14): "Biome",
+    (7, 14): "Biomes",
     (14, 21): "Demolitions",
     (21, 25): "Exatmo",
     (26, 38): "Field mech",
@@ -1155,7 +1158,7 @@ nomad_gifts = {
 }
 
 nomad_interests = {
-    (1, 40):"Biome",
+    (1, 40):"Biomes",
     (41, 60):"Domestication",
     (61, 95):"Survival",
     (96, 99):"Choose",
@@ -1262,8 +1265,8 @@ biome_temperature_list = {
 biome_vegetation_list = {
     (1,5):"Denuded",
     (6,15):"Desert",
-    (16,30):"Tundra Grasses",
-    (31,45):"Tundra Plants",
+    (16,30):"Tundra-Grasses",
+    (31,45):"Tundra-Plants",
     (46,60):"Steppe",
     (61,75):"Copse",
     (76,95):"Forest",
@@ -1274,8 +1277,8 @@ biome_vegetation_list = {
 }
 
 biome_characteristic_list = {
-    (1, 4): "Atmosphere Heavy",
-    (5, 8): "Atmosphere Thin",
+    (1, 4): "Atmosphere-Heavy",
+    (5, 8): "Atmosphere-Thin",
     (9, 12): "Boggy",
     (13, 16): "Bright",
     (17, 20): "City",
@@ -1283,9 +1286,9 @@ biome_characteristic_list = {
     (25, 28): "Farm",
     (29, 32): "Flat",
     (33, 34): "Gaseous",
-    (35, 36): "Gravity Absent",
-    (37, 40): "Gravity High",
-    (41, 44): "Gravity Low",
+    (35, 36): "Gravity-Absent",
+    (37, 40): "Gravity-High",
+    (41, 44): "Gravity-Low",
     (45, 48): "Hilly",
     (49, 52): "Lentic ",
     (53, 54): "Megalopolis",
@@ -1298,10 +1301,10 @@ biome_characteristic_list = {
     (64, 74): "Standard",
     (75, 75): "Subterranean",
     (76, 79): "Swampy",
-    (80, 83): "Toxic Air",
-    (84, 87): "Toxic Land",
-    (88, 91): "Toxic Flora",
-    (92, 95): "Toxic Water",
+    (80, 83): "Toxic-Air",
+    (84, 87): "Toxic-Land",
+    (88, 91): "Toxic-Flora",
+    (92, 95): "Toxic-Water",
     (96, 99): "Village",
     (100, 100): "Choose",
     "die_roll":"1d100",
@@ -1381,7 +1384,7 @@ nomad_domestication_skills = {
 }
 
 nomad_interest_skills_pivot = {
-    "Biome": biome_base_list,
+    "Biomes": biome_base_list,
     "Domestication": nomad_domestication_skills,
     "Survival": nomad_survival_skills,
 }
@@ -4058,8 +4061,6 @@ attack_table_three = {
     "name":"Robotic Attack Three",
     "die_roll":"1d100",
 } 
-# fix this table breaks pdf outputs for splittable shittable
-
 
 # stretched table
 attack_table_four = {
