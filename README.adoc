@@ -12,6 +12,19 @@ Now built on VSCodium
 . in the repo folder add the folder Records, and in Records add the folders Bin, Players, Referee and Toys
 . python3 a_persona_record.py 
 
+## How To Linux
+linux now protects the integrated python3 from dangerous system wide pip installs
+
+. sudo apt install python3.XX-venv (usu 3.12) if you don't have virual environments installed
+. hit up .gitignore with a venv/
+. go to folder where a_person_record.py is located
+. source venv/bin/activate
+. pip install fpdf2
+. in the repo folder add the folder Records, and in Records add the folders Bin, Players, Referee and Toys
+. python3 a_persona_record.py 
+. at end type "deactivate" in terminal
+
+
 .*Folders should look like*
 * /Repo Folder 
 ** a_persona_record.py etc
