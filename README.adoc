@@ -15,23 +15,18 @@ Now built on VSCodium
 ## How To Linux
 linux now protects the integrated python3 from dangerous system wide pip installs
 
-. sudo apt install python3.XX-venv (usu 3.12) if you don't have virual environments installed
+.*Set Up Venv*
+. sudo apt install python3.XX-venv (usu 3.12) if you don't have virtual environments installed
 . hit up .gitignore with a venv/
 . go to folder where a_person_record.py is located
+. python3 -m venv venv
 . source venv/bin/activate
+.. shell should have (venv) user@comp:
 . pip install fpdf2
-. in the repo folder add the folder Records, and in Records add the folders Bin, Players, Referee and Toys
+. add the folder Records, and in Records add the folders Bin, Players, Referee and Toys
+.. mkdir -p Records/{Bin,Players,Referee,Toys}
 . python3 a_persona_record.py 
-. at end type "deactivate" in terminal
-
-
-.*Folders should look like*
-* /Repo Folder 
-** a_persona_record.py etc
-** /Records
-*** /Bin
-*** /Players
-*** /Referee
-*** /Toys
+. when done type "deactivate" in terminal
+.. to restart source venv/bin/activate
 
 best of luck and have fun
