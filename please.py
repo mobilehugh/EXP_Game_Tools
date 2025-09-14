@@ -55,7 +55,7 @@ def explode_this(all_dice:list, die_type:int) -> int:
         
     return result
 
-def roll_this(die_roll_string: str) -> int:
+def roll_this(die_roll_string: str) -> int|str:
     """
     die roll must be in the format of "xdy+z", returns integer result
     if die roll request does not compute a str is returned
@@ -127,7 +127,11 @@ def do_1d100_check(number: int) -> bool:
     """
     Checks to see if 1d100 is less than or equal to the argument
     """
-    return roll_this("1d100") <= number
+    deci_die = roll_this("1d100")
+    if not isinstance(deci_die,int):
+        show_error_message(f"dice error: {deci_die}")
+        raise RuntimeError("invalid die at do_1d100_check")
+    return deci_die <= number
 
 ###########################################
 #
@@ -140,7 +144,6 @@ def toxic(user_input:str) -> bool:
     bad words or too long inputs returns toxic = true
     SQL included to future proof if SQL added
     '''
-
     evil_patterns = [
         r"(\b(select|union|insert|delete|update|drop|alter)\b)",  # SQL keywords
         r"(--|;|--|/\*|\*/|\|)",  # SQL injection symbols
@@ -202,7 +205,7 @@ def show_error_message(message:str) -> None:
 
 
 
-def choose_this(choices: list, comment: str, choosy: AllRecords = None, check_choice: bool = True) -> str:
+def choose_this(choices: list, comment: str, choosy: AllRecords | None = None, check_choice: bool = True) -> str:
     """
     Choose from a list of choices and return the chosen item
     [default] element for list choices[0]
@@ -215,11 +218,11 @@ def choose_this(choices: list, comment: str, choosy: AllRecords = None, check_ch
 
     # if fallthrough skip choosing part
 
-    if choosy:
+    if choosy is not None:
         if choosy.Fallthrough: # if random then return random from choices
             return choice(choices)
     
-    if choosy:
+    if choosy is not None:
         if choosy.Bespoke: # if bespoke give choice to randomize
             if say_yes_to(f'Would you like randomize -> {comment.upper()}'):   
                 return choice(choices)
@@ -414,7 +417,7 @@ def enumerate_this(list_title: str, number_me: list, sort_it:bool = True) -> Non
 
 def store_this(record_to_store: AllRecords) -> None:
     """
-    takes chosen record_to_store and converts it to a JSONified dict and stores it locally
+    takes chosen record_to_store and converts it to a JSON-ified dict and stores it locally
     """
     ### setting new Date_Updated
     record_to_store.Date_Updated = time.strftime("%a-%d-%b-%Y(%H:%M)", time.gmtime())
@@ -528,7 +531,7 @@ def collect_desired_record() -> AllRecords:
 
     list_of_files = os.listdir(directory_to_search)
 
-    ### clear any pdfs from the list
+    ### clear any PDF from the list
     list_of_files = [x for x in list_of_files if x[-3:] != "pdf"]
 
     if record_type in ["Alien", "Anthro", "Robot"]:
